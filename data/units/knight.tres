@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://dnxtmc13ogif"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_7sqbm"]
+
+[resource]
+script = ExtResource("1_7sqbm")
+display_name = "knight"
+damage = 10.0
+attack_cooldown = 1.5
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

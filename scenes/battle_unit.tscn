@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://b3w2tay7iu387"]
+
+[ext_resource type="Script" uid="uid://d1lbi2f6py8bc" path="res://scripts/battle_unit.gd" id="1_p0cq7"]
+[ext_resource type="Texture2D" uid="uid://c04mp2a05i8cr" path="res://assets/pixil-frame-0 (1).png" id="2_p0cq7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qa2gp"]
+bg_color = Color(0.19076231, 0.19076234, 0.19076222, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6pmnr"]
+bg_color = Color(0.15951112, 0.58907986, 0.37574977, 1)
+
+[node name="Battle Unit" type="CharacterBody2D" unique_id=949866952]
+script = ExtResource("1_p0cq7")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=960951107]
+position = Vector2(-3, -6)
+scale = Vector2(0.92592597, 0.92592597)
+texture = ExtResource("2_p0cq7")
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=844934422]
+offset_left = -24.0
+offset_top = -47.0
+offset_right = 24.0
+offset_bottom = -40.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_qa2gp")
+theme_override_styles/fill = SubResource("StyleBoxFlat_6pmnr")
+show_percentage = false

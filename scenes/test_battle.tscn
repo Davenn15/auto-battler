@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://cif7dsxyuj810"]
+
+[ext_resource type="Script" uid="uid://ctbifq67qxv3k" path="res://scripts/test_battle.gd" id="1_7a36v"]
+[ext_resource type="PackedScene" uid="uid://b3w2tay7iu387" path="res://scenes/battle_unit.tscn" id="2_12d8j"]
+[ext_resource type="Script" uid="uid://dtvckmau2hk4n" path="res://scripts/battle_manager.gd" id="5_h5m2h"]
+[ext_resource type="Script" uid="uid://co3c1g7ab430g" path="res://scripts/battle_grid.gd" id="6_12d8j"]
+[ext_resource type="Script" uid="uid://cxbjns1vaeorf" path="res://scripts/prep_controller.gd" id="7_mud6g"]
+
+[node name="test_battle" type="Node2D" unique_id=1912766257 node_paths=PackedStringArray("prep")]
+position = Vector2(-71, -22)
+script = ExtResource("1_7a36v")
+prep = NodePath("PrepController")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=496656011]
+
+[node name="UI" type="Control" parent="CanvasLayer" unique_id=2124328334]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="FightButton" type="Button" parent="CanvasLayer/UI" unique_id=1645538008]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -27.5
+offset_top = -31.0
+offset_right = 27.5
+grow_horizontal = 2
+grow_vertical = 0
+text = "FIGHT"
+
+[node name="Bench" type="HBoxContainer" parent="CanvasLayer/UI" unique_id=2084251389]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -73.0
+offset_right = 20.0
+offset_bottom = -33.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=66095714]
+position = Vector2(669, 362)
+zoom = Vector2(0.75, 0.75)
+
+[node name="Battle Manager" type="Node2D" parent="." unique_id=13118781]
+script = ExtResource("5_h5m2h")
+auto_start = false
+
+[node name="BattleGrid" type="Node2D" parent="." unique_id=596108841]
+script = ExtResource("6_12d8j")
+
+[node name="PrepController" type="Node2D" parent="." unique_id=509309822 node_paths=PackedStringArray("grid", "bench", "ui_layer")]
+script = ExtResource("7_mud6g")
+unit_scene = ExtResource("2_12d8j")
+grid = NodePath("../BattleGrid")
+bench = NodePath("../CanvasLayer/UI/Bench")
+ui_layer = NodePath("../CanvasLayer")
+
+[node name="BattleUnit" parent="." unique_id=949866952 instance=ExtResource("2_12d8j")]
+position = Vector2(971, 142)
+team = 2
+
+[node name="Node2D" type="Node2D" parent="." unique_id=1781792805]
+script = ExtResource("6_12d8j")
+columns = 24
+rows = 16
+
+[node name="BattleUnit2" parent="." unique_id=1949059609 instance=ExtResource("2_12d8j")]
+position = Vector2(-1, 95)
+team = 1
