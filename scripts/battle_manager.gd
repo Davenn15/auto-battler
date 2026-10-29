@@ -1,13 +1,12 @@
 class_name BattleManager
 extends Node
-
 signal battle_ended(winning_team: int)   # -1 if no units remain
 
 enum Phase { PREP, COMBAT, RESULT }
 var phase: Phase = Phase.PREP
 
 @export var auto_start: bool = true   # turn off once you have a Fight button
-
+@export var damage_tracker: DamageTracker
 
 func _ready() -> void:
 	if auto_start:
@@ -20,11 +19,15 @@ func start_battle() -> void:
 	if phase != Phase.PREP:
 		return
 	phase = Phase.COMBAT
+	if damage_tracker != null:
+		damage_tracker.reset()
 	for node in get_tree().get_nodes_in_group("units"):
 		var unit := node as BattleUnit
 		if unit == null:
 			continue
 		unit.died.connect(_on_unit_died)
+		if damage_tracker != null:
+			damage_tracker.register(unit)
 		unit.start_combat()
 	_check_battle_end()   # handles a side starting with zero units
 

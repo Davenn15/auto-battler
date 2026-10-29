@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ddtkh3ynpq0g1"]
+
+[ext_resource type="Resource" uid="uid://bj0tygqyhv86b" path="res://data/units/sword-court/tier 1/silt/silt_gambit.tres" id="1_ad7mo"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_ad7mo"]
+[ext_resource type="Resource" uid="uid://c4lop341jg64e" path="res://data/units/sword-court/tier 1/silt/silt_passive.tres" id="3_mg0vq"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4_0ajra"]
+[ext_resource type="Texture2D" uid="uid://c8a4j1s2pw2ga" path="res://assets/blue guy.png" id="5_xbq4w"]
+
+[resource]
+script = ExtResource("4_0ajra")
+display_name = "silt"
+max_health = 750.0
+attack_range = 175.0
+passives = Array[ExtResource("2_ad7mo")]([ExtResource("3_mg0vq")])
+gambit = ExtResource("1_ad7mo")
+sprite = ExtResource("5_xbq4w")
+might = 55.0
+celerity = 135.0
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

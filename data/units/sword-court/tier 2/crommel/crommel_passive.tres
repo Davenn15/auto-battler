@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="WrackDamagePassive" format=3 uid="uid://dp6v3ivu1ublu"]
+
+[ext_resource type="Script" uid="uid://ckaefi8m6xiy7" path="res://data/units/sword-court/tier 2/crommel/scripts/wrack_damage_passive.gd" id="1_5u2sx"]
+
+[resource]
+script = ExtResource("1_5u2sx")
+metadata/_custom_type_script = "uid://ckaefi8m6xiy7"

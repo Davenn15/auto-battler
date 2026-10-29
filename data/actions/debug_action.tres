@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DebugAction" format=3 uid="uid://b14tfp3ii76io"]
+
+[ext_resource type="Script" uid="uid://c4onlr46ye0gp" path="res://scripts/debug_action.gd" id="1_j3slw"]
+
+[resource]
+script = ExtResource("1_j3slw")
+act_time = 1.0
+metadata/_custom_type_script = "uid://c4onlr46ye0gp"

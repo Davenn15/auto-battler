@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShieldGambit" format=3 uid="uid://s848cg2soxjy"]
+
+[ext_resource type="Script" uid="uid://bjsn85rjsce6w" path="res://data/units/sword-court/tier 1/garth/scripts/shield_gambit.gd" id="1_05mq6"]
+
+[resource]
+script = ExtResource("1_05mq6")
+shield_amount = 350.0
+duration = 4.0
+cast_time = 0.5
+metadata/_custom_type_script = "uid://bjsn85rjsce6w"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://dkrddn21gcfik"]
+
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_4bwmg"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_b5wtr"]
+
+[resource]
+script = ExtResource("1_b5wtr")
+max_health = 99999999999999.0
+damage = 0.0
+move_speed = 0.0
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

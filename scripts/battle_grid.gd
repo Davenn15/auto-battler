@@ -98,6 +98,8 @@ func local_to_cell(p: Vector2) -> Vector2i:
 	var r := (2.0 / 3.0 * p.y) / hex_size
 	return _axial_round(q, r)
 
+func cell_spacing() -> float:
+	return hex_size * SQRT3
 
 func cell_to_world(cell: Vector2i) -> Vector2:
 	return to_global(cell_to_local(cell))
@@ -220,3 +222,13 @@ func _draw() -> void:
 			draw_polyline(_hex_points(cell, 7), Color(1, 1, 1, 0.25), 1.0)   # 7 points closes it
 	if _ids.has(_hover_cell):
 		draw_colored_polygon(_hex_points(_hover_cell, 6), Color(0.3, 0.6, 1.0, 0.35))
+
+## Free cells within `range_cells` of `center`: spots a unit could attack from.
+func free_cells_in_range(center: Vector2i, range_cells: int) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for dq in range(-range_cells, range_cells + 1):
+		for dr in range(-range_cells, range_cells + 1):
+			var c := center + Vector2i(dq, dr)
+			if get_distance(center, c) <= range_cells and can_place(c):
+				result.append(c)
+	return result

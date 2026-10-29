@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ShieldWardPassive" format=3 uid="uid://mkigmpgm2suw"]
+
+[ext_resource type="Script" uid="uid://b05dn03vjblyp" path="res://data/units/sword-court/tier 1/garth/scripts/shield_ward_passive.gd" id="1_i0b8p"]
+
+[resource]
+script = ExtResource("1_i0b8p")
+metadata/_custom_type_script = "uid://b05dn03vjblyp"

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://bpnxufpm5ys0j"]
+
+[ext_resource type="Resource" uid="uid://yeod7enhvsbw" path="res://data/units/sword-court/tier 1/lunck/lunck_gambit.tres" id="1_1gvfw"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_p8i6k"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_xdauj"]
+[ext_resource type="Resource" uid="uid://dg7wepjygqf3y" path="res://data/units/sword-court/tier 1/lunck/lunck_passive.tres" id="3_nsj8n"]
+[ext_resource type="Texture2D" uid="uid://cet5cequar75p" path="res://assets/lunck.png" id="3_xdauj"]
+
+[resource]
+script = ExtResource("2_xdauj")
+display_name = "lunck"
+max_health = 850.0
+passives = Array[ExtResource("1_p8i6k")]([ExtResource("3_nsj8n")])
+gambit = ExtResource("1_1gvfw")
+max_charge = 120.0
+sprite = ExtResource("3_xdauj")
+might = 60.0
+celerity = 90.0
+might_ward = 40.0
+insight_ward = 35.0
+celerity_ward = 30.0
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

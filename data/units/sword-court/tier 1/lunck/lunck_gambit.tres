@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="RallyShieldGambit" format=3 uid="uid://yeod7enhvsbw"]
+
+[ext_resource type="Script" uid="uid://vxih1jw4ope2" path="res://data/units/sword-court/tier 1/lunck/scripts/rally_shield_gambit.gd" id="1_7mb1l"]
+
+[resource]
+script = ExtResource("1_7mb1l")
+cast_time = 1.0
+metadata/_custom_type_script = "uid://vxih1jw4ope2"

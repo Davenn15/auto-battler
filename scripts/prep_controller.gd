@@ -6,6 +6,8 @@ extends Node2D
 @export var bench: HBoxContainer
 @export var ui_layer: CanvasLayer
 
+@export var units_parent: Node
+
 @export var player_team: int = 1
 
 var _dragging: UnitData = null
@@ -107,5 +109,5 @@ func _spawn_unit(unit_data: UnitData, cell: Vector2i) -> void:
 	unit.data = unit_data
 	unit.team = player_team
 	unit.auto_place = false          # we place it ourselves below
-	grid.get_parent().add_child(unit)
+	units_parent.add_child(unit)
 	unit.place_at(cell)

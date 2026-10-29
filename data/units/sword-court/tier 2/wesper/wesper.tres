@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://byi436axrwjqx"]
+
+[ext_resource type="Resource" uid="uid://d2gxkwjx655eg" path="res://data/units/sword-court/tier 2/wesper/wesper_gambit.tres" id="1_fn68r"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_t25rx"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_7sw1d"]
+[ext_resource type="Resource" uid="uid://c62sctv1e3ut4" path="res://data/units/sword-court/tier 2/wesper/wesper_passive.tres" id="3_cjyw8"]
+[ext_resource type="Texture2D" uid="uid://demb7srk26ilv" path="res://assets/wesper.png" id="5_3s0tb"]
+
+[resource]
+script = ExtResource("2_7sw1d")
+display_name = "wesper"
+max_health = 850.0
+passives = Array[ExtResource("1_t25rx")]([ExtResource("3_cjyw8")])
+gambit = ExtResource("1_fn68r")
+sprite = ExtResource("5_3s0tb")
+might = 85.0
+celerity = 140.0
+might_ward = 25.0
+insight_ward = 25.0
+celerity_ward = 45.0
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

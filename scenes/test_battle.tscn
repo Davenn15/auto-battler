@@ -2,11 +2,18 @@
 
 [ext_resource type="Script" uid="uid://ctbifq67qxv3k" path="res://scripts/test_battle.gd" id="1_7a36v"]
 [ext_resource type="PackedScene" uid="uid://b3w2tay7iu387" path="res://scenes/battle_unit.tscn" id="2_12d8j"]
+[ext_resource type="Script" uid="uid://bunyfy1jqthc1" path="res://scripts/damage_tracker.gd" id="2_h5m2h"]
 [ext_resource type="Script" uid="uid://dtvckmau2hk4n" path="res://scripts/battle_manager.gd" id="5_h5m2h"]
 [ext_resource type="Script" uid="uid://co3c1g7ab430g" path="res://scripts/battle_grid.gd" id="6_12d8j"]
+[ext_resource type="Resource" uid="uid://dnxtmc13ogif" path="res://data/units/sword-court/tier 1/garth/garth.tres" id="6_mud6g"]
 [ext_resource type="Script" uid="uid://cxbjns1vaeorf" path="res://scripts/prep_controller.gd" id="7_mud6g"]
+[ext_resource type="Resource" uid="uid://bpnxufpm5ys0j" path="res://data/units/sword-court/tier 1/lunck/lunck.tres" id="8_8lrws"]
+[ext_resource type="Resource" uid="uid://ddtkh3ynpq0g1" path="res://data/units/sword-court/tier 1/silt/silt.tres" id="8_h5m2h"]
+[ext_resource type="Resource" uid="uid://ds85af620srdl" path="res://data/units/sword-court/tier 2/merribold/merribold.tres" id="9_bjvnw"]
+[ext_resource type="Resource" uid="uid://cucqvohyusw30" path="res://data/units/sword-court/tier 2/crommel/crommel.tres" id="9_tqkde"]
+[ext_resource type="Resource" uid="uid://byi436axrwjqx" path="res://data/units/sword-court/tier 2/wesper/wesper.tres" id="11_tqkde"]
 
-[node name="test_battle" type="Node2D" unique_id=1912766257 node_paths=PackedStringArray("prep")]
+[node name="TestBattle" type="Node2D" unique_id=1912766257 node_paths=PackedStringArray("prep")]
 position = Vector2(-71, -22)
 script = ExtResource("1_7a36v")
 prep = NodePath("PrepController")
@@ -21,6 +28,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+metadata/_edit_use_anchors_ = true
 
 [node name="FightButton" type="Button" parent="CanvasLayer/UI" unique_id=1645538008]
 layout_mode = 1
@@ -35,6 +43,7 @@ offset_right = 27.5
 grow_horizontal = 2
 grow_vertical = 0
 text = "FIGHT"
+metadata/_edit_use_anchors_ = true
 
 [node name="Bench" type="HBoxContainer" parent="CanvasLayer/UI" unique_id=2084251389]
 layout_mode = 1
@@ -50,34 +59,92 @@ offset_bottom = -33.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="DamageTracker" type="PanelContainer" parent="CanvasLayer/UI" unique_id=1437106115]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+script = ExtResource("2_h5m2h")
+metadata/_edit_use_anchors_ = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=66095714]
-position = Vector2(669, 362)
-zoom = Vector2(0.75, 0.75)
+position = Vector2(334, 169)
+zoom = Vector2(1.3, 1.3)
 
-[node name="Battle Manager" type="Node2D" parent="." unique_id=13118781]
+[node name="Battle Manager" type="Node2D" parent="." unique_id=13118781 node_paths=PackedStringArray("damage_tracker")]
 script = ExtResource("5_h5m2h")
 auto_start = false
+damage_tracker = NodePath("../CanvasLayer/UI/DamageTracker")
 
-[node name="BattleGrid" type="Node2D" parent="." unique_id=596108841]
-script = ExtResource("6_12d8j")
-
-[node name="PrepController" type="Node2D" parent="." unique_id=509309822 node_paths=PackedStringArray("grid", "bench", "ui_layer")]
+[node name="PrepController" type="Node2D" parent="." unique_id=509309822 node_paths=PackedStringArray("grid", "bench", "ui_layer", "units_parent")]
 script = ExtResource("7_mud6g")
 unit_scene = ExtResource("2_12d8j")
 grid = NodePath("../BattleGrid")
 bench = NodePath("../CanvasLayer/UI/Bench")
 ui_layer = NodePath("../CanvasLayer")
+units_parent = NodePath("../BattleUnits")
 
-[node name="BattleUnit" parent="." unique_id=949866952 instance=ExtResource("2_12d8j")]
-position = Vector2(971, 142)
+[node name="BattleGrid" type="Node2D" parent="." unique_id=1781792805]
+script = ExtResource("6_12d8j")
+
+[node name="BattleUnits" type="Node2D" parent="." unique_id=1070601399]
+y_sort_enabled = true
+
+[node name="Battle Unit12" parent="BattleUnits" unique_id=2084304303 instance=ExtResource("2_12d8j")]
+position = Vector2(224, 191)
+data = ExtResource("6_mud6g")
+
+[node name="Battle Unit18" parent="BattleUnits" unique_id=949866952 instance=ExtResource("2_12d8j")]
+position = Vector2(84, 329)
+data = ExtResource("8_h5m2h")
+
+[node name="Battle Unit21" parent="BattleUnits" unique_id=1263152459 instance=ExtResource("2_12d8j")]
+position = Vector2(22, 329)
+data = ExtResource("9_tqkde")
+
+[node name="Battle Unit14" parent="BattleUnits" unique_id=1216252445 instance=ExtResource("2_12d8j")]
+position = Vector2(111, 185)
+data = ExtResource("8_8lrws")
+
+[node name="Battle Unit15" parent="BattleUnits" unique_id=1451843157 instance=ExtResource("2_12d8j")]
+position = Vector2(162, 189)
+data = ExtResource("9_bjvnw")
+
+[node name="Battle Unit20" parent="BattleUnits" unique_id=1952775483 instance=ExtResource("2_12d8j")]
+position = Vector2(58, 190)
+data = ExtResource("11_tqkde")
+
+[node name="Battle Unit13" parent="BattleUnits" unique_id=565262197 instance=ExtResource("2_12d8j")]
+position = Vector2(337, -5)
+data = ExtResource("8_h5m2h")
 team = 2
 
-[node name="Node2D" type="Node2D" parent="." unique_id=1781792805]
-script = ExtResource("6_12d8j")
-columns = 24
-rows = 16
+[node name="Battle Unit19" parent="BattleUnits" unique_id=1556065047 instance=ExtResource("2_12d8j")]
+position = Vector2(389, -2)
+data = ExtResource("9_tqkde")
+team = 2
 
-[node name="BattleUnit2" parent="." unique_id=1949059609 instance=ExtResource("2_12d8j")]
-position = Vector2(-1, 95)
-team = 1
+[node name="Battle Unit16" parent="BattleUnits" unique_id=523148297 instance=ExtResource("2_12d8j")]
+position = Vector2(249, 140)
+data = ExtResource("9_bjvnw")
+team = 2
+
+[node name="Battle Unit22" parent="BattleUnits" unique_id=417539583 instance=ExtResource("2_12d8j")]
+position = Vector2(199, 139)
+data = ExtResource("6_mud6g")
+team = 2
+
+[node name="Battle Unit17" parent="BattleUnits" unique_id=332896981 instance=ExtResource("2_12d8j")]
+position = Vector2(298, 123)
+data = ExtResource("8_8lrws")
+team = 2
+
+[node name="Battle Unit23" parent="BattleUnits" unique_id=51156771 instance=ExtResource("2_12d8j")]
+position = Vector2(362, 124)
+data = ExtResource("11_tqkde")
+team = 2

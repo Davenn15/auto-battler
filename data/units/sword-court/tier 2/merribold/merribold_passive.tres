@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MerriboldPassive" format=3 uid="uid://dgg5er0h6f8aj"]
+
+[ext_resource type="Script" uid="uid://dsdg5fwt82r75" path="res://data/units/sword-court/tier 2/merribold/scripts/merribold_passive.gd" id="1_0utdy"]
+
+[resource]
+script = ExtResource("1_0utdy")
+max_bonus_regen = 60.0
+metadata/_custom_type_script = "uid://dsdg5fwt82r75"

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="RallyPassive" format=3 uid="uid://dg7wepjygqf3y"]
+
+[ext_resource type="Script" uid="uid://c0pjj2f7qrmce" path="res://data/units/sword-court/tier 1/lunck/scripts/rally_passive.gd" id="1_5jfjj"]
+
+[resource]
+script = ExtResource("1_5jfjj")
+include_self = true
+metadata/_custom_type_script = "uid://c0pjj2f7qrmce"

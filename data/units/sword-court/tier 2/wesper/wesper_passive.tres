@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="IsolatedWrackPassive" format=3 uid="uid://c62sctv1e3ut4"]
+
+[ext_resource type="Script" uid="uid://bilux78farr6q" path="res://data/units/sword-court/tier 2/wesper/scripts/isolated_wrack_passive.gd" id="1_t7ysw"]
+
+[resource]
+script = ExtResource("1_t7ysw")
+bonus_wrack_chance = 0.3
+isolation_range_cells = 1
+metadata/_custom_type_script = "uid://bilux78farr6q"
