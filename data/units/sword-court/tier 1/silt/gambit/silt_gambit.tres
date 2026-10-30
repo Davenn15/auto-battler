@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="EmpowerGambit" format=3 uid="uid://bj0tygqyhv86b"]
 
-[ext_resource type="Script" uid="uid://dxglvhoc4rfg2" path="res://data/units/sword-court/tier 1/silt/scripts/empower_gambit.gd" id="1_8xubf"]
+[ext_resource type="Script" uid="uid://dxglvhoc4rfg2" path="res://data/units/sword-court/tier 1/silt/gambit/empower_gambit.gd" id="1_e86aa"]
 
 [resource]
-script = ExtResource("1_8xubf")
+script = ExtResource("1_e86aa")
 bonus_damage = 40.0
 insight_scaling = 0.2
-gambit_name = null
 cast_time = 1.0
 metadata/_custom_type_script = "uid://dxglvhoc4rfg2"

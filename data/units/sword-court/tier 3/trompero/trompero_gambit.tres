@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ArcaneRingGambit" format=3 uid="uid://b2b2r5by0yqqj"]
+
+[ext_resource type="Script" uid="uid://d1nc5eow08rsl" path="res://data/units/sword-court/tier 3/trompero/scripts/arcane_ring_gambit.gd" id="1_d8sbq"]
+
+[resource]
+script = ExtResource("1_d8sbq")
+tick_damage = 30.0
+tick_insight_scaling = 0.2
+burst_damage = 150.0
+burst_insight_scaling = 0.7
+stun_time = 1.0
+cast_time = 1.0
+metadata/_custom_type_script = "uid://d1nc5eow08rsl"

@@ -28,6 +28,22 @@ const DAMAGE_TYPE_NAMES := {
 	DamageType.CELERITY: "Celerity",
 }
 
+## Damage number color for each damage type. Kept a little below full brightness so
+## wracks have room to be brighter.
+const DAMAGE_TYPE_COLORS := {
+	DamageType.MIGHT: Color(0.9, 0.2, 0.2),       # red
+	DamageType.INSIGHT: Color(0.3, 0.5, 1.0),     # blue
+	DamageType.CELERITY: Color(0.95, 0.8, 0.15),  # yellow
+}
+## How far a wrack's number is lightened toward white (0 = no change, 1 = pure white).
+const WRACK_BRIGHTEN := 0.45
+
+
+## The color to show damage of this type in, brighter if it was a wrack.
+static func damage_color(damage_type: int, is_wrack: bool = false) -> Color:
+	var color: Color = DAMAGE_TYPE_COLORS.get(damage_type, Color.WHITE)
+	return color.lightened(WRACK_BRIGHTEN) if is_wrack else color
+
 ## Which ward reduces which damage type.
 const WARD_FOR_TYPE := {
 	DamageType.MIGHT: Stat.MIGHT_WARD,
@@ -53,7 +69,7 @@ static func ward_stat_for(damage_type: int) -> Stat:
 ## Attribute values at or near this are "average". Celerity and Insight scale from it.
 const ATTRIBUTE_BASELINE := 100.0
 ## Seconds between attacks for a unit with baseline Celerity.
-const BASE_ATTACK_COOLDOWN := 1.0
+const BASE_ATTACK_COOLDOWN := 1.8
 
 
 ## Might sets the damage of a basic attack, 1:1.
@@ -75,3 +91,22 @@ static func charge_multiplier(insight: float) -> float:
 ## scaling works (diminishing returns, a cap) is one edit.
 static func scaled(base: float, per_point: float, attribute: float) -> float:
 	return base + per_point * attribute
+
+## How much each stat grows per upgrade level, as a fraction of base (0.15 = +15% per level).
+## Stats not listed don't grow.
+const UPGRADE_STAT_GROWTH := {
+	Stat.MIGHT: 0.15,
+	Stat.INSIGHT: 0.15,
+	Stat.MIGHT_WARD: .1,
+	Stat.INSIGHT_WARD: .1,
+	Stat.CELERITY_WARD: .1,
+}
+const UPGRADE_HEALTH_GROWTH := 0.2
+
+
+static func upgrade_multiplier(stat: Stat, level: int) -> float:
+	return 1.0 + UPGRADE_STAT_GROWTH.get(stat, 0.0) * level
+
+
+static func upgrade_health_multiplier(level: int) -> float:
+	return 1.0 + UPGRADE_HEALTH_GROWTH * level

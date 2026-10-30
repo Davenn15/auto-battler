@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="KillChargePassive" format=3 uid="uid://cyynalqvbyhvi"]
+
+[ext_resource type="Script" uid="uid://cabg242smwaxu" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/scripts/kill_charge_passive.gd" id="1_s4s3a"]
+
+[resource]
+script = ExtResource("1_s4s3a")
+metadata/_custom_type_script = "uid://cabg242smwaxu"

@@ -12,9 +12,11 @@ var target: BattleUnit
 var damage: float
 var damage_type: int = 0
 var is_wrack: bool = false
+var hit_effects: Array[HitEffect] = []
 
 
-func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack: bool = false, p_type: int = 0) -> void:
+func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack: bool = false, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
+	hit_effects = p_hit_effects
 	is_wrack = p_wrack
 	shooter_id = p_shooter.get_instance_id()
 	target = p_target
@@ -46,6 +48,8 @@ func _hit() -> void:
 	get_tree().call_group("damage_tracker", "record_damage", shooter_id, dealt)
 	var shooter := instance_from_id(shooter_id) as BattleUnit
 	if shooter != null:
-		shooter.gain_charge_from_attack()
+		shooter.gain_charge_from_attack(dealt)
+		shooter.notify_attack_hit(target, dealt)
 	target.gain_charge_from_hit(dealt)
+	BattleUnit.run_hit_effects(hit_effects, target, dealt, is_wrack)
 	queue_free()

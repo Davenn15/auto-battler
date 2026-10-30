@@ -1,0 +1,19 @@
+class_name Upgrade
+extends Resource
+## One node in a unit's upgrade tree. The first upgrade picks one of UnitData.upgrades;
+## the second picks one of that upgrade's next_choices. Like Passives and Gambits, these
+## are shared settings, so no battle state goes here.
+
+@export var upgrade_name: String = "Upgrade"
+@export_multiline var description: String = ""
+## Passives this upgrade adds to the unit. New mechanics go here.
+@export var passives: Array[Passive] = []
+## If set, replaces the unit's Gambit (a stronger version, or a different one entirely).
+@export var gambit: Gambit
+## The choices offered at the next upgrade if this one was picked. Empty on the last level.
+@export var next_choices: Array[Upgrade] = []
+
+## Numbers added to the unit's current Gambit, by property name, e.g. "attack_count": 2.
+## Use this to make the Gambit stronger without copying it. Set `gambit` only when the
+## upgrade switches to a different kind of Gambit.
+@export var gambit_bonuses: Dictionary[String, float] = {}

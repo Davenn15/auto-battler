@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="OrbitingKnifeGambit" format=3 uid="uid://duugut7ytd5un"]
+
+[ext_resource type="Script" uid="uid://ci21lhcorw03o" path="res://data/units/sword-court/tier 1/silt/upgrades/b_path/scripts/orbiting_knife_gambit.gd" id="1_lrrkg"]
+
+[resource]
+script = ExtResource("1_lrrkg")
+cast_time = 0.75
+metadata/_custom_type_script = "uid://ci21lhcorw03o"

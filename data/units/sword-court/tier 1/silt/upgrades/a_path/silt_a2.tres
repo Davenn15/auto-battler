@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cl6pobv7qn44r"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_sbrym"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_icg4d"]
+[ext_resource type="Resource" uid="uid://cyynalqvbyhvi" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/silt_kill_charge.tres" id="4_75io8"]
+
+[resource]
+script = ExtResource("1_sbrym")
+passives = Array[ExtResource("2_icg4d")]([ExtResource("4_75io8")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -27,7 +27,11 @@ var _blocked_time: float = 0.0
 
 const FLOAT_RISE := 40.0    # pixels the number drifts upward
 const FLOAT_TIME := 0.8     # seconds before it fades out
-const WRACK_COLOR := Color(1.0, 0.55, 0.1)   # orange
+const DAMAGE_FONT_MIN := 8          # font size for the smallest hits
+const DAMAGE_FONT_MAX := 26          # font size for hits at or above DAMAGE_FOR_MAX_FONT
+const DAMAGE_FOR_MAX_FONT := 400.0   # damage that reaches the biggest size
+const WRACK_FONT_BONUS := 2          # wracks are this much bigger again
+const DODGE_COLOR := Color(0.464, 0.464, 0.464, 1.0)
 const CHARGE_COLOR := Color(0.6, 0.4, 1.0)   # purple, so it reads differently from the team-colored health bar
 const CASTING_COLOR := Color(1.0, 0.45, 0.75)   # pink, while the bar drains
 var _charge_fill: StyleBoxFlat
@@ -35,12 +39,24 @@ var _charge_fill: StyleBoxFlat
 const SHIELD_COLOR := Color(0.565, 0.565, 0.565, 0.9)   # light gray
 var shield_bar: ColorRect
 
+const BADGE_SIZE := 6.0   # pixels, square
+const BADGE_GAP := 2.0    # between badges, and between the badges and the health bar
+## Badge color for the first and second choice at level 1. Shared by every unit.
+const PATH_COLORS: Array[Color] = [Color(0.94, 0.55, 0.16), Color(0.18, 0.72, 0.69)]   # orange, teal
+## How far a level-2 badge is shaded from its path color: lighter for the first
+## follow-up, darker for the second.
+const FOLLOW_UP_SHADE := 0.4
+
 ## Optional. When set, its stats replace the values below.
 @export var data: UnitData:
 	set(value):
 		data = value
 		_refresh_editor_preview()
 @export var team: int = 1
+## Which upgrade was picked at each level, as indices into the choices offered.
+## [] = not upgraded, [1] = second choice at level 1, [1, 0] = then the first of its follow-ups.
+## The shop will set this later; for now set it in the Inspector to test.
+@export var upgrade_path: Array[int] = []
 
 
 var max_health: float
@@ -100,6 +116,8 @@ func _ready() -> void:
 	health = max_health
 	_setup_health_bar()
 	
+	_setup_upgrade_badges()
+	
 	charge = starting_charge
 	_setup_charge_bar()
 	
@@ -122,23 +140,45 @@ func _ready() -> void:
 func _apply_data() -> void:
 	if data == null:
 		return
-	max_health = data.max_health
+	var chosen := get_chosen_upgrades()
+	var level := chosen.size()
+	max_health = data.max_health * Stats.upgrade_health_multiplier(level)
 	move_speed = 120
-	# UnitData stores range in pixels; convert to whole cells (at least 1).
-	attack_range = maxi(1, roundi(data.attack_range / grid.cell_spacing()))
+	attack_range = data.attack_range_cells
 	health_regen = data.health_regen
-	passives = data.passives
+	passives = data.passives.duplicate()   # a copy, so we never add to the shared resource
 	gambit = data.gambit
+	var bonuses := {}   # property name -> total amount to add
+	for upgrade in chosen:
+		passives.append_array(upgrade.passives)
+		if upgrade.gambit != null:
+			gambit = upgrade.gambit
+			bonuses.clear()   # earlier bonuses were for the old Gambit
+		for property in upgrade.gambit_bonuses:
+			bonuses[property] = bonuses.get(property, 0.0) + upgrade.gambit_bonuses[property]
+	if gambit != null and not bonuses.is_empty():
+		gambit = _gambit_with_bonuses(gambit, bonuses)
 	max_charge = data.max_charge
 	starting_charge = data.starting_charge
 	charge_on_attack = data.charge_on_attack
 	charge_on_hit = data.charge_on_hit
 	charge_per_damage = data.charge_per_damage
 	for stat in Stats.Stat.values():
-		base_stats[stat] = data.get_base_stat(stat)
+		base_stats[stat] = data.get_base_stat(stat) * Stats.upgrade_multiplier(stat, level)
 	attack_damage_type = data.attack_damage_type
 	if data.sprite != null and sprite != null:
 		sprite.texture = data.sprite
+
+## A copy of `base` with each bonus added to the matching property.
+func _gambit_with_bonuses(base: Gambit, bonuses: Dictionary) -> Gambit:
+	var copy := base.duplicate() as Gambit   # this unit's own copy; never change the shared file
+	for property in bonuses:
+		if not property in copy:
+			push_warning("%s: upgrade bonus for unknown Gambit property '%s'." % [name, property])
+			continue
+		var current = copy.get(property)
+		copy.set(property, current + type_convert(bonuses[property], typeof(current)))
+	return copy
 
 ## Editor-only preview: shows the profile's sprite and name on the unit.
 func _refresh_editor_preview() -> void:
@@ -234,6 +274,47 @@ func _update_shield_bar() -> void:
 	shield_bar.size = Vector2((end_frac - start_frac) * width, health_bar.size.y)
 	shield_bar.visible = true
 
+var _badges: HBoxContainer
+
+
+## Small badges to the left of the health bar, one per upgrade taken. How many = level;
+## colors (or icons) = which path. Safe to call again if the upgrades change.
+func _setup_upgrade_badges() -> void:
+	if _badges != null:
+		_badges.queue_free()
+		_badges = null
+	if health_bar == null:
+		return
+	var chosen := get_chosen_upgrades()
+	if chosen.is_empty():
+		return
+	_badges = HBoxContainer.new()
+	_badges.add_theme_constant_override("separation", int(BADGE_GAP))
+	_badges.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for level in chosen.size():
+		_badges.add_child(_make_badge(_badge_color(level)))
+	health_bar.add_child(_badges)   # a child of the bar, so it moves with it
+	var width := chosen.size() * BADGE_SIZE + (chosen.size() - 1) * BADGE_GAP
+	_badges.position = Vector2(-width - BADGE_GAP, (health_bar.size.y - BADGE_SIZE) / 2.0)
+
+
+## A small square of the given color.
+func _make_badge(color: Color) -> Control:
+	var badge := ColorRect.new()
+	badge.color = color
+	badge.custom_minimum_size = Vector2(BADGE_SIZE, BADGE_SIZE)
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return badge
+
+
+## The color of the badge for upgrade `level` (0 = first upgrade), from the choices
+## in upgrade_path.
+func _badge_color(level: int) -> Color:
+	var path_color := PATH_COLORS[upgrade_path[0] % PATH_COLORS.size()]
+	if level == 0:
+		return path_color
+	return path_color.lightened(FOLLOW_UP_SHADE) if upgrade_path[level] == 0 else path_color.darkened(FOLLOW_UP_SHADE)
+
 ## Moves the unit onto `new_cell`, keeping position, `cell`, and grid occupancy in sync.
 func place_at(new_cell: Vector2i) -> void:
 	grid.vacate(cell, self)   # no-op if we weren't holding that cell
@@ -241,6 +322,25 @@ func place_at(new_cell: Vector2i) -> void:
 	global_position = grid.cell_to_world(new_cell)
 	grid.occupy(new_cell, self)
 
+
+## The Upgrade resources picked so far, in order, found by walking the unit's tree.
+func get_chosen_upgrades() -> Array[Upgrade]:
+	var chosen: Array[Upgrade] = []
+	if data == null:
+		return chosen
+	var choices := data.upgrades
+	for index in upgrade_path:
+		if index < 0 or index >= choices.size():
+			push_warning("%s: upgrade choice %d doesn't exist." % [name, index])
+			break
+		var upgrade := choices[index]
+		chosen.append(upgrade)
+		choices = upgrade.next_choices   # the next level's options come from this pick
+	return chosen
+
+
+func get_upgrade_level() -> int:
+	return get_chosen_upgrades().size()
 
 func start_combat() -> void:
 	# Safety net: the stored cell must match where the unit is actually standing.
@@ -404,6 +504,17 @@ func get_stat(stat: Stats.Stat) -> float:
 		value = status.modify_stat(self, stat, value)
 	return maxf(value, 0.0)
 
+## Aura spent on this unit: its purchase price plus any upgrades.
+func get_aura_value() -> int:
+	if data == null:
+		return 0
+	return Economy.unit_aura_value(data.tier, get_upgrade_level())
+
+
+## Reserve spent on this unit (items). Nothing costs Reserve yet.
+func get_reserve_value() -> int:
+	return 0
+
 func _attack(enemy: BattleUnit) -> void:
 	_attack_timer = get_attack_cooldown()
 	_attack_cooldown_total = _attack_timer
@@ -413,23 +524,44 @@ func _attack(enemy: BattleUnit) -> void:
 	var is_wrack := randf() < chance
 	var base_damage := Stats.attack_damage(get_stat(Stats.Stat.MIGHT))
 	var shot_color: Color = TEAM_COLORS.get(team, Color.WHITE)
+	var hit_effects: Array[HitEffect] = []
 	for status in statuses.duplicate():
 		base_damage = status.modify_outgoing_damage(self, base_damage)
 		shot_color = status.modify_projectile_color(self, shot_color)
+		var effect : HitEffect = status.get_hit_effect(self)
+		if effect != null:
+			hit_effects.append(effect)
 		status.on_attack(self)
 	var hit_damage := base_damage * (1.0 + get_stat(Stats.Stat.WRACK_DAMAGE)) if is_wrack else base_damage
 	if attack_range > 1:
-		_fire_projectile(enemy, hit_damage, is_wrack, shot_color)
+		_fire_projectile(enemy, hit_damage, is_wrack, shot_color, hit_effects)
 		return
 	_play_melee_swing(enemy.global_position)
-	var dealt := enemy.take_damage(hit_damage, is_wrack, attack_damage_type)
+	var dealt := enemy.take_damage(hit_damage, is_wrack, get_attack_damage_type())
 	get_tree().call_group("damage_tracker", "record_damage", get_instance_id(), dealt)
-	gain_charge_from_attack()
+	gain_charge_from_attack(dealt)
 	enemy.gain_charge_from_hit(dealt)
+	notify_attack_hit(enemy, dealt)
+	run_hit_effects(hit_effects, enemy, dealt, is_wrack)
 
-func _fire_projectile(enemy: BattleUnit, hit_damage: float, is_wrack: bool, color: Color) -> void:
+func notify_attack_hit(enemy: BattleUnit, dealt: float) -> void:
+	for status in statuses.duplicate():
+		status.on_attack_hit(self, enemy, dealt)
+	if not enemy.alive:
+		for status in statuses.duplicate():
+			status.on_kill(self, enemy)
+
+## Runs the effects an attack collected when it was made. A dodged hit (nothing dealt)
+## runs none, the same rule as charge.
+static func run_hit_effects(effects: Array[HitEffect], hit_target: BattleUnit, dealt: float, is_wrack: bool) -> void:
+	if dealt <= 0.0:
+		return
+	for effect in effects:
+		effect.apply(hit_target, dealt, is_wrack)
+
+func _fire_projectile(enemy: BattleUnit, hit_damage: float, is_wrack: bool, color: Color, hit_effects: Array[HitEffect]) -> void:
 	var projectile := Projectile.new()
-	projectile.setup(self, enemy, hit_damage, color, is_wrack, attack_damage_type)
+	projectile.setup(self, enemy, hit_damage, color, is_wrack, get_attack_damage_type(), hit_effects)
 	get_tree().current_scene.add_child(projectile)
 	projectile.global_position = global_position
 
@@ -454,6 +586,20 @@ func get_attack_cooldown() -> float:
 	for status in statuses:
 		cooldown = status.modify_attack_cooldown(self, cooldown)
 	return maxf(cooldown, 0.05)   # floor so stacking can never reach zero
+
+## The damage type of the unit's basic attacks, after status effects.
+func get_attack_damage_type() -> int:
+	var damage_type := attack_damage_type
+	for status in statuses:
+		damage_type = status.modify_attack_damage_type(self, damage_type)
+	return damage_type
+
+## The unit's chance to avoid a hit entirely, after status effects.
+func get_dodge_chance() -> float:
+	var chance := 0.0
+	for status in statuses:
+		chance = status.modify_dodge_chance(self, chance)
+	return clampf(chance, 0.0, 1.0)
 
 func _setup_attack_bar() -> void:
 	attack_bar = ProgressBar.new()
@@ -491,6 +637,17 @@ func _update_attack_bar() -> void:
 func lock_for(duration: float) -> void:
 	_locked_time = maxf(_locked_time, duration)
 
+const STUN_TINT := Color(0.55, 0.55, 0.55)   # sprite darkens while stunned
+
+## Stops the unit from moving, attacking, or using its Gambit for `duration` seconds.
+## A step already in progress still finishes, so the unit stays on the grid.
+func stun(duration: float) -> void:
+	if not alive or duration <= 0.0:
+		return
+	lock_for(duration)
+	if sprite != null:
+		sprite.modulate = STUN_TINT
+		sprite.create_tween().tween_property(sprite, "modulate", Color.WHITE, duration)
 
 ## Makes the unit attack `enemy` right now, ignoring range and attack timing. It's a real
 ## attack: it can wrack, triggers on-attack effects, and resets the attack timer.
@@ -501,35 +658,65 @@ func attack_now(enemy: BattleUnit) -> void:
 func take_damage(amount: float, is_wrack: bool = false, damage_type: int = Stats.DamageType.MIGHT) -> float:
 	if not alive:
 		return 0.0
+	if randf() < get_dodge_chance():
+		show_float_text("Dodge", DODGE_COLOR)
+		return 0.0   # nothing dealt: no meter credit, no lifesteal, no charge from damage
 	# Wards come first. Shields and other effects apply to what's left.
 	amount *= Stats.ward_multiplier(get_stat(Stats.ward_stat_for(damage_type)))
+	return _apply_damage(amount, Stats.damage_color(damage_type, is_wrack), is_wrack, true)
+
+## Damage that has already been through wards, such as damage released over time.
+## Shields and other statuses still apply. Leave show_numbers off for small, frequent
+## amounts so they don't spam damage numbers.
+func take_warded_damage(amount: float, show_numbers: bool = false, damage_type: int = Stats.DamageType.MIGHT) -> float:
+	if not alive:
+		return 0.0
+	return _apply_damage(amount, Stats.damage_color(damage_type), false, show_numbers)
+
+## The number color of the hit currently being processed, for statuses that show their
+## own numbers (like Bescard's held damage). Only meaningful during modify_incoming_damage.
+var incoming_color: Color = Color.WHITE
+
+func _apply_damage(amount: float, number_color: Color, is_wrack: bool, show_numbers: bool) -> float:
+	incoming_color = number_color
 	var dealt := minf(amount, health + get_shield())
 	var shield_before := get_shield()
 	for status in statuses.duplicate():
 		amount = status.modify_incoming_damage(self, amount)
-	var absorbed := shield_before - get_shield()
-	if absorbed > 0.0:
-		_spawn_damage_number(absorbed, false, SHIELD_COLOR)
-	if amount > 0.0:
-		_spawn_damage_number(minf(amount, health), is_wrack)
+	if show_numbers:
+		var absorbed := shield_before - get_shield()
+		if absorbed > 0.0:
+			_spawn_damage_number(absorbed, SHIELD_COLOR)
+		if amount > 0.0:
+			_spawn_damage_number(minf(amount, health), number_color, is_wrack)
 	health -= amount
 	_update_health_bar()
 	if health <= 0.0:
 		_die()
 	return dealt
 
-func _spawn_damage_number(amount: float, is_wrack: bool = false, tint: Color = Color.WHITE) -> void:
+## Font size for a damage number: bigger for bigger hits, plus a bonus for wracks.
+func _damage_font_size(amount: float, is_wrack: bool) -> int:
+	var t := clampf(amount / DAMAGE_FOR_MAX_FONT, 0.0, 1.0)   # 0 = tiny hit, 1 = huge hit
+	t = sqrt(t)   # grows quickly for small hits, then levels off
+	var font_size := lerpf(DAMAGE_FONT_MIN, DAMAGE_FONT_MAX, t)
+	if is_wrack:
+		font_size += WRACK_FONT_BONUS
+	return roundi(font_size)
+
+func _spawn_damage_number(amount: float, color: Color = Color.WHITE, is_wrack: bool = false) -> void:
+	show_float_text(str(roundi(amount)), color, _damage_font_size(amount, is_wrack))
+
+## Floating text that rises and fades above the unit. Statuses can use this too.
+func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = DAMAGE_FONT_MIN) -> void:
 	var label := Label.new()
-	label.text = str(roundi(amount))
+	label.text = text
 	label.size = Vector2(60, 24)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.z_index = 20
-	label.add_theme_font_size_override("font_size", 16)
-	if is_wrack:
-		label.add_theme_color_override("font_color", WRACK_COLOR)
-	elif tint != Color.WHITE:
-		label.add_theme_color_override("font_color", tint)
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 4)
 
@@ -647,14 +834,23 @@ func gain_charge(amount: float) -> void:
 	charge = minf(charge + amount, max_charge)
 	_update_charge_bar()
 
-## Charge for landing an attack. Scaled by cooldown, so `charge_on_attack`
-## means "charge per second of attacking" and attack speed doesn't change the rate.
-func gain_charge_from_attack() -> void:
+## Charge for landing an attack. A hit that dealt nothing (dodged) gives none.
+func gain_charge_from_attack(dealt: float) -> void:
+	if dealt <= 0.0:
+		return
 	gain_charge(charge_on_attack)
 
 ## Charge for being hit by an attack: a flat amount plus a share of the damage taken.
 func gain_charge_from_hit(damage_taken: float) -> void:
 	gain_charge(charge_on_hit + damage_taken * charge_per_damage)
+
+## Sets charge to full, ignoring anything that blocks charge gain. For effects that
+## refund a Gambit outright.
+func fill_charge() -> void:
+	if not alive:
+		return
+	charge = max_charge
+	_update_charge_bar()
 
 func _die() -> void:
 	alive = false

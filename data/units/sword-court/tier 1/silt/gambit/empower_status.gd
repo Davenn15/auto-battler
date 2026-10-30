@@ -9,13 +9,20 @@ const PROJECTILE_COLOR := Color(1.0, 0.45, 0.75)   # pink
 var bonus: float
 var insight_scaling: float
 var attacks_left: int
+var splash_radius: int
 
 
-func _init(p_bonus: float, p_insight_scaling: float, p_attacks: int) -> void:
+func _init(p_bonus: float, p_insight_scaling: float, p_attacks: int, p_splash_radius: int = 0) -> void:
 	bonus = p_bonus
 	insight_scaling = p_insight_scaling
 	attacks_left = p_attacks
+	splash_radius = p_splash_radius
 
+func get_hit_effect(unit: BattleUnit) -> HitEffect:
+	if splash_radius <= 0:
+		return null
+	var splash_damage := Stats.scaled(bonus, insight_scaling, unit.get_stat(Stats.Stat.INSIGHT))
+	return SplashHitEffect.new(unit, splash_damage, splash_radius)
 
 func on_applied(unit: BattleUnit) -> void:
 	if unit.sprite != null:

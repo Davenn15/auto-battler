@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="GambitSpeedPassive" format=3 uid="uid://c4lop341jg64e"]
 
-[ext_resource type="Script" uid="uid://3i36v0gu5b0w" path="res://data/units/sword-court/tier 1/silt/scripts/gambit_speed_passive.gd" id="1_e56hj"]
+[ext_resource type="Script" uid="uid://3i36v0gu5b0w" path="res://data/units/sword-court/tier 1/silt/passive/gambit_speed_passive.gd" id="1_e56hj"]
 
 [resource]
 script = ExtResource("1_e56hj")

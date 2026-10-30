@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://blor62pem7tbe"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_u2t0r"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_3yevl"]
+[ext_resource type="Resource" uid="uid://c6vqcc8ymskk1" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/silt_a1.tres" id="3_f383k"]
+[ext_resource type="Resource" uid="uid://cl6pobv7qn44r" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/silt_a2.tres" id="4_hinqs"]
+
+[resource]
+script = ExtResource("1_u2t0r")
+next_choices = Array[ExtResource("1_u2t0r")]([ExtResource("3_f383k"), ExtResource("4_hinqs")])
+gambit_bonuses = Dictionary[String, float]({
+"attack_count": 2.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

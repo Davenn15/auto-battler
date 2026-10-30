@@ -27,6 +27,11 @@ func modify_outgoing_damage(_unit: BattleUnit, damage: float) -> float:
 func on_attack(_unit: BattleUnit) -> void:
 	pass
 
+## Called when one of the unit's attacks lands, with the damage it dealt. For a ranged
+## unit this is when the projectile arrives. Use for lifesteal and on-hit effects.
+func on_attack_hit(_unit: BattleUnit, _target: BattleUnit, _dealt: float) -> void:
+	pass
+
 ## Adjust damage the unit is about to take (shields, damage reduction).
 func modify_incoming_damage(_unit: BattleUnit, damage: float) -> float:
 	return damage
@@ -62,3 +67,21 @@ func modify_stat(_unit: BattleUnit, _stat: Stats.Stat, value: float) -> float:
 ## Adjust the chance that this unit's attack on `target` wracks.
 func modify_wrack_chance(_unit: BattleUnit, _target: BattleUnit, chance: float) -> float:
 	return chance
+
+## Change the damage type of the unit's basic attacks.
+func modify_attack_damage_type(_unit: BattleUnit, damage_type: int) -> int:
+	return damage_type
+
+## Adjust the unit's chance to completely avoid an incoming hit (0.1 = 10%).
+func modify_dodge_chance(_unit: BattleUnit, chance: float) -> float:
+	return chance
+
+## Called as the unit makes an attack. Return a HitEffect to run when that attack lands,
+## or null for nothing. Use this instead of on_attack_hit when the effect must still
+## happen if this status ends while a projectile is in the air.
+func get_hit_effect(_unit: BattleUnit) -> HitEffect:
+	return null
+
+## Called when one of the unit's attacks kills `victim`.
+func on_kill(_unit: BattleUnit, _victim: BattleUnit) -> void:
+	pass

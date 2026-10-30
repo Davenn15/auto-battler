@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="InsightAttacksPassive" format=3 uid="uid://ls162aiejabo"]
+
+[ext_resource type="Script" uid="uid://dsk5yxo18euw6" path="res://data/units/sword-court/tier 3/trompero/scripts/insight_attacks_passive.gd" id="1_wkh2a"]
+
+[resource]
+script = ExtResource("1_wkh2a")
+insight_scaling = 0.4
+metadata/_custom_type_script = "uid://dsk5yxo18euw6"

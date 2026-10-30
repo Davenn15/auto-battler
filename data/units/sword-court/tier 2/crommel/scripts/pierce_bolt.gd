@@ -30,7 +30,7 @@ func setup(p_shooter_id: int, p_team: int, p_direction: Vector2, p_reach: float,
 
 	# Visual: a long thin bolt pointing along its direction of travel.
 	polygon = PackedVector2Array([Vector2(-22, -4), Vector2(22, -4), Vector2(22, 4), Vector2(-22, 4)])
-	color = Color(0.85, 0.75, 0.5)
+	color = Color(0.456, 0.281, 0.543, 1.0)
 	rotation = direction.angle()
 	z_index = 10
 

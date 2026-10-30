@@ -1,18 +1,24 @@
 [gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ddtkh3ynpq0g1"]
 
-[ext_resource type="Resource" uid="uid://bj0tygqyhv86b" path="res://data/units/sword-court/tier 1/silt/silt_gambit.tres" id="1_ad7mo"]
+[ext_resource type="Resource" uid="uid://bj0tygqyhv86b" path="res://data/units/sword-court/tier 1/silt/gambit/silt_gambit.tres" id="1_ptrek"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_ad7mo"]
-[ext_resource type="Resource" uid="uid://c4lop341jg64e" path="res://data/units/sword-court/tier 1/silt/silt_passive.tres" id="3_mg0vq"]
+[ext_resource type="Resource" uid="uid://c4lop341jg64e" path="res://data/units/sword-court/tier 1/silt/passive/silt_passive.tres" id="3_gcv2i"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4_0ajra"]
-[ext_resource type="Texture2D" uid="uid://c8a4j1s2pw2ga" path="res://assets/blue guy.png" id="5_xbq4w"]
+[ext_resource type="Texture2D" uid="uid://dk2wpongxtkt0" path="res://assets/silt.png" id="5_xbq4w"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_rivjx"]
+[ext_resource type="Resource" uid="uid://blor62pem7tbe" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/silt_a.tres" id="7_ll8tn"]
+[ext_resource type="Resource" uid="uid://b4xtfk6opb5rd" path="res://data/units/sword-court/tier 1/silt/upgrades/b_path/silt_b.tres" id="8_uwfht"]
 
 [resource]
 script = ExtResource("4_0ajra")
 display_name = "silt"
+upgrades = Array[ExtResource("6_rivjx")]([ExtResource("7_ll8tn"), ExtResource("8_uwfht")])
 max_health = 750.0
-attack_range = 175.0
-passives = Array[ExtResource("2_ad7mo")]([ExtResource("3_mg0vq")])
-gambit = ExtResource("1_ad7mo")
+attack_range_cells = 3
+passives = Array[ExtResource("2_ad7mo")]([ExtResource("3_gcv2i")])
+gambit = ExtResource("1_ptrek")
+max_charge = 90.0
+starting_charge = 30.0
 sprite = ExtResource("5_xbq4w")
 might = 55.0
 celerity = 135.0

@@ -2,10 +2,12 @@
 
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_4bwmg"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_b5wtr"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3_rl061"]
 
 [resource]
 script = ExtResource("1_b5wtr")
-max_health = 99999999999999.0
-damage = 0.0
-move_speed = 0.0
+max_health = 2000.0
+might = 0.0
+insight = 0.0
+celerity = 0.0
 metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

@@ -4,19 +4,19 @@
 [ext_resource type="Resource" uid="uid://1swpy6kbcqx6" path="res://data/units/sword-court/tier 2/crommel/crommel_gambit.tres" id="1_scxi0"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_3gypo"]
 [ext_resource type="Resource" uid="uid://dp6v3ivu1ublu" path="res://data/units/sword-court/tier 2/crommel/crommel_passive.tres" id="3_aq6fn"]
-[ext_resource type="Texture2D" uid="uid://c1d48luh3jfc1" path="res://assets/purple guy.png" id="3_jtssu"]
+[ext_resource type="Texture2D" uid="uid://brurjvaqejmmp" path="res://assets/crommel.png" id="3_jtssu"]
 
 [resource]
 script = ExtResource("2_3gypo")
 display_name = "crommel"
+tier = 2
 max_health = 850.0
-attack_range = 350.0
-attack_cooldown = 3.5
-wrack_chance = 0.5
+attack_range_cells = 5
 passives = Array[ExtResource("1_gcjdq")]([ExtResource("3_aq6fn")])
 gambit = ExtResource("1_scxi0")
+starting_charge = 30.0
 sprite = ExtResource("3_jtssu")
 might = 110.0
-celerity = 70.0
+celerity = 75.0
 celerity_ward = 40.0
 metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

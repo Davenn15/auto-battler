@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SunderStrikeGambit" format=3 uid="uid://dn2qlc3ua1wju"]
+
+[ext_resource type="Script" uid="uid://bgftcakf2rch6" path="res://data/units/sword-court/tier 1/bremes/scripts/sunder_strike_gambit.gd" id="1_hgn0y"]
+
+[resource]
+script = ExtResource("1_hgn0y")
+damage = 150.0
+ward_reduction = 25.0
+ward_duration = 5.0
+cast_time = 0.5
+metadata/_custom_type_script = "uid://bgftcakf2rch6"

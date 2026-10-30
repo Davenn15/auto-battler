@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://mhwe2wj4xrhr"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_2yln4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_jejga"]
+
+[resource]
+script = ExtResource("1_2yln4")
+gambit_bonuses = Dictionary[String, float]({
+"ally_count": 1.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

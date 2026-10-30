@@ -4,18 +4,18 @@
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_rfilw"]
 [ext_resource type="Resource" uid="uid://mkigmpgm2suw" path="res://data/units/sword-court/tier 1/garth/garth_passive.tres" id="3_tfbkh"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4_pcru5"]
-[ext_resource type="Texture2D" uid="uid://dvnxjekw58e20" path="res://assets/red guy.png" id="5_g2t55"]
+[ext_resource type="Texture2D" uid="uid://b548e83w8jonj" path="res://assets/garth.png" id="5_g2t55"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_rfilw"]
 
 [resource]
 script = ExtResource("4_pcru5")
 display_name = "garth"
-max_health = 1300.0
-damage = 80.0
+max_health = 1150.0
 passives = Array[ExtResource("2_rfilw")]([ExtResource("3_tfbkh")])
 gambit = ExtResource("1_xvfta")
-charge_on_hit = 5.0
 sprite = ExtResource("5_g2t55")
-might = 80.0
+might = 65.0
+celerity = 90.0
 might_ward = 60.0
 insight_ward = 30.0
 metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

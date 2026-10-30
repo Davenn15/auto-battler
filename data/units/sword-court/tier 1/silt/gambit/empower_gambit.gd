@@ -8,6 +8,8 @@ extends Gambit
 @export var insight_scaling: float = 0.5
 ## How many of the caster's next attacks are empowered.
 @export var attack_count: int = 3
+## Enemies within this many hexes of the target also take the bonus damage. 0 = no splash.
+@export var splash_radius: int = 0
 
 
 ## Won't cast while the previous empowerment is still active, so charge isn't wasted.
@@ -18,4 +20,4 @@ func can_use(caster: BattleUnit) -> bool:
 func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive:
 		return
-	caster.add_status(EmpowerStatus.new(bonus_damage, insight_scaling, attack_count))
+	caster.add_status(EmpowerStatus.new(bonus_damage, insight_scaling, attack_count, splash_radius))

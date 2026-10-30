@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://brdnr346hy43l"]
+
+[ext_resource type="Resource" uid="uid://b5uham2x8745p" path="res://data/units/sword-court/tier 3/bescard/bescard_gambit.tres" id="1_bgamb"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_pass"]
+[ext_resource type="Resource" uid="uid://k3cqnv13q1al" path="res://data/units/sword-court/tier 3/bescard/bescard_passive.tres" id="3_bpass"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4_udata"]
+[ext_resource type="Texture2D" uid="uid://chx5juu24b7rm" path="res://assets/bescard.png" id="5_sprite"]
+
+[resource]
+script = ExtResource("4_udata")
+display_name = "bescard"
+tier = 3
+max_health = 1250.0
+passives = Array[ExtResource("2_pass")]([ExtResource("3_bpass")])
+gambit = ExtResource("1_bgamb")
+charge_on_hit = 5.0
+sprite = ExtResource("5_sprite")
+might = 110.0
+celerity = 110.0
+might_ward = 30.0

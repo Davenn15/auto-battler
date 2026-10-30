@@ -5,17 +5,21 @@
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_7sw1d"]
 [ext_resource type="Resource" uid="uid://c62sctv1e3ut4" path="res://data/units/sword-court/tier 2/wesper/wesper_passive.tres" id="3_cjyw8"]
 [ext_resource type="Texture2D" uid="uid://demb7srk26ilv" path="res://assets/wesper.png" id="5_3s0tb"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_cjyw8"]
 
 [resource]
 script = ExtResource("2_7sw1d")
 display_name = "wesper"
+tier = 2
 max_health = 850.0
 passives = Array[ExtResource("1_t25rx")]([ExtResource("3_cjyw8")])
 gambit = ExtResource("1_fn68r")
+max_charge = 75.0
+starting_charge = 25.0
 sprite = ExtResource("5_3s0tb")
 might = 85.0
 celerity = 140.0
 might_ward = 25.0
-insight_ward = 25.0
+insight_ward = 30.0
 celerity_ward = 45.0
 metadata/_custom_type_script = "uid://cj6m3iw6d33sq"
