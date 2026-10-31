@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ShieldMightPassive" format=3 uid="uid://cdaxnankvuice"]
+
+[ext_resource type="Script" uid="uid://7hwunw5jowq4" path="res://data/units/sword-court/tier 1/garth/upgrades/b_path/scripts/shield_might_passive.gd" id="1_rrnlu"]
+
+[resource]
+script = ExtResource("1_rrnlu")
+metadata/_custom_type_script = "uid://7hwunw5jowq4"

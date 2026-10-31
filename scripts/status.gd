@@ -85,3 +85,15 @@ func get_hit_effect(_unit: BattleUnit) -> HitEffect:
 ## Called when one of the unit's attacks kills `victim`.
 func on_kill(_unit: BattleUnit, _victim: BattleUnit) -> void:
 	pass
+
+## Adjust the size of a shield this unit is about to receive, from any source.
+func modify_shield_received(_unit: BattleUnit, amount: float) -> float:
+	return amount
+
+## True makes the unit immune to crowd control (stuns now; slows, knockbacks later).
+func blocks_crowd_control(_unit: BattleUnit) -> bool:
+	return false
+
+## Called when the unit dodges a hit.
+func on_dodge(_unit: BattleUnit) -> void:
+	pass

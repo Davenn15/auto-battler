@@ -21,8 +21,7 @@ func execute(caster: BattleUnit) -> void:
 		return
 	# Allies may have moved or died during the Act time, so look again now.
 	for ally in _targets(caster):
-		ally.add_status(ShieldStatus.new(shield_amount, duration))
-		caster.get_tree().call_group("damage_tracker", "record_shielding", caster.get_instance_id(), shield_amount)
+		ally.add_shield(shield_amount, duration, caster.get_instance_id())
 
 
 func _targets(caster: BattleUnit) -> Array[BattleUnit]:

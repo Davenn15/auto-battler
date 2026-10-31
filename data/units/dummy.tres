@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1_b5wtr")
-max_health = 2000.0
+max_health = 50000.0
 might = 0.0
 insight = 0.0
 celerity = 0.0

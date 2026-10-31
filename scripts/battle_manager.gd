@@ -9,6 +9,7 @@ var phase: Phase = Phase.PREP
 @export var damage_tracker: DamageTracker
 
 func _ready() -> void:
+	add_to_group("battle_manager")
 	if auto_start:
 		# Wait one physics frame so all units are ready and the navmesh has synced.
 		await get_tree().physics_frame
@@ -31,6 +32,13 @@ func start_battle() -> void:
 		unit.start_combat()
 	_check_battle_end()   # handles a side starting with zero units
 
+## Brings a unit created mid-battle into the fight: tracks its death and its damage.
+func add_summon(unit: BattleUnit) -> void:
+	if phase != Phase.COMBAT:
+		unit.queue_free()
+		return
+	unit.died.connect(_on_unit_died)
+	unit.start_combat()
 
 func _on_unit_died(unit: BattleUnit) -> void:
 	print("%s died" % unit.name)

@@ -1,21 +1,25 @@
 [gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://kfdfkbdpeyaq"]
 
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_6pai0"]
-[ext_resource type="Resource" uid="uid://dn2qlc3ua1wju" path="res://data/units/sword-court/tier 1/bremes/bremes_gambit.tres" id="1_f131o"]
+[ext_resource type="Resource" uid="uid://dn2qlc3ua1wju" path="res://data/units/sword-court/tier 1/bremes/gambit/bremes_gambit.tres" id="1_f131o"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_44gax"]
-[ext_resource type="Resource" uid="uid://cdbo6mdgd1pps" path="res://data/units/sword-court/tier 1/bremes/bremes_passive.tres" id="3_1aj46"]
+[ext_resource type="Resource" uid="uid://cdbo6mdgd1pps" path="res://data/units/sword-court/tier 1/bremes/passive/bremes_passive.tres" id="3_1aj46"]
 [ext_resource type="Texture2D" uid="uid://bsi2vqkhghq0b" path="res://assets/bremes.png" id="5_2rmpr"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_30vy6"]
+[ext_resource type="Resource" uid="uid://mv0sfodr24o1" path="res://data/units/sword-court/tier 1/bremes/upgrades/a_path/bremes_a.tres" id="7_8x456"]
+[ext_resource type="Resource" uid="uid://6fumepw2j01s" path="res://data/units/sword-court/tier 1/bremes/upgrades/b_path/bremes_b.tres" id="8_rtaju"]
 
 [resource]
 script = ExtResource("2_44gax")
 display_name = "bremes"
+upgrades = Array[ExtResource("6_30vy6")]([ExtResource("7_8x456"), ExtResource("8_rtaju")])
+max_health = 950.0
 passives = Array[ExtResource("1_6pai0")]([ExtResource("3_1aj46")])
 gambit = ExtResource("1_f131o")
 max_charge = 70.0
 starting_charge = 30.0
 sprite = ExtResource("5_2rmpr")
-might = 90.0
-insight = 110.0
+might = 80.0
 might_ward = 25.0
 insight_ward = 35.0
 celerity_ward = 25.0

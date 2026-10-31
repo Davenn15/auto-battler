@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CleaveGambit" format=3 uid="uid://bbr16yj1kt01i"]
+
+[ext_resource type="Script" uid="uid://dk5bp784egc0u" path="res://data/units/sword-court/tier 1/garth/upgrades/b_path/scripts/cleave_gambit.gd" id="1_8h70k"]
+
+[resource]
+script = ExtResource("1_8h70k")
+shield_per_enemy = 100.0
+cast_time = 0.75
+metadata/_custom_type_script = "uid://dk5bp784egc0u"

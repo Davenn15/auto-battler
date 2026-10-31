@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MirrorImageGambit" format=3 uid="uid://diwgdt1e0mp4"]
+
+[ext_resource type="Script" uid="uid://bmb0u304lym60" path="res://data/units/sword-court/tier 1/bremes/upgrades/b_path/scripts/mirror_image_gambit.gd" id="1_ulvui"]
+
+[resource]
+script = ExtResource("1_ulvui")
+health_fraction = 0.1
+extra_dodge = 0.25
+clone_duration = 6.0
+cast_time = 1.5
+metadata/_custom_type_script = "uid://bmb0u304lym60"

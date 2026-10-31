@@ -11,5 +11,4 @@ extends Gambit
 func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive:
 		return
-	caster.add_status(ShieldStatus.new(shield_amount, duration))
-	caster.get_tree().call_group("damage_tracker", "record_shielding", caster.get_instance_id(), shield_amount)
+	caster.add_shield(shield_amount, duration, caster.get_instance_id())

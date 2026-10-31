@@ -17,3 +17,7 @@ extends Resource
 ## Use this to make the Gambit stronger without copying it. Set `gambit` only when the
 ## upgrade switches to a different kind of Gambit.
 @export var gambit_bonuses: Dictionary[String, float] = {}
+
+## Gambit properties set to a new value, by name. Use this for changes that aren't
+## "more", like damage_type (0 = Might, 1 = Insight, 2 = Celerity).
+@export var gambit_overrides: Dictionary[String, float] = {}

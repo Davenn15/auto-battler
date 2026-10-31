@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CcImmuneShieldedPassive" format=3 uid="uid://c468pe0g71ffe"]
+
+[ext_resource type="Script" uid="uid://e1o1r0spxvx8" path="res://data/units/sword-court/tier 1/garth/upgrades/a_path/scripts/cc_immune_shielded_passive.gd" id="1_sbto5"]
+
+[resource]
+script = ExtResource("1_sbto5")
+metadata/_custom_type_script = "uid://e1o1r0spxvx8"

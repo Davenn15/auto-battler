@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_6pfn8"]
 [ext_resource type="Resource" uid="uid://ls162aiejabo" path="res://data/units/sword-court/tier 3/trompero/trompero_passive.tres" id="3_46rfb"]
 [ext_resource type="Texture2D" uid="uid://dkfg4qkjjumhl" path="res://assets/trompero.png" id="5_12hl1"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_46rfb"]
 
 [resource]
 script = ExtResource("2_6pfn8")
@@ -15,7 +16,7 @@ attack_range_cells = 4
 passives = Array[ExtResource("1_0twvd")]([ExtResource("3_46rfb")])
 gambit = ExtResource("1_ru7cl")
 max_charge = 90.0
-starting_charge = 30.0
+starting_charge = 35.0
 sprite = ExtResource("5_12hl1")
 might = 35.0
 insight = 140.0

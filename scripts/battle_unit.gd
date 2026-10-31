@@ -99,6 +99,11 @@ var _dest_cell: Vector2i
 var _dest_world: Vector2
 var _attack_timer: float = 0.0
 
+## True for units created mid-battle by another unit (clones, summons).
+var is_summon: bool = false
+var _summon_max_health: float = 0.0
+var _summon_stats: Dictionary = {}
+var _summoner_id: int = 0   # who a summon's damage is credited to
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -149,15 +154,18 @@ func _apply_data() -> void:
 	passives = data.passives.duplicate()   # a copy, so we never add to the shared resource
 	gambit = data.gambit
 	var bonuses := {}   # property name -> total amount to add
+	var overrides := {}   # property name -> value to set
 	for upgrade in chosen:
 		passives.append_array(upgrade.passives)
 		if upgrade.gambit != null:
 			gambit = upgrade.gambit
 			bonuses.clear()   # earlier bonuses were for the old Gambit
+			overrides.clear()
 		for property in upgrade.gambit_bonuses:
 			bonuses[property] = bonuses.get(property, 0.0) + upgrade.gambit_bonuses[property]
-	if gambit != null and not bonuses.is_empty():
-		gambit = _gambit_with_bonuses(gambit, bonuses)
+		overrides.merge(upgrade.gambit_overrides, true)
+	if gambit != null and not (bonuses.is_empty() and overrides.is_empty()):
+		gambit = _gambit_with_changes(gambit, bonuses, overrides)
 	max_charge = data.max_charge
 	starting_charge = data.starting_charge
 	charge_on_attack = data.charge_on_attack
@@ -168,17 +176,29 @@ func _apply_data() -> void:
 	attack_damage_type = data.attack_damage_type
 	if data.sprite != null and sprite != null:
 		sprite.texture = data.sprite
+	if is_summon:
+		max_health = _summon_max_health
+		base_stats = _summon_stats
+		gambit = null   # summons don't cast
 
-## A copy of `base` with each bonus added to the matching property.
-func _gambit_with_bonuses(base: Gambit, bonuses: Dictionary) -> Gambit:
+## A copy of `base` with bonuses added to, and overrides replacing, the matching properties.
+func _gambit_with_changes(base: Gambit, bonuses: Dictionary, overrides: Dictionary) -> Gambit:
 	var copy := base.duplicate() as Gambit   # this unit's own copy; never change the shared file
 	for property in bonuses:
-		if not property in copy:
-			push_warning("%s: upgrade bonus for unknown Gambit property '%s'." % [name, property])
-			continue
-		var current = copy.get(property)
-		copy.set(property, current + type_convert(bonuses[property], typeof(current)))
+		if _gambit_has(copy, property):
+			var current = copy.get(property)
+			copy.set(property, current + type_convert(bonuses[property], typeof(current)))
+	for property in overrides:
+		if _gambit_has(copy, property):
+			copy.set(property, type_convert(overrides[property], typeof(copy.get(property))))
 	return copy
+
+
+func _gambit_has(gambit_copy: Gambit, property: String) -> bool:
+	if property in gambit_copy:
+		return true
+	push_warning("%s: upgrade changes unknown Gambit property '%s'." % [name, property])
+	return false
 
 ## Editor-only preview: shows the profile's sprite and name on the unit.
 func _refresh_editor_preview() -> void:
@@ -322,6 +342,29 @@ func place_at(new_cell: Vector2i) -> void:
 	global_position = grid.cell_to_world(new_cell)
 	grid.occupy(new_cell, self)
 
+## Turns this unit into a summon copying `source`: same profile and current base stats,
+## a fraction of its max health, and no Gambit. Call before adding it to the scene.
+func setup_as_summon(source: BattleUnit, health_fraction: float) -> void:
+	data = source.data
+	team = source.team
+	auto_place = false   # the summoner places it
+	is_summon = true
+	_summon_max_health = source.max_health * health_fraction
+	_summon_stats = source.base_stats.duplicate()
+	_summoner_id = source.get_credit_id()
+
+## The id this unit's damage is credited to on the damage meter: its summoner for
+## summons, itself otherwise.
+func get_credit_id() -> int:
+	return _summoner_id if is_summon else get_instance_id()
+
+## Kills the unit outright, for effects that end it rather than damage it.
+func kill() -> void:
+	if not alive:
+		return
+	health = 0.0
+	_update_health_bar()
+	_die()
 
 ## The Upgrade resources picked so far, in order, found by walking the unit's tree.
 func get_chosen_upgrades() -> Array[Upgrade]:
@@ -506,7 +549,7 @@ func get_stat(stat: Stats.Stat) -> float:
 
 ## Aura spent on this unit: its purchase price plus any upgrades.
 func get_aura_value() -> int:
-	if data == null:
+	if data == null or is_summon:
 		return 0
 	return Economy.unit_aura_value(data.tier, get_upgrade_level())
 
@@ -538,7 +581,7 @@ func _attack(enemy: BattleUnit) -> void:
 		return
 	_play_melee_swing(enemy.global_position)
 	var dealt := enemy.take_damage(hit_damage, is_wrack, get_attack_damage_type())
-	get_tree().call_group("damage_tracker", "record_damage", get_instance_id(), dealt)
+	get_tree().call_group("damage_tracker", "record_damage", get_credit_id(), dealt)
 	gain_charge_from_attack(dealt)
 	enemy.gain_charge_from_hit(dealt)
 	notify_attack_hit(enemy, dealt)
@@ -639,10 +682,20 @@ func lock_for(duration: float) -> void:
 
 const STUN_TINT := Color(0.55, 0.55, 0.55)   # sprite darkens while stunned
 
+## True while something makes the unit immune to crowd control. Every CC effect checks this.
+func is_cc_immune() -> bool:
+	for status in statuses:
+		if status.blocks_crowd_control(self):
+			return true
+	return false
+
 ## Stops the unit from moving, attacking, or using its Gambit for `duration` seconds.
 ## A step already in progress still finishes, so the unit stays on the grid.
 func stun(duration: float) -> void:
 	if not alive or duration <= 0.0:
+		return
+	if is_cc_immune():
+		show_float_text("Immune", DODGE_COLOR)
 		return
 	lock_for(duration)
 	if sprite != null:
@@ -660,6 +713,8 @@ func take_damage(amount: float, is_wrack: bool = false, damage_type: int = Stats
 		return 0.0
 	if randf() < get_dodge_chance():
 		show_float_text("Dodge", DODGE_COLOR)
+		for status in statuses.duplicate():
+			status.on_dodge(self)
 		return 0.0   # nothing dealt: no meter credit, no lifesteal, no charge from damage
 	# Wards come first. Shields and other effects apply to what's left.
 	amount *= Stats.ward_multiplier(get_stat(Stats.ward_stat_for(damage_type)))
@@ -764,6 +819,16 @@ func get_shield() -> float:
 		total += status.get_shield(self)
 	return total
 
+## Gives this unit a shield, after anything that changes shields it receives. Credits the
+## shielding to `source_id` (the giver's instance id). Returns the shield actually given.
+func add_shield(amount: float, duration: float, source_id: int) -> float:
+	if not alive or amount <= 0.0:
+		return 0.0
+	for status in statuses:
+		amount = status.modify_shield_received(self, amount)
+	add_status(ShieldStatus.new(amount, duration))
+	get_tree().call_group("damage_tracker", "record_shielding", source_id, amount)
+	return amount
 
 func clear_statuses() -> void:
 	for status in statuses.duplicate():

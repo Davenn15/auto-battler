@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cg0t32jmmmhh8"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_tpi5a"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_utl85"]
+[ext_resource type="Resource" uid="uid://djgfw0y40u1bp" path="res://data/units/sword-court/tier 1/garth/upgrades/a_path/garth_a2_wards.tres" id="3_utl85"]
+
+[resource]
+script = ExtResource("1_tpi5a")
+passives = Array[ExtResource("2_utl85")]([ExtResource("3_utl85")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

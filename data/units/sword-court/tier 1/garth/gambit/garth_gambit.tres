@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="ShieldGambit" format=3 uid="uid://s848cg2soxjy"]
 
-[ext_resource type="Script" uid="uid://bjsn85rjsce6w" path="res://data/units/sword-court/tier 1/garth/scripts/shield_gambit.gd" id="1_o8oa4"]
+[ext_resource type="Script" uid="uid://bjsn85rjsce6w" path="res://data/units/sword-court/tier 1/garth/gambit/shield_gambit.gd" id="1_o8oa4"]
 
 [resource]
 script = ExtResource("1_o8oa4")

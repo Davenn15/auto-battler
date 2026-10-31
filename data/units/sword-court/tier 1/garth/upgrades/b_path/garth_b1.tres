@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://3jnhyksi0cj6"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_30hmo"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_4vlkp"]
+[ext_resource type="Resource" uid="uid://cdaxnankvuice" path="res://data/units/sword-court/tier 1/garth/upgrades/b_path/garth_shield_might.tres" id="3_4vlkp"]
+
+[resource]
+script = ExtResource("1_30hmo")
+passives = Array[ExtResource("2_4vlkp")]([ExtResource("3_4vlkp")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

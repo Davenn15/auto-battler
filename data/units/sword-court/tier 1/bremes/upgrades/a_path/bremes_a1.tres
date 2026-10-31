@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cmxrc17tgaeud"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_s26w2"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_lswvr"]
+
+[resource]
+script = ExtResource("1_s26w2")
+gambit_bonuses = Dictionary[String, float]({
+"max_health_percent": 0.1
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

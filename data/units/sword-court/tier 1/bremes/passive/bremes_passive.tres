@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="DodgePassive" format=3 uid="uid://cdbo6mdgd1pps"]
 
-[ext_resource type="Script" uid="uid://oxsm3736kp74" path="res://data/units/sword-court/tier 1/bremes/scripts/dodge_passive.gd" id="1_q1ot4"]
+[ext_resource type="Script" uid="uid://oxsm3736kp74" path="res://data/units/sword-court/tier 1/bremes/passive/dodge_passive.gd" id="1_q1ot4"]
 
 [resource]
 script = ExtResource("1_q1ot4")

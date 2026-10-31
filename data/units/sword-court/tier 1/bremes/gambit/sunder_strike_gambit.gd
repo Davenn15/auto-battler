@@ -11,6 +11,10 @@ extends Gambit
 @export var ward_reduction: float = 30.0
 ## Seconds the wards stay lowered.
 @export var ward_duration: float = 4.0
+## Extra damage per point of the caster's Insight.
+@export var insight_scaling: float = 0.0
+## Extra damage as a fraction of the target's max health (0.05 = 5%).
+@export_range(0.0, 1.0, 0.005) var max_health_percent: float = 0.0
 
 
 ## Only fires when her current target is alive and in attack range, so charge isn't wasted.
@@ -29,6 +33,8 @@ func execute(caster: BattleUnit) -> void:
 	# Wards drop first, so this strike already hits the lowered wards.
 	_apply_ward_break(target)
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
+	hit_damage = Stats.scaled(hit_damage, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
+	hit_damage += max_health_percent * target.max_health
 	var dealt := target.take_damage(hit_damage, false, damage_type)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 

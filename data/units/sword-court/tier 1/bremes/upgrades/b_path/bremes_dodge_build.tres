@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="DodgeBuildPassive" format=3 uid="uid://bok6jn6h0hg60"]
+
+[ext_resource type="Script" uid="uid://iyeh5tmpcge4" path="res://data/units/sword-court/tier 1/bremes/upgrades/b_path/scripts/dodge_build_passive.gd" id="1_pgsj5"]
+
+[resource]
+script = ExtResource("1_pgsj5")
+metadata/_custom_type_script = "uid://iyeh5tmpcge4"
