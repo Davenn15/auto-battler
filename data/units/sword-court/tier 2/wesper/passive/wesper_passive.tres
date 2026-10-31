@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="IsolatedWrackPassive" format=3 uid="uid://c62sctv1e3ut4"]
 
-[ext_resource type="Script" uid="uid://bilux78farr6q" path="res://data/units/sword-court/tier 2/wesper/scripts/isolated_wrack_passive.gd" id="1_t7ysw"]
+[ext_resource type="Script" uid="uid://bilux78farr6q" path="res://data/units/sword-court/tier 2/wesper/passive/isolated_wrack_passive.gd" id="1_t7ysw"]
 
 [resource]
 script = ExtResource("1_t7ysw")

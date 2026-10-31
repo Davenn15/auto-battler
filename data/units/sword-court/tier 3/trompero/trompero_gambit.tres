@@ -6,7 +6,7 @@
 script = ExtResource("1_d8sbq")
 tick_damage = 30.0
 tick_insight_scaling = 0.2
-burst_damage = 150.0
+burst_damage = 200.0
 burst_insight_scaling = 0.7
 stun_time = 1.0
 cast_time = 1.0

@@ -157,6 +157,7 @@ func _apply_data() -> void:
 	var overrides := {}   # property name -> value to set
 	for upgrade in chosen:
 		passives.append_array(upgrade.passives)
+		attack_range += upgrade.attack_range_bonus
 		if upgrade.gambit != null:
 			gambit = upgrade.gambit
 			bonuses.clear()   # earlier bonuses were for the old Gambit
@@ -526,7 +527,7 @@ func _find_nearest_enemy(exclude: BattleUnit = null) -> BattleUnit:
 
 
 func _is_valid_target(u) -> bool:
-	return is_instance_valid(u) and u.alive and u.team != team
+	return is_instance_valid(u) and u.alive and u.team != team and u.is_targetable()
 
 var base_stats: Dictionary = {
 	Stats.Stat.MIGHT: 100.0,
@@ -686,6 +687,20 @@ const STUN_TINT := Color(0.55, 0.55, 0.55)   # sprite darkens while stunned
 func is_cc_immune() -> bool:
 	for status in statuses:
 		if status.blocks_crowd_control(self):
+			return true
+	return false
+
+## False while a status hides the unit from enemies (see Status.blocks_targeting).
+func is_targetable() -> bool:
+	for status in statuses:
+		if status.blocks_targeting(self):
+			return false
+	return true
+
+## Gives this unit's statuses a chance to send an incoming projectile away.
+func try_reflect(projectile: Projectile) -> bool:
+	for status in statuses.duplicate():
+		if status.try_reflect(self, projectile):
 			return true
 	return false
 

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AdoringGambit" format=3 uid="uid://dai1c0d3pprf4"]
+
+[ext_resource type="Script" uid="uid://bh8yo8b1sotrn" path="res://data/units/sword-court/tier 1/lunck/upgrades/b_path/scripts/adoring_gambit.gd" id="1_6qw86"]
+
+[resource]
+script = ExtResource("1_6qw86")
+duration = 10.0
+cast_time = 0.5
+metadata/_custom_type_script = "uid://bh8yo8b1sotrn"

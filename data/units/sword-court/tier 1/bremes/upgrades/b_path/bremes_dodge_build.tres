@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_pgsj5")
+max_bonus = 0.75
 metadata/_custom_type_script = "uid://iyeh5tmpcge4"

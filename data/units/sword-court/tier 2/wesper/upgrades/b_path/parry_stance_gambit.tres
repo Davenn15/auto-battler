@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ParryStanceGambit" format=3 uid="uid://bno3hoiaomcp6"]
+
+[ext_resource type="Script" uid="uid://bunkcbjqogkmm" path="res://data/units/sword-court/tier 2/wesper/upgrades/b_path/scripts/parry_stance_gambit.gd" id="1_otf42"]
+
+[resource]
+script = ExtResource("1_otf42")
+reflect_chance = 0.75
+cast_time = 0.5
+metadata/_custom_type_script = "uid://bunkcbjqogkmm"

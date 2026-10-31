@@ -110,3 +110,20 @@ static func upgrade_multiplier(stat: Stat, level: int) -> float:
 
 static func upgrade_health_multiplier(level: int) -> float:
 	return 1.0 + UPGRADE_HEALTH_GROWTH * level
+
+## Extra stats and health by unit tier, so expensive units are worth their Aura.
+## Tuned with the balance sim (tools/sim_results/tier_G). Tiers not listed get 1.
+const TIER_STAT_MULTIPLIER := {2: 1.1, 3: 1.15}
+const TIER_HEALTH_MULTIPLIER := {2: 1.25, 3: 1.4}
+## Only these stats grow with tier. Wards and wrack stay as each unit sets them.
+const TIER_SCALED_STATS := [Stat.MIGHT, Stat.INSIGHT, Stat.CELERITY]
+
+
+static func tier_multiplier(stat: Stat, tier: int) -> float:
+	if stat in TIER_SCALED_STATS:
+		return TIER_STAT_MULTIPLIER.get(tier, 1.0)
+	return 1.0
+
+
+static func tier_health_multiplier(tier: int) -> float:
+	return TIER_HEALTH_MULTIPLIER.get(tier, 1.0)

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dj5bfah1aoony"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_jtmab"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_oelnm"]
+
+[resource]
+script = ExtResource("1_jtmab")
+gambit_bonuses = Dictionary[String, float]({
+"reflect_wrack_bonus": 0.5
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

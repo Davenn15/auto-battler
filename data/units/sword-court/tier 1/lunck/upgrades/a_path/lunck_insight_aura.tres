@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="RallyBoostPassive" format=3 uid="uid://b4pc3oijl0p3w"]
+
+[ext_resource type="Script" uid="uid://dx6sbggbu78po" path="res://data/units/sword-court/tier 1/lunck/upgrades/a_path/scripts/rally_boost_passive.gd" id="1_2bdc3"]
+
+[resource]
+script = ExtResource("1_2bdc3")
+insight_bonus = 20.0
+metadata/_custom_type_script = "uid://dx6sbggbu78po"

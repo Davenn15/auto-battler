@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dd4a1o1463cnb"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_0q57n"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_kaaut"]
+[ext_resource type="Resource" uid="uid://bjcycgbhq8fxp" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_a1.tres" id="2_y1nsd"]
+[ext_resource type="Resource" uid="uid://brmmlcjt148fx" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_a2.tres" id="3_6af45"]
+[ext_resource type="Resource" uid="uid://c2ds00pflkt3i" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_low_health_wrack.tres" id="5_ejdtr"]
+
+[resource]
+script = ExtResource("1_0q57n")
+passives = Array[ExtResource("2_kaaut")]([ExtResource("5_ejdtr")])
+next_choices = Array[ExtResource("1_0q57n")]([ExtResource("2_y1nsd"), ExtResource("3_6af45")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ExecutePassive" format=3 uid="uid://oum8rcr21qk3"]
+
+[ext_resource type="Script" uid="uid://bqqm1eamehdh" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/scripts/execute_passive.gd" id="1_0yw0b"]
+
+[resource]
+script = ExtResource("1_0yw0b")
+metadata/_custom_type_script = "uid://bqqm1eamehdh"

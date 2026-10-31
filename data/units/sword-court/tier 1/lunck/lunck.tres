@@ -1,17 +1,21 @@
 [gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://bpnxufpm5ys0j"]
 
-[ext_resource type="Resource" uid="uid://yeod7enhvsbw" path="res://data/units/sword-court/tier 1/lunck/lunck_gambit.tres" id="1_1gvfw"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_p8i6k"]
+[ext_resource type="Resource" uid="uid://yeod7enhvsbw" path="res://data/units/sword-court/tier 1/lunck/gambit/lunck_gambit.tres" id="1_yh0pq"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_xdauj"]
-[ext_resource type="Resource" uid="uid://dg7wepjygqf3y" path="res://data/units/sword-court/tier 1/lunck/lunck_passive.tres" id="3_nsj8n"]
+[ext_resource type="Resource" uid="uid://dg7wepjygqf3y" path="res://data/units/sword-court/tier 1/lunck/passive/lunck_passive.tres" id="3_n8o46"]
 [ext_resource type="Texture2D" uid="uid://cet5cequar75p" path="res://assets/lunck.png" id="3_xdauj"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_h4b42"]
+[ext_resource type="Resource" uid="uid://kd1bak0dxdqy" path="res://data/units/sword-court/tier 1/lunck/upgrades/a_path/lunck_a.tres" id="7_eoujo"]
+[ext_resource type="Resource" uid="uid://cg6lp2sk6owfn" path="res://data/units/sword-court/tier 1/lunck/upgrades/b_path/lunck_b.tres" id="8_bu15v"]
 
 [resource]
 script = ExtResource("2_xdauj")
 display_name = "lunck"
+upgrades = Array[ExtResource("6_h4b42")]([ExtResource("7_eoujo"), ExtResource("8_bu15v")])
 max_health = 850.0
-passives = Array[ExtResource("1_p8i6k")]([ExtResource("3_nsj8n")])
-gambit = ExtResource("1_1gvfw")
+passives = Array[ExtResource("1_p8i6k")]([ExtResource("3_n8o46")])
+gambit = ExtResource("1_yh0pq")
 max_charge = 120.0
 starting_charge = 50.0
 sprite = ExtResource("3_xdauj")

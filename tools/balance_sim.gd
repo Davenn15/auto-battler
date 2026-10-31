@@ -6,21 +6,28 @@ extends Node2D
 ## Run it from the project folder, without the editor (Godot's _console.exe prints progress):
 ##   Godot_console.exe --headless --fixed-fps 60 --path . res://tools/balance_sim.tscn -- --battles 500 --arv 6:20
 ##
+## Also writes a matchups file: how much damage each unit dealt to each other unit.
+##
 ## Options (all optional):
 ##   --battles N      how many battles to run (default 200)
 ##   --arv A or A:B   ARV of each team. A:B picks a random value in that range each battle (default 10)
 ##   --max-team N     most units on a team (default 8)
 ##   --time-limit S   seconds of battle time before the battle is called a draw (default 90)
 ##   --seed N         random seed, to repeat a run exactly (default: random)
+##   --duplicates     let a team have more than one of the same unit (off by default, like the game)
+##   --show-placement print where every unit starts and how far it is from the nearest enemy
+##   --tier-health A,B,C   multiply max health by tier: A for tier 1, B for tier 2, ... (default all 1)
+##   --tier-stats A,B,C    the same for Might, Insight, and Celerity
 ##   --out PATH       folder for the results (default res://tools/sim_results)
+##
+## The tier options test stat scaling without changing the game: they apply to every unit
+## as it spawns, so summons copy the scaled stats like they would from real ones.
 ##
 ## --fixed-fps 60 makes every frame count as 1/60 of a second however fast it really runs,
 ## so battles play out exactly as in the game, just much faster.
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 const UNITS_DIR := "res://data/units"
-const START_ROWS := 3   # each team starts in its own 3 rows: team 2 at the top, team 1 at the bottom
-const MAX_TEAM_ATTEMPTS := 200
 
 var battles: int = 200
 var arv_min: int = 10
@@ -28,22 +35,28 @@ var arv_max: int = 10
 var max_team: int = 8
 var time_limit: float = 90.0
 var seed_value: int = 0
+var allow_duplicates: bool = false
+var show_placement: bool = false
+var tier_health: PackedFloat64Array = []   # index 0 = tier 1; missing tiers count as 1
+var tier_stats: PackedFloat64Array = []
 var out_dir: String = "res://tools/sim_results"
 
 var _roster: Array[UnitData] = []
-var _paths: Dictionary = {}       # UnitData -> upgrade paths by level: [[[]], [[0], [1]], [[0, 0], ...]]
 var _records: Dictionary = {}     # unit instance id -> that unit's row for the current battle
 var _unit_rows: Array[Dictionary] = []
 var _battle_rows: Array[Dictionary] = []
 var _battle_over: bool = false
 var _winner: int = 0              # 0 = draw
+var _hits: Dictionary = {}        # "attacker>victim" unit names -> total damage, across all battles
+var _faced: Dictionary = {}       # "attacker>victim" -> how many battles they were on opposite teams
+var _last_victim: int = 0         # instance id of the unit that was just hit (see VictimTracker)
 
 
 func _ready() -> void:
 	add_to_group("damage_tracker")   # units report damage, healing, and shielding to this group
 	_parse_args()
 	seed(seed_value)
-	_load_roster(UNITS_DIR)
+	_roster = RandomTeams.load_roster(UNITS_DIR)
 	if _roster.is_empty():
 		push_error("Balance sim: no units found under %s." % UNITS_DIR)
 		get_tree().quit(1)
@@ -70,6 +83,8 @@ func _run() -> void:
 func _parse_args() -> void:
 	seed_value = randi()
 	var args := OS.get_cmdline_user_args()   # everything after "--" on the command line
+	allow_duplicates = args.has("--duplicates")
+	show_placement = args.has("--show-placement")
 	for i in args.size() - 1:
 		var value := args[i + 1]
 		match args[i]:
@@ -85,74 +100,21 @@ func _parse_args() -> void:
 				time_limit = value.to_float()
 			"--seed":
 				seed_value = value.to_int()
+			"--tier-health":
+				tier_health = value.split_floats(",")
+			"--tier-stats":
+				tier_stats = value.split_floats(",")
 			"--out":
 				out_dir = value
-
-
-# ---------- Roster and teams ----------
-
-## Every UnitData under `dir`, skipping the dummy.
-func _load_roster(dir: String) -> void:
-	for file in DirAccess.get_files_at(dir):
-		if not file.ends_with(".tres") or file.begins_with("dummy"):
-			continue
-		var data := load(dir.path_join(file)) as UnitData
-		if data != null:
-			_roster.append(data)
-			_paths[data] = _paths_by_level(data)
-	for sub in DirAccess.get_directories_at(dir):
-		_load_roster(dir.path_join(sub))
-
-
-## Every upgrade path the unit can have, grouped by level. Units without an upgrade
-## tree only have level 0.
-func _paths_by_level(data: UnitData) -> Array:
-	var levels: Array = [[[]]]
-	var level_1: Array = []
-	var level_2: Array = []
-	for i in data.upgrades.size():
-		level_1.append([i])
-		for j in data.upgrades[i].next_choices.size():
-			level_2.append([i, j])
-	if not level_1.is_empty():
-		levels.append(level_1)
-	if not level_2.is_empty():
-		levels.append(level_2)
-	return levels
-
-
-## A random team worth exactly `target` Aura, as a list of {data, path}. Each pick
-## chooses a unit first, then a level, then a path, so units with upgrade trees aren't
-## picked more often just because they have more options. Empty if none was found.
-func _make_team(target: int) -> Array:
-	for attempt in MAX_TEAM_ATTEMPTS:
-		var team: Array = []
-		var remaining := target
-		while remaining > 0 and team.size() < max_team:
-			var affordable: Array[UnitData] = []
-			for data in _roster:
-				if Economy.unit_aura_value(data.tier, 0) <= remaining:
-					affordable.append(data)
-			if affordable.is_empty():
-				break
-			var data: UnitData = affordable.pick_random()
-			var levels: Array = _paths[data]
-			var max_level := 0
-			for level in levels.size():
-				if Economy.unit_aura_value(data.tier, level) <= remaining:
-					max_level = level
-			var chosen_level := randi_range(0, max_level)
-			team.append({"data": data, "path": levels[chosen_level].pick_random()})
-			remaining -= Economy.unit_aura_value(data.tier, chosen_level)
-		if remaining == 0:
-			return team
-	return []
 
 
 # ---------- Running a battle ----------
 
 func _run_battle(index: int, target: int) -> void:
-	var teams := {1: _make_team(target), 2: _make_team(target)}
+	var teams := {
+		1: RandomTeams.make_team(_roster, target, max_team, allow_duplicates),
+		2: RandomTeams.make_team(_roster, target, max_team, allow_duplicates),
+	}
 	if teams[1].is_empty() or teams[2].is_empty():
 		push_warning("Battle %d: couldn't build a team worth exactly %d ARV; skipped." % [index, target])
 		return
@@ -167,9 +129,11 @@ func _run_battle(index: int, target: int) -> void:
 
 	_records.clear()
 	var lineups := {}
+	var placement := RandomTeams.place_teams(grid, teams)
+	if show_placement:
+		_print_placement(grid, teams, placement)
 	for team in teams:
-		var cells := _start_cells(grid, team)
-		cells.shuffle()
+		var cells: Array = placement[team]
 		var names: PackedStringArray = []
 		for i in teams[team].size():
 			var pick: Dictionary = teams[team][i]
@@ -184,6 +148,8 @@ func _run_battle(index: int, target: int) -> void:
 	_winner = 0
 	manager.battle_ended.connect(_on_battle_ended)
 	manager.start_battle()
+	for id in _records:   # after start_battle, which clears every status
+		(instance_from_id(id) as BattleUnit).add_status(VictimTracker.new(self))
 
 	var elapsed := 0.0
 	while not _battle_over and elapsed < time_limit:
@@ -196,6 +162,7 @@ func _run_battle(index: int, target: int) -> void:
 	for row in _records.values():
 		row["result"] = "draw" if _winner == 0 else ("win" if row["team"] == _winner else "loss")
 		_unit_rows.append(row)
+	_count_faced()
 	_battle_rows.append({
 		"battle": index, "arv": target, "winner": _winner, "duration": snappedf(elapsed, 0.01),
 		"timed_out": not _battle_over, "team_1": lineups[1], "team_2": lineups[2],
@@ -208,21 +175,40 @@ func _spawn(pick: Dictionary, team: int, cell: Vector2i) -> BattleUnit:
 	unit.team = team
 	unit.upgrade_path.assign(pick["path"])
 	unit.auto_place = false
-	add_child(unit)
+	add_child(unit)   # runs _ready, which sets up stats and health from the data
+	_apply_tier_scaling(unit)
 	unit.place_at(cell)
 	unit.died.connect(_on_unit_died)
 	return unit
 
 
-## The cells in a team's starting rows.
-func _start_cells(grid: BattleGrid, team: int) -> Array[Vector2i]:
-	var first_row := grid.rows - START_ROWS if team == 1 else 0
-	var cells: Array[Vector2i] = []
-	for r in range(first_row, first_row + START_ROWS):
-		var q_start := -floori(r / 2.0)   # same layout as BattleGrid._ensure_built
-		for i in grid.columns:
-			cells.append(Vector2i(q_start + i, r))
-	return cells
+const SCALED_STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY]
+
+## Multiplies a freshly spawned unit's health and attributes by its tier's --tier-health
+## and --tier-stats values.
+func _apply_tier_scaling(unit: BattleUnit) -> void:
+	var health_scale := _tier_value(tier_health, unit.data.tier)
+	var stat_scale := _tier_value(tier_stats, unit.data.tier)
+	unit.max_health *= health_scale
+	unit.health = unit.max_health
+	for stat in SCALED_STATS:
+		unit.base_stats[stat] = unit.base_stats.get(stat, 0.0) * stat_scale
+
+
+static func _tier_value(values: PackedFloat64Array, tier: int) -> float:
+	return values[tier - 1] if tier - 1 < values.size() else 1.0
+
+
+## For --show-placement: each unit's starting cell and its distance to the nearest enemy.
+func _print_placement(grid: BattleGrid, teams: Dictionary, placement: Dictionary) -> void:
+	for team in teams:
+		for i in teams[team].size():
+			var pick: Dictionary = teams[team][i]
+			var nearest := 1000
+			for enemy in placement[3 - team]:
+				nearest = mini(nearest, grid.get_distance(placement[team][i], enemy))
+			print("  team %d  %-10s range %d  cell %s  nearest enemy %d" % [team,
+					pick["data"].display_name.capitalize(), RandomTeams.attack_range(pick), placement[team][i], nearest])
 
 
 ## Removes everything from the last battle: grid, manager, units, projectiles, effects.
@@ -249,6 +235,36 @@ func _on_unit_died(unit: BattleUnit) -> void:
 
 func record_damage(unit_id: int, amount: float) -> void:
 	_add(unit_id, "damage", amount)
+	# Every damage source calls take_damage on the victim, then record_damage right after,
+	# so the victim VictimTracker just saw is the one this damage went to.
+	var victim = _records.get(_last_victim)
+	var attacker = _records.get(unit_id)
+	_last_victim = 0
+	if victim != null and attacker != null and amount > 0.0:
+		var key := "%s>%s" % [attacker["unit"], victim["unit"]]
+		_hits[key] = _hits.get(key, 0.0) + amount
+
+
+## Notes which unit is being hit, so record_damage knows who the damage went to.
+## The game's damage reports only say who dealt the damage, not who took it.
+class VictimTracker extends Status:
+	var sim: Node
+
+	func _init(owner_sim: Node) -> void:
+		sim = owner_sim
+
+	func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:
+		sim._last_victim = unit.get_instance_id()
+		return damage
+
+
+## Adds one to every attacker > victim pair that was on opposite teams this battle.
+func _count_faced() -> void:
+	for a in _records.values():
+		for v in _records.values():
+			if a["team"] != v["team"]:
+				var key := "%s>%s" % [a["unit"], v["unit"]]
+				_faced[key] = _faced.get(key, 0) + 1
 
 
 func record_healing(unit_id: int, amount: float) -> void:
@@ -272,20 +288,15 @@ func _new_unit_row(index: int, target: int, team: int, unit: BattleUnit, pick: D
 	return {
 		"battle": index, "arv": target, "team": team, "result": "",
 		"unit": data.display_name.capitalize(), "tier": data.tier,
-		"path": path_label(pick["path"]), "upgrades": _upgrade_names(data, pick["path"]),
+		"path": RandomTeams.path_label(pick["path"]), "upgrades": _upgrade_names(data, pick["path"]),
 		"aura": unit.get_aura_value(), "survived": true,
 		"damage": 0.0, "healing": 0.0, "shielding": 0.0,
 	}
 
 
-## "base", "A", "B", "A1", "B2", ...: the first choice as a letter, the second as a number.
-static func path_label(path: Array) -> String:
-	if path.is_empty():
-		return "base"
-	var label := String.chr(65 + path[0])
-	if path.size() > 1:
-		label += str(path[1] + 1)
-	return label
+## The upgrade level of a path label: "base" = 0, "A" = 1, "A1" = 2.
+static func _level_of(label: String) -> int:
+	return 0 if label == "base" else label.length()
 
 
 ## The names of the upgrades on a path, e.g. "Stalwart > A1". Upgrades still using the
@@ -296,7 +307,7 @@ func _upgrade_names(data: UnitData, path: Array) -> String:
 	for level in path.size():
 		var upgrade: Upgrade = choices[path[level]]
 		var is_default := upgrade.upgrade_name == "Upgrade" or upgrade.upgrade_name.is_empty()
-		names.append(path_label(path.slice(0, level + 1)) if is_default else upgrade.upgrade_name)
+		names.append(RandomTeams.path_label(path.slice(0, level + 1)) if is_default else upgrade.upgrade_name)
 		choices = upgrade.next_choices
 	return " > ".join(names)
 
@@ -315,8 +326,17 @@ func _write_results() -> void:
 	_write_csv(units_path, ["battle", "arv", "team", "result", "unit", "tier", "path", "upgrades",
 			"aura", "survived", "damage", "healing", "shielding"], _unit_rows)
 	_write_csv(battles_path, ["battle", "arv", "winner", "duration", "timed_out", "team_1", "team_2"], _battle_rows)
+	var matchup_rows: Array[Dictionary] = []
+	for key in _faced:
+		var names: PackedStringArray = key.split(">")
+		var damage: float = _hits.get(key, 0.0)
+		matchup_rows.append({"attacker": names[0], "victim": names[1], "battles": _faced[key],
+				"damage": damage, "damage_per_battle": damage / _faced[key]})
+	matchup_rows.sort_custom(func(a, b): return a["victim"] + a["attacker"] < b["victim"] + b["attacker"])
+	var matchups_path := dir.path_join("sim_%s_matchups.csv" % stamp)
+	_write_csv(matchups_path, ["victim", "attacker", "battles", "damage", "damage_per_battle"], matchup_rows)
 	_write_text(summary_path, _summary())
-	print("Results written to:\n  %s\n  %s\n  %s" % [units_path, battles_path, summary_path])
+	print("Results written to:\n  %s\n  %s\n  %s\n  %s" % [units_path, battles_path, matchups_path, summary_path])
 
 
 func _write_csv(path: String, columns: Array, rows: Array[Dictionary]) -> void:
@@ -351,13 +371,19 @@ func _summary() -> String:
 		draws += 1 if row["winner"] == 0 else 0
 		timeouts += 1 if row["timed_out"] else 0
 	var lines: PackedStringArray = [
-		"Balance sim: %d battles, ARV %d-%d, max team %d, seed %d" % [_battle_rows.size(), arv_min, arv_max, max_team, seed_value],
+		"Balance sim: %d battles, ARV %d-%d, max team %d, %s, seed %d" % [_battle_rows.size(), arv_min, arv_max,
+				max_team, "duplicates allowed" if allow_duplicates else "no duplicates", seed_value],
+		"Tier scaling: health %s, Might/Insight/Celerity %s" % [_scale_text(tier_health), _scale_text(tier_stats)],
 		"Draws: %d (%d hit the %.0fs time limit)" % [draws, timeouts, time_limit],
 		"Win rate leaves out draws. A unit on the winning team counts as a win. Rows with",
 		"few battles are noisy; treat anything under ~50 as a hint, not a result.",
 		"",
 	]
+	lines.append_array(_table("By tier", func(row): return "Tier %d" % row["tier"]))
+	lines.append("")
 	lines.append_array(_table("By unit", func(row): return row["unit"]))
+	lines.append("")
+	lines.append_array(_table("By unit and upgrade level", func(row): return "%s L%d" % [row["unit"], _level_of(row["path"])]))
 	lines.append("")
 	lines.append_array(_table("By unit and upgrade path", func(row): return "%s %s" % [row["unit"], row["path"]]))
 	return "\n".join(lines) + "\n"
@@ -395,3 +421,13 @@ func _table(title: String, key_of: Callable) -> PackedStringArray:
 static func _win_rate(group: Dictionary) -> float:
 	var decided: int = group["wins"] + group["losses"]
 	return float(group["wins"]) / decided if decided > 0 else 0.0
+
+
+## "1 / 1.4 / 1.8" for the summary, or "none" when the option wasn't given.
+static func _scale_text(values: PackedFloat64Array) -> String:
+	if values.is_empty():
+		return "none"
+	var parts: PackedStringArray = []
+	for v in values:
+		parts.append(str(v))
+	return " / ".join(parts)

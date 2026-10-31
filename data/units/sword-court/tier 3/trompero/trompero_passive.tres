@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_wkh2a")
-insight_scaling = 0.4
+insight_scaling = 0.8
 metadata/_custom_type_script = "uid://dsk5yxo18euw6"

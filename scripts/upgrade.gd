@@ -21,3 +21,6 @@ extends Resource
 ## Gambit properties set to a new value, by name. Use this for changes that aren't
 ## "more", like damage_type (0 = Might, 1 = Insight, 2 = Celerity).
 @export var gambit_overrides: Dictionary[String, float] = {}
+
+## Extra attack range, in hex cells, while this upgrade is chosen.
+@export var attack_range_bonus: int = 0

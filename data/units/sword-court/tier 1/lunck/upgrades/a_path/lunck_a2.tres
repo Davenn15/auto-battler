@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dng802bttid84"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_53hg6"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_inby8"]
+[ext_resource type="Resource" uid="uid://b4pc3oijl0p3w" path="res://data/units/sword-court/tier 1/lunck/upgrades/a_path/lunck_insight_aura.tres" id="3_inby8"]
+
+[resource]
+script = ExtResource("1_53hg6")
+passives = Array[ExtResource("2_inby8")]([ExtResource("3_inby8")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

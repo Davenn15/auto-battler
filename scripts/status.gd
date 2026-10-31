@@ -97,3 +97,12 @@ func blocks_crowd_control(_unit: BattleUnit) -> bool:
 ## Called when the unit dodges a hit.
 func on_dodge(_unit: BattleUnit) -> void:
 	pass
+
+## True makes the unit untargetable: enemies drop it as their target and can't pick it.
+func blocks_targeting(_unit: BattleUnit) -> bool:
+	return false
+
+## Called when a projectile is about to hit the unit. Return true if this status sent it
+## somewhere else (by calling projectile.reflect), so it doesn't hit.
+func try_reflect(_unit: BattleUnit, _projectile: Projectile) -> bool:
+	return false

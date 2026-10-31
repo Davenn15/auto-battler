@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://brmmlcjt148fx"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_k41uf"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_sl4sl"]
+[ext_resource type="Resource" uid="uid://oum8rcr21qk3" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_execute.tres" id="3_sl4sl"]
+
+[resource]
+script = ExtResource("1_k41uf")
+passives = Array[ExtResource("2_sl4sl")]([ExtResource("3_sl4sl")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -8,12 +8,13 @@
 [ext_resource type="Script" uid="uid://co3c1g7ab430g" path="res://scripts/battle_grid.gd" id="6_12d8j"]
 [ext_resource type="Script" uid="uid://cxbjns1vaeorf" path="res://scripts/prep_controller.gd" id="7_mud6g"]
 [ext_resource type="Resource" uid="uid://ddtkh3ynpq0g1" path="res://data/units/sword-court/tier 1/silt/silt.tres" id="8_h5m2h"]
-[ext_resource type="Resource" uid="uid://kfdfkbdpeyaq" path="res://data/units/sword-court/tier 1/bremes/bremes.tres" id="9_xk6eq"]
 [ext_resource type="Resource" uid="uid://ba82eff6jve8e" path="res://data/units/sword-court/tier 3/trompero/trompero.tres" id="11_xk6eq"]
 [ext_resource type="Resource" uid="uid://dnxtmc13ogif" path="res://data/units/sword-court/tier 1/garth/garth.tres" id="11_xnaop"]
 [ext_resource type="Resource" uid="uid://ds85af620srdl" path="res://data/units/sword-court/tier 2/merribold/merribold.tres" id="12_7f1eh"]
+[ext_resource type="Resource" uid="uid://brdnr346hy43l" path="res://data/units/sword-court/tier 3/bescard/bescard.tres" id="12_fbnr0"]
+[ext_resource type="Resource" uid="uid://cucqvohyusw30" path="res://data/units/sword-court/tier 2/crommel/crommel.tres" id="12_xk6eq"]
 [ext_resource type="Resource" uid="uid://byi436axrwjqx" path="res://data/units/sword-court/tier 2/wesper/wesper.tres" id="13_7f1eh"]
-[ext_resource type="Resource" uid="uid://brdnr346hy43l" path="res://data/units/sword-court/tier 3/bescard/bescard.tres" id="14_fbnr0"]
+[ext_resource type="Resource" uid="uid://bpnxufpm5ys0j" path="res://data/units/sword-court/tier 1/lunck/lunck.tres" id="14_7f1eh"]
 
 [node name="TestBattle" type="Node2D" unique_id=1912766257 node_paths=PackedStringArray("prep")]
 position = Vector2(-71, -22)
@@ -107,36 +108,45 @@ script = ExtResource("6_12d8j")
 y_sort_enabled = true
 
 [node name="Battle Unit21" parent="BattleUnits" unique_id=363914160 instance=ExtResource("2_12d8j")]
-position = Vector2(164, 190)
-data = ExtResource("9_xk6eq")
+position = Vector2(201, 136)
+data = ExtResource("14_7f1eh")
 upgrade_path = Array[int]([1, 1])
 
 [node name="Battle Unit23" parent="BattleUnits" unique_id=949866952 instance=ExtResource("2_12d8j")]
-position = Vector2(198, 142)
-data = ExtResource("14_fbnr0")
-upgrade_path = Array[int]([0, 1])
+position = Vector2(1, 282)
+data = ExtResource("12_xk6eq")
+
+[node name="Battle Unit29" parent="BattleUnits" unique_id=437329576 instance=ExtResource("2_12d8j")]
+position = Vector2(162, 284)
+data = ExtResource("8_h5m2h")
+
+[node name="Battle Unit24" parent="BattleUnits" unique_id=1751398670 instance=ExtResource("2_12d8j")]
+position = Vector2(257, 143)
+data = ExtResource("11_xnaop")
 
 [node name="Battle Unit22" parent="BattleUnits" unique_id=1589499982 instance=ExtResource("2_12d8j")]
-position = Vector2(105, 199)
-data = ExtResource("8_h5m2h")
-upgrade_path = Array[int]([1, 0])
+position = Vector2(140, 143)
+data = ExtResource("12_fbnr0")
+upgrade_path = Array[int]([0, 0])
 
 [node name="Battle Unit25" parent="BattleUnits" unique_id=735963025 instance=ExtResource("2_12d8j")]
-position = Vector2(387, -3)
+position = Vector2(194, 43)
 data = ExtResource("11_xk6eq")
 team = 2
 
 [node name="Battle Unit26" parent="BattleUnits" unique_id=1211725834 instance=ExtResource("2_12d8j")]
-position = Vector2(224, 96)
+position = Vector2(171, 98)
 data = ExtResource("11_xnaop")
 team = 2
+upgrade_path = Array[int]([1, 1])
 
 [node name="Battle Unit27" parent="BattleUnits" unique_id=1859091260 instance=ExtResource("2_12d8j")]
-position = Vector2(282, 94)
+position = Vector2(222, 99)
 data = ExtResource("12_7f1eh")
 team = 2
 
 [node name="Battle Unit28" parent="BattleUnits" unique_id=898150246 instance=ExtResource("2_12d8j")]
-position = Vector2(196, 42)
+position = Vector2(29, 141)
 data = ExtResource("13_7f1eh")
 team = 2
+upgrade_path = Array[int]([0, 0])

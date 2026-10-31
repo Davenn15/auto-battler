@@ -11,6 +11,10 @@ const NO_CELL := Vector2i(-9999, -9999)
 @export var dash_time: float = 0.15
 ## Seconds between strikes.
 @export var strike_interval: float = 0.15
+## Appear at the target instantly instead of sliding there.
+@export var teleport: bool = false
+## Seconds enemies can't target the caster, starting as it moves. 0 = none.
+@export var untargetable_time: float = 0.0
 
 
 ## Only fires if there's an enemy it can reach, so charge isn't wasted.
@@ -27,17 +31,23 @@ func execute(caster: BattleUnit) -> void:
 	var target: BattleUnit = found["target"]
 	var dest: Vector2i = found["cell"]
 
+	var move_time := 0.0 if teleport else dash_time
 	# Keeps the unit from moving or attacking on its own until the sequence is done.
-	caster.lock_for(dash_time + strikes * strike_interval)
+	caster.lock_for(move_time + strikes * strike_interval)
 	caster.target = target
+	if untargetable_time > 0.0:
+		caster.add_status(UntargetableStatus.new(untargetable_time))
 
 	if dest != caster.cell:
-		var start := caster.global_position
-		caster.place_at(dest)   # the logical move is instant; the slide below is only visual
-		var end := caster.global_position
-		caster.global_position = start
-		caster.create_tween().tween_property(caster, "global_position", end, dash_time)
-		await caster.get_tree().create_timer(dash_time).timeout
+		if teleport:
+			caster.place_at(dest)
+		else:
+			var start := caster.global_position
+			caster.place_at(dest)   # the logical move is instant; the slide below is only visual
+			var end := caster.global_position
+			caster.global_position = start
+			caster.create_tween().tween_property(caster, "global_position", end, dash_time)
+			await caster.get_tree().create_timer(dash_time).timeout
 
 	for i in strikes:
 		# Either unit may have died, or the battle ended, while we were waiting.

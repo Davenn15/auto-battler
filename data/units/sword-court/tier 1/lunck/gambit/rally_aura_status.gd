@@ -4,6 +4,7 @@ extends Status
 ## Each ally gets a RallyBuffStatus that is added and removed as they enter and leave.
 
 var celerity: float
+var insight: float = 0.0
 var range_cells: int
 var include_self: bool
 var _buffs: Dictionary = {}   # ally instance id -> RallyBuffStatus
@@ -21,7 +22,7 @@ func tick(unit: BattleUnit, _delta: float) -> void:
 		var id := ally.get_instance_id()
 		in_range[id] = true
 		if not _buffs.has(id):
-			var buff := RallyBuffStatus.new(unit.get_instance_id(), celerity)
+			var buff := RallyBuffStatus.new(unit.get_instance_id(), celerity, insight)
 			_buffs[id] = buff
 			ally.add_status(buff)
 

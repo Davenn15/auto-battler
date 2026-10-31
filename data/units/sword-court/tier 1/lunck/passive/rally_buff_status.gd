@@ -5,16 +5,20 @@ extends Status
 
 var source_id: int      # instance id of the unit providing the aura
 var celerity: float
+var insight
 
 
-func _init(p_source_id: int, p_celerity: float) -> void:
+func _init(p_source_id: int, p_celerity: float, p_insight: float = 0.0) -> void:
 	source_id = p_source_id
 	celerity = p_celerity
+	insight = p_insight
 
 
 func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	if stat == Stats.Stat.CELERITY:
 		return value + celerity
+	if stat == Stats.Stat.INSIGHT:
+		return value + insight
 	return value
 
 

@@ -5,10 +5,10 @@ extends RefCounted
 
 ## Aura cost for each tier: [buy, first upgrade, second upgrade].
 const TIER_AURA_COSTS := {
-	1: [2, 1, 2],
-	2: [4, 2, 4],
-	3: [6, 3, 6],
-	4: [8, 4, 8],
+	1: [2, 1, 1],
+	2: [4, 2, 2],
+	3: [6, 3, 3],
+	4: [8, 4, 4],
 }
 const MAX_UPGRADE_LEVEL := 2
 

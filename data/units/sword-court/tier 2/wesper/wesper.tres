@@ -1,21 +1,24 @@
 [gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://byi436axrwjqx"]
 
-[ext_resource type="Resource" uid="uid://d2gxkwjx655eg" path="res://data/units/sword-court/tier 2/wesper/wesper_gambit.tres" id="1_fn68r"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_t25rx"]
+[ext_resource type="Resource" uid="uid://d2gxkwjx655eg" path="res://data/units/sword-court/tier 2/wesper/gambit/wesper_gambit.tres" id="1_vjyvd"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_7sw1d"]
-[ext_resource type="Resource" uid="uid://c62sctv1e3ut4" path="res://data/units/sword-court/tier 2/wesper/wesper_passive.tres" id="3_cjyw8"]
+[ext_resource type="Resource" uid="uid://c62sctv1e3ut4" path="res://data/units/sword-court/tier 2/wesper/passive/wesper_passive.tres" id="3_e05yv"]
 [ext_resource type="Texture2D" uid="uid://demb7srk26ilv" path="res://assets/wesper.png" id="5_3s0tb"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_cjyw8"]
+[ext_resource type="Resource" uid="uid://dd4a1o1463cnb" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_a.tres" id="7_lk86c"]
+[ext_resource type="Resource" uid="uid://cjfvuxoetv63n" path="res://data/units/sword-court/tier 2/wesper/upgrades/b_path/wesper_b.tres" id="8_t2u6e"]
 
 [resource]
 script = ExtResource("2_7sw1d")
 display_name = "wesper"
 tier = 2
-max_health = 850.0
-passives = Array[ExtResource("1_t25rx")]([ExtResource("3_cjyw8")])
-gambit = ExtResource("1_fn68r")
-max_charge = 75.0
-starting_charge = 25.0
+upgrades = Array[ExtResource("6_cjyw8")]([ExtResource("7_lk86c"), ExtResource("8_t2u6e")])
+max_health = 900.0
+passives = Array[ExtResource("1_t25rx")]([ExtResource("3_e05yv")])
+gambit = ExtResource("1_vjyvd")
+max_charge = 80.0
+starting_charge = 30.0
 sprite = ExtResource("5_3s0tb")
 might = 85.0
 celerity = 140.0
