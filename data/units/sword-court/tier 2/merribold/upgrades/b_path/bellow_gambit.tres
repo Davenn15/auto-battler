@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BellowGambit" format=3 uid="uid://efyewglqhvxa"]
+
+[ext_resource type="Script" uid="uid://bqxuhfakopowh" path="res://data/units/sword-court/tier 2/merribold/upgrades/b_path/scripts/bellow_gambit.gd" id="1_c7pqf"]
+
+[resource]
+script = ExtResource("1_c7pqf")
+duration = 6.0
+cast_time = 1.0
+metadata/_custom_type_script = "uid://bqxuhfakopowh"

@@ -5,8 +5,7 @@
 [resource]
 script = ExtResource("1_hgn0y")
 damage = 130.0
-might_scaling = 0.8
-ward_reduction = 25.0
-ward_duration = 5.0
+might_scaling = 0.65
+ward_reduction = 20.0
 cast_time = 0.5
 metadata/_custom_type_script = "uid://bgftcakf2rch6"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dcho0pvhbukhy"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_rakgc"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_r8syy"]
+[ext_resource type="Resource" uid="uid://5ws23xn0witq" path="res://data/units/sword-court/tier 3/sumpton/upgrades/a_path/wrack_tally_passive.tres" id="3_wj1oi"]
+
+[resource]
+script = ExtResource("1_rakgc")
+passives = Array[ExtResource("2_r8syy")]([ExtResource("3_wj1oi")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -34,7 +34,7 @@ func execute(caster: BattleUnit) -> void:
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
 	var hits := 0
 	for enemy in enemies:
-		var dealt := enemy.take_damage(hit_damage, false, damage_type)
+		var dealt := enemy.take_damage(hit_damage, 0, damage_type)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if dealt <= 0.0:
 			continue   # dodged: no shield, no stun

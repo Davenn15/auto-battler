@@ -15,9 +15,9 @@ func _init(p_silt_id: int, p_damage: float, p_type: int, p_wrack_multiplier: flo
 	wrack_multiplier = p_wrack_multiplier
 
 
-func apply(target: BattleUnit, _dealt: float, is_wrack: bool) -> void:
+func apply(target: BattleUnit, _dealt: float, wrack_level: int) -> void:
 	if not target.alive:
 		return   # the attack already finished it
-	var amount := damage * wrack_multiplier if is_wrack else damage
-	var dealt := target.take_damage(amount, is_wrack, damage_type)
+	var amount := damage * pow(wrack_multiplier, wrack_level)
+	var dealt := target.take_damage(amount, wrack_level, damage_type)
 	target.get_tree().call_group("damage_tracker", "record_damage", silt_id, dealt)

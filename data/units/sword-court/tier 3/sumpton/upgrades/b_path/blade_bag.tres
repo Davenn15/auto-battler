@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://c6b0bt4uu4t6o"]
+
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_eqb61"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_br16x"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3_ao6vv"]
+[ext_resource type="Texture2D" uid="uid://bvccj83p7rofx" path="res://assets/blade bag.png" id="3_br16x"]
+
+[resource]
+script = ExtResource("2_br16x")
+display_name = "blade bag"
+summon_only = true
+health_regen = 0.0
+sprite = ExtResource("3_br16x")
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BladeTossGambit" format=3 uid="uid://bnb7evbqgt7qk"]
+
+[ext_resource type="Script" uid="uid://d4b6a1x4xixwq" path="res://data/units/sword-court/tier 3/sumpton/gambit/blade_toss_gambit.gd" id="1_0d2xj"]
+
+[resource]
+script = ExtResource("1_0d2xj")
+blades = 8
+toss_interval = 0.2
+gambit_name = null
+cast_time = 1.0
+metadata/_custom_type_script = "uid://d4b6a1x4xixwq"

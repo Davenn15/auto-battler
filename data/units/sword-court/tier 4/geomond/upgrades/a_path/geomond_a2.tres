@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c1agc70oici3k"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_5p6vw"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_pb2fx"]
+
+[resource]
+script = ExtResource("1_5p6vw")
+gambit_overrides = Dictionary[String, float]({
+"lava_duration": 3.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

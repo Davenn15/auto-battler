@@ -11,14 +11,16 @@ var shooter_id: int   # a number, so it stays valid even after the shooter is fr
 var target: BattleUnit
 var damage: float
 var damage_type: int = 0
-var is_wrack: bool = false
+var wrack_level: int = 0
 var hit_effects: Array[HitEffect] = []
 var credit_id: int    # who the damage meter credits; the summoner for summons
+var ignore_ward: bool = false   # the hit skips the target's wards
+var grants_charge: bool = true   # false for extra shots that shouldn't build attack charge
 
 
-func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack: bool = false, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
+func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack_level: int = 0, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
 	hit_effects = p_hit_effects
-	is_wrack = p_wrack
+	wrack_level = p_wrack_level
 	shooter_id = p_shooter.get_instance_id()
 	credit_id = p_shooter.get_credit_id()
 	target = p_target
@@ -47,14 +49,19 @@ func _process(delta: float) -> void:
 func _hit() -> void:
 	if target.try_reflect(self):
 		return   # it's now flying back at whoever fired it
-	var dealt := target.take_damage(damage, is_wrack, damage_type)
+	var dealt := target.take_damage(damage, wrack_level, damage_type, ignore_ward)
 	get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 	var shooter := instance_from_id(shooter_id) as BattleUnit
 	if shooter != null:
-		shooter.gain_charge_from_attack(dealt)
+		if grants_charge:
+			shooter.gain_charge_from_attack(dealt)
 		shooter.notify_attack_hit(target, dealt)
 	target.gain_charge_from_hit(dealt)
-	BattleUnit.run_hit_effects(hit_effects, target, dealt, is_wrack)
+	BattleUnit.run_hit_effects(hit_effects, target, dealt, wrack_level)
+	_after_hit()
+
+## What happens once the shot has hit. Shots that do more, like bouncing, override this.
+func _after_hit() -> void:
 	queue_free()
 
 ## Sends this shot back at whoever fired it, now belonging to `by`. Its damage stays the
@@ -64,9 +71,10 @@ func reflect(by: BattleUnit, wrack_chance: float) -> bool:
 	var shooter := instance_from_id(shooter_id) as BattleUnit
 	if shooter == null or not shooter.alive:
 		return false
-	if not is_wrack and randf() < wrack_chance:
-		is_wrack = true
-		damage *= 1.0 + by.get_stat(Stats.Stat.WRACK_DAMAGE)
+	var rolled := Stats.roll_wrack(wrack_chance)
+	if rolled > wrack_level:   # only the extra levels add damage
+		damage *= Stats.wrack_multiplier(rolled - wrack_level, by.get_stat(Stats.Stat.WRACK_DAMAGE))
+		wrack_level = rolled
 	shooter_id = by.get_instance_id()
 	credit_id = by.get_credit_id()
 	target = shooter

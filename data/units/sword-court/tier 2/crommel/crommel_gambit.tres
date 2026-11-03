@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="PierceBoltGambit" format=3 uid="uid://1swpy6kbcqx6"]
-
-[ext_resource type="Script" uid="uid://d2u5eujsfvtsi" path="res://data/units/sword-court/tier 2/crommel/scripts/pierce_bolt_gambit.gd" id="1_d0eil"]
-
-[resource]
-script = ExtResource("1_d0eil")
-max_health_percent = 0.25
-cast_time = 1.5
-metadata/_custom_type_script = "uid://d2u5eujsfvtsi"

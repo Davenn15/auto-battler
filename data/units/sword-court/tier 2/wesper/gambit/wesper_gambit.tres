@@ -1,10 +1,11 @@
 [gd_resource type="Resource" script_class="DashStrikeGambit" format=3 uid="uid://d2gxkwjx655eg"]
 
-[ext_resource type="Script" uid="uid://c8wmrcu8a0py7" path="res://data/units/sword-court/tier 2/wesper/gambit/dash_strike_gambit.gd" id="1_4kjms"]
+[ext_resource type="Script" uid="uid://c8wmrcu8a0py7" path="res://data/units/sword-court/tier 2/wesper/gambit/dash_strike_gambit.gd" id="1_7shk5"]
 
 [resource]
-script = ExtResource("1_4kjms")
+script = ExtResource("1_7shk5")
 dash_time = 0.5
 strike_interval = 0.3
+target_rule = 2
 cast_time = 0.5
 metadata/_custom_type_script = "uid://c8wmrcu8a0py7"

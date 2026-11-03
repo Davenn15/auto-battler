@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://ck7lwfebs4yra"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_k8is0"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_cb687"]
+
+[resource]
+script = ExtResource("1_k8is0")
+gambit_overrides = Dictionary[String, float]({
+"charge_per_blade_hit": 2.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

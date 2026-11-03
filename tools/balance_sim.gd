@@ -15,7 +15,11 @@ extends Node2D
 ##   --time-limit S   seconds of battle time before the battle is called a draw (default 90)
 ##   --seed N         random seed, to repeat a run exactly (default: random)
 ##   --duplicates     let a team have more than one of the same unit (off by default, like the game)
+##   --no-frontline-rule  allow teams with no front-liner (by default every team has at least
+##                    one melee unit that isn't in the second-row list)
 ##   --show-placement print where every unit starts and how far it is from the nearest enemy
+##   --second-row A,B units that start one row behind the front (default bremes,lunck,wesper;
+##                    "none" for nobody)
 ##   --tier-health A,B,C   multiply max health by tier: A for tier 1, B for tier 2, ... (default all 1)
 ##   --tier-stats A,B,C    the same for Might, Insight, and Celerity
 ##   --out PATH       folder for the results (default res://tools/sim_results)
@@ -37,6 +41,8 @@ var time_limit: float = 90.0
 var seed_value: int = 0
 var allow_duplicates: bool = false
 var show_placement: bool = false
+var second_row: Array[String] = ["bremes", "lunck", "wesper"]
+var require_frontline: bool = true
 var tier_health: PackedFloat64Array = []   # index 0 = tier 1; missing tiers count as 1
 var tier_stats: PackedFloat64Array = []
 var out_dir: String = "res://tools/sim_results"
@@ -84,6 +90,7 @@ func _parse_args() -> void:
 	seed_value = randi()
 	var args := OS.get_cmdline_user_args()   # everything after "--" on the command line
 	allow_duplicates = args.has("--duplicates")
+	require_frontline = not args.has("--no-frontline-rule")
 	show_placement = args.has("--show-placement")
 	for i in args.size() - 1:
 		var value := args[i + 1]
@@ -100,6 +107,8 @@ func _parse_args() -> void:
 				time_limit = value.to_float()
 			"--seed":
 				seed_value = value.to_int()
+			"--second-row":
+				second_row.assign(Array() if value == "none" else Array(value.to_lower().split(",")))
 			"--tier-health":
 				tier_health = value.split_floats(",")
 			"--tier-stats":
@@ -112,8 +121,8 @@ func _parse_args() -> void:
 
 func _run_battle(index: int, target: int) -> void:
 	var teams := {
-		1: RandomTeams.make_team(_roster, target, max_team, allow_duplicates),
-		2: RandomTeams.make_team(_roster, target, max_team, allow_duplicates),
+		1: RandomTeams.make_team(_roster, target, max_team, allow_duplicates, require_frontline, second_row),
+		2: RandomTeams.make_team(_roster, target, max_team, allow_duplicates, require_frontline, second_row),
 	}
 	if teams[1].is_empty() or teams[2].is_empty():
 		push_warning("Battle %d: couldn't build a team worth exactly %d ARV; skipped." % [index, target])
@@ -129,7 +138,7 @@ func _run_battle(index: int, target: int) -> void:
 
 	_records.clear()
 	var lineups := {}
-	var placement := RandomTeams.place_teams(grid, teams)
+	var placement := RandomTeams.place_teams(grid, teams, second_row)
 	if show_placement:
 		_print_placement(grid, teams, placement)
 	for team in teams:
@@ -373,7 +382,9 @@ func _summary() -> String:
 	var lines: PackedStringArray = [
 		"Balance sim: %d battles, ARV %d-%d, max team %d, %s, seed %d" % [_battle_rows.size(), arv_min, arv_max,
 				max_team, "duplicates allowed" if allow_duplicates else "no duplicates", seed_value],
-		"Tier scaling: health %s, Might/Insight/Celerity %s" % [_scale_text(tier_health), _scale_text(tier_stats)],
+		"Extra tier scaling (on top of the game's own): health %s, Might/Insight/Celerity %s" % [_scale_text(tier_health), _scale_text(tier_stats)],
+		"Second row: %s. At least one front-liner per team: %s" % [", ".join(second_row) if not second_row.is_empty() else "nobody",
+				"yes" if require_frontline else "no"],
 		"Draws: %d (%d hit the %.0fs time limit)" % [draws, timeouts, time_limit],
 		"Win rate leaves out draws. A unit on the winning team counts as a win. Rows with",
 		"few battles are noisy; treat anything under ~50 as a hint, not a result.",

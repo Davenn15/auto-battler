@@ -6,6 +6,8 @@ extends Node2D
 ## a ProgressBar named "HealthBar", plus whatever visuals you like.
 
 signal died(unit: BattleUnit)
+## Emitted when one of this unit's attacks rolls a wrack.
+signal wracked(unit: BattleUnit)
 
 # Health bar fill color per team.
 const TEAM_COLORS := {
@@ -18,17 +20,29 @@ const HEALTH_TICK_WIDTH := 1.0        # line width in pixels
 const SWING_TIME := 0.12          # seconds for the sword to sweep
 const SWING_ARC := 0.9            # radians either side of the aim direction
 const ATTACK_BAR_COLOR := Color(1.0, 0.85, 0.3)   # gold
+
 var attack_bar: ProgressBar
 var _attack_cooldown_total: float = 1.0
 var _locked_time: float = 0.0
+var _stunned_time: float = 0.0   # seconds of stun left; the attack timer doesn't run meanwhile
 
 const BLOCKED_TARGET_TIMEOUT := 1.0   # seconds unable to reach a target before giving up on it
 var _blocked_time: float = 0.0
 
 const FLOAT_RISE := 40.0    # pixels the number drifts upward
 const FLOAT_TIME := 0.8     # seconds before it fades out
-const DAMAGE_FONT_MIN := 8          # font size for the smallest hits
-const DAMAGE_FONT_MAX := 26          # font size for hits at or above DAMAGE_FOR_MAX_FONT
+const FLOAT_TEXT_BOTTOM := -46.0              # where floating text's bottom edge starts, relative to the unit: just above the health bar (-42)
+const FLOAT_TEXT_BOX := Vector2(60, 40)       # room for the biggest number, so it grows upward, never down onto the bar
+
+const DAMAGE_FLASH_WINDOW := 0.15   # seconds a flash keeps collecting hits before fading
+const DAMAGE_FLASH_TIME := 0.35     # seconds the flash then takes to fade
+var _flash: ColorRect             # the current damage flash on the health bar
+var _flash_collecting := false    # true while it's still adding up hits
+var _flash_top: float             # health when the current flash started
+var _flash_low: float             # lowest health since then
+
+const DAMAGE_FONT_MIN := 7          # font size for the smallest hits
+const DAMAGE_FONT_MAX := 22          # font size for hits at or above DAMAGE_FOR_MAX_FONT
 const DAMAGE_FOR_MAX_FONT := 400.0   # damage that reaches the biggest size
 const WRACK_FONT_BONUS := 2          # wracks are this much bigger again
 const DODGE_COLOR := Color(0.464, 0.464, 0.464, 1.0)
@@ -38,6 +52,8 @@ var _charge_fill: StyleBoxFlat
 
 const SHIELD_COLOR := Color(0.565, 0.565, 0.565, 0.9)   # light gray
 var shield_bar: ColorRect
+const PENDING_COLOR := Color(0.45, 0.05, 0.05)   # dark red: health about to be lost
+var pending_bar: ColorRect
 
 const BADGE_SIZE := 6.0   # pixels, square
 const BADGE_GAP := 2.0    # between badges, and between the badges and the health bar
@@ -147,7 +163,7 @@ func _apply_data() -> void:
 		return
 	var chosen := get_chosen_upgrades()
 	var level := chosen.size()
-	max_health = data.max_health * Stats.upgrade_health_multiplier(level)
+	max_health = data.max_health * Stats.upgrade_health_multiplier(level) * Stats.tier_health_multiplier(data.tier)
 	move_speed = 120
 	attack_range = data.attack_range_cells
 	health_regen = data.health_regen
@@ -173,7 +189,7 @@ func _apply_data() -> void:
 	charge_on_hit = data.charge_on_hit
 	charge_per_damage = data.charge_per_damage
 	for stat in Stats.Stat.values():
-		base_stats[stat] = data.get_base_stat(stat) * Stats.upgrade_multiplier(stat, level)
+		base_stats[stat] = data.get_base_stat(stat) * Stats.upgrade_multiplier(stat, level) * Stats.tier_multiplier(stat, data.tier)
 	attack_damage_type = data.attack_damage_type
 	if data.sprite != null and sprite != null:
 		sprite.texture = data.sprite
@@ -232,6 +248,7 @@ func _setup_health_bar() -> void:
 	_update_health_bar()
 	_setup_health_ticks()
 	_update_health_ticks()
+	_setup_pending_bar()   # before the shield bar, so the shield draws on top
 	_setup_shield_bar()
 
 
@@ -271,6 +288,30 @@ func _update_health_ticks() -> void:
 	for i in _health_ticks.size():
 		_health_ticks[i].visible = (i + 1) * HEALTH_TICK_INTERVAL <= health
 
+func _setup_pending_bar() -> void:
+	pending_bar = ColorRect.new()
+	pending_bar.color = PENDING_COLOR
+	pending_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pending_bar.visible = false
+	health_bar.add_child(pending_bar)   # child of the health bar, so it draws on top of it
+
+
+## Darkens the end of the health bar by the damage the unit is still due to take.
+func _update_pending_bar() -> void:
+	if pending_bar == null or health_bar == null or max_health <= 0.0:
+		return
+	var pending := minf(get_pending_damage(), maxf(health, 0.0))
+	if pending <= 0.0:
+		pending_bar.visible = false
+		return
+	var width := health_bar.size.x
+	var start_frac := (health - pending) / max_health
+	var end_frac := health / max_health
+	pending_bar.position = Vector2(start_frac * width, 0.0)
+	pending_bar.size = Vector2((end_frac - start_frac) * width, health_bar.size.y)
+	pending_bar.visible = true
+
+
 func _setup_shield_bar() -> void:
 	shield_bar = ColorRect.new()
 	shield_bar.color = SHIELD_COLOR
@@ -295,8 +336,44 @@ func _update_shield_bar() -> void:
 	shield_bar.size = Vector2((end_frac - start_frac) * width, health_bar.size.y)
 	shield_bar.visible = true
 
-var _badges: HBoxContainer
+## Flashes white the part of the health bar a hit just took. Hits that land within
+## DAMAGE_FLASH_WINDOW of the first share one flash, so a volley of small hits reads
+## as one chunk of damage.
+func _flash_health_loss(from_health: float, to_health: float) -> void:
+	if health_bar == null or max_health <= 0.0 or from_health <= to_health:
+		return
+	if not _flash_collecting or not is_instance_valid(_flash):
+		_start_flash(from_health)
+	_flash_low = minf(_flash_low, to_health)
+	_size_flash()
 
+
+## Starts a new flash at `from_health`. It collects hits for DAMAGE_FLASH_WINDOW, then
+## fades and removes itself. An older flash that's still fading is left to finish.
+func _start_flash(from_health: float) -> void:
+	_flash = ColorRect.new()
+	_flash.color = Color.WHITE
+	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	health_bar.add_child(_flash)   # a child of the bar, so it draws on top of it
+	_flash_top = from_health
+	_flash_low = from_health
+	_flash_collecting = true
+	var tween := _flash.create_tween()
+	tween.tween_interval(DAMAGE_FLASH_WINDOW)
+	tween.tween_callback(func(): _flash_collecting = false)
+	tween.tween_property(_flash, "modulate:a", 0.0, DAMAGE_FLASH_TIME)
+	tween.tween_callback(_flash.queue_free)
+
+
+## Stretches the current flash from the lowest health it has seen up to where it started.
+func _size_flash() -> void:
+	var width := health_bar.size.x
+	var start := maxf(_flash_low, 0.0) / max_health
+	var end := minf(_flash_top, max_health) / max_health
+	_flash.position = Vector2(start * width, 0.0)
+	_flash.size = Vector2((end - start) * width, health_bar.size.y)
+
+var _badges: HBoxContainer
 
 ## Small badges to the left of the health bar, one per upgrade taken. How many = level;
 ## colors (or icons) = which path. Safe to call again if the upgrades change.
@@ -354,6 +431,22 @@ func setup_as_summon(source: BattleUnit, health_fraction: float) -> void:
 	_summon_stats = source.base_stats.duplicate()
 	_summoner_id = source.get_credit_id()
 
+## Turns this unit into a summon that looks like `profile` (name, sprite) but takes its
+## numbers from `source`: `health_fraction` of its max health and its base stats, with
+## all three wards multiplied by `ward_multiplier`. Fights for `source`'s team and
+## credits its damage to it. Call before adding it to the scene.
+func setup_as_profile_summon(profile: UnitData, source: BattleUnit, health_fraction: float,
+		ward_multiplier: float = 1.0) -> void:
+	data = profile
+	team = source.team
+	auto_place = false   # the summoner places it
+	is_summon = true
+	_summon_max_health = source.max_health * health_fraction
+	_summon_stats = source.base_stats.duplicate()
+	for ward in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
+		_summon_stats[ward] *= ward_multiplier
+	_summoner_id = source.get_credit_id()
+
 ## The id this unit's damage is credited to on the damage meter: its summoner for
 ## summons, itself otherwise.
 func get_credit_id() -> int:
@@ -401,6 +494,7 @@ func start_combat() -> void:
 	_update_charge_bar()
 	active = true
 	_locked_time = 0.0
+	_stunned_time = 0.0
 
 
 func stop_combat() -> void:
@@ -408,6 +502,7 @@ func stop_combat() -> void:
 	_update_charge_bar()
 	active = false   # a step already in progress still finishes, so units stay on-grid
 	_locked_time = 0.0
+	_stunned_time = 0.0
 
 
 func _physics_process(delta: float) -> void:
@@ -417,10 +512,14 @@ func _physics_process(delta: float) -> void:
 	if not alive:
 		return
 
-	_attack_timer = maxf(_attack_timer - delta, 0.0)
+	if _stunned_time > 0.0:
+		_stunned_time -= delta   # stunned: no winding up an attack
+	else:
+		_attack_timer = maxf(_attack_timer - delta, 0.0)
 	for status in statuses.duplicate():
 		status.tick(self, delta)
 	_update_shield_bar()
+	_update_pending_bar()
 	_update_attack_bar()
 	if active:
 		heal(get_health_regen() * delta)
@@ -448,7 +547,7 @@ func _physics_process(delta: float) -> void:
 		target = null
 	if target == null:
 		_engaged = false
-		target = _find_nearest_enemy()
+		target = _choose_target()
 		_blocked_time = 0.0
 	if _ready_to_gambit():
 		_begin_gambit()
@@ -465,7 +564,7 @@ func _physics_process(delta: float) -> void:
 			# The target was in range and has since left it: pick a fresh target,
 			# the same as if it had died.
 			_engaged = false
-			target = _find_nearest_enemy()
+			target = _choose_target()
 			_blocked_time = 0.0
 			if target == null:
 				return
@@ -493,7 +592,7 @@ func _start_step() -> void:
 		_blocked_time += get_physics_process_delta_time()
 		if _blocked_time >= BLOCKED_TARGET_TIMEOUT:
 			var blocked := target
-			target = _find_nearest_enemy(blocked)   # pick someone else
+			target = _choose_target(blocked)   # pick someone else
 			_engaged = false
 			_blocked_time = 0.0
 		return
@@ -525,6 +624,12 @@ func _find_nearest_enemy(exclude: BattleUnit = null) -> BattleUnit:
 			best = u
 	return best
 
+## Who to target next: the nearest enemy, unless a status says otherwise.
+func _choose_target(exclude: BattleUnit = null) -> BattleUnit:
+	var choice := _find_nearest_enemy(exclude)
+	for status in statuses:
+		choice = status.modify_target_choice(self, choice, exclude)
+	return choice
 
 func _is_valid_target(u) -> bool:
 	return is_instance_valid(u) and u.alive and u.team != team and u.is_targetable()
@@ -541,12 +646,34 @@ var base_stats: Dictionary = {
 }
 var attack_damage_type: int = Stats.DamageType.MIGHT
 
-## A stat's current value: the unit's base, then every status's adjustments.
+## Moves to `dest` straight away as far as the grid is concerned, and slides there on
+## screen over `time` seconds. Await it to wait for the slide to finish.
+func dash_to(dest: Vector2i, time: float) -> void:
+	if dest == cell:
+		return
+	var start := global_position
+	place_at(dest)   # the logical move is instant; the slide below is only visual
+	var end := global_position
+	global_position = start
+	create_tween().tween_property(self, "global_position", end, time)
+	await get_tree().create_timer(time).timeout
+
+## A stat's current value: the unit's base, then every status's adjustments, then any
+## final adjustments.
 func get_stat(stat: Stats.Stat) -> float:
+	var value := get_stat_before_final(stat)
+	for status in statuses:
+		value = status.modify_final_stat(self, stat, value)
+	return maxf(value, 0.0)
+
+
+## A stat after every status's normal adjustment but before final ones. For statuses
+## that turn one stat into another; everything else should use get_stat.
+func get_stat_before_final(stat: Stats.Stat) -> float:
 	var value: float = base_stats.get(stat, 0.0)
 	for status in statuses:
 		value = status.modify_stat(self, stat, value)
-	return maxf(value, 0.0)
+	return value
 
 ## Aura spent on this unit: its purchase price plus any upgrades.
 func get_aura_value() -> int:
@@ -559,14 +686,19 @@ func get_aura_value() -> int:
 func get_reserve_value() -> int:
 	return 0
 
-func _attack(enemy: BattleUnit) -> void:
+func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: float = 0.0,
+		projectile: Projectile = null, extra_hit_effects: Array[HitEffect] = []) -> int: 
 	_attack_timer = get_attack_cooldown()
 	_attack_cooldown_total = _attack_timer
 	var chance := get_stat(Stats.Stat.WRACK_CHANCE)
 	for status in statuses:
 		chance = status.modify_wrack_chance(self, enemy, chance)
-	var is_wrack := randf() < chance
-	var base_damage := Stats.attack_damage(get_stat(Stats.Stat.MIGHT))
+	var wrack_level := Stats.roll_wrack(chance + extra_wrack_chance)
+	if wrack_level > 0:
+		wracked.emit(self)
+	if wrack_level >= 2:
+		show_float_text("Hyper!", Stats.HYPER_WRACK_COLOR)
+	var base_damage := Stats.attack_damage(get_stat(Stats.Stat.MIGHT)) + extra_damage
 	var shot_color: Color = TEAM_COLORS.get(team, Color.WHITE)
 	var hit_effects: Array[HitEffect] = []
 	for status in statuses.duplicate():
@@ -576,19 +708,23 @@ func _attack(enemy: BattleUnit) -> void:
 		if effect != null:
 			hit_effects.append(effect)
 		status.on_attack(self)
-	var hit_damage := base_damage * (1.0 + get_stat(Stats.Stat.WRACK_DAMAGE)) if is_wrack else base_damage
-	if attack_range > 1:
-		_fire_projectile(enemy, hit_damage, is_wrack, shot_color, hit_effects)
-		return
+	hit_effects.append_array(extra_hit_effects)
+	var hit_damage := base_damage * Stats.wrack_multiplier(wrack_level, get_stat(Stats.Stat.WRACK_DAMAGE))
+	if attack_range > 1 or projectile != null:
+		_fire_projectile(enemy, hit_damage, wrack_level, shot_color, hit_effects, projectile)
+		return wrack_level
 	_play_melee_swing(enemy.global_position)
-	var dealt := enemy.take_damage(hit_damage, is_wrack, get_attack_damage_type())
+	var dealt := enemy.take_damage(hit_damage, wrack_level, get_attack_damage_type())
 	get_tree().call_group("damage_tracker", "record_damage", get_credit_id(), dealt)
 	gain_charge_from_attack(dealt)
 	enemy.gain_charge_from_hit(dealt)
 	notify_attack_hit(enemy, dealt)
-	run_hit_effects(hit_effects, enemy, dealt, is_wrack)
+	run_hit_effects(hit_effects, enemy, dealt, wrack_level)
+	return wrack_level
 
 func notify_attack_hit(enemy: BattleUnit, dealt: float) -> void:
+	if dealt <= 0.0:
+		return   # a dodge: nothing that happens "on hit" should trigger
 	for status in statuses.duplicate():
 		status.on_attack_hit(self, enemy, dealt)
 	if not enemy.alive:
@@ -597,15 +733,22 @@ func notify_attack_hit(enemy: BattleUnit, dealt: float) -> void:
 
 ## Runs the effects an attack collected when it was made. A dodged hit (nothing dealt)
 ## runs none, the same rule as charge.
-static func run_hit_effects(effects: Array[HitEffect], hit_target: BattleUnit, dealt: float, is_wrack: bool) -> void:
+static func run_hit_effects(effects: Array[HitEffect], hit_target: BattleUnit, dealt: float, wrack_level: int) -> void:
 	if dealt <= 0.0:
 		return
 	for effect in effects:
-		effect.apply(hit_target, dealt, is_wrack)
+		effect.apply(hit_target, dealt, wrack_level)
 
-func _fire_projectile(enemy: BattleUnit, hit_damage: float, is_wrack: bool, color: Color, hit_effects: Array[HitEffect]) -> void:
-	var projectile := Projectile.new()
-	projectile.setup(self, enemy, hit_damage, color, is_wrack, get_attack_damage_type(), hit_effects)
+func _fire_projectile(enemy: BattleUnit, hit_damage: float, wrack_level: int, color: Color,
+		hit_effects: Array[HitEffect], projectile: Projectile = null) -> void:
+	if projectile == null:
+		for status in statuses:
+			projectile = status.create_projectile(self)
+			if projectile != null:
+				break
+	if projectile == null:
+		projectile = Projectile.new()
+	projectile.setup(self, enemy, hit_damage, color, wrack_level, get_attack_damage_type(), hit_effects)
 	get_tree().current_scene.add_child(projectile)
 	projectile.global_position = global_position
 
@@ -713,17 +856,22 @@ func stun(duration: float) -> void:
 		show_float_text("Immune", DODGE_COLOR)
 		return
 	lock_for(duration)
+	_stunned_time = maxf(_stunned_time, duration)
 	if sprite != null:
 		sprite.modulate = STUN_TINT
 		sprite.create_tween().tween_property(sprite, "modulate", Color.WHITE, duration)
 
 ## Makes the unit attack `enemy` right now, ignoring range and attack timing. It's a real
 ## attack: it can wrack, triggers on-attack effects, and resets the attack timer.
-func attack_now(enemy: BattleUnit) -> void:
+## Gambits can make it stronger: `extra_damage` is added before damage buffs apply,
+## `extra_wrack_chance` adds to the wrack roll, and `projectile` replaces the normal shot.
+func attack_now(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: float = 0.0,
+		projectile: Projectile = null, extra_hit_effects: Array[HitEffect] = []) -> int:
 	if alive and is_instance_valid(enemy) and enemy.alive:
-		_attack(enemy)
+		return _attack(enemy, extra_damage, extra_wrack_chance, projectile, extra_hit_effects)      # 2. passes the answer on
+	return false                                                                 # 3. no attack, so no wrack
 
-func take_damage(amount: float, is_wrack: bool = false, damage_type: int = Stats.DamageType.MIGHT) -> float:
+func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.DamageType.MIGHT, ignore_ward: bool = false) -> float:
 	if not alive:
 		return 0.0
 	if randf() < get_dodge_chance():
@@ -732,8 +880,9 @@ func take_damage(amount: float, is_wrack: bool = false, damage_type: int = Stats
 			status.on_dodge(self)
 		return 0.0   # nothing dealt: no meter credit, no lifesteal, no charge from damage
 	# Wards come first. Shields and other effects apply to what's left.
-	amount *= Stats.ward_multiplier(get_stat(Stats.ward_stat_for(damage_type)))
-	return _apply_damage(amount, Stats.damage_color(damage_type, is_wrack), is_wrack, true)
+	if not ignore_ward:
+		amount *= Stats.ward_multiplier(get_stat(Stats.ward_stat_for(damage_type)))
+	return _apply_damage(amount, Stats.damage_color(damage_type, wrack_level), wrack_level, true)
 
 ## Damage that has already been through wards, such as damage released over time.
 ## Shields and other statuses still apply. Leave show_numbers off for small, frequent
@@ -741,16 +890,19 @@ func take_damage(amount: float, is_wrack: bool = false, damage_type: int = Stats
 func take_warded_damage(amount: float, show_numbers: bool = false, damage_type: int = Stats.DamageType.MIGHT) -> float:
 	if not alive:
 		return 0.0
-	return _apply_damage(amount, Stats.damage_color(damage_type), false, show_numbers)
+	return _apply_damage(amount, Stats.damage_color(damage_type), 0, show_numbers)
 
 ## The number color of the hit currently being processed, for statuses that show their
 ## own numbers (like Bescard's held damage). Only meaningful during modify_incoming_damage.
 var incoming_color: Color = Color.WHITE
 
-func _apply_damage(amount: float, number_color: Color, is_wrack: bool, show_numbers: bool) -> float:
+func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_numbers: bool) -> float:
 	incoming_color = number_color
 	var dealt := minf(amount, health + get_shield())
 	var shield_before := get_shield()
+	# Health left once held damage lands, measured before any status holds this hit, so
+	# a held hit still flashes.
+	var effective_before := health - get_pending_damage()
 	for status in statuses.duplicate():
 		amount = status.modify_incoming_damage(self, amount)
 	if show_numbers:
@@ -758,31 +910,34 @@ func _apply_damage(amount: float, number_color: Color, is_wrack: bool, show_numb
 		if absorbed > 0.0:
 			_spawn_damage_number(absorbed, SHIELD_COLOR)
 		if amount > 0.0:
-			_spawn_damage_number(minf(amount, health), number_color, is_wrack)
+			_spawn_damage_number(minf(amount, health), number_color, wrack_level)
 	health -= amount
 	_update_health_bar()
+	_update_pending_bar()
+	if show_numbers:
+		_flash_health_loss(effective_before, health - get_pending_damage())
 	if health <= 0.0:
 		_die()
 	return dealt
 
 ## Font size for a damage number: bigger for bigger hits, plus a bonus for wracks.
-func _damage_font_size(amount: float, is_wrack: bool) -> int:
+func _damage_font_size(amount: float, wrack_level: int) -> int:
 	var t := clampf(amount / DAMAGE_FOR_MAX_FONT, 0.0, 1.0)   # 0 = tiny hit, 1 = huge hit
 	t = sqrt(t)   # grows quickly for small hits, then levels off
 	var font_size := lerpf(DAMAGE_FONT_MIN, DAMAGE_FONT_MAX, t)
-	if is_wrack:
-		font_size += WRACK_FONT_BONUS
+	font_size += WRACK_FONT_BONUS * wrack_level
 	return roundi(font_size)
 
-func _spawn_damage_number(amount: float, color: Color = Color.WHITE, is_wrack: bool = false) -> void:
-	show_float_text(str(roundi(amount)), color, _damage_font_size(amount, is_wrack))
+func _spawn_damage_number(amount: float, color: Color = Color.WHITE, wrack_level: int = 0) -> void:
+	show_float_text(str(roundi(amount)), color, _damage_font_size(amount, wrack_level))
 
 ## Floating text that rises and fades above the unit. Statuses can use this too.
 func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = DAMAGE_FONT_MIN) -> void:
 	var label := Label.new()
 	label.text = text
-	label.size = Vector2(60, 24)
+	label.size = FLOAT_TEXT_BOX
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM   # text sits on the box's bottom edge
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.z_index = 20
 	label.add_theme_font_size_override("font_size", font_size)
@@ -791,7 +946,8 @@ func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = 
 	label.add_theme_constant_override("outline_size", 4)
 
 	get_tree().current_scene.add_child(label)   # not a child of the unit, so it survives a killing blow
-	label.global_position = global_position + Vector2(-30 + randf_range(-12.0, 12.0), -50)
+	label.global_position = global_position + Vector2(-FLOAT_TEXT_BOX.x / 2.0 + randf_range(-12.0, 12.0),
+			FLOAT_TEXT_BOTTOM - FLOAT_TEXT_BOX.y)
 
 	var tween := label.create_tween()
 	tween.set_parallel(true)
@@ -809,6 +965,11 @@ func heal(amount: float, source_id: int = 0) -> void:
 	_update_health_bar()
 	var healer_id := source_id if source_id != 0 else get_instance_id()
 	get_tree().call_group("damage_tracker", "record_healing", healer_id, healed)
+
+## Sets current health directly, clamped to max. For summons that come back hurt.
+func set_health(amount: float) -> void:
+	health = clampf(amount, 0.0, max_health)
+	_update_health_bar()
 
 ## The unit's current regen per second, after status effects.
 func get_health_regen() -> float:
@@ -828,6 +989,14 @@ func remove_status(status: Status) -> void:
 		status.on_removed(self)
 
 ## Total shield from all statuses.
+## Damage this unit has taken but not lost yet, summed over its statuses.
+func get_pending_damage() -> float:
+	var total := 0.0
+	for status in statuses:
+		total += status.get_pending_damage(self)
+	return total
+
+
 func get_shield() -> float:
 	var total := 0.0
 	for status in statuses:

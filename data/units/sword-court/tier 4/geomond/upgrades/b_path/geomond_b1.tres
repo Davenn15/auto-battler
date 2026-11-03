@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bk4rq2v2pkoc5"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_metfj"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_gf3r4"]
+
+[resource]
+script = ExtResource("1_metfj")
+gambit_overrides = Dictionary[String, float]({
+"wave_shields_allies": 1.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

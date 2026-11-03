@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PreciseShotGambit" format=3 uid="uid://d00mg07572y1h"]
+
+[ext_resource type="Script" uid="uid://bktmjhf1kv154" path="res://data/units/sword-court/tier 2/crommel/upgrades/b_path/scripts/precise_shot_gambit.gd" id="1_84r6m"]
+
+[resource]
+script = ExtResource("1_84r6m")
+cast_time = 1.5
+metadata/_custom_type_script = "uid://bktmjhf1kv154"

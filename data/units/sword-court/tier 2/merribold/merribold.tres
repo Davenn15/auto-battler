@@ -1,19 +1,22 @@
 [gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ds85af620srdl"]
 
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_3vtec"]
-[ext_resource type="Resource" uid="uid://dd3tdjspmmvmn" path="res://data/units/sword-court/tier 2/merribold/merribold_gambit.tres" id="1_6o4vc"]
+[ext_resource type="Resource" uid="uid://dd3tdjspmmvmn" path="res://data/units/sword-court/tier 2/merribold/gambit/merribold_gambit.tres" id="1_t10ry"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_ldhmq"]
 [ext_resource type="Texture2D" uid="uid://cho1j8i8oxwqr" path="res://assets/merribold.png" id="2_rpv05"]
 [ext_resource type="Resource" uid="uid://dgg5er0h6f8aj" path="res://data/units/sword-court/tier 2/merribold/merribold_passive.tres" id="3_u43wc"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_ldhmq"]
+[ext_resource type="Resource" uid="uid://je47pwm3rj3u" path="res://data/units/sword-court/tier 2/merribold/upgrades/a_path/merribold_a.tres" id="7_hujla"]
+[ext_resource type="Resource" uid="uid://bv0rhdmv2ufcj" path="res://data/units/sword-court/tier 2/merribold/upgrades/b_path/merribold_b.tres" id="8_eqntd"]
 
 [resource]
 script = ExtResource("1_3vtec")
 display_name = "merribold"
 tier = 2
+upgrades = Array[ExtResource("6_ldhmq")]([ExtResource("7_hujla"), ExtResource("8_eqntd")])
 max_health = 1400.0
 passives = Array[ExtResource("2_ldhmq")]([ExtResource("3_u43wc")])
-gambit = ExtResource("1_6o4vc")
+gambit = ExtResource("1_t10ry")
 max_charge = 110.0
 starting_charge = 20.0
 sprite = ExtResource("2_rpv05")

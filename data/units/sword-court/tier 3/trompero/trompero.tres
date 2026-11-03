@@ -1,21 +1,24 @@
 [gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ba82eff6jve8e"]
 
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_0twvd"]
-[ext_resource type="Resource" uid="uid://b2b2r5by0yqqj" path="res://data/units/sword-court/tier 3/trompero/trompero_gambit.tres" id="1_ru7cl"]
+[ext_resource type="Resource" uid="uid://b2b2r5by0yqqj" path="res://data/units/sword-court/tier 3/trompero/gambit/trompero_gambit.tres" id="1_6sxb1"]
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_6pfn8"]
-[ext_resource type="Resource" uid="uid://ls162aiejabo" path="res://data/units/sword-court/tier 3/trompero/trompero_passive.tres" id="3_46rfb"]
+[ext_resource type="Resource" uid="uid://ls162aiejabo" path="res://data/units/sword-court/tier 3/trompero/passive/trompero_passive.tres" id="3_ohhtv"]
 [ext_resource type="Texture2D" uid="uid://dkfg4qkjjumhl" path="res://assets/trompero.png" id="5_12hl1"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_46rfb"]
+[ext_resource type="Resource" uid="uid://bldl0lw287n8g" path="res://data/units/sword-court/tier 3/trompero/upgrades/a_path/trompero_a.tres" id="7_htyim"]
+[ext_resource type="Resource" uid="uid://s1w4u6lvptgy" path="res://data/units/sword-court/tier 3/trompero/upgrades/b_path/trompero_b.tres" id="8_l4lbu"]
 
 [resource]
 script = ExtResource("2_6pfn8")
 display_name = "trompero"
 tier = 3
+upgrades = Array[ExtResource("6_46rfb")]([ExtResource("7_htyim"), ExtResource("8_l4lbu")])
 max_health = 950.0
 attack_range_cells = 4
-passives = Array[ExtResource("1_0twvd")]([ExtResource("3_46rfb")])
-gambit = ExtResource("1_ru7cl")
-max_charge = 90.0
+passives = Array[ExtResource("1_0twvd")]([ExtResource("3_ohhtv")])
+gambit = ExtResource("1_6sxb1")
+max_charge = 110.0
 starting_charge = 40.0
 sprite = ExtResource("5_12hl1")
 might = 40.0

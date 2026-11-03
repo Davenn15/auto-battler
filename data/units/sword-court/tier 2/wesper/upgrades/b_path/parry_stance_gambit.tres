@@ -4,6 +4,8 @@
 
 [resource]
 script = ExtResource("1_otf42")
-reflect_chance = 0.75
+duration = 7.0
+ward_bonus = 50.0
+reflect_chance = 1.0
 cast_time = 0.5
 metadata/_custom_type_script = "uid://bunkcbjqogkmm"

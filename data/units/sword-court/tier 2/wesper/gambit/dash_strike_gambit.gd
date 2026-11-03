@@ -1,6 +1,6 @@
 class_name DashStrikeGambit
 extends Gambit
-## Dashes next to the enemy furthest from the caster, then attacks it several times in
+## Dashes next to an enemy based on targeting rule, then attacks it several times in
 ## quick succession. The strikes are real attacks: they use the caster's normal damage,
 ## can wrack, and trigger on-attack effects.
 
@@ -15,7 +15,15 @@ const NO_CELL := Vector2i(-9999, -9999)
 @export var teleport: bool = false
 ## Seconds enemies can't target the caster, starting as it moves. 0 = none.
 @export var untargetable_time: float = 0.0
+enum TargetRule { FARTHEST, LOWEST_HEALTH, FARTHEST_UNLESS_FINISHING }
 
+## Which enemy to dash to: the farthest one, or the one with the lowest share of its max
+## health (ties, like everyone at full health, go to the farthest).
+@export var target_rule: TargetRule = TargetRule.FARTHEST
+
+## With FARTHEST_UNLESS_FINISHING: if the current target is at or below this share of its
+## max health, strike it instead of dashing away (0.5 = half).
+@export_range(0.0, 1.0) var finish_threshold: float = 0.5
 
 ## Only fires if there's an enemy it can reach, so charge isn't wasted.
 func can_use(caster: BattleUnit) -> bool:
@@ -71,9 +79,10 @@ func _find_target(caster: BattleUnit) -> Dictionary:
 		var unit := node as BattleUnit
 		if unit != null and unit.alive and unit.team != caster.team:
 			enemies.append(unit)
-	# Furthest first.
-	enemies.sort_custom(func(a, b): return origin.distance_squared_to(a.global_position) > origin.distance_squared_to(b.global_position))
-
+	enemies.sort_custom(_comes_first.bind(origin))
+	if target_rule == TargetRule.FARTHEST_UNLESS_FINISHING and _is_finishable(caster, caster.target):
+		enemies.erase(caster.target)
+		enemies.push_front(caster.target)   # tried first; the rest stay farthest first
 	for enemy in enemies:
 		if caster.grid.get_distance(caster.cell, enemy.cell) <= 1:
 			return {"target": enemy, "cell": caster.cell}   # already adjacent, no dash needed
@@ -82,6 +91,19 @@ func _find_target(caster: BattleUnit) -> Dictionary:
 			return {"target": enemy, "cell": landing}
 	return {}
 
+## Sort order for targets: by `target_rule`, then farthest first.
+func _comes_first(a: BattleUnit, b: BattleUnit, origin: Vector2) -> bool:
+	if target_rule == TargetRule.LOWEST_HEALTH:
+		var a_share := a.health / a.max_health
+		var b_share := b.health / b.max_health
+		if not is_equal_approx(a_share, b_share):
+			return a_share < b_share
+	return origin.distance_squared_to(a.global_position) > origin.distance_squared_to(b.global_position)
+
+## True if `unit` is a living enemy at or below `finish_threshold` of its max health.
+## Untyped because the caster's target may have been freed.
+func _is_finishable(caster: BattleUnit, unit) -> bool:
+	return _alive(unit) and unit.team != caster.team and unit.health <= unit.max_health * finish_threshold
 
 ## The free cell next to `enemy` that is closest to the caster, or NO_CELL if none is free.
 func _landing_cell(caster: BattleUnit, enemy: BattleUnit) -> Vector2i:

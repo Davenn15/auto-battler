@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="GeomondPassive" format=3 uid="uid://mje6iescmemr"]
+
+[ext_resource type="Script" uid="uid://b0c02c2y86co3" path="res://data/units/sword-court/tier 4/geomond/passive/geomond_passive.gd" id="1_yi4j6"]
+
+[resource]
+script = ExtResource("1_yi4j6")
+metadata/_custom_type_script = "uid://b0c02c2y86co3"

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RageGambit" format=3 uid="uid://b5uham2x8745p"]
+
+[ext_resource type="Script" uid="uid://xhq2i6s36878" path="res://data/units/sword-court/tier 3/bescard/gambit/rage_gambit.gd" id="1_bgamb"]
+
+[resource]
+script = ExtResource("1_bgamb")
+duration = 9.0
+might_bonus = 50.0
+celerity_bonus = 60.0
+lifesteal = 0.4
+gambit_name = "Rage"
+cast_time = 0.5

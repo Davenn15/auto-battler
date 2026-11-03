@@ -22,6 +22,25 @@ const STAT_NAMES := {
 	Stat.WRACK_DAMAGE: "Wrack Damage",
 }
 
+## Highest wrack level a hit can reach: 1 = wrack, 2 = Hyper-Wrack.
+const MAX_WRACK_LEVEL := 2
+const HYPER_WRACK_COLOR := Color(1.0, 0.3, 0.9)
+
+
+## Rolls a hit's wrack level from its wrack chance: 0 = normal, 1 = wrack, 2 = Hyper-Wrack.
+## Each full 100% is a guaranteed level, and what's left over is the chance of one more,
+## so 1.3 always wracks and has a 30% chance to Hyper-Wrack.
+static func roll_wrack(chance: float) -> int:
+	var level := floori(chance)
+	if randf() < chance - level:
+		level += 1
+	return mini(level, MAX_WRACK_LEVEL)
+
+
+## Damage multiplier for a wrack level: the wrack multiplier once per level.
+static func wrack_multiplier(level: int, wrack_damage: float) -> float:
+	return pow(1.0 + wrack_damage, level)
+
 const DAMAGE_TYPE_NAMES := {
 	DamageType.MIGHT: "Might",
 	DamageType.INSIGHT: "Insight",
@@ -39,10 +58,13 @@ const DAMAGE_TYPE_COLORS := {
 const WRACK_BRIGHTEN := 0.45
 
 
-## The color to show damage of this type in, brighter if it was a wrack.
-static func damage_color(damage_type: int, is_wrack: bool = false) -> Color:
+## The color to show damage of this type in: brighter for a wrack, tinted toward the
+## Hyper-Wrack color for a Hyper-Wrack.
+static func damage_color(damage_type: int, wrack_level: int = 0) -> Color:
 	var color: Color = DAMAGE_TYPE_COLORS.get(damage_type, Color.WHITE)
-	return color.lightened(WRACK_BRIGHTEN) if is_wrack else color
+	if wrack_level >= 2:
+		return color.lerp(HYPER_WRACK_COLOR, 0.6)
+	return color.lightened(WRACK_BRIGHTEN) if wrack_level == 1 else color
 
 ## Which ward reduces which damage type.
 const WARD_FOR_TYPE := {
@@ -113,8 +135,8 @@ static func upgrade_health_multiplier(level: int) -> float:
 
 ## Extra stats and health by unit tier, so expensive units are worth their Aura.
 ## Tuned with the balance sim (tools/sim_results/tier_G). Tiers not listed get 1.
-const TIER_STAT_MULTIPLIER := {2: 1.1, 3: 1.15}
-const TIER_HEALTH_MULTIPLIER := {2: 1.25, 3: 1.4}
+const TIER_STAT_MULTIPLIER := {2: 1.1, 3: 1.15, 4: 1.2}
+const TIER_HEALTH_MULTIPLIER := {2: 1.25, 3: 1.4, 4: 1.55}
 ## Only these stats grow with tier. Wards and wrack stay as each unit sets them.
 const TIER_SCALED_STATS := [Stat.MIGHT, Stat.INSIGHT, Stat.CELERITY]
 

@@ -6,13 +6,15 @@ const PARRY_COLOR := Color(0.85, 0.85, 0.95)
 
 var time_left: float
 var ward_bonus: float
+var celerity_bonus: float
 var reflect_chance: float
 var reflect_wrack_bonus: float
 
 
-func _init(p_duration: float, p_ward_bonus: float, p_reflect_chance: float, p_reflect_wrack_bonus: float) -> void:
+func _init(p_duration: float, p_ward_bonus: float, p_celerity_bonus: float, p_reflect_chance: float, p_reflect_wrack_bonus: float) -> void:
 	time_left = p_duration
 	ward_bonus = p_ward_bonus
+	celerity_bonus = p_celerity_bonus
 	reflect_chance = p_reflect_chance
 	reflect_wrack_bonus = p_reflect_wrack_bonus
 
@@ -26,6 +28,8 @@ func tick(unit: BattleUnit, delta: float) -> void:
 func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	if stat in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
 		return value + ward_bonus
+	if stat == Stats.Stat.CELERITY:
+		return value + celerity_bonus
 	return value
 
 

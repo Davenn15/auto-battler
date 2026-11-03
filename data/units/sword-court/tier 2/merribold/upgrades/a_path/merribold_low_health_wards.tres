@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="LowHealthWardPassive" format=3 uid="uid://dqwx4h4l0cu3x"]
+
+[ext_resource type="Script" uid="uid://bujbbxwbrwq5s" path="res://data/units/sword-court/tier 2/merribold/upgrades/a_path/scripts/low_health_ward_passive.gd" id="1_3aqsf"]
+
+[resource]
+script = ExtResource("1_3aqsf")
+metadata/_custom_type_script = "uid://bujbbxwbrwq5s"

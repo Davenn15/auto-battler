@@ -6,6 +6,9 @@ extends Resource
 ## Shop tier (1-4). Sets how much Aura this unit costs; see Economy.TIER_AURA_COSTS.
 @export_range(1, 4) var tier: int = 1
 
+## Only created by other units, like Sumpton's blade bag. Never bought or drafted.
+@export var summon_only: bool = false
+
 @export_group("Upgrades")
 ## The choices for this unit's first upgrade. Each holds its own follow-up choices.
 @export var upgrades: Array[Upgrade] = []
@@ -13,7 +16,7 @@ extends Resource
 @export var max_health: float = 1000.0
 ## How far this unit can attack, in hex cells. 1 = melee (adjacent cells only).
 @export_range(1, 10, 1, "or_greater") var attack_range_cells: int = 1
-@export_range(0.0, 1.0, 0.01) var wrack_chance: float = 0.25
+@export_range(0.0, 1.0, 0.01, "or_greater") var wrack_chance: float = 0.25
 @export_range(0.0, 5.0, 0.05, "or_greater") var wrack_damage: float = 0.3
 @export var health_regen: float = 2.0   # health restored per second during combat
 

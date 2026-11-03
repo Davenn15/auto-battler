@@ -6,6 +6,6 @@
 [resource]
 script = ExtResource("1_brpgy")
 gambit_bonuses = Dictionary[String, float]({
-"shield_amount": 200.0
+"shield_amount": 300.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

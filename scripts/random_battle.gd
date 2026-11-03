@@ -13,7 +13,16 @@ const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 @export var team_seed: int = 0
 ## Start fighting as soon as the teams are placed.
 @export var auto_fight: bool = false
+## Units that start in the second row instead of the front (lower-case display names).
+@export var second_row_units: Array[String] = ["bremes", "lunck", "wesper"]
+## Every team gets at least one front-liner: a melee unit not in second_row_units.
+@export var require_frontline: bool = true
 @export_dir var units_dir: String = "res://data/units"
+## Units each team always gets, filled out randomly after them. One per entry: a name,
+## optionally followed by a path, like "merribold b", "garth a1", "silt base" or just
+## "wesper" for a random path. If they cost more than the rolled ARV, the ARV goes up.
+@export var team_1_units: Array[String] = []
+@export var team_2_units: Array[String] = []
 
 @onready var battle_manager: BattleManager = $"Battle Manager"
 @onready var grid: BattleGrid = $BattleGrid
@@ -37,15 +46,30 @@ func _ready() -> void:
 
 func _spawn_teams(arv: int, used_seed: int) -> void:
 	var roster := RandomTeams.load_roster(units_dir)
-	var teams := {
-		1: RandomTeams.make_team(roster, arv, max_team, allow_duplicates),
-		2: RandomTeams.make_team(roster, arv, max_team, allow_duplicates),
-	}
+	var forced := {1: [], 2: []}
+	var errors: PackedStringArray = []
+	for team in forced:
+		for text in (team_1_units if team == 1 else team_2_units):
+			var wanted := RandomTeams.parse_pick(roster, text)
+			if wanted.has("error"):
+				errors.append("Team %d: %s" % [team, wanted["error"]])
+			else:
+				forced[team].append(wanted)
+		arv = maxi(arv, RandomTeams.min_cost(forced[team]))
+	if not errors.is_empty():
+		lineup_label.text = "\n".join(errors)
+		fight_button.disabled = true
+		return
+
+	var teams := {}
+	for team in forced:
+		teams[team] = RandomTeams.make_team(roster, arv, max_team, allow_duplicates, require_frontline,
+				second_row_units, forced[team])
 	if teams[1].is_empty() or teams[2].is_empty():
 		lineup_label.text = "Couldn't build two teams worth exactly %d ARV. Try another range." % arv
 		fight_button.disabled = true
 		return
-	var placement := RandomTeams.place_teams(grid, teams)
+	var placement := RandomTeams.place_teams(grid, teams, second_row_units)
 	var lines: PackedStringArray = ["ARV %d    seed %d" % [arv, used_seed]]
 	for team in teams:
 		var names: PackedStringArray = []

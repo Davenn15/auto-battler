@@ -57,6 +57,11 @@ func modify_attack_cooldown(_unit: BattleUnit, cooldown: float) -> float:
 func get_shield(_unit: BattleUnit) -> float:
 	return 0.0
 
+## Damage this status is holding back, to be dealt later (like Bescard's passive).
+## Shown on the health bar as health about to be lost.
+func get_pending_damage(_unit: BattleUnit) -> float:
+	return 0.0
+
 func modify_health_regen(_unit: BattleUnit, regen: float) -> float:
 	return regen
 
@@ -106,3 +111,18 @@ func blocks_targeting(_unit: BattleUnit) -> bool:
 ## somewhere else (by calling projectile.reflect), so it doesn't hit.
 func try_reflect(_unit: BattleUnit, _projectile: Projectile) -> bool:
 	return false
+
+## Lets a status change who the unit picks as its next target. `choice` is the nearest
+## valid enemy (or null); `exclude` is an enemy it must not pick. Return the one to use.
+func modify_target_choice(_unit: BattleUnit, choice: BattleUnit, _exclude: BattleUnit) -> BattleUnit:
+	return choice
+
+## Runs after every status's modify_stat, for effects that need the finished number,
+## like turning one stat into another.
+func modify_final_stat(_unit: BattleUnit, _stat: Stats.Stat, value: float) -> float:
+	return value
+
+## Lets a status replace the projectile the unit's ranged attacks fire. Return null to
+## keep the normal one.
+func create_projectile(_unit: BattleUnit) -> Projectile:
+	return null

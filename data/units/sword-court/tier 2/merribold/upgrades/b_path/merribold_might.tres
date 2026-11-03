@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="StatBonusPassive" format=3 uid="uid://cabh8dqvfpek7"]
+
+[ext_resource type="Script" uid="uid://sdo6eme3alib" path="res://scripts/stat_bonus_passive.gd" id="1_1m8tp"]
+
+[resource]
+script = ExtResource("1_1m8tp")
+metadata/_custom_type_script = "uid://sdo6eme3alib"

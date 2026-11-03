@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bv0rhdmv2ufcj"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_4rkg5"]
+[ext_resource type="Resource" uid="uid://efyewglqhvxa" path="res://data/units/sword-court/tier 2/merribold/upgrades/b_path/bellow_gambit.tres" id="1_kqhge"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_elgxx"]
+[ext_resource type="Resource" uid="uid://q3yvf2ehfqax" path="res://data/units/sword-court/tier 2/merribold/upgrades/b_path/merribold_b1.tres" id="3_ve2bf"]
+[ext_resource type="Resource" uid="uid://b5j4r85ja0ypn" path="res://data/units/sword-court/tier 2/merribold/upgrades/b_path/merribold_b2.tres" id="4_g4l5t"]
+
+[resource]
+script = ExtResource("1_4rkg5")
+gambit = ExtResource("1_kqhge")
+next_choices = Array[ExtResource("1_4rkg5")]([ExtResource("3_ve2bf"), ExtResource("4_g4l5t")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

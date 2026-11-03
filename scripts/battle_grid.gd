@@ -133,10 +133,10 @@ func has_cell(cell: Vector2i) -> bool:
 	return _ids.has(cell)
 
 
-@warning_ignore("integer_division")
 func get_distance(a: Vector2i, b: Vector2i) -> int:
 	var dq := a.x - b.x
 	var dr := a.y - b.y
+	@warning_ignore("integer_division")
 	return (absi(dq) + absi(dq + dr) + absi(dr)) / 2
 
 

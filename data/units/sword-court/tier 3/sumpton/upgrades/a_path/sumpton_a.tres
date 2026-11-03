@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c7jt8ed6mvb5n"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_my68h"]
+[ext_resource type="Resource" uid="uid://dsx0eu2n60g60" path="res://data/units/sword-court/tier 3/sumpton/upgrades/a_path/sumpton_a1.tres" id="2_dv3vi"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_llq1v"]
+[ext_resource type="Resource" uid="uid://dcho0pvhbukhy" path="res://data/units/sword-court/tier 3/sumpton/upgrades/a_path/sumpton_a2.tres" id="3_3ng4r"]
+
+[resource]
+script = ExtResource("1_my68h")
+next_choices = Array[ExtResource("1_my68h")]([ExtResource("2_dv3vi"), ExtResource("3_3ng4r")])
+gambit_bonuses = Dictionary[String, float]({
+"blades": 6.0
+})
+gambit_overrides = Dictionary[String, float]({
+"blade_shield": 40.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

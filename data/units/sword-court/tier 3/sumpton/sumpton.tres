@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ds4yd2ythi8jm"]
+
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_ff10o"]
+[ext_resource type="Resource" uid="uid://bnb7evbqgt7qk" path="res://data/units/sword-court/tier 3/sumpton/gambit/sumpton_gambit.tres" id="1_ldwk4"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_102h1"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3_ktop8"]
+[ext_resource type="Resource" uid="uid://prxf602rrshd" path="res://data/units/sword-court/tier 3/sumpton/passive/sumpton_passive.tres" id="3_t1uk1"]
+[ext_resource type="Texture2D" uid="uid://ff181e8g6o2j" path="res://assets/sumpton.png" id="5_ldwk4"]
+[ext_resource type="Resource" uid="uid://c7jt8ed6mvb5n" path="res://data/units/sword-court/tier 3/sumpton/upgrades/a_path/sumpton_a.tres" id="7_kkayf"]
+[ext_resource type="Resource" uid="uid://cse6ojqeeuios" path="res://data/units/sword-court/tier 3/sumpton/upgrades/b_path/sumpton_b.tres" id="8_2dwrb"]
+
+[resource]
+script = ExtResource("2_102h1")
+display_name = "sumpton"
+tier = 3
+summon_only = null
+upgrades = Array[ExtResource("3_ktop8")]([ExtResource("7_kkayf"), ExtResource("8_2dwrb")])
+max_health = 1200.0
+attack_range_cells = 2
+passives = Array[ExtResource("1_ff10o")]([ExtResource("3_t1uk1")])
+gambit = ExtResource("1_ldwk4")
+max_charge = 90.0
+starting_charge = 40.0
+sprite = ExtResource("5_ldwk4")
+might = 85.0
+celerity = 105.0
+might_ward = 35.0
+insight_ward = 35.0
+celerity_ward = 45.0
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

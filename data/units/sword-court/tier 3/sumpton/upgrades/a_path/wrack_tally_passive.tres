@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="WrackTallyPassive" format=3 uid="uid://5ws23xn0witq"]
+
+[ext_resource type="Script" uid="uid://mpwa8nx188oq" path="res://data/units/sword-court/tier 3/sumpton/upgrades/a_path/scripts/wrack_tally_passive.gd" id="1_tbmm6"]
+
+[resource]
+script = ExtResource("1_tbmm6")
+max_bonus_blades = 10
+metadata/_custom_type_script = "uid://mpwa8nx188oq"

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bhkggc8vmypm8"]
+
+[ext_resource type="Resource" uid="uid://cxt8ubomxoqrc" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/flurry_gambit.tres" id="1_kqkwv"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_kqq4m"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_6exhl"]
+[ext_resource type="Resource" uid="uid://bpiy587528l7w" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/bescard_b1.tres" id="3_nnuof"]
+[ext_resource type="Resource" uid="uid://qtyfmspdcv1q" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/bescard_b2.tres" id="4_t8pfo"]
+
+[resource]
+script = ExtResource("1_kqq4m")
+gambit = ExtResource("1_kqkwv")
+next_choices = Array[ExtResource("1_kqq4m")]([ExtResource("3_nnuof"), ExtResource("4_t8pfo")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

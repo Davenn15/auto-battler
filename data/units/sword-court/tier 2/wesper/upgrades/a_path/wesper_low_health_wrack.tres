@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="LowHealthWrackPassive" format=3 uid="uid://c2ds00pflkt3i"]
 
-[ext_resource type="Script" uid="uid://0bc7hcswk5ro" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/scripts/low_health_wrack_passive.gd" id="1_onm7f"]
+[ext_resource type="Script" uid="uid://0bc7hcswk5ro" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/scripts/low_health_wrack_passive.gd" id="1_6g8ig"]
 
 [resource]
-script = ExtResource("1_onm7f")
-bonus_wrack_chance = 5.0
+script = ExtResource("1_6g8ig")
+bonus_wrack_chance = 0.5
 metadata/_custom_type_script = "uid://0bc7hcswk5ro"

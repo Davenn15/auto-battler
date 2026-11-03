@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="SumptonPassive" format=3 uid="uid://prxf602rrshd"]
+
+[ext_resource type="Script" uid="uid://cpjfs85f2ebs8" path="res://data/units/sword-court/tier 3/sumpton/passive/sumpton_passive.gd" id="1_dawca"]
+
+[resource]
+script = ExtResource("1_dawca")
+stun_duration = 0.15
+metadata/_custom_type_script = "uid://cpjfs85f2ebs8"

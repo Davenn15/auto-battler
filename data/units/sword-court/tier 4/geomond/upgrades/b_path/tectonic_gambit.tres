@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TectonicGambit" format=3 uid="uid://67mwnerlqgws"]
+
+[ext_resource type="Script" uid="uid://moboh6rdne36" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/scripts/tectonic_gambit.gd" id="1_jiceh"]
+
+[resource]
+script = ExtResource("1_jiceh")
+duration = 10.0
+wave_width_cells = 2.0
+dash_time = 0.3
+attack_shield = 120.0
+attack_shield_duration = 3.0
+wave_max_health_percent = 0.06
+cast_time = 0.5
+metadata/_custom_type_script = "uid://moboh6rdne36"

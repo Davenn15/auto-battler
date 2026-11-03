@@ -35,7 +35,7 @@ func tick(unit: BattleUnit, _delta: float) -> void:
 		_buffs.erase(id)
 
 
-func on_removed(unit: BattleUnit) -> void:
+func on_removed(_unit: BattleUnit) -> void:
 	for id in _buffs:
 		var ally := instance_from_id(id) as BattleUnit
 		if ally != null:

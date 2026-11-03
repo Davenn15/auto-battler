@@ -20,7 +20,7 @@ func _init(shooter: BattleUnit, p_damage: float, p_radius: int) -> void:
 	radius = p_radius
 
 
-func apply(target: BattleUnit, _dealt: float, _is_wrack: bool) -> void:
+func apply(target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
 	var tree := grid.get_tree()
 	for node in tree.get_nodes_in_group("units"):
 		var enemy := node as BattleUnit
@@ -28,5 +28,5 @@ func apply(target: BattleUnit, _dealt: float, _is_wrack: bool) -> void:
 			continue
 		if grid.get_distance(target.cell, enemy.cell) > radius:
 			continue
-		var dealt := enemy.take_damage(damage, false, damage_type)
+		var dealt := enemy.take_damage(damage, 0, damage_type)
 		tree.call_group("damage_tracker", "record_damage", shooter_id, dealt)

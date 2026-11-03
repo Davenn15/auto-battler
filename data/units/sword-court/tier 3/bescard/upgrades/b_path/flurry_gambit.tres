@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="FlurryGambit" format=3 uid="uid://cxt8ubomxoqrc"]
+
+[ext_resource type="Script" uid="uid://bjlvxwv7ymq1f" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/scripts/flurry_gambit.gd" id="1_npacc"]
+
+[resource]
+script = ExtResource("1_npacc")
+cast_time = 0.5
+metadata/_custom_type_script = "uid://bjlvxwv7ymq1f"

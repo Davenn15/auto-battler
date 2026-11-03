@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bldl0lw287n8g"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_vgg6c"]
+[ext_resource type="Resource" uid="uid://drcljvl0scfme" path="res://data/units/sword-court/tier 3/trompero/upgrades/a_path/trompero_a1.tres" id="2_7c2f4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_fasmv"]
+[ext_resource type="Resource" uid="uid://c76xe2kg3p00l" path="res://data/units/sword-court/tier 3/trompero/upgrades/a_path/trompero_a2.tres" id="3_yb7m6"]
+
+[resource]
+script = ExtResource("1_vgg6c")
+next_choices = Array[ExtResource("1_vgg6c")]([ExtResource("2_7c2f4"), ExtResource("3_yb7m6")])
+gambit_bonuses = Dictionary[String, float]({
+"radius_cells": 1.0
+})
+gambit_overrides = Dictionary[String, float]({
+"can_wrack": 1.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

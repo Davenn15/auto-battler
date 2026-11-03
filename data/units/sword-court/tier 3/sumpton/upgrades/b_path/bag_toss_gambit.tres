@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BagTossGambit" format=3 uid="uid://bsn1af2ic0kgj"]
+
+[ext_resource type="Resource" uid="uid://c6b0bt4uu4t6o" path="res://data/units/sword-court/tier 3/sumpton/upgrades/b_path/blade_bag.tres" id="1_3jtfu"]
+[ext_resource type="Script" uid="uid://bqx3vg5bjvlm1" path="res://data/units/sword-court/tier 3/sumpton/upgrades/b_path/scripts/bag_toss_gambit.gd" id="1_ttupj"]
+
+[resource]
+script = ExtResource("1_ttupj")
+bag_profile = ExtResource("1_3jtfu")
+bag_health_fraction = 1.1
+bag_ward_multiplier = 1.0
+blade_interval = 0.8
+metadata/_custom_type_script = "uid://bqx3vg5bjvlm1"

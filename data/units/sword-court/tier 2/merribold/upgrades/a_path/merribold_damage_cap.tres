@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DamageCapPassive" format=3 uid="uid://tdrik5hyt2gs"]
+
+[ext_resource type="Script" uid="uid://b3x0twf57lbsy" path="res://data/units/sword-court/tier 2/merribold/upgrades/a_path/scripts/damage_cap_passive.gd" id="1_yjlxv"]
+
+[resource]
+script = ExtResource("1_yjlxv")
+max_share_of_health = 0.15
+metadata/_custom_type_script = "uid://b3x0twf57lbsy"

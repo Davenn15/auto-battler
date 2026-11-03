@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cye5kemqt0x0k"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_aaehh"]
+[ext_resource type="Resource" uid="uid://d2pcmeevbewj7" path="res://data/units/sword-court/tier 3/bescard/upgrades/a_path/bescard_a1.tres" id="2_pggjx"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_tdhag"]
+[ext_resource type="Resource" uid="uid://bsthudkix80iv" path="res://data/units/sword-court/tier 3/bescard/upgrades/a_path/bescard_a2.tres" id="3_mqblv"]
+
+[resource]
+script = ExtResource("1_aaehh")
+next_choices = Array[ExtResource("1_aaehh")]([ExtResource("2_pggjx"), ExtResource("3_mqblv")])
+gambit_overrides = Dictionary[String, float]({
+"cleanse_on_kill": 1.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

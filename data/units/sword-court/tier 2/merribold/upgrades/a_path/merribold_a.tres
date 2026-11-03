@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://je47pwm3rj3u"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_nk2ng"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_t1j3x"]
+[ext_resource type="Resource" uid="uid://c1a3thqhhbmdt" path="res://data/units/sword-court/tier 2/merribold/upgrades/a_path/merribold_a1.tres" id="2_uxyof"]
+[ext_resource type="Resource" uid="uid://bk5fll3xgjqgu" path="res://data/units/sword-court/tier 2/merribold/upgrades/a_path/merribold_a2.tres" id="3_lxo17"]
+[ext_resource type="Resource" uid="uid://dqwx4h4l0cu3x" path="res://data/units/sword-court/tier 2/merribold/upgrades/a_path/merribold_low_health_wards.tres" id="5_bve8r"]
+
+[resource]
+script = ExtResource("1_nk2ng")
+passives = Array[ExtResource("2_t1j3x")]([ExtResource("5_bve8r")])
+next_choices = Array[ExtResource("1_nk2ng")]([ExtResource("2_uxyof"), ExtResource("3_lxo17")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"
