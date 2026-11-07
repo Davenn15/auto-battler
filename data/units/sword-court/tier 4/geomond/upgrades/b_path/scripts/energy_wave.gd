@@ -34,7 +34,7 @@ func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color
 
 
 ## Replaces Projectile's homing: rolls straight on, touching everyone along the way.
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var step := minf(WAVE_SPEED * delta, remaining)
 	var from := global_position
 	var to := from + direction * step
@@ -62,13 +62,14 @@ func _process(delta: float) -> void:
 ## everything else happens for each enemy.
 func _hit_unit(enemy: BattleUnit) -> void:
 	var extra := max_health_percent * enemy.max_health * pow(wrack_multiplier, wrack_level)
-	var dealt := enemy.take_damage(damage + extra, wrack_level, damage_type, ignore_ward)
+	var dealt := enemy.take_damage(damage + extra, wrack_level, damage_type, ignore_ward, instance_from_id(shooter_id) as BattleUnit)
 	get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 	var shooter := instance_from_id(shooter_id) as BattleUnit
 	if shooter != null:
 		if not _gave_charge and dealt > 0.0:
-			shooter.gain_charge_from_attack(dealt)
+			shooter.gain_charge_from_attack(dealt, enemy)
 			_gave_charge = true
+		enemy.notify_attacked(shooter, dealt)
 		shooter.notify_attack_hit(enemy, dealt)
 	enemy.gain_charge_from_hit(dealt)
 	BattleUnit.run_hit_effects(hit_effects, enemy, dealt, wrack_level)

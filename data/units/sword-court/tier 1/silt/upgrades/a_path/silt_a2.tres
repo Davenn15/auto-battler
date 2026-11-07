@@ -6,5 +6,6 @@
 
 [resource]
 script = ExtResource("1_sbrym")
+description = "Killing an enemy with an attack fills Silt's Charge."
 passives = Array[ExtResource("2_icg4d")]([ExtResource("4_75io8")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PistolPassive" format=3 uid="uid://ctfbrchfskwa7"]
+
+[ext_resource type="Script" uid="uid://bsjm513k7q825" path="res://data/units/sword-court/tier 3/von carrow/passive/pistol_passive.gd" id="1_5tomj"]
+
+[resource]
+script = ExtResource("1_5tomj")
+description = "Every few attacks, Von Carrow fires a longer-range pistol shot with extra damage and Wrack Chance."
+pistol_range = 3
+wrack_bonus = 0.35
+metadata/_custom_type_script = "uid://bsjm513k7q825"

@@ -6,5 +6,6 @@
 
 [resource]
 script = ExtResource("1_viph3")
+description = "Garth can't be crowd controlled while shielded."
 passives = Array[ExtResource("2_22gnl")]([ExtResource("3_22gnl")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

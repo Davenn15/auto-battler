@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_mainr")
+description = "Getting a kill while raging resets the rage's duration."
 gambit_overrides = Dictionary[String, float]({
 "refresh_on_kill": 1.0
 })

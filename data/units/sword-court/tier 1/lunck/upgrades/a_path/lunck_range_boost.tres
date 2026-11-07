@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_lol3t")
 range_bonus = 1
+description = "His aura reaches farther."
 metadata/_custom_type_script = "uid://dx6sbggbu78po"

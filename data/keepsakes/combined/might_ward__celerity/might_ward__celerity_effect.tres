@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LowHealthDamageEffect" format=3]
+
+[ext_resource type="Script" uid="uid://cjtg7l1whxikl" path="res://data/keepsakes/effects/low_health_damage_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+bonus = 0.25
+threshold = 0.5
+metadata/_custom_type_script = "uid://cjtg7l1whxikl"

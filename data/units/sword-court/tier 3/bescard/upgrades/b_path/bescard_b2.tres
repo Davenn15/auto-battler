@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_nex5a")
+description = "Each strike in the flurry makes the target bleed."
 gambit_overrides = Dictionary[String, float]({
-"bleed_percent": 0.035
+"bleed_percent": 0.03
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MarkGambit" format=3 uid="uid://ll3x6dafaf03"]
+
+[ext_resource type="Script" uid="uid://c6av0hs4uaqsr" path="res://data/units/sword-court/tier 3/von carrow/upgrades/b_path/scripts/mark_gambit.gd" id="1_5aqm1"]
+
+[resource]
+script = ExtResource("1_5aqm1")
+description = "Marks the nearby enemy who has dealt the most damage, cutting its Wards, and goes after it. If it dies while marked, she gains a big shield."
+ward_cut = 0.5
+cast_time = 0.3
+metadata/_custom_type_script = "uid://c6av0hs4uaqsr"

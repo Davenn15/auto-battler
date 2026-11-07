@@ -6,5 +6,6 @@
 
 [resource]
 script = ExtResource("1_53hg6")
+description = "Lunck's aura also gives Insight."
 passives = Array[ExtResource("2_inby8")]([ExtResource("3_inby8")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

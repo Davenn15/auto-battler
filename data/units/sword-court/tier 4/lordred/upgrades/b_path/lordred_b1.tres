@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bk70y8v2inxxl"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_mho86"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_i6g5s"]
+[ext_resource type="Resource" uid="uid://cmg15ktro6j1x" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/attribute_ward_passive.tres" id="3_i6g5s"]
+
+[resource]
+script = ExtResource("1_mho86")
+description = "Each of his Wards grows with its matching attribute."
+passives = Array[ExtResource("2_i6g5s")]([ExtResource("3_i6g5s")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -7,4 +7,5 @@ script = ExtResource("1_o8oa4")
 shield_amount = 250.0
 duration = 4.0
 cast_time = 0.5
+description = "Shields himself for a few seconds."
 metadata/_custom_type_script = "uid://bjsn85rjsce6w"

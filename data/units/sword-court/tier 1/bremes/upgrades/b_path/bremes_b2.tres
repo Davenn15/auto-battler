@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_oafs0")
+description = "Mirror Image creates one more copy."
 gambit_bonuses = Dictionary[String, float]({
 "clone_count": 1.0
 })

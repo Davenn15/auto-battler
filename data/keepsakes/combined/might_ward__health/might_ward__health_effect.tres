@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="DelayedHealEffect" format=3]
+
+[ext_resource type="Script" uid="uid://fpigg0rqfuo3" path="res://data/keepsakes/combined/might_ward__health/delayed_heal_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+share = 0.15
+delay = 3.0
+metadata/_custom_type_script = "uid://fpigg0rqfuo3"

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ReloadOnGainPassive" format=3 uid="uid://ccb7r8c8bdkni"]
+
+[ext_resource type="Script" uid="uid://c2qphstirrqvn" path="res://data/units/sword-court/tier 3/von carrow/upgrades/a_path/scripts/reload_on_gain_passive.gd" id="1_3ti36"]
+
+[resource]
+script = ExtResource("1_3ti36")
+description = "Gaining permanent stats loads a pistol shot."
+metadata/_custom_type_script = "uid://c2qphstirrqvn"

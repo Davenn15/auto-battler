@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ConstellationGambit" format=3 uid="uid://cx1kamj6uamb"]
+
+[ext_resource type="Script" uid="uid://blvbunkhy2lej" path="res://data/units/sword-court/tier 4/vere/gambit/constellation_gambit.gd" id="1_bkxj8"]
+
+[resource]
+script = ExtResource("1_bkxj8")
+cast_time = 0.5
+description = "A three-part combo, one part per cast: blink and strike the enemy with the most Insight, then the most Celerity, then the most health, hardest of all."
+metadata/_custom_type_script = "uid://blvbunkhy2lej"

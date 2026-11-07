@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_1kag6")
+description = "New Gambit: Cleave. Hits every enemy next to him and shields him for each one hit."
 gambit = ExtResource("1_pwpx4")
 next_choices = Array[ExtResource("1_1kag6")]([ExtResource("3_1o046"), ExtResource("4_h8qv4")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

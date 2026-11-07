@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/match/ai_eval.gd" id="1_eval"]
+
+[node name="AiEval" type="Node2D"]
+script = ExtResource("1_eval")

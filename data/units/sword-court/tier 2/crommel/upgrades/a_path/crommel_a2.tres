@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_uejak")
+description = "The bolt can Wrack."
 gambit_overrides = Dictionary[String, float]({
 "can_wrack": 1.0
 })

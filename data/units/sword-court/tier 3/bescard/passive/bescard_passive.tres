@@ -6,3 +6,4 @@
 script = ExtResource("1_bpass")
 duration = 3.5
 passive_name = "Unruly"
+description = "Damage Bescard takes is dealt to him over a few seconds instead of all at once."

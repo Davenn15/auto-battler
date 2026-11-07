@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LullabyGambit" format=3 uid="uid://bnkxsi6jff4gs"]
+
+[ext_resource type="Script" uid="uid://1avfnlhibkck" path="res://data/units/sword-court/tier 2/prancelot/upgrades/b_path/scripts/lullaby_gambit.gd" id="1_cuckd"]
+
+[resource]
+script = ExtResource("1_cuckd")
+cast_time = 1.0
+description = "Sends a lulling wave forward. Enemies in it fall asleep until the time runs out or they take enough damage."
+metadata/_custom_type_script = "uid://1avfnlhibkck"

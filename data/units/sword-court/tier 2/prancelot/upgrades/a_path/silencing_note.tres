@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NotePassive" format=3 uid="uid://d2efsg2koumbq"]
+
+[ext_resource type="Script" uid="uid://b2kle04pd2vts" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/scripts/note_passive.gd" id="1_s5ndc"]
+
+[resource]
+script = ExtResource("1_s5ndc")
+kind = 2
+every = 5
+duration = 2.5
+description = "Every few attacks, silences the nearby enemy with the most Charge: it can't gain Charge or cast for a while."
+metadata/_custom_type_script = "uid://b2kle04pd2vts"

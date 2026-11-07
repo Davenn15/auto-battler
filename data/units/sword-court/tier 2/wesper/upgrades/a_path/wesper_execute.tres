@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_0yw0b")
-health_threshold = 0.2
+description = "Executes enemies left on very low health."
 metadata/_custom_type_script = "uid://bqqm1eamehdh"

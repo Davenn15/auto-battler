@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EchoStrikeEffect" format=3]
+
+[ext_resource type="Script" uid="uid://j8j3qu5laof" path="res://data/keepsakes/combined/might__celerity/echo_strike_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+every = 4
+metadata/_custom_type_script = "uid://j8j3qu5laof"

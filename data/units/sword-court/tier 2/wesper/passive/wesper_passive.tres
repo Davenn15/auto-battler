@@ -6,4 +6,5 @@
 script = ExtResource("1_t7ysw")
 bonus_wrack_chance = 0.3
 isolation_range_cells = 1
+description = "Wesper has extra Wrack Chance against enemies with no allies near them."
 metadata/_custom_type_script = "uid://bilux78farr6q"

@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1_qoymj")
+description = "The bolt is wider."
 next_choices = Array[ExtResource("1_qoymj")]([ExtResource("2_57upr"), ExtResource("3_cuyr4")])
 gambit_bonuses = Dictionary[String, float]({
 "bolt_radius": 12.0

@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_f3jnr")
+description = "His waves permanently strip the Wards of enemies they hit."
 gambit_overrides = Dictionary[String, float]({
 "ward_shred_per_hit": 10.0
 })

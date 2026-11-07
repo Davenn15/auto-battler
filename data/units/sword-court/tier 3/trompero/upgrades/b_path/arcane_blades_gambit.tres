@@ -6,8 +6,9 @@
 script = ExtResource("1_8hpux")
 blades_per_cast = 4
 max_blades = 20
-blade_damage = 30.0
+blade_damage = 25.0
 blade_insight_scaling = 0.2
 shield_duration = 6.0
 cast_time = 0.5
+description = "Summons arcane blades that orbit him for the rest of combat. Each attack, every blade fires a shot too. Casting again adds more."
 metadata/_custom_type_script = "uid://c10t1o5gixjc0"

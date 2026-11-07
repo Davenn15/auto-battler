@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://b6eg4khrgqvo0"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_6xn10"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_k2ybf"]
+[ext_resource type="Resource" uid="uid://cimlafthwxl8q" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/shard_scaling_passive.tres" id="3_k2ybf"]
+
+[resource]
+script = ExtResource("1_6xn10")
+description = "His blade shards also deal part of the attacker's damage."
+passives = Array[ExtResource("2_k2ybf")]([ExtResource("3_k2ybf")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -4,6 +4,9 @@
 
 [resource]
 script = ExtResource("1_c7pqf")
+enemy_might_reduction = 40.0
 duration = 6.0
+damage = 85.0
 cast_time = 1.0
+description = "Bellows: nearby allies gain Might, and nearby enemies lose Might and take damage, for a while."
 metadata/_custom_type_script = "uid://bqxuhfakopowh"

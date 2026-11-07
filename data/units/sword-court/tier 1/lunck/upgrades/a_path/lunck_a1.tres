@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1_50afl")
+description = "Lunck's aura and attacks reach farther still."
 passives = Array[ExtResource("2_pka87")]([ExtResource("3_pka87")])
 attack_range_bonus = 1
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

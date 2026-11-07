@@ -4,5 +4,6 @@
 
 [resource]
 script = ExtResource("1_84r6m")
-cast_time = 1.5
+cast_time = 1.25
+description = "Fires a powerful attack at the enemy in range with the most health, with bonus max-health damage and extra Wrack Chance."
 metadata/_custom_type_script = "uid://bktmjhf1kv154"

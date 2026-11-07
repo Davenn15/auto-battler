@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="StatBonusPassive" format=3 uid="uid://b5ppqyiavi06u"]
+
+[ext_resource type="Script" uid="uid://sdo6eme3alib" path="res://scripts/stat_bonus_passive.gd" id="1_r82vb"]
+
+[resource]
+script = ExtResource("1_r82vb")
+stat = 6
+amount = 0.5
+description = "Bonus Wrack Chance."
+metadata/_custom_type_script = "uid://sdo6eme3alib"

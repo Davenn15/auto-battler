@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_metfj")
+description = "His waves also shield allies they pass through."
 gambit_overrides = Dictionary[String, float]({
 "wave_shields_allies": 1.0
 })

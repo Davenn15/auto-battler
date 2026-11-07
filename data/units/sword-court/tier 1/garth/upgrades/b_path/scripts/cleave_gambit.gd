@@ -32,14 +32,17 @@ func execute(caster: BattleUnit) -> void:
 	_play_slash(caster)
 
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
+	# Gambit damage can wrack if an item lets it: one roll for the whole cleave.
+	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+	hit_damage *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	var hits := 0
 	for enemy in enemies:
-		var dealt := enemy.take_damage(hit_damage, 0, damage_type)
+		var dealt := enemy.take_damage(hit_damage, wrack, damage_type)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if dealt <= 0.0:
 			continue   # dodged: no shield, no stun
 		hits += 1
-		enemy.stun(stun_duration)
+		enemy.stun(stun_duration, caster)
 	caster.add_shield(shield_per_enemy * hits, shield_duration, caster.get_instance_id())
 
 

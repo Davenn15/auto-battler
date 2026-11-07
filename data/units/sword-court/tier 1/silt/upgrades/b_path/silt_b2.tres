@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_2yln4")
+description = "Knives go to one more ally."
 gambit_bonuses = Dictionary[String, float]({
-"ally_count": 2.0
+"ally_count": 1.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

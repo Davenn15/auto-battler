@@ -54,15 +54,15 @@ func execute(caster: BattleUnit) -> void:
 			caster.place_at(dest)   # the logical move is instant; the slide below is only visual
 			var end := caster.global_position
 			caster.global_position = start
-			caster.create_tween().tween_property(caster, "global_position", end, dash_time)
-			await caster.get_tree().create_timer(dash_time).timeout
+			caster.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS).tween_property(caster, "global_position", end, dash_time)
+			await caster.get_tree().create_timer(dash_time, true, true).timeout
 
 	for i in strikes:
 		# Either unit may have died, or the battle ended, while we were waiting.
 		if not _alive(caster) or not caster.active or not _alive(target):
 			return
 		caster.attack_now(target)
-		await caster.get_tree().create_timer(strike_interval).timeout
+		await caster.get_tree().create_timer(strike_interval, true, true).timeout
 
 
 ## Untyped on purpose: the unit may have been freed by the time this is called.

@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_pav0f")
+description = "The bag's landing stuns."
 gambit_overrides = Dictionary[String, float]({
-"landing_stun": 1.0
+"landing_stun": 0.75
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

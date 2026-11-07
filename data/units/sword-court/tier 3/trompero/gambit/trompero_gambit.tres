@@ -5,8 +5,9 @@
 [resource]
 script = ExtResource("1_6lsme")
 duration = 5.0
-tick_insight_scaling = 0.2
-burst_damage = 175.0
-burst_insight_scaling = 0.65
+burst_damage = 150.0
+burst_insight_scaling = 0.6
+stun_time = 0.5
 cast_time = 1.75
+description = "Places a ring that damages enemies inside it, then explodes and stuns them."
 metadata/_custom_type_script = "uid://d1nc5eow08rsl"

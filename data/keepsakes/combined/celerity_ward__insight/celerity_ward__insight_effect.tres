@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LowHealthTriggerEffect" format=3]
+
+[ext_resource type="Script" uid="uid://dhc1ukjl0mmn8" path="res://data/keepsakes/effects/low_health_trigger_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+threshold = 0.5
+hide_time = 2.5
+metadata/_custom_type_script = "uid://dhc1ukjl0mmn8"

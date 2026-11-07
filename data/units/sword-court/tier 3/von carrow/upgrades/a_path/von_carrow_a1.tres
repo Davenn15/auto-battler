@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://hf38gmne6u1f"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_w2na2"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_3rtk8"]
+
+[resource]
+script = ExtResource("1_w2na2")
+description = "Her explosive shot heals her for part of its damage."
+gambit_overrides = Dictionary[String, float]({
+"lifesteal": 0.5
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

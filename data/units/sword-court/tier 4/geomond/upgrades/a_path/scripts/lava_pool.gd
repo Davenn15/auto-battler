@@ -37,7 +37,7 @@ func setup(caster: BattleUnit, p_origin: Vector2, p_dir: Vector2, p_length: floa
 	z_index = -1   # under the units
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_time_left -= delta
 	_tick_timer -= delta
 	if _tick_timer <= 0.0:
@@ -50,7 +50,7 @@ func _process(delta: float) -> void:
 				var dealt := unit.take_damage(damage_per_second * TICK_INTERVAL, 0, damage_type)
 				get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)
 	if _time_left <= 0.0:
-		set_process(false)
+		set_physics_process(false)
 		var tween := create_tween()
 		tween.tween_property(self, "modulate:a", 0.0, 0.3)
 		tween.tween_callback(queue_free)

@@ -5,7 +5,9 @@
 [resource]
 script = ExtResource("1_otf42")
 duration = 7.0
-ward_bonus = 50.0
-reflect_chance = 1.0
+ward_bonus = 35.0
+celerity_bonus = 40.0
+reflect_chance = 0.8
 cast_time = 0.5
+description = "Takes a stance for a while: extra Wards and Celerity, and a chance to reflect incoming projectiles."
 metadata/_custom_type_script = "uid://bunkcbjqogkmm"

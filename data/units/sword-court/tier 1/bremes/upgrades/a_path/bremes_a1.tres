@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_s26w2")
+description = "Her strike also deals damage based on the target's max health."
 gambit_bonuses = Dictionary[String, float]({
 "max_health_percent": 0.1
 })

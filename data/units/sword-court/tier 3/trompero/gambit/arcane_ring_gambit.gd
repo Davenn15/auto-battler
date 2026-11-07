@@ -42,9 +42,11 @@ func execute(caster: BattleUnit) -> void:
 			Stats.scaled(tick_damage, tick_insight_scaling, insight),
 			Stats.scaled(burst_damage, burst_insight_scaling, insight),
 			stun_time, Stats.DamageType.INSIGHT)
-	ring.wrack_chance = caster.get_stat(Stats.Stat.WRACK_CHANCE) if can_wrack else 0.0
-	ring.wrack_multiplier = 1.0 + caster.get_stat(Stats.Stat.WRACK_DAMAGE)
-	ring.insight_drain = insight_drain
+	# Wracks if A lets it or an item does; when it could already, items add wrack damage.
+	var ring_wracks := can_wrack or caster.can_wrack_kind(Stats.EffectKind.GAMBIT_DAMAGE)
+	ring.wrack_chance = caster.get_stat(Stats.Stat.WRACK_CHANCE) if ring_wracks else 0.0
+	ring.wrack_multiplier = caster.effect_wrack_multiplier(1, Stats.EffectKind.GAMBIT_DAMAGE, can_wrack)   # per level
+	ring.insight_drain = insight_drain * caster.wrack_effect_multiplier(Stats.EffectKind.CONTROL)
 	ring.charge_per_burst_hit = charge_per_burst_hit
 	caster.get_tree().current_scene.add_child(ring)
 	ring.global_position = caster.grid.cell_to_world(ring.center)

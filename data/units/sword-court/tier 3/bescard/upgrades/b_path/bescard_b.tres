@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_kqq4m")
+description = "New Gambit: Flurry. A quick burst of attacks on his target."
 gambit = ExtResource("1_kqkwv")
 next_choices = Array[ExtResource("1_kqq4m")]([ExtResource("3_nnuof"), ExtResource("4_t8pfo")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

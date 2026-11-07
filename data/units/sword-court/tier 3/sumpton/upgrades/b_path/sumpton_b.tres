@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_umdej")
+description = "New Gambit: Bag Toss. Throws his blade bag into the enemies, where it keeps firing blades."
 gambit = ExtResource("1_2gm8s")
 next_choices = Array[ExtResource("1_umdej")]([ExtResource("3_6emb5"), ExtResource("4_2lwwm")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

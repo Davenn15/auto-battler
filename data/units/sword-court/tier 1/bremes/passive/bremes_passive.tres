@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_q1ot4")
 dodge_chance = 0.15
+description = "Bremes has a chance to dodge incoming hits."
 metadata/_custom_type_script = "uid://oxsm3736kp74"

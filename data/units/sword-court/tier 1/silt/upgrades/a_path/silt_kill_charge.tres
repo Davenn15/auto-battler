@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_s4s3a")
+description = "Kills with attacks fill his Charge."
 metadata/_custom_type_script = "uid://cabg242smwaxu"

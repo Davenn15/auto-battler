@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ChargeCelerityEffect" format=3]
+
+[ext_resource type="Script" uid="uid://dnt41bvar1toq" path="res://data/keepsakes/effects/charge_celerity_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+celerity_per_step = 3.0
+charge_per_step = 10.0
+metadata/_custom_type_script = "uid://dnt41bvar1toq"

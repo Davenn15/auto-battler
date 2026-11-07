@@ -4,5 +4,6 @@
 
 [resource]
 script = ExtResource("1_tbmm6")
-max_bonus_blades = 10
+max_bonus_blades = 6
+description = "Ally Wracks bank extra blades for his next toss."
 metadata/_custom_type_script = "uid://mpwa8nx188oq"

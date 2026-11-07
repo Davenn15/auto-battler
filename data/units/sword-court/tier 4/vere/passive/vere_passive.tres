@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="StarburnPassive" format=3 uid="uid://bchypi44kgeel"]
+
+[ext_resource type="Script" uid="uid://c02ciiydxr4pe" path="res://data/units/sword-court/tier 4/vere/passive/starburn_passive.gd" id="1_v2mdy"]
+
+[resource]
+script = ExtResource("1_v2mdy")
+duration = 2.5
+description = "Vere's attacks leave a burn that deals part of their damage again."
+metadata/_custom_type_script = "uid://c02ciiydxr4pe"

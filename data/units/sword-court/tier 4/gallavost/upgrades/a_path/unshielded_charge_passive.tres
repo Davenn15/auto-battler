@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="UnshieldedChargePassive" format=3 uid="uid://c8borlypbajpr"]
+
+[ext_resource type="Script" uid="uid://wv0vssk6ykcg" path="res://data/units/sword-court/tier 4/gallavost/upgrades/a_path/scripts/unshielded_charge_passive.gd" id="1_ulqq2"]
+
+[resource]
+script = ExtResource("1_ulqq2")
+per_second = 5.0
+description = "Gains Charge over time while unshielded."
+metadata/_custom_type_script = "uid://wv0vssk6ykcg"

@@ -6,7 +6,8 @@ extends Resource
 @export var gambit_name: String = "Gambit"
 ## Seconds the unit spends Acting before the effect happens. 0 = instant.
 @export var cast_time: float = 0.0
-
+## Shown in the unit info panel.
+@export_multiline var description: String = ""
 
 ## Checked before charge is spent. Return false when the Action has no valid use right
 ## now (e.g. no enemy in range); the unit keeps its full charge and checks again later.

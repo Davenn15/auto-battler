@@ -4,11 +4,14 @@ extends RefCounted
 ## use them. Tweaking balance or renaming things should only need edits in this file.
 
 ## Every stat a unit has. Add new ones here (and in UnitData.get_base_stat).
-enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE }
+enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM }
 
 ## The three kinds of damage. The order matches the "Might / Insight / Celerity" dropdown
 ## on UnitData and Gambits, so keep them in sync if you reorder or rename.
 enum DamageType { MIGHT, INSIGHT, CELERITY }
+
+## Kinds of non-attack effect that items can let wrack.
+enum EffectKind { GAMBIT_DAMAGE, CONTROL, HEALING }
 
 ## Display names, for any UI that shows stats or damage types.
 const STAT_NAMES := {
@@ -20,11 +23,13 @@ const STAT_NAMES := {
 	Stat.CELERITY_WARD: "Celerity Ward",
 	Stat.WRACK_CHANCE: "Wrack Chance",
 	Stat.WRACK_DAMAGE: "Wrack Damage",
+	Stat.VAMPIRISM: "Vampirism",
 }
 
-## Highest wrack level a hit can reach: 1 = wrack, 2 = Hyper-Wrack.
-const MAX_WRACK_LEVEL := 2
-const HYPER_WRACK_COLOR := Color(1.0, 0.3, 0.9)
+## Highest wrack level a hit can reach: 1 = wrack, 2 = Hyper-Wrack, 3 = Uber-Wrack.
+const MAX_WRACK_LEVEL := 3
+const HYPER_WRACK_COLOR := Color(0.561, 0.302, 0.902, 1.0)
+const UBER_WRACK_COLOR := Color(0.875, 0.427, 0.984, 1.0)
 
 
 ## Rolls a hit's wrack level from its wrack chance: 0 = normal, 1 = wrack, 2 = Hyper-Wrack.
@@ -32,7 +37,7 @@ const HYPER_WRACK_COLOR := Color(1.0, 0.3, 0.9)
 ## so 1.3 always wracks and has a 30% chance to Hyper-Wrack.
 static func roll_wrack(chance: float) -> int:
 	var level := floori(chance)
-	if randf() < chance - level:
+	if CombatRng.randf() < chance - level:
 		level += 1
 	return mini(level, MAX_WRACK_LEVEL)
 
@@ -62,7 +67,9 @@ const WRACK_BRIGHTEN := 0.45
 ## Hyper-Wrack color for a Hyper-Wrack.
 static func damage_color(damage_type: int, wrack_level: int = 0) -> Color:
 	var color: Color = DAMAGE_TYPE_COLORS.get(damage_type, Color.WHITE)
-	if wrack_level >= 2:
+	if wrack_level >= 3:
+		return color.lerp(UBER_WRACK_COLOR, 0.7)
+	if wrack_level == 2:
 		return color.lerp(HYPER_WRACK_COLOR, 0.6)
 	return color.lightened(WRACK_BRIGHTEN) if wrack_level == 1 else color
 
@@ -149,3 +156,17 @@ static func tier_multiplier(stat: Stat, tier: int) -> float:
 
 static func tier_health_multiplier(tier: int) -> float:
 	return TIER_HEALTH_MULTIPLIER.get(tier, 1.0)
+
+
+## Reserve buffs for fully upgraded units, bought in the match shop. Each buff grows the
+## same stats as tiers do. PLACEHOLDER sizes until the exact rule is decided.
+const BUFF_STAT_STEP := 0.05
+const BUFF_HEALTH_STEP := 0.15
+
+
+static func buff_multiplier(stat: Stat, buffs: int) -> float:
+	return 1.0 + BUFF_STAT_STEP * buffs if stat in TIER_SCALED_STATS else 1.0
+
+
+static func buff_health_multiplier(buffs: int) -> float:
+	return 1.0 + BUFF_HEALTH_STEP * buffs

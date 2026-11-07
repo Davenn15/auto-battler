@@ -40,7 +40,7 @@ func execute(caster: BattleUnit) -> void:
 		caster.lock_for((_total_strikes(wracks) - done) * strike_interval)
 		caster.attack_now(target, 0.0, 0.0, null, effects)
 		done += 1
-		await caster.get_tree().create_timer(strike_interval).timeout
+		await caster.get_tree().create_timer(strike_interval, true, true).timeout
 
 
 ## Strikes in this flurry so far: the base count plus one per landed wrack, up to the cap.

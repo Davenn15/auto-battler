@@ -33,6 +33,7 @@ func execute(caster: BattleUnit) -> void:
 	for unit in recipients:
 		unit.add_shield(shield_amount, duration, caster.get_instance_id())
 		unit.add_status(AdoredStatus.new(caster.get_instance_id(), wrack_chance, charge_on_kill, duration))
+		KeepsakeVfx.head_icon(unit, "VfxAdoreHeart", KeepsakeVfx.HeadIcon.HEART, KeepsakeVfx.LUNCK_ORANGE, duration)
 
 
 ## The living ally (not Lunck) whose best attribute is highest.

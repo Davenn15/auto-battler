@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_7mb1l")
 cast_time = 1.0
+description = "Shields every ally within his aura, himself included."
 metadata/_custom_type_script = "uid://vxih1jw4ope2"

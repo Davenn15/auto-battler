@@ -32,6 +32,12 @@ const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 ## Each cast heals the bag by this share of its max health (0.25 = 25%). A bag thrown
 ## after the last one died comes back at this much health instead of full.
 @export_range(0.0, 1.0, 0.05) var recast_heal_fraction: float = 0.25
+@export_group("After Sumpton dies")
+## Share of the bag's max health it loses per second once Sumpton is dead (0.02 = 2%).
+@export var decay_start: float = 0.02
+## How much that rate climbs every second (0.02 = +2% per second, each second).
+@export var decay_ramp: float = 0.02
+
 
 ## Only throws if some landing spot would hit an enemy.
 func can_use(caster: BattleUnit) -> bool:
@@ -45,6 +51,11 @@ func execute(caster: BattleUnit) -> void:
 	if spot["count"] == 0:
 		return
 	var landing := Stats.scaled(landing_damage, landing_might_scaling, caster.get_stat(Stats.Stat.MIGHT))
+	# Items can let the landing's damage and stun wrack. Rolled now, while Sumpton is
+	# surely alive, since he may not be when the bag lands.
+	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+	landing *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
+	var stun := landing_stun * caster.wrack_effect_multiplier(Stats.EffectKind.CONTROL) if landing_stun > 0.0 else 0.0
 	var bag := _find_bag(caster)
 	if bag != null:
 		bag.heal(bag.max_health * recast_heal_fraction, caster.get_instance_id())
@@ -56,8 +67,8 @@ func execute(caster: BattleUnit) -> void:
 			caster.add_status(BagThrownStatus.new())
 		else:
 			bag.set_health(bag.max_health * recast_heal_fraction)   # the last bag died
-		await caster.get_tree().create_timer(flight_time).timeout
-	_land(bag, landing)
+		await caster.get_tree().create_timer(flight_time, true, true).timeout
+	_land(bag, landing, wrack, stun)
 
 ## True once this caster has thrown a bag this battle.
 func _has_thrown(caster: BattleUnit) -> bool:
@@ -74,15 +85,16 @@ func _spawn_bag(caster: BattleUnit, cell: Vector2i) -> BattleUnit:
 	caster.get_tree().call_group("battle_manager", "add_summon", bag)
 	# After add_summon: start_combat clears statuses, so these must come later.
 	var blade := Stats.scaled(blade_damage, blade_might_scaling, caster.get_stat(Stats.Stat.MIGHT))
-	bag.add_status(BagStatus.new(blade_interval, blade_range_cells, blade, flight_time))
+	bag.add_status(BagStatus.new(blade_interval, blade_range_cells, blade, flight_time,
+			decay_start, decay_ramp))
 	# The bag already holds its cell; this only flies it there from Sumpton on screen.
 	bag.global_position = caster.global_position
-	bag.create_tween().tween_property(bag, "global_position", caster.grid.cell_to_world(cell), flight_time)
+	bag.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS).tween_property(bag, "global_position", caster.grid.cell_to_world(cell), flight_time)
 	return bag
 
 
 ## Untyped `bag`: it may have been destroyed while in the air.
-func _land(bag, damage_amount: float) -> void:
+func _land(bag, damage_amount: float, wrack: int, stun: float) -> void:
 	if not _alive(bag):
 		return
 	bag.show_float_text("Thud", Color(0.9, 0.75, 0.5))
@@ -92,10 +104,10 @@ func _land(bag, damage_amount: float) -> void:
 			continue
 		if bag.grid.get_distance(bag.cell, enemy.cell) > landing_radius_cells:
 			continue
-		var dealt := enemy.take_damage(damage_amount, 0, Stats.DamageType.MIGHT)
+		var dealt := enemy.take_damage(damage_amount, wrack, Stats.DamageType.MIGHT)
 		bag.get_tree().call_group("damage_tracker", "record_damage", bag.get_credit_id(), dealt)
-		if landing_stun > 0.0 and dealt > 0.0 and enemy.alive:
-			enemy.stun(landing_stun)
+		if stun > 0.0 and dealt > 0.0 and enemy.alive:
+			enemy.stun(stun)   # already wracked when thrown
 
 
 ## The free cell within throw range with the most enemies within landing radius. Ties go

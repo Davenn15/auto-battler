@@ -22,4 +22,5 @@ starting_charge = 30.0
 sprite = ExtResource("5_xbq4w")
 might = 55.0
 celerity = 135.0
+attack_damage_type = 2
 metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

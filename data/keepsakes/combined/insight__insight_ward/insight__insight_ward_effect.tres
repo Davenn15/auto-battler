@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="GambitShieldEffect" format=3]
+
+[ext_resource type="Script" uid="uid://swl8xwbs2s2w" path="res://data/keepsakes/effects/gambit_shield_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+charge_multiplier = 2.0
+metadata/_custom_type_script = "uid://swl8xwbs2s2w"

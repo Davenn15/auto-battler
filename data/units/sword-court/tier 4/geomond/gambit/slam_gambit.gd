@@ -53,7 +53,7 @@ func execute(caster: BattleUnit) -> void:
 	if channel_ward_bonus > 0.0:
 		caster.add_status(ChannelWardStatus.new(channel_ward_bonus, channel_time))
 	caster.show_float_text("Slam", SLAM_COLOR)
-	await caster.get_tree().create_timer(channel_time).timeout
+	await caster.get_tree().create_timer(channel_time, true, true).timeout
 	# The caster may have died, or the battle ended, while winding up.
 	if _alive(caster) and caster.active:
 		_slam(caster)
@@ -69,10 +69,14 @@ func _slam(caster: BattleUnit) -> void:
 		return   # everyone got out of the way
 	_play_slam_visual(caster, aim["dir"])
 	var flat := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
+	# Gambit damage can wrack if an item lets it: one roll for the whole slam.
+	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+	var wrack_multiplier := caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	for enemy in enemies:
 		if not enemy.alive or not _is_in_slam(caster, origin, enemy, aim["dir"]):
 			continue
-		var dealt := enemy.take_damage(flat + max_health_percent * enemy.max_health, 0, damage_type)
+		var amount := (flat + max_health_percent * enemy.max_health) * wrack_multiplier
+		var dealt := enemy.take_damage(amount, wrack, damage_type)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 	if lava_duration > 0.0:
 		var pool := LavaPool.new()

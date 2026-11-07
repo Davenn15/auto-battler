@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://60ywa7hdtg26"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_cvkwx"]
+[ext_resource type="Resource" uid="uid://hf38gmne6u1f" path="res://data/units/sword-court/tier 3/von carrow/upgrades/a_path/von_carrow_a1.tres" id="2_6fk18"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_213bp"]
+[ext_resource type="Resource" uid="uid://bpdoano08qkd1" path="res://data/units/sword-court/tier 3/von carrow/upgrades/a_path/von_carrow_a2.tres" id="3_253ir"]
+
+[resource]
+script = ExtResource("1_cvkwx")
+description = "Each cast gives her Might for the rest of combat."
+next_choices = Array[ExtResource("1_cvkwx")]([ExtResource("2_6fk18"), ExtResource("3_253ir")])
+gambit_overrides = Dictionary[String, float]({
+"might_per_cast": 35.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

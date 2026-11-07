@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cshquikiyoysr"]
+
+[ext_resource type="Resource" uid="uid://7ywdnje6tsdl" path="res://data/units/sword-court/tier 4/vere/upgrades/b_path/starfall_gambit.tres" id="1_4pkfq"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_mhh1g"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_vuovx"]
+[ext_resource type="Resource" uid="uid://dbehdur7xh6lq" path="res://data/units/sword-court/tier 4/vere/upgrades/b_path/vere_b1.tres" id="3_8g3ph"]
+[ext_resource type="Resource" uid="uid://fymaglv5n1yl" path="res://data/units/sword-court/tier 4/vere/upgrades/b_path/vere_b2.tres" id="4_rf0gu"]
+
+[resource]
+script = ExtResource("1_mhh1g")
+description = "New Gambit: Starfall. Leaps up and rains attacks on enemies in an area."
+gambit = ExtResource("1_4pkfq")
+next_choices = Array[ExtResource("1_mhh1g")]([ExtResource("3_8g3ph"), ExtResource("4_rf0gu")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

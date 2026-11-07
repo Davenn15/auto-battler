@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="RegenShareEffect" format=3]
+
+[ext_resource type="Script" uid="uid://crpoipkc35ptj" path="res://data/keepsakes/effects/regen_share_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+share = 0.015
+metadata/_custom_type_script = "uid://crpoipkc35ptj"

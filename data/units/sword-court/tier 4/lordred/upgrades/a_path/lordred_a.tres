@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bnkq72bbha8op"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_gdpk0"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_i8coe"]
+[ext_resource type="Resource" uid="uid://cu4ftij8n8uv4" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/lordred_a1.tres" id="2_sht3d"]
+[ext_resource type="Resource" uid="uid://3tfrd7n53nrq" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/lordred_a2.tres" id="3_b2wfp"]
+[ext_resource type="Resource" uid="uid://di5by7sb5o75p" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/shared_gains_passive.tres" id="5_k2fum"]
+
+[resource]
+script = ExtResource("1_gdpk0")
+description = "Whenever an ally gains permanent stats, Lordred gains most of them too."
+passives = Array[ExtResource("2_i8coe")]([ExtResource("5_k2fum")])
+next_choices = Array[ExtResource("1_gdpk0")]([ExtResource("2_sht3d"), ExtResource("3_b2wfp")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

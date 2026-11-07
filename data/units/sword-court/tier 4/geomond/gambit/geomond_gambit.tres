@@ -4,10 +4,12 @@
 
 [resource]
 script = ExtResource("1_xcgv2")
+description = "Dashes into position, gains a shield, then winds up a huge slam that hits everything in a long line."
 dash_time = 0.3
 shield_amount = 450.0
 shield_duration = 2.5
 channel_time = 2.5
 lava_damage = 25.0
+lava_insight_scaling = 0.1
 cast_time = 0.5
 metadata/_custom_type_script = "uid://doce5a42gfcuu"

@@ -5,9 +5,10 @@
 
 [resource]
 script = ExtResource("1_c4lou")
+description = "The bag is tougher and fires blades faster."
 gambit_bonuses = Dictionary[String, float]({
-"bag_health_fraction": 0.5,
-"bag_ward_multiplier": 0.25,
+"bag_health_fraction": 0.35,
+"bag_ward_multiplier": 0.35,
 "blade_interval": -0.2
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

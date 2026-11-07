@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="GallavostPassive" format=3 uid="uid://1708rlmrb7wt"]
+
+[ext_resource type="Script" uid="uid://ddje5f44jmeow" path="res://data/units/sword-court/tier 4/gallavost/passive/gallavost_passive.gd" id="1_qrobe"]
+
+[resource]
+script = ExtResource("1_qrobe")
+shield_share = 0.65
+description = "Gallavost starts combat with part of her health as a lasting shield. While she has no shield, her damage ignores Wards."
+metadata/_custom_type_script = "uid://ddje5f44jmeow"

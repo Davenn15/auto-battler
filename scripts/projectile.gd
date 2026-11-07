@@ -16,7 +16,7 @@ var hit_effects: Array[HitEffect] = []
 var credit_id: int    # who the damage meter credits; the summoner for summons
 var ignore_ward: bool = false   # the hit skips the target's wards
 var grants_charge: bool = true   # false for extra shots that shouldn't build attack charge
-
+var is_attack: bool = true   # false for shots that aren't attacks (no charge, no on-hit, no retaliation)
 
 func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack_level: int = 0, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
 	hit_effects = p_hit_effects
@@ -32,7 +32,7 @@ func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color
 	color = p_color
 	z_index = 10
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	# Target died or was freed while we were in the air: the shot fizzles.
 	if not is_instance_valid(target) or not target.alive:
 		queue_free()
@@ -49,16 +49,19 @@ func _process(delta: float) -> void:
 func _hit() -> void:
 	if target.try_reflect(self):
 		return   # it's now flying back at whoever fired it
-	var dealt := target.take_damage(damage, wrack_level, damage_type, ignore_ward)
+	var dealt := target.take_damage(damage, wrack_level, damage_type, ignore_ward, instance_from_id(shooter_id) as BattleUnit)
 	get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
-	var shooter := instance_from_id(shooter_id) as BattleUnit
-	if shooter != null:
-		if grants_charge:
-			shooter.gain_charge_from_attack(dealt)
-		shooter.notify_attack_hit(target, dealt)
-	target.gain_charge_from_hit(dealt)
-	BattleUnit.run_hit_effects(hit_effects, target, dealt, wrack_level)
+	if is_attack:
+		var shooter := instance_from_id(shooter_id) as BattleUnit
+		if shooter != null:
+			if grants_charge:
+				shooter.gain_charge_from_attack(dealt, target)
+			shooter.notify_attack_hit(target, dealt)
+			target.notify_attacked(shooter, dealt)
+		target.gain_charge_from_hit(dealt)
+		BattleUnit.run_hit_effects(hit_effects, target, dealt, wrack_level)
 	_after_hit()
+	
 
 ## What happens once the shot has hit. Shots that do more, like bouncing, override this.
 func _after_hit() -> void:
@@ -79,5 +82,5 @@ func reflect(by: BattleUnit, wrack_chance: float) -> bool:
 	credit_id = by.get_credit_id()
 	target = shooter
 	hit_effects = []
-	color = BattleUnit.TEAM_COLORS.get(by.team, Color.WHITE)
+	color = BattleUnit.team_color(by.team)
 	return true

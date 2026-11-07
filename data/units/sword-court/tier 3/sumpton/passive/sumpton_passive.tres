@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_dawca")
 stun_duration = 0.15
+description = "Sumpton's attacks briefly stun."
 metadata/_custom_type_script = "uid://cpjfs85f2ebs8"

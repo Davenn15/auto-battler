@@ -6,5 +6,6 @@
 
 [resource]
 script = ExtResource("1_vioou")
+description = "No single hit can take more than a set share of his max health."
 passives = Array[ExtResource("2_0iwg4")]([ExtResource("3_0iwg4")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

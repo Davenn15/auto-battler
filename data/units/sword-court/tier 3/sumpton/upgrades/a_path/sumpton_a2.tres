@@ -6,5 +6,6 @@
 
 [resource]
 script = ExtResource("1_rakgc")
+description = "Each Wrack by an ally adds a blade to his next toss."
 passives = Array[ExtResource("2_r8syy")]([ExtResource("3_wj1oi")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

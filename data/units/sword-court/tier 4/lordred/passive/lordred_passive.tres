@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LordredPassive" format=3 uid="uid://kut5p0p4myvc"]
+
+[ext_resource type="Script" uid="uid://cdfg2v65k6x30" path="res://data/units/sword-court/tier 4/lordred/passive/lordred_passive.gd" id="1_0w7qu"]
+
+[resource]
+script = ExtResource("1_0w7qu")
+max_bonus = 75.0
+description = "Lordred gains Might, Insight and Celerity as his health falls."
+metadata/_custom_type_script = "uid://cdfg2v65k6x30"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShardScalingPassive" format=3 uid="uid://cimlafthwxl8q"]
+
+[ext_resource type="Script" uid="uid://ce5grkw1dboi" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/scripts/shard_scaling_passive.gd" id="1_xhilf"]
+
+[resource]
+script = ExtResource("1_xhilf")
+share = 0.4
+passive_name = null
+description = "Blade shards deal part of the attack's damage back."
+metadata/_custom_type_script = "uid://ce5grkw1dboi"

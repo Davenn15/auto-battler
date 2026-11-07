@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://011t1edkme07"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_0r1s7"]
+[ext_resource type="Resource" uid="uid://c5k2fsr32iacu" path="res://data/units/sword-court/tier 4/vere/upgrades/a_path/vere_a1.tres" id="2_0iu3h"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_uc4c6"]
+[ext_resource type="Resource" uid="uid://eqye6lfc20ke" path="res://data/units/sword-court/tier 4/vere/upgrades/a_path/vere_a2.tres" id="3_ho63w"]
+[ext_resource type="Resource" uid="uid://dq8uo0leikirq" path="res://data/units/sword-court/tier 4/vere/upgrades/a_path/inceptive_passive.tres" id="5_6n53q"]
+
+[resource]
+script = ExtResource("1_0r1s7")
+description = "Vere has extra Wrack Chance and Wrack Damage against enemies above half health."
+passives = Array[ExtResource("2_uc4c6")]([ExtResource("5_6n53q")])
+next_choices = Array[ExtResource("1_0r1s7")]([ExtResource("2_0iu3h"), ExtResource("3_ho63w")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

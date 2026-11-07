@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EscalatingCleaveGambit" format=3 uid="uid://dugxy3hk64kp"]
+
+[ext_resource type="Script" uid="uid://ce25uodbfvhj7" path="res://data/units/sword-court/tier 4/lordred/gambit/escalating_cleave_gambit.gd" id="1_ei7aq"]
+
+[resource]
+script = ExtResource("1_ei7aq")
+bonus_damage = 80.0
+max_health_percent = 0.1
+damage_growth = 0.4
+charge_growth = 10.0
+cast_time = 0.75
+description = "Cleaves his target with a heavy max-health attack. Each cast costs more Charge and hits harder than the last."
+metadata/_custom_type_script = "uid://ce25uodbfvhj7"

@@ -7,11 +7,12 @@
 
 [resource]
 script = ExtResource("1_my68h")
+description = "Tosses more blades, and each blade also shields the ally who catches it."
 next_choices = Array[ExtResource("1_my68h")]([ExtResource("2_dv3vi"), ExtResource("3_3ng4r")])
 gambit_bonuses = Dictionary[String, float]({
-"blades": 6.0
+"blades": 5.0
 })
 gambit_overrides = Dictionary[String, float]({
-"blade_shield": 40.0
+"blade_shield": 35.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

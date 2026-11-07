@@ -27,3 +27,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 
 func blocks_targeting(_unit: BattleUnit) -> bool:
 	return true
+
+## Can't be hit while untargetable: every hit is dodged.
+func modify_dodge_chance(_unit: BattleUnit, _chance: float) -> float:
+	return 1.0

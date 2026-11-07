@@ -4,5 +4,8 @@
 
 [resource]
 script = ExtResource("1_lrrkg")
+duration = 5.0
+ally_count = 2
 cast_time = 0.75
+description = "Sends a knife to orbit his fastest ally for a while. Each of their attacks is followed by a knife strike."
 metadata/_custom_type_script = "uid://ci21lhcorw03o"

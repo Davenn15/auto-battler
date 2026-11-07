@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_cqh4w")
+description = "New Gambit: Tectonic Stance. Gains range, and his attacks become waves that hit every enemy in a line."
 gambit = ExtResource("1_3jhwj")
 next_choices = Array[ExtResource("1_cqh4w")]([ExtResource("3_g0nei"), ExtResource("4_skwpk")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

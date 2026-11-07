@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_brpgy")
+description = "Parry Stance also gives her a shield."
 gambit_bonuses = Dictionary[String, float]({
-"shield_amount": 300.0
+"shield_amount": 225.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

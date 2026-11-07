@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cvarjbqkjunr3"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_wm486"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_6pulx"]
+[ext_resource type="Resource" uid="uid://b2rp0tfg23oex" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/prancelot_a1.tres" id="2_t2ge4"]
+[ext_resource type="Resource" uid="uid://dpx0hkgfekgqx" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/prancelot_a2.tres" id="3_a41xm"]
+[ext_resource type="Resource" uid="uid://b70t0xde7303l" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/energizing_note.tres" id="5_aai4u"]
+
+[resource]
+script = ExtResource("1_wm486")
+description = "Adds an Energizing Note: gives Celerity to the nearby ally with the least Celerity."
+passives = Array[ExtResource("2_6pulx")]([ExtResource("5_aai4u")])
+next_choices = Array[ExtResource("1_wm486")]([ExtResource("2_t2ge4"), ExtResource("3_a41xm")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

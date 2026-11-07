@@ -6,7 +6,13 @@
 [resource]
 script = ExtResource("1_ttupj")
 bag_profile = ExtResource("1_3jtfu")
-bag_health_fraction = 1.1
-bag_ward_multiplier = 1.0
-blade_interval = 0.8
+flight_time = 0.75
+landing_might_scaling = 0.5
+bag_health_fraction = 0.9
+bag_ward_multiplier = 0.9
+blade_interval = 0.9
+blade_might_scaling = 0.2
+recast_heal_fraction = 0.2
+cast_time = 0.75
+description = "Throws the blade bag where the most enemies are. It damages them on landing, then fires blades at nearby enemies until destroyed. Casting again makes it jump to a new spot."
 metadata/_custom_type_script = "uid://bqx3vg5bjvlm1"

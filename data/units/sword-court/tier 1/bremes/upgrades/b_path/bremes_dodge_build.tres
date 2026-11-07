@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_pgsj5")
 max_bonus = 0.75
+description = "Each hit taken adds dodge chance, until she dodges."
 metadata/_custom_type_script = "uid://iyeh5tmpcge4"

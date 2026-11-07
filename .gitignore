@@ -1,3 +1,16 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Exported builds and launcher downloads
+builds/
+build/
+tools/launcher/game/
+tools/launcher/game_new/
+tools/launcher/github_token.txt
+
+# Simulation output
+tools/sim_results/
+
+# Godot editor temp files
+*.tmp

@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_4otbc")
+description = "Precise Shot bounces to a nearby enemy for part of its damage."
 gambit_overrides = Dictionary[String, float]({
-"ricochet_share": 0.3
+"ricochet_share": 0.2
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

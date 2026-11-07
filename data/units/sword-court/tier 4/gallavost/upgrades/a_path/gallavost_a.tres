@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://d351fys8cvb8f"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_lbvio"]
+[ext_resource type="Resource" uid="uid://dtilg0f6p2yeb" path="res://data/units/sword-court/tier 4/gallavost/upgrades/a_path/gallavost_a1.tres" id="2_3l5qy"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_4125u"]
+[ext_resource type="Resource" uid="uid://ckrh5q6i5cdot" path="res://data/units/sword-court/tier 4/gallavost/upgrades/a_path/gallavost_a2.tres" id="3_0aard"]
+[ext_resource type="Resource" uid="uid://bj7xgoyw36egv" path="res://data/units/sword-court/tier 4/gallavost/upgrades/a_path/indestructible_passive.tres" id="5_07pqy"]
+
+[resource]
+script = ExtResource("1_lbvio")
+description = "After gaining a shield, Gallavost briefly gains a lot of dodge chance."
+passives = Array[ExtResource("2_4125u")]([ExtResource("5_07pqy")])
+next_choices = Array[ExtResource("1_lbvio")]([ExtResource("2_3l5qy"), ExtResource("3_0aard")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

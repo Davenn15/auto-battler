@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="InceptivePassive" format=3 uid="uid://dq8uo0leikirq"]
+
+[ext_resource type="Script" uid="uid://ctsi77n1utgdl" path="res://data/units/sword-court/tier 4/vere/upgrades/a_path/scripts/inceptive_passive.gd" id="1_bkffr"]
+
+[resource]
+script = ExtResource("1_bkffr")
+bonus_chance = 0.35
+bonus_damage = 0.35
+description = "Stronger Wracks against healthy enemies."
+metadata/_custom_type_script = "uid://ctsi77n1utgdl"

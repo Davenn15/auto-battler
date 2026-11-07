@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_5p6vw")
+description = "The slam leaves a lava pool that burns enemies."
 gambit_overrides = Dictionary[String, float]({
 "lava_duration": 3.0
 })

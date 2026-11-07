@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_kyifo")
+description = "New Gambit: Arcane Blades. Summons blades that orbit him and fire along with his attacks."
 gambit = ExtResource("1_ghstt")
 next_choices = Array[ExtResource("1_kyifo")]([ExtResource("3_v3omy"), ExtResource("4_7rma4")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

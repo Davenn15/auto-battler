@@ -22,3 +22,4 @@ sprite = ExtResource("5_sprite")
 might = 110.0
 celerity = 110.0
 might_ward = 30.0
+attack_damage_type = 2

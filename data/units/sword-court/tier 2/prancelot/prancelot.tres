@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://b82oqh8hna0mh"]
+
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_hfkkv"]
+[ext_resource type="Resource" uid="uid://d4kapt6ugklfv" path="res://data/units/sword-court/tier 2/prancelot/gambit/prancelot_gambit.tres" id="1_tq5wq"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_b6amk"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3_8pcnp"]
+[ext_resource type="Resource" uid="uid://c3hr5ly8c3m0y" path="res://data/units/sword-court/tier 2/prancelot/passive/prancelot_passive.tres" id="3_txj64"]
+[ext_resource type="Texture2D" uid="uid://cj1ocxg4bn7ht" path="res://assets/prancelot.png" id="5_ksn28"]
+[ext_resource type="Resource" uid="uid://cvarjbqkjunr3" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/prancelot_a.tres" id="7_ksn28"]
+[ext_resource type="Resource" uid="uid://dvh5at6orjl5n" path="res://data/units/sword-court/tier 2/prancelot/upgrades/b_path/prancelot_b.tres" id="8_f1y6p"]
+
+[resource]
+script = ExtResource("2_b6amk")
+display_name = "prancelot"
+tier = 2
+upgrades = Array[ExtResource("3_8pcnp")]([ExtResource("7_ksn28"), ExtResource("8_f1y6p")])
+max_health = 800.0
+attack_range_cells = 3
+passives = Array[ExtResource("1_hfkkv")]([ExtResource("3_txj64")])
+gambit = ExtResource("1_tq5wq")
+max_charge = 80.0
+starting_charge = 10.0
+sprite = ExtResource("5_ksn28")
+might = 65.0
+celerity = 120.0
+insight_ward = 25.0
+celerity_ward = 30.0
+attack_damage_type = 1
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

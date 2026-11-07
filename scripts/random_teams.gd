@@ -6,13 +6,17 @@ extends RefCounted
 
 const MAX_ATTEMPTS := 200
 const PLACEMENT_PASSES := 10   # most rounds of units moving to better starting cells
+## Placement score lost per enemy that would reach a ranged unit before its front line.
+## Bigger than any range score, so staying covered always comes first.
+const EXPOSED_PENALTY := 5000
 
 
 ## Every UnitData under `dir` and its subfolders, skipping files that start with "dummy"
 ## and profiles marked summon_only (things units create, like Sumpton's bag).
 static func load_roster(dir: String) -> Array[UnitData]:
 	var roster: Array[UnitData] = []
-	for file in DirAccess.get_files_at(dir):
+	for listed in DirAccess.get_files_at(dir):
+		var file := listed.trim_suffix(".remap")   # exported builds list "x.tres.remap"
 		if file.ends_with(".tres") and not file.begins_with("dummy"):
 			var data := load(dir.path_join(file)) as UnitData
 			if data != null and data.get("summon_only") != true:
@@ -153,6 +157,9 @@ static func attack_range(pick: Dictionary) -> int:
 ## best cell until nobody wants to move.
 ## Units named in `second_row` (lower-case display names) always start one row behind the
 ## front, preferably right behind a teammate in the front row.
+## Ranged units first make sure every enemy has a front-liner of theirs strictly closer
+## than they are, so the enemy's nearest-target pick lands on the front line first. Only
+## then do they look for the best range.
 static func place_teams(grid: BattleGrid, teams: Dictionary, second_row: Array[String] = []) -> Dictionary:
 	var placement := {}
 	for team in teams:
@@ -174,10 +181,19 @@ static func place_teams(grid: BattleGrid, teams: Dictionary, second_row: Array[S
 			var enemies: Array = placement[3 - team]
 			var reach := attack_range(teams[team][i])
 			var in_second_row := second_row.has(teams[team][i]["data"].display_name.to_lower())
+			var hides_behind_front := reach > 1 and not in_second_row
+			var fronts: Array = []   # cells of this team's front-liners, for ranged units to stay behind
+			if hides_behind_front:
+				for j in teams[team].size():
+					if j != i and is_frontline(teams[team][j], second_row):
+						fronts.append(cells[j])
 			var score_of := func(cell: Vector2i) -> int:
 				if in_second_row:
 					return _second_row_score(grid, team, cell, cells, i)
-				return _placement_score(grid, cell, enemies, reach)
+				var score := _placement_score(grid, cell, enemies, reach)
+				if hides_behind_front and not fronts.is_empty():
+					score -= EXPOSED_PENALTY * _exposed_to(grid, cell, enemies, fronts)
+				return score
 			var best_cells: Array[Vector2i] = []
 			var best_score: int = score_of.call(cells[i])
 			for cell in half_cells(grid, team):
@@ -229,6 +245,23 @@ static func _placement_score(grid: BattleGrid, cell: Vector2i, enemies: Array, r
 	return nearest if nearest <= reach else -nearest - 1000
 
 
+## How many enemies would reach `cell` no later than they reach this team's front line:
+## enemies for which no front-liner is strictly closer. Units target the nearest enemy, so
+## a ranged unit with 0 here is only picked once the front line is out of the way.
+static func _exposed_to(grid: BattleGrid, cell: Vector2i, enemies: Array, fronts: Array) -> int:
+	var exposed := 0
+	for enemy in enemies:
+		var mine := grid.get_distance(cell, enemy)
+		var shielded := false
+		for front in fronts:
+			if grid.get_distance(front, enemy) < mine:
+				shielded = true
+				break
+		if not shielded:
+			exposed += 1
+	return exposed
+
+
 ## How good `cell` is for a unit that stays out of the front line: only cells in the
 ## second row count, and each front-row teammate right in front of it adds one.
 static func _second_row_score(grid: BattleGrid, team: int, cell: Vector2i, teammates: Array, self_index: int) -> int:
@@ -247,3 +280,58 @@ static func _second_row_score(grid: BattleGrid, team: int, cell: Vector2i, teamm
 static func _row_from_front(grid: BattleGrid, team: int, depth: int) -> int:
 	var half_rows := grid.rows / 2
 	return half_rows + depth if team == 1 else half_rows - 1 - depth
+
+
+# ---------- Keepsakes ----------
+
+## Every Keepsake under `dir` and its subfolders, as {"keepsakes": [...], "shards": [...]}.
+## Loose Shards (is_shard) go in "shards", everything else in "keepsakes".
+static func load_keepsakes(dir: String) -> Dictionary:
+	var pools := {"keepsakes": [], "shards": []}
+	_collect_keepsakes(dir, pools)
+	return pools
+
+
+static func _collect_keepsakes(dir: String, pools: Dictionary) -> void:
+	for listed in DirAccess.get_files_at(dir):
+		var file := listed.trim_suffix(".remap")   # exported builds list "x.tres.remap"
+		if not file.ends_with(".tres"):
+			continue
+		var keepsake := load(dir.path_join(file)) as Keepsake   # skips the _effect.tres files
+		if keepsake != null:
+			pools["shards" if keepsake.is_shard else "keepsakes"].append(keepsake)
+	for sub in DirAccess.get_directories_at(dir):
+		_collect_keepsakes(dir.path_join(sub), pools)
+
+
+## A team's Reserve for items: `scale` Reserve per point of ARV (1 = the same as its
+## Aura), rounded down to whole Shards.
+static func reserve_budget(arv: int, scale: float) -> int:
+	if scale <= 0.0:
+		return 0
+	return floori(arv * scale / Shard.RESERVE_VALUE) * Shard.RESERVE_VALUE
+
+
+## Spends `budget` Reserve on random items for a team of `unit_count` units, as one list of
+## Keepsakes per unit (at most `per_unit` each). Buys whole keepsakes while it can afford
+## them and a unit has a free slot, then a Shard with the last 3. Each item goes to a random
+## unit with a free slot. Reserve that can't be spent (every slot full) is left over.
+static func buy_keepsakes(pools: Dictionary, budget: int, unit_count: int, per_unit: int = 3) -> Array:
+	var loadouts: Array = []
+	for i in unit_count:
+		loadouts.append([])
+	var keepsake_cost := Shard.RESERVE_VALUE * 2
+	while budget >= Shard.RESERVE_VALUE:
+		var open: Array[int] = []
+		for i in unit_count:
+			if loadouts[i].size() < per_unit:
+				open.append(i)
+		if open.is_empty():
+			break
+		var pool: Array = pools["keepsakes"] if budget >= keepsake_cost else pools["shards"]
+		if pool.is_empty():
+			break
+		var item: Keepsake = pool.pick_random()
+		loadouts[open.pick_random()].append(item)
+		budget -= item.get_reserve_value()
+	return loadouts

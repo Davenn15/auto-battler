@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dd44dsrtthyiw"]
+
+[ext_resource type="Resource" uid="uid://rkr56nrfu3yj" path="res://data/units/sword-court/tier 4/gallavost/upgrades/b_path/shatter_gambit.tres" id="1_3ry6x"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_7l6a1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_prdmv"]
+[ext_resource type="Resource" uid="uid://hemk2ehkw25n" path="res://data/units/sword-court/tier 4/gallavost/upgrades/b_path/gallavost_b1.tres" id="3_d50ve"]
+[ext_resource type="Resource" uid="uid://bugpi6l1e4lx2" path="res://data/units/sword-court/tier 4/gallavost/upgrades/b_path/gallavost_b2.tres" id="4_jk2tp"]
+
+[resource]
+script = ExtResource("1_7l6a1")
+description = "New Gambit: Shatter. Shatters her shield to hurt and stun nearby enemies; once per combat, rebuilds it when it's gone."
+gambit = ExtResource("1_3ry6x")
+next_choices = Array[ExtResource("1_7l6a1")]([ExtResource("3_d50ve"), ExtResource("4_jk2tp")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

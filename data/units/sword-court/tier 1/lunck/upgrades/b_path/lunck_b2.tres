@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_fhhnc")
+description = "Lunck also gets the shield and Wrack Chance himself."
 gambit_overrides = Dictionary[String, float]({
 "include_self": 1.0
 })

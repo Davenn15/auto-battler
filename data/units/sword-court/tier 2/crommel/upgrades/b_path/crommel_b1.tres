@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_o0dar")
+description = "Precise Shot ignores Wards."
 gambit_overrides = Dictionary[String, float]({
 "ignore_ward": 1.0
 })

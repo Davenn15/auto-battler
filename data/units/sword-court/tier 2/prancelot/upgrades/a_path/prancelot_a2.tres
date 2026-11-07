@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dpx0hkgfekgqx"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_s0box"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_32qod"]
+[ext_resource type="Resource" uid="uid://d2efsg2koumbq" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/silencing_note.tres" id="3_32qod"]
+
+[resource]
+script = ExtResource("1_s0box")
+description = "Adds a Silencing Note: stops the nearby enemy with the most Charge from gaining Charge or casting."
+passives = Array[ExtResource("2_32qod")]([ExtResource("3_32qod")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

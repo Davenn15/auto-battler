@@ -5,8 +5,9 @@
 
 [resource]
 script = ExtResource("1_qwrqg")
+description = "Her dash becomes a teleport, and she can't be targeted for a moment after."
 gambit_overrides = Dictionary[String, float]({
 "teleport": 1.0,
-"untargetable_time": 1.5
+"untargetable_time": 2.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

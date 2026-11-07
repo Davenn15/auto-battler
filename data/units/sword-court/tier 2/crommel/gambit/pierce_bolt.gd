@@ -42,7 +42,7 @@ func setup(p_shooter_id: int, p_team: int, p_direction: Vector2, p_reach: float,
 	z_index = 10
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var step := minf(SPEED * delta, remaining)
 	var from := global_position
 	var to := from + direction * step

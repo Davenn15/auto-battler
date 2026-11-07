@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StarfallGambit" format=3 uid="uid://7ywdnje6tsdl"]
+
+[ext_resource type="Script" uid="uid://cwymvpradqm06" path="res://data/units/sword-court/tier 4/vere/upgrades/b_path/scripts/starfall_gambit.gd" id="1_rfu3o"]
+
+[resource]
+script = ExtResource("1_rfu3o")
+radius_cells = 3
+strikes = 7
+strike_interval = 0.25
+max_extra_strikes = 9
+cast_time = 1.0
+description = "Leaps out of reach and rains a quick series of attacks on random enemies in a circle, then lands inside it."
+metadata/_custom_type_script = "uid://cwymvpradqm06"

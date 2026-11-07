@@ -22,6 +22,7 @@ func execute(caster: BattleUnit) -> void:
 	# Allies may have moved or died during the Act time, so look again now.
 	for ally in _targets(caster):
 		ally.add_shield(shield_amount, duration, caster.get_instance_id())
+		KeepsakeVfx.head_icon(ally, "VfxRallyFlag", KeepsakeVfx.HeadIcon.FLAG, KeepsakeVfx.LUNCK_ORANGE, duration)
 
 
 func _targets(caster: BattleUnit) -> Array[BattleUnit]:

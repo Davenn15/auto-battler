@@ -8,4 +8,5 @@ blades = 8
 toss_interval = 0.2
 gambit_name = null
 cast_time = 1.0
+description = "Tosses blades to nearby allies. Each blade gives an attribute and its matching Ward for the rest of combat."
 metadata/_custom_type_script = "uid://d4b6a1x4xixwq"

@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_6pgnj")
+description = "He gains Wards while winding up the slam."
 gambit_overrides = Dictionary[String, float]({
-"channel_ward_bonus": 100.0
+"channel_ward_bonus": 115.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

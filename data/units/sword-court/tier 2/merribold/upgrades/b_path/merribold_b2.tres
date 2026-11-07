@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_q0iie")
+description = "Bellow also gives Merribold and the allies it buffs his fastest regeneration."
 gambit_overrides = Dictionary[String, float]({
 "grant_max_regen": 1.0
 })

@@ -2,15 +2,19 @@
 
 [ext_resource type="Script" uid="uid://cyqgakwbhvk2t" path="res://scripts/random_battle.gd" id="1_b1vyt"]
 [ext_resource type="Script" uid="uid://bunyfy1jqthc1" path="res://scripts/damage_tracker.gd" id="2_o36l5"]
-[ext_resource type="Script" uid="uid://dsjexv8fi16i1" path="res://scripts/arv_display.gd" id="3_y4bae"]
 [ext_resource type="Script" uid="uid://dtvckmau2hk4n" path="res://scripts/battle_manager.gd" id="4_030or"]
+[ext_resource type="Script" uid="uid://c1cdm3dsepsh6" path="res://scripts/unit_info_panel.gd" id="4_dn38c"]
 [ext_resource type="Script" uid="uid://co3c1g7ab430g" path="res://scripts/battle_grid.gd" id="7_ueh5w"]
+[ext_resource type="Script" uid="uid://cdb6ykw72b3xd" path="res://scripts/combat_timer.gd" id="20_ctimer"]
+[ext_resource type="Script" uid="uid://be32jbour7gbe" path="res://scripts/item_toolbox.gd" id="21_itembox"]
+[ext_resource type="Script" uid="uid://wx48lsoirmxb" path="res://scripts/lineup_panel.gd" id="22_lineup"]
 
 [node name="RandomBattle" type="Node2D" unique_id=1912766257]
 position = Vector2(-71, -22)
 script = ExtResource("1_b1vyt")
 arv_min = 4
 arv_max = 48
+second_row_units = Array[String](["bremes", "lunck", "wesper", "von carrow", "vere"])
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=496656011]
 
@@ -50,13 +54,6 @@ grow_horizontal = 0
 script = ExtResource("2_o36l5")
 metadata/_edit_use_anchors_ = true
 
-[node name="ARVDisplay" type="PanelContainer" parent="CanvasLayer/UI" unique_id=1562514835]
-layout_mode = 1
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("3_y4bae")
-metadata/_edit_use_anchors_ = true
-
 [node name="RerollButton" type="Button" parent="CanvasLayer/UI" unique_id=1239738481]
 layout_mode = 0
 offset_left = 615.0
@@ -66,15 +63,47 @@ offset_bottom = 648.0
 text = "New teams"
 metadata/_edit_use_anchors_ = true
 
-[node name="LineupLabel" type="Label" parent="CanvasLayer/UI" unique_id=2130260497]
+[node name="LineupPanel" type="PanelContainer" parent="CanvasLayer/UI" unique_id=2130260497]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -23.0
-offset_right = 40.0
 grow_vertical = 0
-metadata/_edit_use_anchors_ = true
+script = ExtResource("22_lineup")
+
+[node name="UnitInfoPanel" type="PanelContainer" parent="CanvasLayer/UI" unique_id=1493404214]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_vertical = 2
+script = ExtResource("4_dn38c")
+
+[node name="CombatTimer" type="Label" parent="CanvasLayer/UI" unique_id=963493109]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 6.0
+offset_right = 120.0
+offset_bottom = 52.0
+grow_horizontal = 2
+script = ExtResource("20_ctimer")
+
+[node name="ItemToolbox" type="PanelContainer" parent="CanvasLayer/UI" unique_id=743169303]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("21_itembox")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=66095714]
 visible = false

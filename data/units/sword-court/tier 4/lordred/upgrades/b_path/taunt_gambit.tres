@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TauntGambit" format=3 uid="uid://b6rwdv7fwtdxm"]
+
+[ext_resource type="Script" uid="uid://csx1sbsldjj8r" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/scripts/taunt_gambit.gd" id="1_l71e1"]
+
+[resource]
+script = ExtResource("1_l71e1")
+range_cells = 3
+taunt_time = 3.0
+ward_per_taunt = 25.0
+ward_time = 3.5
+cast_time = 0.75
+description = "Taunts nearby enemies into attacking him, and gains Wards for each one taunted."
+metadata/_custom_type_script = "uid://csx1sbsldjj8r"

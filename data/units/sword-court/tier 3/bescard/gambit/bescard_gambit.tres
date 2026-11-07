@@ -10,3 +10,4 @@ celerity_bonus = 60.0
 lifesteal = 0.4
 gambit_name = "Rage"
 cast_time = 0.5
+description = "Flies into a rage: more Might and Celerity, and his attacks heal him."

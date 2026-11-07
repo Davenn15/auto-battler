@@ -38,8 +38,9 @@ func execute(caster: BattleUnit) -> void:
 	var flat := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
 	flat = Stats.scaled(flat, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
 
-	var wrack_level := Stats.roll_wrack(caster.get_stat(Stats.Stat.WRACK_CHANCE)) if can_wrack else 0
-	var wrack_multiplier := 1.0 + caster.get_stat(Stats.Stat.WRACK_DAMAGE)
+	# Wracks if A2 lets it or an item does; when it could already, items add wrack damage.
+	var wrack_level := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE, can_wrack)
+	var wrack_multiplier := caster.effect_wrack_multiplier(1, Stats.EffectKind.GAMBIT_DAMAGE, can_wrack)   # per level
 	var bolt := PierceBolt.new()
 	bolt.setup(caster.get_instance_id(), caster.team, dir, reach, bolt_radius,
 			flat, max_health_percent, damage_type, wrack_level, wrack_multiplier)

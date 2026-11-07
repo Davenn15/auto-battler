@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/might_ward__celerity/might_ward__celerity_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Finisher"
+first_shard = 1
+second_shard = 2
+effect = ExtResource("2_effect")
+might_ward = 25.0
+celerity = 20.0
+description = "You deal 25% increased damage to enemies beneath half of their Maximum Health."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

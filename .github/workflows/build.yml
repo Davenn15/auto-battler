@@ -1,0 +1,79 @@
+# Builds the Windows game on every push to the main branch and publishes it as the
+# latest GitHub Release, where tools/launcher picks it up for players.
+# Uses the same Godot as local exports (4.7.2 .NET/"mono" build on Windows), so builds
+# match and fights play out the same.
+
+name: Build game
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:   # lets you start a build by hand from the Actions tab
+
+permissions:
+  contents: write   # needed to create releases
+
+concurrency:
+  group: build
+  cancel-in-progress: true   # a newer push replaces a build still running
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_NAME: Godot_v4.7.2-stable_mono_win64
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Godot and its export templates (about 1.2 GB) are kept between runs.
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: godot_cache
+          key: godot-${{ env.GODOT_VERSION }}-mono-win64
+
+      - name: Download Godot and export templates
+        shell: pwsh
+        run: |
+          $ProgressPreference = "SilentlyContinue"
+          $base = "https://github.com/godotengine/godot/releases/download/$env:GODOT_VERSION-stable"
+          New-Item -ItemType Directory -Force godot_cache | Out-Null
+          if (-not (Test-Path "godot_cache/$env:GODOT_NAME")) {
+            Invoke-WebRequest "$base/$env:GODOT_NAME.zip" -OutFile godot_cache/godot.zip
+            Expand-Archive godot_cache/godot.zip godot_cache
+            Remove-Item godot_cache/godot.zip
+          }
+          if (-not (Test-Path "godot_cache/templates.zip")) {
+            Invoke-WebRequest "$base/Godot_v$env:GODOT_VERSION-stable_mono_export_templates.tpz" -OutFile godot_cache/templates.zip
+          }
+
+      - name: Install export templates
+        shell: pwsh
+        run: |
+          $dest = "$env:APPDATA/Godot/export_templates/$env:GODOT_VERSION.stable.mono"
+          Expand-Archive godot_cache/templates.zip "$env:RUNNER_TEMP/templates" -Force
+          New-Item -ItemType Directory -Force $dest | Out-Null
+          Copy-Item "$env:RUNNER_TEMP/templates/templates/*" $dest -Recurse -Force
+
+      - name: Export the game
+        shell: pwsh
+        run: |
+          $godot = "godot_cache/$env:GODOT_NAME/${env:GODOT_NAME}_console.exe"
+          & $godot --headless --path . --import
+          New-Item -ItemType Directory -Force build | Out-Null
+          & $godot --headless --path . --export-release "Windows Desktop" "$PWD/build/AutoBattler.exe"
+          if (-not (Test-Path build/AutoBattler.exe) -or -not (Test-Path build/AutoBattler.pck)) {
+            throw "The export didn't produce AutoBattler.exe and AutoBattler.pck."
+          }
+          Compress-Archive build/* AutoBattler-windows.zip
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Build ${{ github.run_number }}
+          body: ${{ github.event.head_commit.message }}
+          files: AutoBattler-windows.zip
+          make_latest: "true"

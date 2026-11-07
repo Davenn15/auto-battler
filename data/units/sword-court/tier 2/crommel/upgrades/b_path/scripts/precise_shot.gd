@@ -14,10 +14,10 @@ func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color
 	polygon = PackedVector2Array([Vector2(-14, 0), Vector2(0, -5), Vector2(14, 0), Vector2(0, 5)])
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if is_instance_valid(target):
 		rotation = (target.global_position - global_position).angle()   # point where it's flying
-	super._process(delta)
+	super._physics_process(delta)
 
 
 func _after_hit() -> void:

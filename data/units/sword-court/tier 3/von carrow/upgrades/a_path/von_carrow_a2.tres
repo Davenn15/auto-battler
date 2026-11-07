@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bpdoano08qkd1"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_vbcep"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_csbhj"]
+[ext_resource type="Resource" uid="uid://ccb7r8c8bdkni" path="res://data/units/sword-court/tier 3/von carrow/upgrades/a_path/reload_on_gain_passive.tres" id="3_1ieoc"]
+
+[resource]
+script = ExtResource("1_vbcep")
+description = "Whenever she gains permanent stats, her next attack is a pistol shot."
+passives = Array[ExtResource("2_csbhj")]([ExtResource("3_1ieoc")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

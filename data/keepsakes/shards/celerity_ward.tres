@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+
+[resource]
+script = ExtResource("1_keep")
+first_shard = 3
+second_shard = 3
+celerity_ward = 15.0
+is_shard = true
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/celerity__celerity_ward/celerity__celerity_ward_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Longshot"
+first_shard = 2
+second_shard = 3
+effect = ExtResource("2_effect")
+celerity = 20.0
+celerity_ward = 25.0
+description = "You gain +1 Attack Range."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

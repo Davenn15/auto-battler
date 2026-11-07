@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://btwepq6ccicui"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_3v0nq"]
+[ext_resource type="Resource" uid="uid://b6rwdv7fwtdxm" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/taunt_gambit.tres" id="1_aso1m"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_jc0rf"]
+[ext_resource type="Resource" uid="uid://bk70y8v2inxxl" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/lordred_b1.tres" id="3_51enw"]
+[ext_resource type="Resource" uid="uid://b6eg4khrgqvo0" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/lordred_b2.tres" id="4_4eyvx"]
+[ext_resource type="Resource" uid="uid://l08vg6lekiw4" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/spite_passive.tres" id="6_m4ecb"]
+
+[resource]
+script = ExtResource("1_3v0nq")
+description = "New Gambit: Taunt. Forces nearby enemies to attack him and gives him Wards. He also flings a blade shard back at anyone who attacks him."
+passives = Array[ExtResource("2_jc0rf")]([ExtResource("6_m4ecb")])
+gambit = ExtResource("1_aso1m")
+next_choices = Array[ExtResource("1_3v0nq")]([ExtResource("3_51enw"), ExtResource("4_4eyvx")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

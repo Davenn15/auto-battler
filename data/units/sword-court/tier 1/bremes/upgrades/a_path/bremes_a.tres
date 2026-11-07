@@ -7,9 +7,10 @@
 
 [resource]
 script = ExtResource("1_1cecv")
+description = "Her strike deals Insight damage and scales with Insight."
 next_choices = Array[ExtResource("1_1cecv")]([ExtResource("2_fp1lc"), ExtResource("3_svxyi")])
 gambit_bonuses = Dictionary[String, float]({
-"insight_scaling": 0.75
+"insight_scaling": 0.65
 })
 gambit_overrides = Dictionary[String, float]({
 "damage_type": 1.0

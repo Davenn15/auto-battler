@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ShieldedStrikesPassive" format=3 uid="uid://bbb7i37fdk0fy"]
+
+[ext_resource type="Script" uid="uid://c7nybyo0h6ubw" path="res://data/units/sword-court/tier 3/von carrow/upgrades/b_path/scripts/shielded_strikes_passive.gd" id="1_mpd2p"]
+
+[resource]
+script = ExtResource("1_mpd2p")
+description = "Bonus max-health damage on attacks while shielded."
+percent = 0.075
+metadata/_custom_type_script = "uid://c7nybyo0h6ubw"

@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_xb06s")
+description = "New Gambit: Adoration. Rushes to his strongest ally and gives them a big shield and extra Wrack Chance."
 gambit = ExtResource("1_wwfeg")
 next_choices = Array[ExtResource("1_xb06s")]([ExtResource("3_bvlcg"), ExtResource("4_5v0hw")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

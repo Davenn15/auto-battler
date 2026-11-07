@@ -8,4 +8,5 @@ dash_time = 0.5
 strike_interval = 0.3
 target_rule = 2
 cast_time = 0.5
+description = "Dashes to the farthest enemy and strikes it several times. If her current target is low on health, she finishes it instead."
 metadata/_custom_type_script = "uid://c8wmrcu8a0py7"

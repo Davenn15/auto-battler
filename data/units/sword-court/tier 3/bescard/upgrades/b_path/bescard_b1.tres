@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_pym5c")
+description = "Each Wrack in the flurry adds another strike."
 gambit_overrides = Dictionary[String, float]({
 "max_wrack_extra_strikes": 6.0
 })

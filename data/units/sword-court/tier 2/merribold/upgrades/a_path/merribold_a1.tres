@@ -5,7 +5,8 @@
 
 [resource]
 script = ExtResource("1_idgyk")
+description = "His swing heals him for each enemy it hits."
 gambit_bonuses = Dictionary[String, float]({
-"heal_per_hit": 60.0
+"heal_per_hit": 50.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

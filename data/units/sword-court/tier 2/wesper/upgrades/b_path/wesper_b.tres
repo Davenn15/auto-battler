@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_foutf")
+description = "New Gambit: Parry Stance. Gains Wards and Celerity and can reflect projectiles."
 gambit = ExtResource("1_4cywd")
 next_choices = Array[ExtResource("1_foutf")]([ExtResource("3_l1t2q"), ExtResource("4_gg23h")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

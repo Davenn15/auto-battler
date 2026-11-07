@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_4rkg5")
+description = "New Gambit: Bellow. Nearby allies gain Might; nearby enemies lose Might and take damage."
 gambit = ExtResource("1_kqhge")
 next_choices = Array[ExtResource("1_4rkg5")]([ExtResource("3_ve2bf"), ExtResource("4_g4l5t")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

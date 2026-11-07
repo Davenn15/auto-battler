@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_c786d")
+description = "Each cast also shields him."
 gambit_overrides = Dictionary[String, float]({
 "shield_amount": 150.0,
 "shield_insight_scaling": 0.3

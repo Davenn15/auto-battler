@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/insight__insight_ward/insight__insight_ward_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Spellshield"
+first_shard = 4
+second_shard = 5
+effect = ExtResource("2_effect")
+insight = 20.0
+insight_ward = 25.0
+description = "Whenever you play your Gambit, gain Shield equal to twice your Maximum Charge."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

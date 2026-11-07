@@ -4,5 +4,8 @@
 
 [resource]
 script = ExtResource("1_c8pvq")
-insight_ward = 0.0
+might_ward = 40.0
+insight_ward = 10.0
+celerity_ward = 40.0
+description = "More Wards while shielded."
 metadata/_custom_type_script = "uid://b05dn03vjblyp"

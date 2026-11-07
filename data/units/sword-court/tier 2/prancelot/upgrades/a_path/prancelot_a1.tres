@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://b2rp0tfg23oex"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_tsu3m"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_e5f67"]
+[ext_resource type="Resource" uid="uid://begclb0vfe80k" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/jolting_note.tres" id="3_e5f67"]
+
+[resource]
+script = ExtResource("1_tsu3m")
+description = "Adds a Jolting Note: gives Wrack Chance to the nearby ally who has dealt the most damage."
+passives = Array[ExtResource("2_e5f67")]([ExtResource("3_e5f67")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

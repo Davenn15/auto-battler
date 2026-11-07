@@ -126,3 +126,80 @@ func modify_final_stat(_unit: BattleUnit, _stat: Stats.Stat, value: float) -> fl
 ## keep the normal one.
 func create_projectile(_unit: BattleUnit) -> Projectile:
 	return null
+
+## Called on each of the unit's statuses when another status is added to it.
+func on_status_added(_unit: BattleUnit, _added: Status) -> void:
+	pass
+
+
+## True for statuses that permanently raise the unit's stats for the rest of combat
+## (Sumpton's blades, Von Carrow's Triggerhappy). Effects that react to "gaining
+## permanent stats" check this.
+func is_permanent_stat_gain() -> bool:
+	return false
+
+## Lets a status change the unit's wrack damage against a particular target, like
+## modify_wrack_chance does for wrack chance.
+func modify_wrack_damage(_unit: BattleUnit, _target: BattleUnit, value: float) -> float:
+	return value
+
+## True makes all of the unit's damage skip the target's wards.
+func ignores_wards(_unit: BattleUnit) -> bool:
+	return false
+
+## True stops the unit from casting its Gambit, even with full charge.
+func blocks_gambit(_unit: BattleUnit) -> bool:
+	return false
+
+## The stats this status permanently adds, as {Stats.Stat: amount}. Empty for statuses
+## that don't. Effects that copy permanent gains (Lordred) read this.
+func get_permanent_stat_gains() -> Dictionary:
+	return {}
+
+
+## Called when an enemy's attack reaches the unit, hit or dodged. `dealt` is what it dealt
+## (0 if dodged).
+func on_attacked(_unit: BattleUnit, _attacker: BattleUnit, _dealt: float) -> void:
+	pass
+
+## Lets a status change healing the unit receives, before it's applied.
+func modify_healing_received(_unit: BattleUnit, amount: float) -> float:
+	return amount
+
+## Lets a status change charge the unit is about to gain.
+func modify_charge_gain(_unit: BattleUnit, amount: float) -> float:
+	return amount
+
+## On the attacker: changes the damage of a hit it deals to `target`, after wards.
+func modify_damage_dealt(_unit: BattleUnit, _target: BattleUnit, amount: float) -> float:
+	return amount
+
+
+## On the attacker: changes the ward `target` uses against this hit.
+func modify_target_ward(_unit: BattleUnit, _target: BattleUnit, ward: float, _wrack_level: int) -> float:
+	return ward
+
+
+## On the unit being hit: changes the charge its attacker gains for landing the hit.
+func modify_attacker_charge(_unit: BattleUnit, _attacker: BattleUnit, amount: float) -> float:
+	return amount
+
+
+## Called after the unit actually gains charge, with how much it gained.
+func on_charge_gained(_unit: BattleUnit, _amount: float) -> void:
+	pass
+
+## True lets this kind of effect from the unit wrack (Gambit damage, control and debuff
+## effects, or heals and shields).
+func lets_wrack(_unit: BattleUnit, _kind: Stats.EffectKind) -> bool:
+	return false
+
+
+## Extra wrack damage for Gambit damage that could already wrack on its own.
+func gambit_wrack_bonus(_unit: BattleUnit) -> float:
+	return 0.0
+
+
+## The colour of the unit's melee sword swing. Purely visual.
+func modify_swing_color(_unit: BattleUnit, color: Color) -> Color:
+	return color

@@ -9,4 +9,5 @@ range_cells = 3
 cone_angle = 150.0
 damage_type = 1
 cast_time = 1.0
+description = "Swings in a wide cone, hitting every enemy in it."
 metadata/_custom_type_script = "uid://bwq5f08tji6qb"

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ExplosiveShotGambit" format=3 uid="uid://cf7ehxipx3ou0"]
+
+[ext_resource type="Script" uid="uid://clopy65v0opx" path="res://data/units/sword-court/tier 3/von carrow/gambit/explosive_shot_gambit.gd" id="1_rvo8f"]
+
+[resource]
+script = ExtResource("1_rvo8f")
+description = "Fires an explosive shot in a cone. Enemies closer to her take more damage."
+far_multiplier = 0.75
+range_cells = 3
+cone_angle = 45.0
+cast_time = 0.5
+metadata/_custom_type_script = "uid://clopy65v0opx"

@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_8piq7")
+description = "Rage is much stronger, but he attacks random targets while raging."
 gambit_bonuses = Dictionary[String, float]({
 "celerity_bonus": 40.0,
 "lifesteal": 0.15,

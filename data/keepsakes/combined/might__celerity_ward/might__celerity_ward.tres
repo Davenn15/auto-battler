@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/might__celerity_ward/might__celerity_ward_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Revenge"
+first_shard = 0
+second_shard = 3
+effect = ExtResource("2_effect")
+might = 25.0
+celerity_ward = 25.0
+description = "Whenever an enemy damages you, they gain a stack of Revenge up to a maximum of 10. Each stack causes the enemy to deal 1% less damage to you and take 1% more damage from you."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

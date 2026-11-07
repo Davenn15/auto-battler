@@ -54,7 +54,7 @@ func modify_target_choice(unit: BattleUnit, choice: BattleUnit, exclude: BattleU
 		var other := node as BattleUnit
 		if other != null and other != exclude and unit._is_valid_target(other):
 			options.append(other)
-	return choice if options.is_empty() else options.pick_random()
+	return choice if options.is_empty() else CombatRng.pick(options)
 
 
 func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
@@ -62,12 +62,9 @@ func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 		return value + might
 	if stat == Stats.Stat.CELERITY:
 		return value + celerity
+	if stat == Stats.Stat.VAMPIRISM:
+		return value + lifesteal
 	return value
-
-
-func on_attack_hit(unit: BattleUnit, _target: BattleUnit, dealt: float) -> void:
-	unit.heal(dealt * lifesteal)
-
 
 func tick(unit: BattleUnit, delta: float) -> void:
 	time_left -= delta

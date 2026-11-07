@@ -1,6 +1,7 @@
 class_name ArvDisplay
 extends PanelContainer
-## Shows each team's ARV (Aura + Reserve value), a rough at-a-glance measure of strength.
+## Shows each team's ARV, a rough at-a-glance measure of strength, with the Aura and Reserve
+## it has spent.
 
 var _labels: Dictionary = {}   # team -> Label
 

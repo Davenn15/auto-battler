@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bm6c4drmxkt2x"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_lk0fj"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_igr0j"]
+
+[resource]
+script = ExtResource("1_lk0fj")
+description = "Lullaby reaches farther."
+gambit_bonuses = Dictionary[String, float]({
+"length_cells": 1.0
+})
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

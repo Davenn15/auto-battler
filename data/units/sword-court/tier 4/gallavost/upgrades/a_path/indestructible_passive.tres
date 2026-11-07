@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="IndestructiblePassive" format=3 uid="uid://bj7xgoyw36egv"]
+
+[ext_resource type="Script" uid="uid://0fcpdc1pb5u0" path="res://data/units/sword-court/tier 4/gallavost/upgrades/a_path/scripts/indestructible_passive.gd" id="1_maqfg"]
+
+[resource]
+script = ExtResource("1_maqfg")
+duration = 1.5
+description = "Brief dodge chance after gaining a shield."
+metadata/_custom_type_script = "uid://0fcpdc1pb5u0"

@@ -37,8 +37,8 @@ func execute(caster: BattleUnit) -> void:
 		# The caster may have died, or the battle ended, between tosses.
 		if not _alive(caster) or not caster.active:
 			return
-		_toss(caster, _random_ally(caster), randi_range(0, BLADE_KINDS.size() - 1))
-		await caster.get_tree().create_timer(toss_interval).timeout
+		_toss(caster, _random_ally(caster), CombatRng.randi_range(0, BLADE_KINDS.size() - 1))
+		await caster.get_tree().create_timer(toss_interval, true, true).timeout
 
 ## Extra blades banked by allies' wracks (Sumpton's A2), used up by this cast. 0 without A2.
 func _take_bonus_blades(caster: BattleUnit) -> int:
@@ -57,7 +57,7 @@ func _random_ally(caster: BattleUnit) -> BattleUnit:
 			continue
 		if caster.grid.get_distance(caster.cell, unit.cell) <= range_cells:
 			options.append(unit)
-	return caster if options.is_empty() else options.pick_random()
+	return caster if options.is_empty() else CombatRng.pick(options)
 
 
 ## Sends a spinning blade of kind `kind` (an index into BLADE_KINDS) flying to `ally`.
@@ -70,7 +70,7 @@ func _toss(caster: BattleUnit, ally: BattleUnit, kind: int) -> void:
 	caster.get_tree().current_scene.add_child(blade)
 	blade.global_position = caster.global_position
 	blade.set_meta("caster_id", caster.get_instance_id())
-	var tween := blade.create_tween()
+	var tween := blade.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	tween.tween_property(blade, "global_position", ally.global_position, flight_time)
 	tween.parallel().tween_property(blade, "rotation", TAU * 2.0, flight_time)   # two spins
 	tween.tween_callback(_land.bind(blade, ally, kind))

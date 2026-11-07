@@ -6,4 +6,5 @@
 script = ExtResource("1_5jfjj")
 celerity_bonus = 10.0
 include_self = true
+description = "Lunck and nearby allies gain Celerity."
 metadata/_custom_type_script = "uid://c0pjj2f7qrmce"

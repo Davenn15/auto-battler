@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DodgeEffect" format=3]
+
+[ext_resource type="Script" uid="uid://cdfhev4485io3" path="res://data/keepsakes/effects/dodge_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+chance = 0.1
+metadata/_custom_type_script = "uid://cdfhev4485io3"

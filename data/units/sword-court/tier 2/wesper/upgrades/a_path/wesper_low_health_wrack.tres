@@ -4,5 +4,6 @@
 
 [resource]
 script = ExtResource("1_6g8ig")
-bonus_wrack_chance = 0.5
+bonus_wrack_chance = 0.6
+description = "Extra Wrack Chance against enemies below half health."
 metadata/_custom_type_script = "uid://0bc7hcswk5ro"

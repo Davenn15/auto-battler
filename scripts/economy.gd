@@ -1,7 +1,8 @@
 class_name Economy
 extends RefCounted
 ## Prices and value formulas. Aura buys and upgrades units; Reserve buys items and
-## everything else. A team's ARV (Aura + Reserve value) is a rough measure of its strength.
+## everything else. A team's ARV is a rough measure of its strength: an ARV 48 team has
+## spent 48 Aura on units and 48 Reserve on items.
 
 ## Aura cost for each tier: [buy, first upgrade, second upgrade].
 const TIER_AURA_COSTS := {
@@ -22,7 +23,9 @@ static func unit_aura_value(tier: int, upgrade_level: int) -> int:
 	return total
 
 
-## A team's Aura and Reserve value, summed over the given units.
+## A team's Aura and Reserve value, summed over the given units. Its ARV ("total") is the
+## larger of the two: Aura and Reserve are each meant to match the ARV, and Reserve can fall
+## a little short because items only come in whole Shards.
 static func team_value(units: Array, team: int) -> Dictionary:
 	var aura := 0
 	var reserve := 0
@@ -32,4 +35,4 @@ static func team_value(units: Array, team: int) -> Dictionary:
 			continue
 		aura += unit.get_aura_value()
 		reserve += unit.get_reserve_value()
-	return {"aura": aura, "reserve": reserve, "total": aura + reserve}
+	return {"aura": aura, "reserve": reserve, "total": maxi(aura, reserve)}

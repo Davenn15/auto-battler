@@ -33,12 +33,15 @@ func execute(caster: BattleUnit) -> void:
 	_play_swing_visual(caster, aim)
 
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
+	# Gambit damage can wrack if an item lets it: one roll for the whole swing.
+	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+	hit_damage *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 
 	var hits := 0
 	for enemy in _enemies_in_cone(caster, enemies, aim):
 		if not enemy.alive:
 			continue
-		var dealt := enemy.take_damage(hit_damage, 0, damage_type)
+		var dealt := enemy.take_damage(hit_damage, wrack, damage_type)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if dealt > 0.0:
 			hits += 1   # a dodged swing doesn't count

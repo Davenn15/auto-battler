@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_mfw47")
+description = "Empowered attacks also hit enemies next to the target."
 gambit_bonuses = Dictionary[String, float]({
 "splash_radius": 1.0
 })

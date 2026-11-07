@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://eqye6lfc20ke"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_bevif"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_xdu80"]
+[ext_resource type="Resource" uid="uid://b5ppqyiavi06u" path="res://data/units/sword-court/tier 4/vere/upgrades/a_path/vere_wrack_chance.tres" id="3_xdu80"]
+
+[resource]
+script = ExtResource("1_bevif")
+description = "Vere gains Wrack Chance."
+passives = Array[ExtResource("2_xdu80")]([ExtResource("3_xdu80")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

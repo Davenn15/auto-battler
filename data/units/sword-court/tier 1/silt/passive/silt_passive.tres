@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_e56hj")
 celerity_per_gambit = 25.0
+description = "Each time Silt uses his Gambit, he gains Celerity for the rest of combat."
 metadata/_custom_type_script = "uid://3i36v0gu5b0w"

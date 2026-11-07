@@ -6,5 +6,6 @@
 script = ExtResource("1_e86aa")
 bonus_damage = 40.0
 insight_scaling = 0.2
-cast_time = 1.0
+cast_time = 0.5
+description = "His next few attacks deal bonus damage."
 metadata/_custom_type_script = "uid://dxglvhoc4rfg2"

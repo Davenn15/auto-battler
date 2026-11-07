@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1_vgg6c")
+description = "The ring is bigger and can Wrack."
 next_choices = Array[ExtResource("1_vgg6c")]([ExtResource("2_7c2f4"), ExtResource("3_yb7m6")])
 gambit_bonuses = Dictionary[String, float]({
 "radius_cells": 1.0

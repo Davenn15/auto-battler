@@ -4,5 +4,6 @@
 
 [resource]
 script = ExtResource("1_2bdc3")
-insight_bonus = 20.0
+insight_bonus = 10.0
+description = "His aura also gives Insight."
 metadata/_custom_type_script = "uid://dx6sbggbu78po"

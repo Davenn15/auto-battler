@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="NotePassive" format=3 uid="uid://b70t0xde7303l"]
+
+[ext_resource type="Script" uid="uid://b2kle04pd2vts" path="res://data/units/sword-court/tier 2/prancelot/upgrades/a_path/scripts/note_passive.gd" id="1_lm3rr"]
+
+[resource]
+script = ExtResource("1_lm3rr")
+amount = 40.0
+duration = 6.0
+description = "Every few attacks, gives Celerity to the nearby ally with the least Celerity."
+metadata/_custom_type_script = "uid://b2kle04pd2vts"

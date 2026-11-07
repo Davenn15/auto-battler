@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AttributeRegenPassive" format=3 uid="uid://bq7b7sqg256b2"]
+
+[ext_resource type="Script" uid="uid://c8c2l1ljdsu3t" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/scripts/attribute_regen_passive.gd" id="1_a65nw"]
+
+[resource]
+script = ExtResource("1_a65nw")
+scaling = 0.1
+description = "Regeneration based on his attributes."
+metadata/_custom_type_script = "uid://c8c2l1ljdsu3t"

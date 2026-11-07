@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://ckrh5q6i5cdot"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_240n4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_5befk"]
+[ext_resource type="Resource" uid="uid://c8borlypbajpr" path="res://data/units/sword-court/tier 4/gallavost/upgrades/a_path/unshielded_charge_passive.tres" id="3_5befk"]
+
+[resource]
+script = ExtResource("1_240n4")
+description = "While unshielded, she gains Charge over time."
+passives = Array[ExtResource("2_5befk")]([ExtResource("3_5befk")])
+metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

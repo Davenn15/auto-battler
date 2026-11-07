@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_yi4j6")
+description = "Celerity Geomond would gain becomes Might and Insight instead. His attacks deal bonus max-health damage."
 metadata/_custom_type_script = "uid://b0c02c2y86co3"

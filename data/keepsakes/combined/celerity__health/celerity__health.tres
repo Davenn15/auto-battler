@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/celerity__health/celerity__health_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Momentum"
+first_shard = 2
+second_shard = 6
+effect = ExtResource("2_effect")
+celerity = 20.0
+health = 250.0
+description = "You gain 25 Celerity while above 50% of your Maximum Health."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

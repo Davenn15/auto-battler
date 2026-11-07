@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_sbto5")
+description = "Immune to crowd control while shielded."
 metadata/_custom_type_script = "uid://e1o1r0spxvx8"

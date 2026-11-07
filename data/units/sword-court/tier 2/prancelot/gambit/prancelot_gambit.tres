@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CrescendoGambit" format=3 uid="uid://d4kapt6ugklfv"]
+
+[ext_resource type="Script" uid="uid://b1p0t63vf50ak" path="res://data/units/sword-court/tier 2/prancelot/gambit/crescendo_gambit.gd" id="1_dy6vt"]
+
+[resource]
+script = ExtResource("1_dy6vt")
+cast_time = 0.75
+description = "Plays faster for a while: more Celerity and stronger notes."
+metadata/_custom_type_script = "uid://b1p0t63vf50ak"

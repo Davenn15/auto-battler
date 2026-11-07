@@ -30,15 +30,20 @@ func execute(caster: BattleUnit) -> void:
 	var id := caster.get_instance_id()
 	var regen := _max_passive_regen(caster) if grant_max_regen else 0.0
 	caster.show_float_text("Bellow", BELLOW_COLOR)
+	KeepsakeVfx.bellow_ring(caster, range_cells)
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
+	# Items can let the damage and the Might cut wrack: one roll each for the whole bellow.
+	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+	hit_damage *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
+	var might_cut := enemy_might_reduction * caster.wrack_effect_multiplier(Stats.EffectKind.CONTROL)
 	for unit in _units_in_range(caster):
 		if unit.team == caster.team:
 			_apply(unit, BellowedStatus.new(id, ally_might_bonus, regen, duration))
 		else:
-			var dealt := unit.take_damage(hit_damage, 0, damage_type)
+			var dealt := unit.take_damage(hit_damage, wrack, damage_type)
 			caster.get_tree().call_group("damage_tracker", "record_damage", id, dealt)
 			if unit.alive:   # the hit may have killed it
-				_apply(unit, BellowedStatus.new(id, -enemy_might_reduction, 0.0, duration))
+				_apply(unit, BellowedStatus.new(id, -might_cut, 0.0, duration))
 
 
 ## Replaces this caster's earlier Bellow on `unit` instead of stacking.

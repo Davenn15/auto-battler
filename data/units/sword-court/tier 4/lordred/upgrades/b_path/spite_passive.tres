@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SpitePassive" format=3 uid="uid://l08vg6lekiw4"]
+
+[ext_resource type="Script" uid="uid://b7q12vdukf31u" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/scripts/spite_passive.gd" id="1_jwiy2"]
+
+[resource]
+script = ExtResource("1_jwiy2")
+damage = 40.0
+description = "Flings a blade shard back at enemies who attack him."
+metadata/_custom_type_script = "uid://b7q12vdukf31u"

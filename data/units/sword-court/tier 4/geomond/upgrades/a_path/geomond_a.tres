@@ -7,9 +7,10 @@
 
 [resource]
 script = ExtResource("1_okvlk")
+description = "The slam is longer and wider."
 next_choices = Array[ExtResource("1_okvlk")]([ExtResource("2_u2w3d"), ExtResource("3_mmcbt")])
 gambit_bonuses = Dictionary[String, float]({
-"length_cells": 2.0,
+"length_cells": 1.0,
 "width_cells": 1.0
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

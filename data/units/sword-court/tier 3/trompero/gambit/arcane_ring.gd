@@ -6,6 +6,14 @@ extends Node2D
 
 const TICK_INTERVAL := 0.5   # seconds between damage ticks
 const COLOR := Color(0.708, 0.094, 0.297, 1.0)   # violet
+## The outline's ripple: how many waves go round, how tall they are in pixels, and how
+## fast they turn (radians per second).
+const WAVES := 9
+const WAVE_HEIGHT := 2.5
+const WAVE_SPEED := 2.0
+const OUTLINE_POINTS := 96
+
+var _spin := 0.0
 
 var caster_id: int
 var team: int
@@ -39,7 +47,7 @@ func setup(p_caster: BattleUnit, p_center: Vector2i, p_radius_cells: int, p_dura
 	z_index = -1   # draw under the units
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_time_left -= delta
 	_tick_timer -= delta
 	var inside := _enemies_inside()
@@ -56,14 +64,14 @@ func _process(delta: float) -> void:
 
 
 func _explode() -> void:
-	set_process(false)   # stop ticking; the fade below finishes the ring off
+	set_physics_process(false)   # stop ticking; the fade below finishes the ring off
 	var wrack_level := Stats.roll_wrack(wrack_chance)
 	var hits := 0
 	for enemy in _enemies_inside():
 		if _damage(enemy, burst_damage, wrack_level) > 0.0:
 			hits += 1   # a dodged burst doesn't count
 		if enemy.alive:
-			enemy.stun(stun_time)
+			enemy.stun(stun_time, instance_from_id(caster_id) as BattleUnit)
 	var caster := instance_from_id(caster_id) as BattleUnit
 	if caster != null and charge_per_burst_hit > 0.0 and hits > 0:
 		caster.gain_charge(charge_per_burst_hit * hits)
@@ -102,7 +110,19 @@ func _enemies_inside() -> Array[BattleUnit]:
 	return result
 
 
+## Only for the look: turns the wavy outline. Gameplay runs in _physics_process.
+func _process(delta: float) -> void:
+	_spin += delta
+	queue_redraw()
+
+
 func _draw() -> void:
 	var r := (radius_cells + 0.5) * grid.cell_spacing()   # reaches the outer edge of the last cell
 	draw_circle(Vector2.ZERO, r, Color(COLOR, 0.15))
-	draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, COLOR, 2.0)
+	# A slightly wavy outline that slowly turns.
+	var points := PackedVector2Array()
+	for i in OUTLINE_POINTS + 1:
+		var angle := TAU * i / OUTLINE_POINTS
+		var wave := WAVE_HEIGHT * sin(angle * WAVES - _spin * WAVE_SPEED)
+		points.append(Vector2.from_angle(angle) * (r + wave))
+	draw_polyline(points, COLOR, 2.0, true)

@@ -178,6 +178,13 @@ func vacate(cell: Vector2i, unit: Node) -> void:
 		_astar.set_point_disabled(_ids[cell], false)
 
 
+## Frees every cell, for when the whole board is cleared and set up again.
+func clear_occupants() -> void:
+	for cell in _occupants.keys():
+		_astar.set_point_disabled(_ids[cell], false)
+	_occupants.clear()
+
+
 # ---------- Pathfinding ----------
 
 ## Returns the next cell to step into on the way from `from` to `to`,

@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_nk2ng")
+description = "The lower Merribold's health, the higher his Wards."
 passives = Array[ExtResource("2_t1j3x")]([ExtResource("5_bve8r")])
 next_choices = Array[ExtResource("1_nk2ng")]([ExtResource("2_uxyof"), ExtResource("3_lxo17")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="StatOnEventEffect" format=3]
+
+[ext_resource type="Script" uid="uid://dcp4ys2j7wj5p" path="res://data/keepsakes/effects/stat_on_event_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+event = 1
+stat = 2
+amount = 1.0
+metadata/_custom_type_script = "uid://dcp4ys2j7wj5p"

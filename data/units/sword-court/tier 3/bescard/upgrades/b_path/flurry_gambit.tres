@@ -4,5 +4,7 @@
 
 [resource]
 script = ExtResource("1_npacc")
-cast_time = 0.5
+bleed_duration = 3.0
+cast_time = 0.75
+description = "Unleashes a quick flurry of attacks on his current target."
 metadata/_custom_type_script = "uid://bjlvxwv7ymq1f"

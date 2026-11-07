@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ciknf5lejs4e"]
+
+[ext_resource type="Resource" uid="uid://cf7ehxipx3ou0" path="res://data/units/sword-court/tier 3/von carrow/gambit/von_carrow_gambit.tres" id="1_4h1u2"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="1_igrbh"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="2_snjjq"]
+[ext_resource type="Resource" uid="uid://ctfbrchfskwa7" path="res://data/units/sword-court/tier 3/von carrow/passive/von_carrow_passive.tres" id="3_mbowq"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3_xlp4v"]
+[ext_resource type="Texture2D" uid="uid://ekusm1twlfkq" path="res://assets/von carrow.png" id="5_0x5b2"]
+[ext_resource type="Resource" uid="uid://60ywa7hdtg26" path="res://data/units/sword-court/tier 3/von carrow/upgrades/a_path/von_carrow_a.tres" id="7_0x5b2"]
+[ext_resource type="Resource" uid="uid://b0ohxsk6vb4kc" path="res://data/units/sword-court/tier 3/von carrow/upgrades/b_path/von_carrow_b.tres" id="8_p10ub"]
+
+[resource]
+script = ExtResource("2_snjjq")
+display_name = "von carrow"
+tier = 3
+upgrades = Array[ExtResource("3_xlp4v")]([ExtResource("7_0x5b2"), ExtResource("8_p10ub")])
+max_health = 950.0
+passives = Array[ExtResource("1_igrbh")]([ExtResource("3_mbowq")])
+gambit = ExtResource("1_4h1u2")
+max_charge = 65.0
+starting_charge = 20.0
+sprite = ExtResource("5_0x5b2")
+might = 115.0
+insight = 80.0
+celerity = 110.0
+might_ward = 30.0
+celerity_ward = 40.0
+metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

@@ -7,6 +7,7 @@
 
 [resource]
 script = ExtResource("1_u2t0r")
+description = "More of his attacks are empowered."
 next_choices = Array[ExtResource("1_u2t0r")]([ExtResource("3_f383k"), ExtResource("4_hinqs")])
 gambit_bonuses = Dictionary[String, float]({
 "attack_count": 2.0

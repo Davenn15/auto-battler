@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_1ogne")
+description = "New Gambit: Orbiting Knife. Sends a knife to circle his fastest ally, adding a strike to each of their attacks."
 gambit = ExtResource("1_itas0")
 next_choices = Array[ExtResource("1_1ogne")]([ExtResource("3_mo3xq"), ExtResource("4_elgfi")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

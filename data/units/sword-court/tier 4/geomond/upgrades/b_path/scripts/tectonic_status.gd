@@ -20,10 +20,12 @@ func _init(p_duration: float, p_range_bonus: int, p_wave_half_width: float) -> v
 
 func on_applied(unit: BattleUnit) -> void:
 	unit.attack_range += range_bonus
+	KeepsakeVfx.magma_pool(unit)   # flowing magma under him while the stance lasts
 
 
 func on_removed(unit: BattleUnit) -> void:
 	unit.attack_range -= range_bonus   # back to melee; he walks in to his next target
+	KeepsakeVfx.clear(unit, "VfxMagma")
 
 
 func tick(unit: BattleUnit, delta: float) -> void:
@@ -46,7 +48,9 @@ func on_attack(unit: BattleUnit) -> void:
 	if attack_shield > 0.0:
 		unit.add_shield(attack_shield, attack_shield_duration, unit.get_instance_id())
 
-func get_hit_effect(_unit: BattleUnit) -> HitEffect:
+func get_hit_effect(unit: BattleUnit) -> HitEffect:
 	if ward_shred_per_hit > 0.0:
-		return WardShredHitEffect.new(ward_shred_per_hit, ward_shred_max)
+		# An item can let control effects wrack, shredding more per hit.
+		var per_hit := ward_shred_per_hit * unit.wrack_effect_multiplier(Stats.EffectKind.CONTROL)
+		return WardShredHitEffect.new(per_hit, ward_shred_max)
 	return null

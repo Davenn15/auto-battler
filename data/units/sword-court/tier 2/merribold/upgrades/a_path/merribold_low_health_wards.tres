@@ -4,4 +4,6 @@
 
 [resource]
 script = ExtResource("1_3aqsf")
+max_ward_bonus = 50.0
+description = "Wards rise as his health falls."
 metadata/_custom_type_script = "uid://bujbbxwbrwq5s"

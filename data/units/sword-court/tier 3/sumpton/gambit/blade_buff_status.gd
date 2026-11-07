@@ -8,6 +8,11 @@ var ward: Stats.Stat
 var attribute_bonus: float
 var ward_bonus: float
 
+func is_permanent_stat_gain() -> bool:
+	return true
+
+func get_permanent_stat_gains() -> Dictionary:
+	return {attribute: attribute_bonus, ward: ward_bonus}
 
 func _init(p_attribute: Stats.Stat, p_ward: Stats.Stat, p_attribute_bonus: float, p_ward_bonus: float) -> void:
 	attribute = p_attribute

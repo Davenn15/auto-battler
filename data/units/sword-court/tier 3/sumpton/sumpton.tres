@@ -13,7 +13,6 @@
 script = ExtResource("2_102h1")
 display_name = "sumpton"
 tier = 3
-summon_only = null
 upgrades = Array[ExtResource("3_ktop8")]([ExtResource("7_kkayf"), ExtResource("8_2dwrb")])
 max_health = 1200.0
 attack_range_cells = 2

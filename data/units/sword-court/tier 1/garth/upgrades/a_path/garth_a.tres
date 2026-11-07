@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_ylaip")
+description = "Every shield Garth receives is bigger."
 passives = Array[ExtResource("4_h2w64")]([ExtResource("5_ywlc7")])
 next_choices = Array[ExtResource("1_ylaip")]([ExtResource("2_u1bc4"), ExtResource("3_x8b10")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

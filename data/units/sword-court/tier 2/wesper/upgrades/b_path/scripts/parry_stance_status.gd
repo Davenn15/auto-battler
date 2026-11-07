@@ -34,7 +34,7 @@ func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 
 
 func try_reflect(unit: BattleUnit, projectile: Projectile) -> bool:
-	if randf() >= reflect_chance:
+	if CombatRng.randf() >= reflect_chance:
 		return false
 	var wrack_chance := unit.get_stat(Stats.Stat.WRACK_CHANCE) + reflect_wrack_bonus
 	if not projectile.reflect(unit, wrack_chance):

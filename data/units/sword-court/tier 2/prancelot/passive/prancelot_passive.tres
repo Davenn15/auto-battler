@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PrancelotPassive" format=3 uid="uid://c3hr5ly8c3m0y"]
+
+[ext_resource type="Script" uid="uid://vojb006fd1q6" path="res://data/units/sword-court/tier 2/prancelot/passive/prancelot_passive.gd" id="1_keumu"]
+
+[resource]
+script = ExtResource("1_keumu")
+heal_per_second = 25.0
+description = "Every other attack sends a healing note to the most hurt nearby ally."
+metadata/_custom_type_script = "uid://vojb006fd1q6"

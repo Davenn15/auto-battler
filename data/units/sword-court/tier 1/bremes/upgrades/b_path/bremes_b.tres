@@ -8,6 +8,7 @@
 
 [resource]
 script = ExtResource("1_tq08x")
+description = "New Gambit: Mirror Image. Creates a copy of Bremes that fights beside her for a few seconds."
 gambit = ExtResource("1_43so4")
 next_choices = Array[ExtResource("1_tq08x")]([ExtResource("3_ngu0y"), ExtResource("4_jubmh")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

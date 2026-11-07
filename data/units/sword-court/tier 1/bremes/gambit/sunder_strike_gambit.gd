@@ -35,7 +35,11 @@ func execute(caster: BattleUnit) -> void:
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
 	hit_damage = Stats.scaled(hit_damage, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
 	hit_damage += max_health_percent * target.max_health
-	var dealt := target.take_damage(hit_damage, 0, damage_type)
+	# Gambit damage can wrack if an item lets it.
+	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+	hit_damage *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
+	KeepsakeVfx.teal_slash(target)
+	var dealt := target.take_damage(hit_damage, wrack, damage_type)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 
 

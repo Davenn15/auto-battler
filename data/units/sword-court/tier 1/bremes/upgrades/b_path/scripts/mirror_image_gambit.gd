@@ -25,6 +25,7 @@ func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive:
 		return
 	var cells := caster.grid.free_cells_in_range(caster.cell, 1)
+	KeepsakeVfx.smoke_puff(caster)
 	for i in mini(clone_count, cells.size()):
 		_spawn_clone(caster, cells[i])
 
@@ -35,6 +36,7 @@ func _spawn_clone(caster: BattleUnit, cell: Vector2i) -> void:
 	caster.get_parent().add_child(clone)   # _ready runs here
 	clone.place_at(cell)
 	clone.modulate = CLONE_TINT
+	KeepsakeVfx.smoke_puff(clone)
 	caster.get_tree().call_group("battle_manager", "add_summon", clone)
 	# After add_summon: start_combat clears statuses, so these must come later.
 	clone.add_status(DodgeStatus.new(extra_dodge))
