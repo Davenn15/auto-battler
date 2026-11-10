@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ClampGambit" format=3 uid="uid://cp14kjf5h3sdj"]
+
+[ext_resource type="Script" uid="uid://bsyrgq6o8t83a" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/scripts/clamp_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 120.0
+might_scaling = 2.0
+ward_shred = 10.0
+shred_duration = 6.0
+gambit_name = "Clamp"
+cast_time = 0.2
+description = "Clamps his claw on his target, dealing damage and reducing its wards. Neither of them can attack, move or cast until it lets go."

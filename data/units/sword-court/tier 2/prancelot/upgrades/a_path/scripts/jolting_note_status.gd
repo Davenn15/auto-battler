@@ -1,6 +1,6 @@
 class_name JoltingNoteStatus
 extends NoteStatus
-## Sends a jolting note to the nearby ally (him included) who has dealt the most damage
+## Sends a jolting note to the nearby ally (never himself) who has dealt the most damage
 ## this combat, giving it wrack chance for a while.
 
 var amount: float

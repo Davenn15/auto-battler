@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://tt2e5kk7mnke"]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" uid="uid://dn62lhfhb6sf6" path="res://data/keepsakes/combined/manadrinker/insight__health_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Manadrinker"
+first_shard = 4
+second_shard = 6
+insight = 20.0
+health = 250.0
+effect = ExtResource("2_effect")
+description = "Whenever you gain Charge, you Heal for 2x the Charge gained."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

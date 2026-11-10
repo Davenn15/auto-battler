@@ -28,6 +28,11 @@ const BLADE_KINDS := [
 ## Charge each blade gives the ally that catches it. 0 = none.
 @export var blade_charge: float = 0.0
 
+## Only casts if an ally is in range to catch a blade. Sumpton never catches his own.
+func can_use(caster: BattleUnit) -> bool:
+	return _random_ally(caster) != null
+
+
 func execute(caster: BattleUnit) -> void:
 	if not _alive(caster):
 		return
@@ -37,7 +42,10 @@ func execute(caster: BattleUnit) -> void:
 		# The caster may have died, or the battle ended, between tosses.
 		if not _alive(caster) or not caster.active:
 			return
-		_toss(caster, _random_ally(caster), CombatRng.randi_range(0, BLADE_KINDS.size() - 1))
+		var ally := _random_ally(caster)
+		if ally == null:
+			return   # everyone in range has died since the cast began
+		_toss(caster, ally, CombatRng.randi_range(0, BLADE_KINDS.size() - 1))
 		await caster.get_tree().create_timer(toss_interval, true, true).timeout
 
 ## Extra blades banked by allies' wracks (Sumpton's A2), used up by this cast. 0 without A2.
@@ -47,8 +55,7 @@ func _take_bonus_blades(caster: BattleUnit) -> int:
 			return status.take()
 	return 0
 
-## A random living ally within range, other than the caster. The caster itself if
-## nobody is near.
+## A random living ally within range, other than the caster, or null if nobody is near.
 func _random_ally(caster: BattleUnit) -> BattleUnit:
 	var options: Array[BattleUnit] = []
 	for node in caster.get_tree().get_nodes_in_group("units"):
@@ -57,7 +64,7 @@ func _random_ally(caster: BattleUnit) -> BattleUnit:
 			continue
 		if caster.grid.get_distance(caster.cell, unit.cell) <= range_cells:
 			options.append(unit)
-	return caster if options.is_empty() else CombatRng.pick(options)
+	return null if options.is_empty() else CombatRng.pick(options)
 
 
 ## Sends a spinning blade of kind `kind` (an index into BLADE_KINDS) flying to `ally`.

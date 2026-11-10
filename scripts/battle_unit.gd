@@ -135,6 +135,9 @@ var _cast_total: float = 0.0   # length of the cast in progress, for the bar
 ## Damage this unit has dealt this battle, including its summons'. For effects that
 ## care who has been hitting hardest.
 var damage_dealt: float = 0.0
+## Health this unit has lost to damage this combat (after wards and shields). M-PATH links
+## to the ally with the most.
+var damage_taken: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite
 
@@ -600,7 +603,63 @@ func unequip(keepsake: Keepsake) -> bool:
 func _keepsakes_changed() -> void:
 	var had := max_health
 	_apply_data()
-	health = maxf(health + max_health - had, 1.0)
+	_refresh_after_keepsakes(had)
+
+
+## Mid-combat: puts `added` on the unit with its stats and effect, taking `replacing` off
+## first if given (a Shard being combined into `added`). Unlike equip(), it doesn't rebuild
+## the unit, which would undo things set up at the start of the fight. Either may be null.
+## For temporary items, such as VE5TIBULE's Shards.
+func swap_keepsake_in_combat(added: Keepsake, replacing: Keepsake = null) -> void:
+	var had := max_health
+	if replacing != null and keepsakes.has(replacing):
+		keepsakes.erase(replacing)
+		max_health -= replacing.health
+		for status in statuses.duplicate():
+			if status is KeepsakeStatsStatus and status.keepsake == replacing:
+				remove_status(status)
+				break
+		for i in _keepsake_effect_statuses.size():
+			if _keepsake_effect_statuses[i][0] == replacing:
+				for status in _keepsake_effect_statuses[i][1]:
+					remove_status(status)
+				_keepsake_effect_statuses.remove_at(i)
+				break
+	if added != null:
+		keepsakes.append(added)
+		max_health += added.health
+		if active:
+			add_status(KeepsakeStatsStatus.new(added))
+			_start_keepsake_effect(added)
+	_refresh_after_keepsakes(had)
+
+
+## [keepsake, statuses its effect added], so a keepsake taken off mid-combat takes its
+## effect with it.
+var _keepsake_effect_statuses: Array = []
+
+func _start_keepsake_effect(keepsake: Keepsake) -> void:
+	if keepsake.effect == null:
+		return
+	var before := statuses.duplicate()
+	keepsake.effect.on_battle_start(self)
+	var added: Array[Status] = []
+	for status in statuses:
+		if not before.has(status):
+			added.append(status)
+	_keepsake_effect_statuses.append([keepsake, added])
+
+
+## Mid-combat: sets max health and health directly and redraws the bar. For effects that
+## resize a unit, such as REPL\K8R splitting itself.
+func resize_health(new_max: float, new_health: float) -> void:
+	max_health = maxf(new_max, 1.0)
+	_refresh_after_keepsakes(max_health)
+	set_health(clampf(new_health, 1.0, max_health))
+
+
+func _refresh_after_keepsakes(had: float) -> void:
+	health = clampf(health + max_health - had, 1.0, max_health)
 	if health_bar != null:
 		health_bar.max_value = max_health
 		for tick in _health_ticks:
@@ -629,10 +688,10 @@ func start_combat() -> void:
 	clear_statuses()
 	for passive in passives:
 		passive.on_battle_start(self)
+	_keepsake_effect_statuses.clear()
 	for keepsake in keepsakes:
 		add_status(KeepsakeStatsStatus.new(keepsake))
-		if keepsake.effect != null:
-			keepsake.effect.on_battle_start(self)
+		_start_keepsake_effect(keepsake)
 	_casting = false
 	var actual := grid.world_to_cell(global_position)
 	if actual != cell:
@@ -645,6 +704,7 @@ func start_combat() -> void:
 	_locked_time = 0.0
 	_stunned_time = 0.0
 	damage_dealt = 0.0
+	damage_taken = 0.0
 
 
 
@@ -1112,8 +1172,9 @@ func bonus_attack(enemy: BattleUnit) -> int:
 ## right after take_damage, so the damage meter reads this to sort damage by type.
 static var last_damage_type: int = Stats.DamageType.MIGHT
 
+## `show_numbers` off: no damage number (Scour's beam shows one total per attack instead).
 func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.DamageType.MIGHT,
-		ignore_ward: bool = false, attacker: BattleUnit = null) -> float:
+		ignore_ward: bool = false, attacker: BattleUnit = null, show_numbers: bool = true) -> float:
 	if not alive:
 		return 0.0
 	last_damage_type = damage_type
@@ -1136,7 +1197,7 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	incoming_damage_type = damage_type
 	incoming_is_hit = true
 	incoming_wrack_level = wrack_level
-	var dealt := _apply_damage(amount, Stats.damage_color(damage_type, wrack_level), wrack_level, true)
+	var dealt := _apply_damage(amount, Stats.damage_color(damage_type, wrack_level), wrack_level, show_numbers)
 	incoming_attacker = null
 	return dealt
 
@@ -1177,6 +1238,8 @@ func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_nu
 			_spawn_damage_number(absorbed, SHIELD_COLOR)
 		if amount > 0.0:
 			_spawn_damage_number(minf(amount, health), number_color, wrack_level)
+	if amount > 0.0:
+		damage_taken += minf(amount, maxf(health, 0.0))
 	health -= amount
 	_update_health_bar()
 	_update_pending_bar()
@@ -1383,6 +1446,10 @@ func gain_charge(amount: float) -> void:
 		for status in statuses.duplicate():
 			status.on_charge_gained(self, charge - before)
 
+## TESTING: no flat Charge for being hit, for now: being hit gives Charge only for the damage
+## taken (charge_per_damage). Set to true to bring the flat charge_on_hit back.
+const FLAT_HIT_CHARGE := false
+
 func gain_charge_from_attack(dealt: float, target: BattleUnit = null) -> void:
 	if dealt <= 0.0:
 		return
@@ -1392,9 +1459,10 @@ func gain_charge_from_attack(dealt: float, target: BattleUnit = null) -> void:
 			amount = status.modify_attacker_charge(target, self, amount)
 	gain_charge(amount)
 
-## Charge for being hit by an attack: a flat amount plus a share of the damage taken.
-func gain_charge_from_hit(damage_taken: float) -> void:
-	gain_charge(charge_on_hit + damage_taken * charge_per_damage)
+## Charge for being hit by an attack: a share of the damage taken (plus a flat amount when
+## FLAT_HIT_CHARGE is on).
+func gain_charge_from_hit(taken: float) -> void:
+	gain_charge((charge_on_hit if FLAT_HIT_CHARGE else 0.0) + taken * charge_per_damage)
 
 ## Sets charge to full, ignoring anything that blocks charge gain. For effects that
 ## refund a Gambit outright.

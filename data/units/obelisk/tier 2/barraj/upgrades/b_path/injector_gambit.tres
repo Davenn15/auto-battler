@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="InjectorGambit" format=3 uid="uid://b8sbcs6waruxn"]
+
+[ext_resource type="Script" uid="uid://qe7m0xp32wud" path="res://data/units/obelisk/tier 2/barraj/upgrades/b_path/scripts/injector_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+missiles = 8
+cone_degrees = 25.0
+interval = 0.1
+damage_type = 1
+gambit_name = "Injector"
+cast_time = 0.4
+description = "Aims at the cone holding the most enemies and quickly fires injector missiles at random within it. Each hits the first enemy it touches, dealing damage and giving it a stack of Mono-Virus."

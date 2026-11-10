@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://d4dwxjrnt2v4r"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" uid="uid://gdnv3aorjafq" path="res://data/units/obelisk/tier 2/m-path/upgrades/a_path/m-path_a1.tres" id="2"]
+[ext_resource type="Resource" uid="uid://c8blompxkhd76" path="res://data/units/obelisk/tier 2/m-path/upgrades/a_path/m-path_a2.tres" id="3"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="4_bx8yi"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Bonded"
+description = "When either linked unit is healed, the other is healed for a share of it too."
+next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])
+gambit_bonuses = Dictionary[String, float]({
+"heal_share": 0.8
+})

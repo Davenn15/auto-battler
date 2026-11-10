@@ -32,6 +32,8 @@ extends Resource
 
 
 var _icon: ImageTexture   # made the first time it's asked for
+## Width in pixels (of the 32-pixel icon) of the white border round keepsake icons.
+const ICON_BORDER_WIDTH := 3
 
 
 func get_reserve_value() -> int:
@@ -58,13 +60,18 @@ func get_stat_bonuses() -> Dictionary:
 
 
 ## Placeholder art: a square, left half the first Shard's colour, right half the second's.
+## Keepsakes (combined items) get a thin white border so they stand out from Shards.
 func get_icon(size: int = 32) -> Texture2D:
 	if _icon == null:
 		var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
-		image.fill_rect(Rect2i(0, 0, size / 2, size), Shard.COLORS[first_shard])
-		image.fill_rect(Rect2i(size / 2, 0, size - size / 2, size), Shard.COLORS[second_shard])
-		_icon = ImageTexture.create_from_image(image)
 		var right: Shard.Kind = first_shard if is_shard else second_shard
 		image.fill_rect(Rect2i(0, 0, size / 2, size), Shard.COLORS[first_shard])
 		image.fill_rect(Rect2i(size / 2, 0, size - size / 2, size), Shard.COLORS[right])
+		if not is_shard:
+			var border := ICON_BORDER_WIDTH
+			image.fill_rect(Rect2i(0, 0, size, border), Color.WHITE)
+			image.fill_rect(Rect2i(0, size - border, size, border), Color.WHITE)
+			image.fill_rect(Rect2i(0, 0, border, size), Color.WHITE)
+			image.fill_rect(Rect2i(size - border, 0, border, size), Color.WHITE)
+		_icon = ImageTexture.create_from_image(image)
 	return _icon

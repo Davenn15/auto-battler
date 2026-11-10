@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MissileAttackPassive" format=3 uid="uid://b8s5rb61n5r0i"]
+
+[ext_resource type="Script" uid="uid://dfywqcsta4o8s" path="res://data/units/obelisk/tier 2/barraj/upgrades/a_path/scripts/missile_attack_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+spread_cells = 2
+blast_cells = 1.3
+damage = 90.0
+might_scaling = 0.35
+passive_name = "Missile Attacks"
+description = "Each attack also fires a missile that explodes near the target."

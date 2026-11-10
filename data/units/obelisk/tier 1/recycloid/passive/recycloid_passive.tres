@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RecyclePassive" format=3 uid="uid://btojg74gwdvb8"]
+
+[ext_resource type="Script" uid="uid://se88r0s1v8xm" path="res://data/units/obelisk/tier 1/recycloid/passive/recycle_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+share = 0.1
+passive_name = "Recycling"
+description = "When any unit dies near Recycloid, he takes a share of its max health and heals the most hurt ally near him with it (a random nearby ally if everyone is at full health)."

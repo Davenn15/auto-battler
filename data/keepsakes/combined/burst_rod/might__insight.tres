@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/burst_rod/might__insight_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Burst Rod"
+first_shard = 0
+second_shard = 4
+effect = ExtResource("2_effect")
+might = 25.0
+insight = 20.0
+description = "Whenever you deal at least 15% of an enemy's health within 1 second, gain 5 Charge."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

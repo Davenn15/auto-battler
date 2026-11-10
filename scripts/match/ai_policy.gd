@@ -24,6 +24,13 @@ const RANGES := {
 	"center_bias": [0.0, 0.0, 1.0],    # chance to fill columns from the middle outward
 }
 
+## How a plan treats Shards. Plans take turns (by variant), so each is tested every round:
+##   KEEP: the old habit. Combine loose pairs only sometimes; equip Shards straight away.
+##   POOL: take every Shard off the units, combine as many pairs as possible, re-equip.
+##   HOLD: combine every loose pair; a leftover Shard waits loose instead of being equipped.
+enum ShardHandling { KEEP, POOL, HOLD }
+const SHARD_HANDLING := [ShardHandling.KEEP, ShardHandling.POOL, ShardHandling.HOLD]
+
 var genome := {}
 
 
@@ -148,7 +155,13 @@ func make_plan(p: PlayerState, combat_number: int, variant: int, second_row: Arr
 			"reroll":
 				MatchRules.reroll(p, combat_number)
 				stats["rerolls"] += 1
-	while randf() < g["combine_rate"]:
+	# What to do with Shards differs from plan to plan, so the planner's test battles decide
+	# whether combining pays off (see SHARD_HANDLING).
+	var handling: int = SHARD_HANDLING[variant % SHARD_HANDLING.size()]
+	if handling == ShardHandling.POOL:
+		_pull_shards_off(p)   # every Shard the army has becomes available to combine
+	var combine_all := handling != ShardHandling.KEEP
+	while combine_all or randf() < g["combine_rate"]:
 		var loose: Array = []
 		for i in p.inventory.size():
 			if p.inventory[i].is_shard:
@@ -158,16 +171,28 @@ func make_plan(p: PlayerState, combat_number: int, variant: int, second_row: Arr
 		loose.shuffle()
 		if MatchRules.combine(p, loose[0], loose[1]):
 			stats["combines"] += 1
+		else:
+			break
 	for i in range(p.inventory.size() - 1, -1, -1):
 		var open := p.units.filter(func(u): return u.items.size() < BattleUnit.MAX_KEEPSAKES)
 		if open.is_empty():
 			break
+		if handling == ShardHandling.HOLD and p.inventory[i].is_shard:
+			continue   # a lone Shard waits loose for a partner
 		if randf() < g["equip_rate"]:
 			MatchRules.equip(p, open.pick_random(), i)
 	if variant == 0 or randf() < g["layout_rate"]:
 		lay_out(p, second_row, g)
 	MatchRules.auto_place_bench(p)
 	return stats
+
+
+## Takes every Shard off the army's units and back into the inventory. Keepsakes stay on.
+static func _pull_shards_off(p: PlayerState) -> void:
+	for unit in p.units:
+		for i in range(unit.items.size() - 1, -1, -1):
+			if unit.items[i].is_shard:
+				MatchRules.unequip(p, unit, i)
 
 
 func _path_choice(unit: ArmyUnit) -> int:

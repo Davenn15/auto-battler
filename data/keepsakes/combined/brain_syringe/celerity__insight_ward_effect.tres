@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="SapOnHitEffect" format=3 uid="uid://gdh61xj450mp"]
+
+[ext_resource type="Script" uid="uid://u7ctromixf3d" path="res://data/keepsakes/effects/sap_on_hit_effect.gd" id="1_eff"]
+
+[resource]
+script = ExtResource("1_eff")
+amount = 2.0
+metadata/_custom_type_script = "uid://u7ctromixf3d"

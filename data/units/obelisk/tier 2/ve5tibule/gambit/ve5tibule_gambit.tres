@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PhaseGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/gambit/phase_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Phase"
+cast_time = 0.3
+description = "Phases the enemy in range that has dealt the most damage this combat: it is stunned and untargetable for a while."

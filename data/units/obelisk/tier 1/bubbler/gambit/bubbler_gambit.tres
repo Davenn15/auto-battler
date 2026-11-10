@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BubbleGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/bubbler/gambit/bubble_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Bubble"
+cast_time = 0.5
+description = "Blows a protective bubble around himself that stays where it was cast for a while. Allies inside gain Wards."

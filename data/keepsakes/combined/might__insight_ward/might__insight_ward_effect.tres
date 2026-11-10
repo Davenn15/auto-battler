@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="GambitPunishEffect" format=3]
-
-[ext_resource type="Script" uid="uid://bag3u2eufjhua" path="res://data/keepsakes/combined/might__insight_ward/gambit_punish_effect.gd" id="1_eff"]
-
-[resource]
-script = ExtResource("1_eff")
-range_cells = 1
-metadata/_custom_type_script = "uid://bag3u2eufjhua"

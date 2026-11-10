@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ShardGiftGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/b_path/scripts/shard_gift_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Gift"
+cast_time = 0.3
+description = "Sends nearby allies a temporary Shard. If an ally already holds a Shard, the new one combines with it into a keepsake. Everything given is taken back when combat ends."

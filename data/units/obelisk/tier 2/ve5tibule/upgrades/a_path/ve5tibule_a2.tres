@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/a_path/phased_enemy_decay.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "His enemies lose Charge over time while phased."
+passives = Array[ExtResource("2")]([ExtResource("3")])

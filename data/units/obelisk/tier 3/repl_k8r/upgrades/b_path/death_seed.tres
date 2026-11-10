@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DeathSeedPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/repl_k8r/upgrades/b_path/scripts/death_seed_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Last Seed"
+description = "When a duplicate dies, it plants a replication seed in the nearby non-REPL\\K8R ally with the lowest health."

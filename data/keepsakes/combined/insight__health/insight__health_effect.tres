@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="ChargeHealEffect" format=3]
-
-[ext_resource type="Script" uid="uid://vvlgtmhrhi06" path="res://data/keepsakes/combined/insight__health/charge_heal_effect.gd" id="1_eff"]
-
-[resource]
-script = ExtResource("1_eff")
-multiplier = 2.5
-metadata/_custom_type_script = "uid://vvlgtmhrhi06"

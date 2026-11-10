@@ -16,12 +16,16 @@ signal message(kind: String, data: Dictionary)
 const PORT := 7777
 ## Bump whenever a change would make two copies play differently. Copies with different
 ## versions refuse to play each other.
-const PROTOCOL_VERSION := "proto-1"
+const PROTOCOL_VERSION := "proto-3"
 
 enum Mode { OFFLINE, HOST, CLIENT }
 
 var mode: Mode = Mode.OFFLINE
 var match_seed := 0
+## Factions: yours (set by the menu before hosting or joining) and the other player's,
+## which arrives with the connection handshake.
+var local_faction := "Sword Court"
+var opponent_faction := "Sword Court"
 var _peer: ENetMultiplayerPeer
 
 
@@ -105,10 +109,12 @@ func _receive(kind: String, data: Dictionary) -> void:
 					_drop_later()
 					return
 				match_seed = randi() & 0x7fffffff
-				send("start", {"seed": match_seed})
+				opponent_faction = data.get("faction", opponent_faction)
+				send("start", {"seed": match_seed, "faction": local_faction})
 				match_ready.emit(match_seed)
 		"start":   # host -> joiner
 			match_seed = int(data["seed"])
+			opponent_faction = data.get("faction", opponent_faction)
 			match_ready.emit(match_seed)
 		"reject":
 			var reason: String = data.get("reason", "The host refused the connection.")
@@ -124,7 +130,7 @@ func _drop_later() -> void:
 
 
 func _on_connected_to_server() -> void:
-	send("hello", {"version": PROTOCOL_VERSION})
+	send("hello", {"version": PROTOCOL_VERSION, "faction": local_faction})
 
 
 func _on_connection_failed() -> void:

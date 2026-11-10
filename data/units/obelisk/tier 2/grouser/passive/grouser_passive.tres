@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShredPassive" format=3 uid="uid://dp6wsh4tpcj0l"]
+
+[ext_resource type="Script" uid="uid://mc3xtk8xmweh" path="res://data/units/obelisk/tier 2/grouser/passive/shred_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+highest_amount = 10.0
+duration = 6.0
+passive_name = "Shred"
+description = "Attacks reduce the target's highest ward for a few seconds. Stacks."

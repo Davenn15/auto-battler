@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LinkGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/m-path/gambit/link_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Link"
+cast_time = 0.3
+description = "Links M-PATH to the nearby ally that has taken the most damage. While linked, both have more wards and each takes a share of the other's damage."

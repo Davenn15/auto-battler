@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NetworkGambit" format=3 uid="uid://dwnb312abhiml"]
+
+[ext_resource type="Script" uid="uid://yde8plj4341e" path="res://data/units/obelisk/tier 2/m-path/upgrades/b_path/scripts/network_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+width_cells = 4.0
+duration = 6.0
+gambit_name = "Networked"
+cast_time = 0.3
+description = "Lays a rectangular field over the most allies. For a while it keeps evening out the health of every ally inside."

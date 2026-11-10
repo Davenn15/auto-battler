@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1_jiceh")
-description = "For a while he gains attack range, his attacks become waves that hit every enemy in a line, and each attack shields him. He also dashes away from his target."
 duration = 8.0
 range_bonus = 2
 wave_width_cells = 2.0
@@ -12,6 +11,6 @@ dash_cells = 2
 dash_time = 0.3
 attack_shield = 100.0
 attack_shield_duration = 2.0
-wave_max_health_percent = 0.05
 cast_time = 0.5
+description = "For a while he gains attack range, his attacks become waves that hit every enemy in a line, and each attack shields him. He also dashes away from his target."
 metadata/_custom_type_script = "uid://moboh6rdne36"

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="WardStealPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/grouser/upgrades/a_path/scripts/ward_steal_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Ward Steal"
+description = "Whenever Grouser reduces an enemy's ward, he gains that much of it for a while."

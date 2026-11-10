@@ -7,6 +7,8 @@ extends RefCounted
 const START_HP := 64
 const START_AURA := 6
 const START_RESERVE := 10
+## Loss damage starts from this, plus half the round number (see round_damage).
+const ROUND_DAMAGE_BASE := 4
 ## The most Aura a player is ever given in a match, counting the starting Aura.
 const MAX_AURA_RECEIVED := 48
 
@@ -37,6 +39,45 @@ static func roster() -> Array[UnitData]:
 	if _roster.is_empty():
 		_roster = RandomTeams.load_roster(UNITS_DIR)
 	return _roster
+
+
+# ---------- Factions ----------
+# A unit's faction is the folder it lives in: data/units/<faction>/<tier>/<unit>/.
+
+const DEFAULT_FACTION := "Sword Court"
+
+
+## "Sword Court" for res://data/units/sword-court/tier 1/garth/garth.tres.
+static func faction_of(data: UnitData) -> String:
+	var folder := data.resource_path.trim_prefix(UNITS_DIR + "/").get_slice("/", 0)
+	return faction_name(folder)
+
+
+## A faction folder's name as players see it: "sword-court" -> "Sword Court".
+static func faction_name(folder: String) -> String:
+	var words := folder.replace("_", " ").replace("-", " ").split(" ", false)
+	for i in words.size():
+		words[i] = words[i].capitalize()
+	return " ".join(words)
+
+
+## Every faction that has at least one unit, the default first, then by name.
+static func factions() -> PackedStringArray:
+	var names := PackedStringArray()
+	for data in roster():
+		var name := faction_of(data)
+		if not names.has(name):
+			names.append(name)
+	names.sort()
+	if names.has(DEFAULT_FACTION):
+		names.remove_at(names.find(DEFAULT_FACTION))
+		names.insert(0, DEFAULT_FACTION)
+	return names
+
+
+## The units a player of `faction` can buy.
+static func roster_for(faction: String) -> Array[UnitData]:
+	return roster().filter(func(d): return faction_of(d) == faction)
 
 
 static func shards() -> Array:
@@ -71,9 +112,16 @@ static func pay_income(player: PlayerState, round_number: int) -> Dictionary:
 
 
 ## Damage to the loser of a player combat in round `round_number`, when the winner has
-## `surviving_aura` Aura of units left (upgrades count; summons and keepsakes don't).
+## `surviving_aura` Aura of units left (upgrades count; summons and keepsakes don't):
+## the round part plus half the survivors, rounded down.
 static func loss_damage(round_number: int, surviving_aura: int) -> int:
-	return round_number + surviving_aura / 2
+	return round_damage(round_number) + surviving_aura / 2
+
+
+## The part of a loss that comes from the round: starts higher and grows half as fast
+## as the round number (5 in round 3, 6 in round 5, 7 in round 7, ...).
+static func round_damage(round_number: int) -> int:
+	return ROUND_DAMAGE_BASE + round_number / 2
 
 
 ## Draws: each player takes half of what they'd take for losing, rounded down.
@@ -162,9 +210,9 @@ static func tier_unlocked(tier: int, combat_number: int) -> bool:
 	return combat_number >= TIER_FIRST_COMBAT.get(tier, 1)
 
 
-## Three different units from the tiers unlocked for `combat_number`.
+## Three different units of the player's faction, from the tiers unlocked for `combat_number`.
 static func roll_unit_offers(player: PlayerState, combat_number: int) -> void:
-	var pool := roster().filter(func(d): return tier_unlocked(d.tier, combat_number))
+	var pool := roster_for(player.faction).filter(func(d): return tier_unlocked(d.tier, combat_number))
 	pool.shuffle()
 	player.unit_offers.assign(pool.slice(0, UNIT_OFFERS))
 

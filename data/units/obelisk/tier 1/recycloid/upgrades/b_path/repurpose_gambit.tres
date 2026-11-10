@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RepurposeGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/recycloid/upgrades/b_path/scripts/repurpose_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Repurposed"
+cast_time = 0.8
+description = "Brings back a copy of the last ally that died, with part of its health. The copy takes ramping damage until it dies, and Recycloid gains no Charge while it lives."

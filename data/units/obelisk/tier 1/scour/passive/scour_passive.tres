@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="BeamPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/scour/passive/beam_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Beam"
+description = "Scour's attack is a continuous beam that deals his attack damage steadily. When he switches targets, the beam takes a moment to charge up."

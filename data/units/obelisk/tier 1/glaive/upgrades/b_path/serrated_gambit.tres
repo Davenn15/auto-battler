@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SerratedGambit" format=3 uid="uid://bwqyobtpkko1w"]
+
+[ext_resource type="Script" uid="uid://blchr8ey5nlya" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/scripts/serrated_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Serrated"
+cast_time = 0.4
+description = "Spins like a sawblade for a while, damaging every enemy next to him. He can't attack or gain Charge while spinning, but can still move."

@@ -36,6 +36,7 @@ func execute(caster: BattleUnit) -> void:
 	for ward in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
 		caster.add_status(TimedStatStatus.new(ward, ward_per_taunt * taunted, ward_time))
 	caster.show_float_text("Taunt ×%d" % taunted, Color(0.85, 0.15, 0.15))
+	KeepsakeVfx.taunt_ring(caster, ward_time)   # lasts as long as the Ward bonus
 
 
 func _enemies_in_range(caster: BattleUnit) -> Array[BattleUnit]:

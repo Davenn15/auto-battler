@@ -17,12 +17,14 @@ var credit_id: int    # who the damage meter credits; the summoner for summons
 var ignore_ward: bool = false   # the hit skips the target's wards
 var grants_charge: bool = true   # false for extra shots that shouldn't build attack charge
 var is_attack: bool = true   # false for shots that aren't attacks (no charge, no on-hit, no retaliation)
+var team: int = 0   # the shooter's team, so areas like Bubbler's bubble can slow enemy shots
 
 func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack_level: int = 0, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
 	hit_effects = p_hit_effects
 	wrack_level = p_wrack_level
 	shooter_id = p_shooter.get_instance_id()
 	credit_id = p_shooter.get_credit_id()
+	team = p_shooter.team
 	target = p_target
 	damage = p_damage
 	damage_type = p_type
@@ -39,7 +41,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var to_target := target.global_position - global_position
-	var step := SPEED * delta
+	var step := SPEED * delta * speed_scale()
 	if to_target.length() <= maxf(step, HIT_DISTANCE):
 		_hit()
 	else:
@@ -63,6 +65,15 @@ func _hit() -> void:
 	_after_hit()
 	
 
+## How fast this shot moves right now (1 = full speed): slowed while it's inside an enemy
+## area that slows shots, such as Bubbler's bubble (nodes in the "projectile_slowers" group).
+func speed_scale() -> float:
+	var factor := 1.0
+	for node in get_tree().get_nodes_in_group("projectile_slowers"):
+		factor = minf(factor, node.slow_factor(global_position, team))
+	return factor
+
+
 ## What happens once the shot has hit. Shots that do more, like bouncing, override this.
 func _after_hit() -> void:
 	queue_free()
@@ -81,6 +92,7 @@ func reflect(by: BattleUnit, wrack_chance: float) -> bool:
 	shooter_id = by.get_instance_id()
 	credit_id = by.get_credit_id()
 	target = shooter
+	team = by.team
 	hit_effects = []
 	color = BattleUnit.team_color(by.team)
 	return true

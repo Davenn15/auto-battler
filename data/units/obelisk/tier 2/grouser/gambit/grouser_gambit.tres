@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SnipGambit" format=3 uid="uid://c2jcjxkul0gsx"]
+
+[ext_resource type="Script" uid="uid://dxidr8opqeowi" path="res://data/units/obelisk/tier 2/grouser/gambit/snip_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 0.5
+gambit_name = "Snip"
+cast_time = 0.3
+description = "Snips the target with his claw twice. Each snip is an attack that deals bonus damage equal to a share of the target's max health."

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://ctf6sofjn7mtq"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" uid="uid://b8s5rb61n5r0i" path="res://data/units/obelisk/tier 2/barraj/upgrades/a_path/missile_attacks.tres" id="3"]
+[ext_resource type="Resource" uid="uid://cx1p823ugimj4" path="res://data/units/obelisk/tier 2/barraj/upgrades/a_path/barraj_a1.tres" id="4"]
+[ext_resource type="Resource" uid="uid://bcdwyyvcipp0h" path="res://data/units/obelisk/tier 2/barraj/upgrades/a_path/barraj_a2.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Missile Attacks"
+description = "Each attack also fires a missile that explodes near the target."
+passives = Array[ExtResource("2")]([ExtResource("3")])
+next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

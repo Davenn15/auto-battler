@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="TargetGuardPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/scripts/target_guard_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Locked On"
+description = "Grouser takes less damage from the enemy he is targeting."

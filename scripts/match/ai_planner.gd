@@ -23,6 +23,11 @@ signal plan_ready(summary: String)
 ## Melee units that stand in the second row (same as the random battle scene's list).
 @export var second_row_units: Array[String] = ["bremes", "lunck", "wesper", "von carrow", "vere"]
 
+## Names this planner's files and its log line, so two planners can run at once (watching
+## two computers play).
+var job_prefix := "job"
+var label := "Opponent"
+
 var busy := false
 var _player: PlayerState
 var _plans: Array[PlayerState] = []
@@ -99,10 +104,20 @@ func _stand_in_opponent(aura: int) -> Array[ArmyUnit]:
 
 # ---------- Simulating ----------
 
+## True in a background copy started to test plans. Such a copy must never start copies of
+## its own: if it ever ended up in a match, each copy would start more, without end.
+static func is_eval_copy() -> bool:
+	return OS.get_cmdline_user_args().has("--ai-eval")
+
+
 func _start_jobs(opponent: Array[ArmyUnit]) -> void:
 	_results.clear()
 	_results.resize(_plans.size())
 	_jobs.clear()
+	if is_eval_copy():
+		push_error("AiPlanner: a background test copy tried to plan; refusing to start more copies.")
+		_finish(0)
+		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://ai"))
 	var count := clampi(processes, 1, _plans.size())
 	for j in count:
@@ -114,8 +129,8 @@ func _start_jobs(opponent: Array[ArmyUnit]) -> void:
 			"candidates": indices.map(func(i): return ArmyUnit.army_to_array(_plans[i].units)),
 			"battles": battles_per_candidate, "time_limit": time_limit, "seed": randi(),
 		}
-		var in_path := ProjectSettings.globalize_path("user://ai/job_%d_in.json" % j)
-		var out_path := ProjectSettings.globalize_path("user://ai/job_%d_out.json" % j)
+		var in_path := ProjectSettings.globalize_path("user://ai/%s_%d_in.json" % [job_prefix, j])
+		var out_path := ProjectSettings.globalize_path("user://ai/%s_%d_out.json" % [job_prefix, j])
 		var file := FileAccess.open(in_path, FileAccess.WRITE)
 		file.store_string(JSON.stringify(job))
 		file.close()
@@ -157,8 +172,8 @@ func _finish(index: int) -> void:
 	busy = false
 	var seconds := (Time.get_ticks_msec() - _started_ms) / 1000.0
 	var tested := _results.filter(func(r): return r != null).size()
-	var summary := "Opponent planned in %.1fs (%d plans tested, %d battles each%s)" % [
-			seconds, tested, battles_per_candidate, ", against a stand-in army" if _used_stand_in else ""]
+	var summary := "%s planned in %.1fs (%d plans tested, %d battles each%s)" % [
+			label, seconds, tested, battles_per_candidate, ", against a stand-in army" if _used_stand_in else ""]
 	var r = _results[index] if index < _results.size() else null
 	if r != null:
 		summary += "; its pick won %d of %d" % [r["wins"], r["wins"] + r["draws"] + r["losses"]]

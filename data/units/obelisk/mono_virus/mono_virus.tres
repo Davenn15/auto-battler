@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="MonoVirusSettings" format=3 uid="uid://dlohoo1knexrh"]
+
+[ext_resource type="Script" uid="uid://bwh1mr03kmlvm" path="res://data/units/obelisk/mono_virus/mono_virus_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage_per_stack = 0.01
+transfer_share = 0.5
+number_interval = 0.5

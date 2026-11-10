@@ -24,6 +24,7 @@ const BELLOW_RING_COLOR := Color(1.0, 0.18, 0.12)  # Merribold's Bellow
 const LUNCK_ORANGE := Color(1.0, 0.55, 0.15)       # Lunck's flag and heart
 const CRESCENDO_COLOR := Color(1.0, 0.5, 0.8)      # Prancelot's floating notes
 const BREMES_TEAL := Color(0.25, 0.85, 0.8)        # Bremes' slash and smoke
+const LORDRED_RED := Color(1.0, 0.28, 0.45)        # Lordred's cleave and taunt
 const HEAD_ICON_HEIGHT := -66.0                     # above the health bar and item icons
 const BURST_COLOR := Color(0.35, 0.6, 1.0)
 const SPARK_COLOR := Color(0.75, 0.35, 1.0)
@@ -415,6 +416,137 @@ static func teal_slash(target: BattleUnit) -> void:
 	slash.rotation = target.global_rotation
 
 
+## Scour's Haywire: a fiery spiked blast out to the explosion's reach.
+static func haywire_blast(unit: BattleUnit, radius_cells: int) -> void:
+	if not enabled() or unit.grid == null:
+		return
+	var ring := SpikyRing.new()
+	ring.color = Color(1.0, 0.55, 0.15)
+	ring.max_radius = (radius_cells + 0.5) * unit.grid.hex_size * BattleGrid.SQRT3
+	ring.z_index = 14
+	_spawn(unit, ring, unit.global_position)
+	burst(unit, Color(1.0, 0.75, 0.3))
+
+
+## Recycloid's passive: a green orb of recycled health floating from where a unit died to
+## the ally it heals.
+static func recycle_orb(from: Vector2, to_unit: BattleUnit) -> void:
+	if not enabled() or not is_instance_valid(to_unit):
+		return
+	var orb := Burst.new()
+	orb.color = VacuumChannel.VACUUM_COLOR
+	to_unit.get_tree().current_scene.add_child(orb)
+	orb.global_position = from
+	var tween := orb.create_tween()
+	tween.tween_property(orb, "global_position", to_unit.global_position, 0.35)
+	heal_flash(to_unit)
+
+
+## Mono-Virus: a purple orb carrying a dead unit's stacks to the ally that inherits them.
+static func virus_jump(from: Vector2, to_unit: BattleUnit) -> void:
+	if not enabled() or not is_instance_valid(to_unit):
+		return
+	var orb := Burst.new()
+	orb.color = MonoVirusStatus.SETTINGS.color
+	to_unit.get_tree().current_scene.add_child(orb)
+	orb.global_position = from
+	orb.create_tween().tween_property(orb, "global_position", to_unit.global_position, 0.35)
+
+
+## Grouser's claw: two neon yellow blades closing on the target like a pincer.
+static func claw_snip(target: BattleUnit) -> void:
+	if not enabled() or not is_instance_valid(target):
+		return
+	var claw := Pincer.new()
+	claw.color = WardShiftStatus.COLOR
+	claw.size = _sprite_size(target).y * 1.0
+	claw.z_index = 13
+	_spawn(target, claw, target.global_position)
+	claw.rotation = target.global_rotation
+
+
+## VE5TIBULE's gift: the item's icon flies from him to the ally, then pops.
+static func gift_icon(from: Vector2, to_unit: BattleUnit, item: Keepsake) -> void:
+	if not enabled() or not is_instance_valid(to_unit) or item == null:
+		return
+	var icon := Sprite2D.new()
+	icon.texture = item.get_icon(20)
+	icon.scale = Vector2.ONE * 18.0 / maxf(icon.texture.get_height(), 1.0)   # about 18 pixels tall
+	icon.z_index = 15
+	to_unit.get_tree().current_scene.add_child(icon)
+	icon.global_position = from
+	var tween := icon.create_tween()
+	tween.tween_property(icon, "global_position", to_unit.global_position + Vector2(0, -20), 0.35) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(icon, "scale", icon.scale * 1.6, 0.15)
+	tween.parallel().tween_property(icon, "modulate:a", 0.0, 0.15)
+	tween.tween_callback(icon.queue_free)
+
+
+## Mono-Virus: a small purple badge at the unit's lower right showing how many stacks it
+## carries. Call again whenever the count changes; clear it with clear(unit, key).
+static func virus_badge(unit: BattleUnit, key: String, stacks: int) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	var badge := unit.get_node_or_null(key) as StackBadge
+	if badge == null or badge.is_queued_for_deletion():
+		badge = StackBadge.new()
+		badge.name = key
+		badge.z_index = 13
+		var size := _sprite_size(unit)
+		badge.position = Vector2(size.x * 0.5 - 2.0, size.y * 0.5 - 6.0)
+		unit.add_child(badge)
+	badge.color = MonoVirusStatus.SETTINGS.color
+	if badge.count != stacks:
+		badge.count = stacks
+		badge.pop = 0.0   # a little bounce each time it changes
+	badge.queue_redraw()
+
+
+## BAR.RAJ's missiles: a round explosion, bright in the middle and fading outwards, that
+## grows to the size of the blast.
+static func missile_blast(parent: Node, at: Vector2, radius: float, color: Color) -> void:
+	if not enabled() or parent == null:
+		return
+	var blast := RadialBlast.new()
+	blast.color = color
+	blast.max_radius = radius
+	blast.z_index = 14
+	parent.add_child(blast)
+	blast.global_position = at
+
+
+## Lordred's Cleave: one large pinkish red slash cutting right through the target.
+static func cleave_slash(target: BattleUnit) -> void:
+	if not enabled() or not is_instance_valid(target):
+		return
+	var slash := Slash.new()
+	slash.color = LORDRED_RED
+	slash.size = _sprite_size(target).y * 1.5
+	slash.count = 1
+	slash.thickness = 2.2
+	slash.z_index = 13
+	_spawn(target, slash, target.global_position)
+	slash.rotation = target.global_rotation
+
+
+## Lordred's Taunt: a slowly turning spiked pinkish red ring around him for `duration`
+## seconds. Playing it again restarts the clock.
+static func taunt_ring(unit: BattleUnit, duration: float) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	var ring := unit.get_node_or_null("VfxTaunt") as SpikedAura
+	if ring == null or ring.is_queued_for_deletion():
+		ring = SpikedAura.new()
+		ring.name = "VfxTaunt"
+		ring.color = LORDRED_RED
+		ring.radius = _sprite_size(unit).x * 0.75
+		ring.z_index = -1   # behind the unit's sprite
+		unit.add_child(ring)
+	ring.life = duration
+	ring.time = 0.0
+
+
 ## Bremes' Mirror Image: a teal puff of smoke at the unit's feet.
 static func smoke_puff(unit: BattleUnit) -> void:
 	if not enabled() or not is_instance_valid(unit):
@@ -717,11 +849,44 @@ class NoteSwirl extends Node2D:
 			draw_string(font, pos + Vector2(-5, 6), NOTES[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(color, alpha))
 
 
-## Two quick crossing slash marks that sweep across the target and fade.
+## A spiked ring around a unit that grows in, turns slowly, and fades at the end.
+class SpikedAura extends Node2D:
+	const SPIKES := 16
+	var color := Color.WHITE
+	var radius := 30.0
+	var life := 1.0
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		life -= delta
+		if life <= 0.0:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var grow := minf(time / 0.15, 1.0)
+		var fade := clampf(life / 0.3, 0.0, 1.0)
+		var r := radius * (0.6 + 0.4 * grow)
+		var pulse := 1.0 + 0.04 * sin(time * 6.0)
+		var points := PackedVector2Array()
+		for i in SPIKES * 2 + 1:
+			var angle := TAU * i / (SPIKES * 2) + time * 0.6
+			var reach := r * pulse * (1.25 if i % 2 == 0 else 1.0)
+			points.append(Vector2.from_angle(angle) * Vector2(reach, reach * 0.75))   # flattened onto the ground
+		draw_colored_polygon(points.slice(0, points.size() - 1), Color(color, 0.12 * fade))
+		draw_polyline(points, Color(color, 0.85 * fade), 2.0, true)
+
+
+## Quick slash marks that sweep across the target and fade: two crossing ones by default,
+## or a single big one (count 1, thicker).
 class Slash extends Node2D:
 	const TIME := 0.28
 	var color := Color.WHITE
 	var size := 30.0
+	var count := 2
+	var thickness := 1.0
 	var time := 0.0
 
 	func _process(delta: float) -> void:
@@ -731,7 +896,7 @@ class Slash extends Node2D:
 		queue_redraw()
 
 	func _draw() -> void:
-		for i in 2:
+		for i in count:
 			# The second slash starts a little after the first, crossing it.
 			var t := clampf((time - i * 0.06) / (TIME * 0.6), 0.0, 1.0)
 			if t <= 0.0:
@@ -741,9 +906,9 @@ class Slash extends Node2D:
 			var to := -from
 			var tip := from.lerp(to, t)
 			var tail := from.lerp(to, maxf(t - 0.55, 0.0))
-			draw_line(tail, tip, Color(color, 0.35 * fade), 7.0, true)
-			draw_line(tail, tip, Color(color, fade), 3.0, true)
-			draw_line(tail, tip, Color(1, 1, 1, 0.8 * fade), 1.0, true)
+			draw_line(tail, tip, Color(color, 0.35 * fade), 7.0 * thickness, true)
+			draw_line(tail, tip, Color(color, fade), 3.0 * thickness, true)
+			draw_line(tail, tip, Color(1, 1, 1, 0.8 * fade), 1.0 * thickness, true)
 
 
 ## A puff of smoke balls bursting out at a unit's feet and drifting up as they fade.
@@ -826,6 +991,84 @@ class SpikyRing extends Node2D:
 		draw_colored_polygon(points, Color(color, 0.18 * fade))
 		points.append(points[0])
 		draw_polyline(points, Color(color, 0.9 * fade), 2.0, true)
+
+
+## Two curved blades that swing shut across a point, then fade.
+class Pincer extends Node2D:
+	const TIME := 0.25
+	var color := Color.WHITE
+	var size := 30.0
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		if time >= TIME:
+			queue_free()
+		queue_redraw()
+
+	func _draw() -> void:
+		var t := clampf(time / (TIME * 0.5), 0.0, 1.0)         # closing
+		var fade := clampf(1.0 - (time - TIME * 0.5) / (TIME * 0.5), 0.0, 1.0)
+		var open := lerpf(0.9, 0.05, t * t)                    # half-angle between the blades
+		for side: float in [-1.0, 1.0]:
+			var points := PackedVector2Array()
+			for i in 9:
+				var a := -PI / 2.0 + side * open * (1.0 - i / 8.0)   # a curve that ends at the tip
+				points.append(Vector2.from_angle(a + side * 0.6) * size * 0.5 + Vector2(side * size * 0.15, size * 0.25))
+			draw_polyline(points, Color(0, 0, 0, 0.5 * fade), 9.0, true)   # dark edge, so it shows on a glow
+			draw_polyline(points, Color(color, 0.5 * fade), 7.0, true)
+			draw_polyline(points, Color(color, fade), 4.0, true)
+		if t >= 1.0:
+			draw_circle(Vector2(0, -size * 0.2), 4.0 * fade + 1.0, Color(1, 1, 1, 0.9 * fade))
+
+
+class StackBadge extends Node2D:
+	const POP_TIME := 0.15
+	const FONT_SIZE := 11
+	var color := Color.WHITE
+	var count := 0
+	var pop := POP_TIME   # time since the count last changed
+
+	func _process(delta: float) -> void:
+		if pop < POP_TIME:
+			pop += delta
+			scale = Vector2.ONE * (1.0 + 0.35 * (1.0 - minf(pop / POP_TIME, 1.0)))
+			queue_redraw()
+
+	func _draw() -> void:
+		var text := str(count)
+		var font := ThemeDB.fallback_font
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, FONT_SIZE)
+		var radius := maxf(7.0, text_size.x / 2.0 + 3.0)
+		draw_circle(Vector2.ZERO, radius + 1.5, Color(0.08, 0.02, 0.12, 0.95))   # dark rim
+		draw_circle(Vector2.ZERO, radius, color.darkened(0.25))
+		var at := Vector2(-text_size.x / 2.0, font.get_ascent(FONT_SIZE) / 2.0 - 1.0)
+		draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, 3, Color(0.08, 0.02, 0.12))
+		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, Color.WHITE)
+
+
+class RadialBlast extends Node2D:
+	const TIME := 0.3
+	const RINGS := 6   # stacked circles, each fainter towards the edge
+	var color := Color.WHITE
+	var max_radius := 40.0
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		if time >= TIME:
+			queue_free()
+		queue_redraw()
+
+	func _draw() -> void:
+		var t := clampf(time / TIME, 0.0, 1.0)
+		var radius := max_radius * (1.0 - pow(1.0 - t, 3.0))   # fast at first, easing out
+		var fade := 1.0 - t * t
+		for i in RINGS:
+			var share := 1.0 - float(i) / RINGS   # 1 = the outer circle
+			draw_circle(Vector2.ZERO, maxf(radius * share, 1.0), Color(color, 0.16 * fade))
+		draw_circle(Vector2.ZERO, maxf(radius * 0.3, 1.0), Color(1, 1, 1, 0.5 * fade))
+		draw_arc(Vector2.ZERO, maxf(radius, 1.0), 0.0, TAU, 40, Color(color, 0.6 * fade), 1.5, true)
 
 
 class Burst extends Node2D:

@@ -4,7 +4,8 @@
 
 [resource]
 script = ExtResource("1_c7pqf")
-enemy_might_reduction = 40.0
+ally_might_bonus = 25.0
+enemy_might_reduction = 25.0
 duration = 6.0
 damage = 85.0
 cast_time = 1.0

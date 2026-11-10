@@ -4,10 +4,10 @@
 
 [resource]
 script = ExtResource("1_ta72r")
-throw_might_scaling = 0.3
+throw_might_scaling = 0.2
 stun_time = 0.5
 sword_size = 2.0
-twirl_might_scaling = 0.6
+twirl_might_scaling = 0.45
 cast_time = 0.75
 description = "Shielded: throws her twinsword out and back, hitting and stunning enemies, and gains a shield when she catches it. Unshielded: twirls through the enemy line and back, hitting everything she passes."
 metadata/_custom_type_script = "uid://tnetpdu0vr2u"

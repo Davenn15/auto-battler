@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/glaive/upgrades/a_path/glaive_charge.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "Rotor casts faster and needs less Charge."
+passives = Array[ExtResource("2")]([ExtResource("3")])
+gambit_bonuses = Dictionary[String, float]({
+"cast_time": -0.3
+})

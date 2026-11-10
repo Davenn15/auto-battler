@@ -21,6 +21,7 @@ Net="*res://scripts/net/net_session.gd"
 
 [display]
 
+window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

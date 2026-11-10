@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="VirusWrackPassive" format=3 uid="uid://byms6jof3tejb"]
+
+[ext_resource type="Script" uid="uid://b0olw5w612txr" path="res://data/units/obelisk/tier 2/barraj/upgrades/b_path/scripts/virus_wrack_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+bonus_chance = 0.85
+passive_name = "Exploit"
+description = "Attacks gain Wrack chance against enemies with Mono-Virus."

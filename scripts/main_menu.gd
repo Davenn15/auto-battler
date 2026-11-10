@@ -12,6 +12,10 @@ var _buttons: VBoxContainer
 var _address: LineEdit
 var _status: Label
 var _cancel: Button
+var _your_faction: OptionButton
+var _computer_faction: OptionButton
+var _blue_faction: OptionButton
+var _red_faction: OptionButton
 
 
 func _ready() -> void:
@@ -29,6 +33,8 @@ func _ready() -> void:
 	Net.leave()
 	BattleUnit.view_rotation = 0.0
 	BattleUnit.swap_team_colors = false
+	MatchGame.spectating = false
+	Engine.time_scale = 1.0
 	Net.hosted.connect(_on_hosted)
 	Net.match_ready.connect(_on_match_ready)
 	Net.connection_failed.connect(_on_connection_failed)
@@ -46,7 +52,7 @@ func _build() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var column := VBoxContainer.new()
-	column.custom_minimum_size = Vector2(380, 0)
+	column.custom_minimum_size = Vector2(520, 0)
 	column.add_theme_constant_override("separation", 12)
 	center.add_child(column)
 
@@ -59,7 +65,12 @@ func _build() -> void:
 	_buttons = VBoxContainer.new()
 	_buttons.add_theme_constant_override("separation", 8)
 	column.add_child(_buttons)
-	_button("Play vs Computer", func(): get_tree().change_scene_to_file(MATCH_SCENE))
+
+	# Factions: yours (vs the computer and online), the computer's, and both watched sides.
+	_your_faction = _faction_picker("yours")
+	_row([_caption("Your faction"), _your_faction])
+	_computer_faction = _faction_picker("computer")
+	_row([_wide_button("Play vs Computer", _play_computer), _caption("Computer:"), _computer_faction])
 	_button("Host online match", _host)
 
 	var join_row := HBoxContainer.new()
@@ -75,6 +86,9 @@ func _build() -> void:
 	join_row.add_child(join)
 	_buttons.add_child(join_row)
 
+	_blue_faction = _faction_picker("blue")
+	_red_faction = _faction_picker("red")
+	_row([_wide_button("Watch computers", _watch), _caption("Blue:"), _blue_faction, _caption("Red:"), _red_faction])
 	_button("Random battle", func(): get_tree().change_scene_to_file(RANDOM_BATTLE_SCENE))
 
 	_status = Label.new()
@@ -97,7 +111,85 @@ func _button(text: String, action: Callable) -> void:
 	_buttons.add_child(button)
 
 
+## Computer vs computer, match after match, to watch for balance problems.
+func _watch() -> void:
+	MatchGame.spectating = true
+	MatchGame.player_faction = _picked(_blue_faction)
+	MatchGame.opponent_faction = _picked(_red_faction)
+	get_tree().change_scene_to_file(MATCH_SCENE)
+
+
+func _play_computer() -> void:
+	MatchGame.player_faction = _picked(_your_faction)
+	MatchGame.opponent_faction = _picked(_computer_faction)
+	get_tree().change_scene_to_file(MATCH_SCENE)
+
+
+## Online: your faction goes to the other player when you connect (see Net).
+func _use_your_faction_online() -> void:
+	MatchGame.player_faction = _picked(_your_faction)
+	Net.local_faction = MatchGame.player_faction
+
+
+# ---------- Faction pickers ----------
+
+## A drop-down of every faction that has units, remembering its last choice under `key`.
+func _faction_picker(key: String) -> OptionButton:
+	var picker := OptionButton.new()
+	var saved: String = _setting("factions", key, MatchRules.DEFAULT_FACTION)
+	for faction in MatchRules.factions():
+		picker.add_item(faction)
+		if faction == saved:
+			picker.select(picker.item_count - 1)
+	picker.item_selected.connect(func(i): _save_setting("factions", key, picker.get_item_text(i)))
+	return picker
+
+
+func _picked(picker: OptionButton) -> String:
+	if picker.selected < 0:
+		return MatchRules.DEFAULT_FACTION
+	return picker.get_item_text(picker.selected)
+
+
+func _caption(text: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	return label
+
+
+func _wide_button(text: String, action: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(0, 40)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.pressed.connect(action)
+	return button
+
+
+func _row(parts: Array) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	for part in parts:
+		row.add_child(part)
+	_buttons.add_child(row)
+
+
+func _setting(section: String, key: String, fallback):
+	var config := ConfigFile.new()
+	if config.load(SETTINGS_PATH) != OK:
+		return fallback
+	return config.get_value(section, key, fallback)
+
+
+func _save_setting(section: String, key: String, value) -> void:
+	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
+	config.set_value(section, key, value)
+	config.save(SETTINGS_PATH)
+
+
 func _host() -> void:
+	_use_your_faction_online()
 	var error := Net.host()
 	if error != OK:
 		_status.text = "Couldn't host (error %d). Is another copy of the game already hosting?" % error
@@ -121,6 +213,7 @@ func _join() -> void:
 		_status.text = "Type the host's address first."
 		return
 	_save_address(address)
+	_use_your_faction_online()
 	var error := Net.join(address)
 	if error != OK:
 		_status.text = "Couldn't start connecting (error %d)." % error

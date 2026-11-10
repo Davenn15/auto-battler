@@ -14,7 +14,8 @@ position = Vector2(-71, -22)
 script = ExtResource("1_b1vyt")
 arv_min = 4
 arv_max = 48
-second_row_units = Array[String](["bremes", "lunck", "wesper", "von carrow", "vere"])
+second_row_units = Array[String](["bremes", "lunck", "wesper", "von carrow", "vere", "glaive"])
+team_1_units = Array[String](["grouser"])
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=496656011]
 
@@ -55,11 +56,17 @@ script = ExtResource("2_o36l5")
 metadata/_edit_use_anchors_ = true
 
 [node name="RerollButton" type="Button" parent="CanvasLayer/UI" unique_id=1239738481]
-layout_mode = 0
-offset_left = 615.0
-offset_top = 617.0
-offset_right = 710.0
-offset_bottom = 648.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 39.0
+offset_top = -31.0
+offset_right = 134.0
+grow_horizontal = 2
+grow_vertical = 0
 text = "New teams"
 metadata/_edit_use_anchors_ = true
 

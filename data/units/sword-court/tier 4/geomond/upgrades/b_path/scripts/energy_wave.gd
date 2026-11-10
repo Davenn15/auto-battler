@@ -8,7 +8,6 @@ extends Projectile
 const WAVE_SPEED := 450.0   # pixels/sec
 const WAVE_COLOR := Color(1.0, 0.55, 0.15)
 
-var team: int
 var direction: Vector2
 var remaining: float          # pixels left to travel
 var half_width: float = 20.0  # set before setup
@@ -35,7 +34,7 @@ func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color
 
 ## Replaces Projectile's homing: rolls straight on, touching everyone along the way.
 func _physics_process(delta: float) -> void:
-	var step := minf(WAVE_SPEED * delta, remaining)
+	var step := minf(WAVE_SPEED * delta * speed_scale(), remaining)
 	var from := global_position
 	var to := from + direction * step
 	for node in get_tree().get_nodes_in_group("units"):

@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="DamageCapEffect" format=3]
-
-[ext_resource type="Script" uid="uid://bpvylql776hfw" path="res://data/keepsakes/combined/might_ward__might_ward/damage_cap_effect.gd" id="1_eff"]
-
-[resource]
-script = ExtResource("1_eff")
-cap = 0.25
-metadata/_custom_type_script = "uid://bpvylql776hfw"

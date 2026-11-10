@@ -36,6 +36,10 @@ var _popup_text: Label
 var _popup_buttons: VBoxContainer
 var _unit_tip: PanelContainer
 var _unit_tip_text: RichTextLabel
+var _spectate_bar: HBoxContainer
+var _speed_button: Button
+
+const SPEEDS := [1.0, 2.0, 4.0]
 
 const UNIT_TIP_WIDTH := 320.0
 
@@ -48,6 +52,49 @@ func _ready() -> void:
 	_build_bottom()
 	_build_popup()
 	_build_unit_tip()
+	_build_spectate_bar()
+
+
+## Watching two computers: a game-speed toggle and a way back to the menu, under the board.
+func _build_spectate_bar() -> void:
+	_spectate_bar = HBoxContainer.new()
+	_spectate_bar.add_theme_constant_override("separation", 10)
+	_spectate_bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_spectate_bar.offset_left = 440 - 576
+	_spectate_bar.offset_right = 670 - 576
+	_spectate_bar.offset_top = -50
+	_spectate_bar.offset_bottom = -10
+	_spectate_bar.visible = false
+	add_child(_spectate_bar)
+	_speed_button = Button.new()
+	_speed_button.custom_minimum_size = Vector2(110, 0)
+	_speed_button.add_theme_font_size_override("font_size", 16)
+	_speed_button.tooltip_text = "How fast the game runs while you watch."
+	_speed_button.pressed.connect(_cycle_speed)
+	_spectate_bar.add_child(_speed_button)
+	var menu := Button.new()
+	menu.text = "Menu"
+	menu.custom_minimum_size = Vector2(110, 0)
+	menu.add_theme_font_size_override("font_size", 16)
+	menu.pressed.connect(_leave_spectating)
+	_spectate_bar.add_child(menu)
+	_show_speed()
+
+
+func _cycle_speed() -> void:
+	var i := SPEEDS.find(Engine.time_scale)
+	Engine.time_scale = SPEEDS[(i + 1) % SPEEDS.size()]
+	_show_speed()
+
+
+func _show_speed() -> void:
+	_speed_button.text = "Speed %dx" % roundi(Engine.time_scale)
+
+
+func _leave_spectating() -> void:
+	Engine.time_scale = 1.0
+	MatchGame.spectating = false
+	get_tree().change_scene_to_file(MatchGame.MENU_SCENE)
 
 
 ## The panel that shows what a shop unit does while the mouse is over it.
@@ -392,9 +439,10 @@ func refresh() -> void:
 	if game == null:
 		return
 	hide_unit_tip()   # the shop buttons are about to be rebuilt
-	var planning := game.phase == MatchGame.Phase.PLANNING
+	var planning := game.phase == MatchGame.Phase.PLANNING and not MatchGame.spectating
 	_side.visible = planning
 	_hint.visible = planning
+	_spectate_bar.visible = MatchGame.spectating
 	_refresh_top()
 	_log.text = "\n".join(game.log_lines)
 	var waiting := game.phase == MatchGame.Phase.WAITING
@@ -430,12 +478,12 @@ func _refresh_top() -> void:
 		phase_name += " (planning)"
 	var online_bits := ""
 	if game.online and choosing:
-		if game.phase == MatchGame.Phase.PLANNING:
+		if game.phase == MatchGame.Phase.PLANNING and MatchGame.PLANNING_TIMER_ON:
 			phase_name += " · [color=#ffd24d]%d s left[/color]" % ceili(maxf(game.planning_left, 0.0))
 		online_bits = "   [color=#7fdc7f]Ready ✓[/color]" if game.ai_ready else "   [color=#9a9aa5]planning…[/color]"
-	_top.text = "[b]Round %d[/b] · %s        [color=#66a6ff][b]You[/b][/color]  HP %d   Aura %d   Reserve %d   [color=#9a9aa5](Aura given %d / %d)[/color]        [color=#ff6666][b]Opponent[/b][/color]  HP %d%s" % [
-			game.round_number, phase_name, maxi(p.hp, 0), p.aura, p.reserve, p.aura_received,
-			MatchRules.MAX_AURA_RECEIVED, maxi(game.ai.hp, 0), online_bits]
+	_top.text = "[b]Round %d[/b] · %s        [color=#66a6ff][b]%s[/b][/color]  HP %d   Aura %d   Reserve %d   [color=#9a9aa5](Aura given %d / %d)[/color]        [color=#ff6666][b]%s[/b][/color]  HP %d%s" % [
+			game.round_number, phase_name, p.player_name, maxi(p.hp, 0), p.aura, p.reserve, p.aura_received,
+			MatchRules.MAX_AURA_RECEIVED, game.ai.player_name, maxi(game.ai.hp, 0), online_bits]
 
 
 func _refresh_shop() -> void:

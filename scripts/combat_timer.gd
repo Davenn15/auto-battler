@@ -1,7 +1,7 @@
 class_name CombatTimer
 extends Label
-## Shows how long the current battle has been fighting, at the top centre of the screen.
-## Once overtime starts, it says OVERTIME in big red letters instead.
+## Counts down the time left until overtime, at the top centre of the screen. Once
+## overtime starts, it says OVERTIME in big red letters instead.
 
 const NORMAL_SIZE := 20
 const OVERTIME_SIZE := 34
@@ -30,7 +30,10 @@ func _process(_delta: float) -> void:
 		_set_overtime_look(_manager.in_overtime)
 	if _showing_overtime:
 		return
+	# Counts down to overtime. With overtime turned off (0), it counts up instead.
 	var seconds := floori(_manager.combat_time)
+	if _manager.overtime_after > 0.0:
+		seconds = ceili(maxf(_manager.overtime_after - _manager.combat_time, 0.0))
 	text = "%d:%02d" % [floori(seconds / 60.0), seconds % 60]
 
 

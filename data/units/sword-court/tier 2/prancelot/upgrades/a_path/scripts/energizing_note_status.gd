@@ -1,6 +1,6 @@
 class_name EnergizingNoteStatus
 extends NoteStatus
-## Sends an energizing note to the nearby ally (him included) with the least Celerity,
+## Sends an energizing note to the nearby ally (never himself) with the least Celerity,
 ## giving it Celerity for a while.
 
 var amount: float

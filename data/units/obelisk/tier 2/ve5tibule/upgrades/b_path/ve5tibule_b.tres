@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/b_path/shard_gift_gambit.tres" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/b_path/ve5tibule_b1.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/b_path/ve5tibule_b2.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Gift"
+description = "New Gambit: Gift. Sends nearby allies temporary Shards that combine with Shards they hold. Taken back when combat ends."
+gambit = ExtResource("2")
+next_choices = Array[ExtResource("1")]([ExtResource("3"), ExtResource("4")])

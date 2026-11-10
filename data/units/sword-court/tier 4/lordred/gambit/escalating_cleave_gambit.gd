@@ -31,6 +31,7 @@ func execute(caster: BattleUnit) -> void:
 	var bonus: float = (bonus_damage + max_health_percent * target.max_health) * escalation
 	tracker.escalate(caster, charge_growth)   # the next cast costs more
 	caster.show_float_text("Cleave ×%d" % tracker.casts, CLEAVE_COLOR)
+	KeepsakeVfx.cleave_slash(target)
 	caster.attack_now(target, bonus)
 	if refund_on_kill and not _alive(target):
 		caster.fill_charge()

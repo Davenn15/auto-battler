@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cucmlyr11al3x"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_urnnh"]
+
+[resource]
+script = ExtResource("1")
+description = "Allies inside the field have more wards."
+gambit_bonuses = Dictionary[String, float]({
+"ward_bonus": 20.0
+})

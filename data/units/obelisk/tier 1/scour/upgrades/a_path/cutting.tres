@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BeamBoostPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scripts/beam_boost_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Cutting"
+damage_ramp_per_second = 0.25
+max_damage_ramp = 1.0
+description = "The beam's damage slowly ramps up while it stays on one target, and resets when he switches."

@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="FlatReductionEffect" format=3]
-
-[ext_resource type="Script" uid="uid://bxvt2ooi3gckj" path="res://data/keepsakes/combined/might_ward__celerity_ward/flat_reduction_effect.gd" id="1_eff"]
-
-[resource]
-script = ExtResource("1_eff")
-might_reduction = 15.0
-celerity_reduction = 10.0
-metadata/_custom_type_script = "uid://bxvt2ooi3gckj"

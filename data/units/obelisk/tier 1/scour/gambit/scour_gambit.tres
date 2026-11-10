@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="OverdriveGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/scour/gambit/overdrive_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Overdrive"
+cast_time = 0.5
+description = "Goes into overdrive: gains Might and Celerity for a while, but burns a share of his max health every second. The burn can kill him."

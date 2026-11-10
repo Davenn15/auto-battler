@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BarrageGambit" format=3 uid="uid://bbgop6b0dgufa"]
+
+[ext_resource type="Script" uid="uid://dpnhoa4igq0f7" path="res://data/units/obelisk/tier 2/barraj/gambit/barrage_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 0.15
+blast_cells = 1.0
+damage = 110.0
+might_scaling = 0.35
+gambit_name = "Barrage"
+cast_time = 0.4
+description = "Launches a barrage of missiles at a large area. Each missile lands on a random point in the area and explodes."

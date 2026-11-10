@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://7rghb0xyuknt"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/m-path/passive/m-path_passive.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/m-path/gambit/m-path_gambit.tres" id="5"]
+[ext_resource type="Resource" uid="uid://d4dwxjrnt2v4r" path="res://data/units/obelisk/tier 2/m-path/upgrades/a_path/m-path_a.tres" id="6"]
+[ext_resource type="Resource" uid="uid://ceobg1u545kh2" path="res://data/units/obelisk/tier 2/m-path/upgrades/b_path/m-path_b.tres" id="7"]
+[ext_resource type="Texture2D" uid="uid://dd8i1c17v1y75" path="res://assets/m-path.png" id="8"]
+
+[resource]
+script = ExtResource("1")
+display_name = "M-PATH"
+tier = 2
+upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
+max_health = 950.0
+attack_range_cells = 2
+passives = Array[ExtResource("2")]([ExtResource("4")])
+gambit = ExtResource("5")
+max_charge = 90.0
+starting_charge = 50.0
+sprite = ExtResource("8")
+might = 70.0
+insight = 95.0
+celerity = 90.0
+might_ward = 45.0
+insight_ward = 30.0
+celerity_ward = 25.0
+attack_damage_type = 1

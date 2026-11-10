@@ -23,6 +23,8 @@ const COMBAT_HARD_LIMIT := 180.0
 const BOARD_SCREEN_CENTER := Vector2(555, 330)   # where the board's centre sits on screen
 ## Online only: seconds to plan before you're readied with the board as it stands.
 const PLANNING_TIME := 60.0
+## Off for now, so players have time to read everything: planning lasts until both are ready.
+const PLANNING_TIMER_ON := false
 const MENU_SCENE := "res://scenes/main_menu.tscn"
 
 @onready var grid: BattleGrid = $BattleGrid
@@ -66,12 +68,39 @@ var _my_fingerprint := ""
 var _host_results: Dictionary = {}  # joiner: round -> the host's result
 var _fingerprints: Dictionary = {}  # host: round -> the host's own fingerprint
 
+## Watching mode: the computer plays both sides, match after match, with nothing to click.
+## Set by the menu before it opens the match scene; the menu clears it again.
+static var spectating := false
+## Seconds to look at the board once both computers have planned, and at each result.
+const SPECTATE_BOARD_PAUSE := 2.0
+const SPECTATE_RESULT_PAUSE := 3.0
+const SPECTATE_GAME_OVER_PAUSE := 6.0
+## Every combat while watching is written here, to look back over.
+const SPECTATE_LOG := "user://spectate_log.txt"
+static var spectate_match_number := 0
+var _blue_planner: AiPlanner
+var _blue_ready := false
+
+## Factions picked in the menu: yours (Blue's when watching) and the computer's (Red's).
+## Online, the opponent's comes from Net instead.
+static var player_faction := MatchRules.DEFAULT_FACTION
+static var opponent_faction := MatchRules.DEFAULT_FACTION
+
 
 func _ready() -> void:
+	# A background test copy that booted straight into a match (the main scene isn't the
+	# menu): go to the tester instead of playing.
+	if AiPlanner.is_eval_copy():
+		get_tree().change_scene_to_file.call_deferred("res://scenes/ai_eval.tscn")
+		return
 	player.player_name = "You"
 	ai.player_name = "Opponent"
 	online = Net.is_online()
-	if online:
+	player.faction = player_faction
+	ai.faction = Net.opponent_faction if online else opponent_faction
+	if spectating:
+		_setup_spectating()
+	elif online:
 		my_team = PLAYER_TEAM if Net.is_host() else ENEMY_TEAM
 		Net.message.connect(_on_net_message)
 		Net.opponent_left.connect(_on_opponent_left)
@@ -100,6 +129,7 @@ func _frame_camera(turned: bool = false) -> void:
 	camera.position = box.get_center() + (-shift if turned else shift)
 	BattleUnit.view_rotation = PI if turned else 0.0
 	BattleUnit.swap_team_colors = my_team != PLAYER_TEAM and turned
+	grid.queue_redraw()   # the board tint follows the colour swap
 
 
 func combat_number() -> int:
@@ -139,11 +169,14 @@ func _begin_planning() -> void:
 	hud.refresh()
 	# The opponent plans against the army you last fielded, just as you see theirs.
 	ai_planner.plan(ai, player.last_fielded, combat_number())
+	if spectating:
+		_blue_ready = false
+		_blue_planner.plan(player, ai.last_fielded, combat_number())
 
 
 ## Online: counts down the planning time, then readies you with the board as it stands.
 func _process(delta: float) -> void:
-	if not online or phase != Phase.PLANNING:
+	if not online or phase != Phase.PLANNING or not PLANNING_TIMER_ON:
 		return
 	var shown := ceili(planning_left)
 	planning_left -= delta
@@ -157,6 +190,8 @@ func _process(delta: float) -> void:
 func _on_ai_plan_ready(summary: String) -> void:
 	ai_ready = true
 	add_log(summary + ".")
+	if spectating:
+		_spectate_try_fight()
 	hud.refresh()
 
 
@@ -278,7 +313,7 @@ func _return_table() -> void:
 # ---------- Moving units on the board ----------
 
 func _unhandled_input(event: InputEvent) -> void:
-	if phase != Phase.PLANNING:
+	if phase != Phase.PLANNING or spectating:
 		return
 	var world := get_global_mouse_position()
 	var button := event as InputEventMouseButton
@@ -466,7 +501,7 @@ func _start_combat() -> void:
 	_frame_camera(my_team != PLAYER_TEAM)   # the joiner watches it turned around
 	ArmySpawner.spawn(bottom, PLAYER_TEAM, false, units_parent)
 	ArmySpawner.spawn(top, ENEMY_TEAM, true, units_parent)
-	damage_tracker.set_team_titles({my_team: "You", 3 - my_team: "Opponent"}, my_team != PLAYER_TEAM)
+	damage_tracker.set_team_titles({my_team: player.player_name, 3 - my_team: ai.player_name}, my_team != PLAYER_TEAM)
 	damage_tracker.visible = true
 	hud.refresh()
 	await get_tree().physics_frame   # let every unit finish _ready
@@ -532,6 +567,9 @@ func _try_finish_as_joiner() -> void:
 ## Damage and income from a fight's result: {winner (team, or -1 for a draw), aura_1,
 ## aura_2 (each team's surviving Aura)}.
 func _apply_result(result: Dictionary) -> void:
+	if spectating:
+		_apply_spectate_result(result)
+		return
 	phase = Phase.RESULT
 	var winner := int(result["winner"])
 	var other_team := 3 - my_team
@@ -542,12 +580,12 @@ func _apply_result(result: Dictionary) -> void:
 		var damage := MatchRules.loss_damage(round_number, mine)
 		ai.hp -= damage
 		lines.append("You won! %d Aura of your units survived." % mine)
-		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, round_number, round_number, mine / 2])
+		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, mine / 2])
 	elif winner == other_team:
 		var damage := MatchRules.loss_damage(round_number, theirs)
 		player.hp -= damage
 		lines.append("You lost. %d Aura of their units survived." % theirs)
-		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, round_number, round_number, theirs / 2])
+		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, theirs / 2])
 	else:
 		var to_player := MatchRules.draw_damage(round_number, theirs)
 		var to_ai := MatchRules.draw_damage(round_number, mine)
@@ -576,13 +614,123 @@ func continue_after_result() -> void:
 			text = "You win the match!"
 		elif ai.is_alive():
 			text = "You were defeated."
+		if spectating:
+			text = "Both computers fell. It's a draw."
+			if player.is_alive() or ai.is_alive():
+				var champ := player if player.is_alive() else ai
+				text = "%s wins the match with %d HP left!" % [champ.player_name, champ.hp]
+			_spectate_write("%s  (%d combats)\n" % [text, combats_done])
 		hud.show_game_over(text)
 		hud.refresh()
 		if online:
 			Net.leave()
+		if spectating:
+			await get_tree().create_timer(SPECTATE_GAME_OVER_PAUSE).timeout
+			if is_inside_tree() and spectating:
+				new_match()
 		return
 	_advance_rounds()
 	_begin_planning()
+
+
+# ---------- Watching two computers ----------
+
+func _setup_spectating() -> void:
+	player.player_name = "Blue"
+	ai.player_name = "Red"
+	player.is_ai = true
+	ai.is_ai = true
+	ai_planner.label = "Red"
+	ai_planner.plan_ready.connect(_on_ai_plan_ready)
+	_blue_planner = AiPlanner.new()
+	_blue_planner.job_prefix = "blue_job"
+	_blue_planner.label = "Blue"
+	add_child(_blue_planner)
+	_blue_planner.plan_ready.connect(_on_blue_plan_ready)
+	spectate_match_number += 1
+	_spectate_write("=== Match %d (%s) ===" % [spectate_match_number, Time.get_datetime_string_from_system(false, true)])
+
+
+func _on_blue_plan_ready(summary: String) -> void:
+	_blue_ready = true
+	add_log(summary + ".")
+	hud.refresh()
+	_spectate_try_fight()
+
+
+var _spectate_starting := false
+
+## Once both computers have planned: shows both armies for a moment, then fights.
+func _spectate_try_fight() -> void:
+	if not (ai_ready and _blue_ready) or phase != Phase.PLANNING or _spectate_starting:
+		return
+	_spectate_starting = true
+	for p in [player, ai]:
+		MatchRules.auto_place_bench(p)
+	_clear_board()
+	_fog.hide_fog()
+	ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent)
+	ArmySpawner.spawn(ai.units, ENEMY_TEAM, true, units_parent)
+	await get_tree().create_timer(SPECTATE_BOARD_PAUSE).timeout
+	_spectate_starting = false
+	if is_inside_tree() and phase == Phase.PLANNING:
+		press_ready()
+
+
+func _apply_spectate_result(result: Dictionary) -> void:
+	phase = Phase.RESULT
+	var winner := int(result["winner"])
+	var aura := {PLAYER_TEAM: int(result["aura_1"]), ENEMY_TEAM: int(result["aura_2"])}
+	var sides := {PLAYER_TEAM: player, ENEMY_TEAM: ai}
+	var lines: PackedStringArray = []
+	if winner == PLAYER_TEAM or winner == ENEMY_TEAM:
+		var loser: PlayerState = sides[3 - winner]
+		var damage := MatchRules.loss_damage(round_number, aura[winner])
+		loser.hp -= damage
+		lines.append("%s won with %d Aura surviving. %s takes %d damage." % [sides[winner].player_name, aura[winner], loser.player_name, damage])
+	else:
+		var to_blue := MatchRules.draw_damage(round_number, aura[ENEMY_TEAM])
+		var to_red := MatchRules.draw_damage(round_number, aura[PLAYER_TEAM])
+		player.hp -= to_blue
+		ai.hp -= to_red
+		lines.append("Draw. Blue takes %d damage, Red takes %d." % [to_blue, to_red])
+	lines.append("HP: Blue %d, Red %d." % [maxi(player.hp, 0), maxi(ai.hp, 0)])
+	for p in [player, ai]:
+		MatchRules.pay_income(p, round_number)
+	combats_done += 1
+	add_log("Round %d: %s" % [round_number, lines[0]])
+	_spectate_write("Round %d (%.0fs fight)\n  Blue: %s\n  Red:  %s\n  %s %s" % [round_number, _combat_time,
+			_army_text(player.last_fielded), _army_text(ai.last_fielded), lines[0], lines[1]])
+	hud.show_result("\n".join(lines))
+	hud.refresh()
+	await get_tree().create_timer(SPECTATE_RESULT_PAUSE).timeout
+	if is_inside_tree() and phase == Phase.RESULT:
+		continue_after_result()
+
+
+## "Garth A1 [Wrack Shard, Blizzard], Silt ..." for the log.
+static func _army_text(army: Array[ArmyUnit]) -> String:
+	var parts := PackedStringArray()
+	for unit in army:
+		var text := unit.label().strip_edges()
+		if unit.buffs > 0:
+			text += " +%d buffs" % unit.buffs
+		if not unit.items.is_empty():
+			text += " [%s]" % ", ".join(unit.items.map(func(k): return k.get_display_name()))
+		parts.append(text)
+	return ", ".join(parts)
+
+
+## Adds lines to the watching log (see SPECTATE_LOG).
+static func _spectate_write(text: String) -> void:
+	var file := FileAccess.open(SPECTATE_LOG, FileAccess.READ_WRITE)
+	if file == null:
+		file = FileAccess.open(SPECTATE_LOG, FileAccess.WRITE)
+	if file == null:
+		return
+	file.seek_end()
+	file.store_line(text)
+	file.close()
 
 
 ## After the match: online back to the menu, otherwise a fresh match against the computer.

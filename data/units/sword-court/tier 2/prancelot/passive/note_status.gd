@@ -47,12 +47,13 @@ func _arrive(_unit, _target: BattleUnit, _strength: float) -> void:
 	pass
 
 
-## Living units within range on `team`, for picking targets.
+## Living units within range on `team`, for picking targets. Never Prancelot himself: his
+## notes can't heal or buff him (no note is sent if nobody else qualifies).
 func _units_in_range(unit: BattleUnit, team: int) -> Array[BattleUnit]:
 	var result: Array[BattleUnit] = []
 	for node in unit.get_tree().get_nodes_in_group("units"):
 		var other := node as BattleUnit
-		if other != null and other.alive and other.team == team \
+		if other != null and other != unit and other.alive and other.team == team \
 				and unit.grid.get_distance(unit.cell, other.cell) <= range_cells:
 			result.append(other)
 	return result

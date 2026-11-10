@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="RotorGambit" format=3 uid="uid://cm8n3bhhvbe5n"]
+
+[ext_resource type="Script" uid="uid://bt6s7n1p0m16a" path="res://data/units/obelisk/tier 1/glaive/gambit/rotor_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+duration = 4.0
+radius_cells = 0.75
+damage = 30.0
+might_scaling = 0.2
+damage_type = 2
+gambit_name = "Rotor"
+cast_time = 0.6
+description = "Conjures an energy rotor that circles him for a while, damaging enemies it passes through. He can't gain Charge while it's out."

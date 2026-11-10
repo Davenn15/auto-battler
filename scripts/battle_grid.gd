@@ -21,6 +21,14 @@ extends Node2D
 		show_debug = value
 		queue_redraw()
 
+## Faint colour over each half of the board: blue for the bottom (your) half, red for the top.
+@export var tint_halves: bool = true:
+	set(value):
+		tint_halves = value
+		queue_redraw()
+const BOTTOM_TINT := Color(0.3, 0.5, 1.0, 0.08)
+const TOP_TINT := Color(1.0, 0.3, 0.3, 0.08)
+
 const SQRT3 := 1.7320508075688772
 # The six axial neighbor offsets.
 const DIRECTIONS: Array[Vector2i] = [
@@ -224,6 +232,13 @@ func _hex_points(cell: Vector2i, count: int) -> PackedVector2Array:
 
 
 func _draw() -> void:
+	if show_debug and tint_halves:
+		# Team 1's half (the bottom rows) blue, team 2's red; swapped while the battle is
+		# watched turned around, so your own half is always the blue one.
+		var swap := not Engine.is_editor_hint() and BattleUnit.swap_team_colors
+		for cell in _ids:
+			var bottom: bool = cell.y >= rows / 2
+			draw_colored_polygon(_hex_points(cell, 6), BOTTOM_TINT if bottom != swap else TOP_TINT)
 	if show_debug:
 		for cell in _ids:
 			draw_polyline(_hex_points(cell, 7), Color(1, 1, 1, 0.25), 1.0)   # 7 points closes it

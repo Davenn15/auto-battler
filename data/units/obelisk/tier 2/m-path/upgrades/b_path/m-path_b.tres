@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://ceobg1u545kh2"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" uid="uid://dwnb312abhiml" path="res://data/units/obelisk/tier 2/m-path/upgrades/b_path/network_gambit.tres" id="2"]
+[ext_resource type="Resource" uid="uid://cucmlyr11al3x" path="res://data/units/obelisk/tier 2/m-path/upgrades/b_path/m-path_b1.tres" id="3"]
+[ext_resource type="Resource" uid="uid://hqexa0q42son" path="res://data/units/obelisk/tier 2/m-path/upgrades/b_path/m-path_b2.tres" id="4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="5_xyh2d"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Networked"
+description = "New Gambit: Networked. Lays a rectangular field over the most allies that keeps evening out the health of every ally inside."
+gambit = ExtResource("2")
+next_choices = Array[ExtResource("1")]([ExtResource("3"), ExtResource("4")])

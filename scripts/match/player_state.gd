@@ -4,7 +4,7 @@ extends RefCounted
 
 var player_name := "Player"
 var is_ai := false
-var faction := "Sword Court"
+var faction := MatchRules.DEFAULT_FACTION
 
 var hp: int = MatchRules.START_HP
 var aura: int = MatchRules.START_AURA

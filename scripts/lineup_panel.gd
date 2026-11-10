@@ -63,7 +63,7 @@ func _build() -> void:
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title)
 	_toggle = Button.new()
-	_toggle.text = "Hide"
+	_toggle.text = "Show"
 	_toggle.focus_mode = Control.FOCUS_NONE
 	_toggle.pressed.connect(_on_toggle_pressed)
 	header.add_child(_toggle)
@@ -71,6 +71,7 @@ func _build() -> void:
 	_body = VBoxContainer.new()
 	_body.add_theme_constant_override("separation", 4)
 	column.add_child(_body)
+	_body.visible = false   # starts minimized; Show opens it
 	for team in [2, 1]:   # team 2 starts at the top of the board
 		var box := PanelContainer.new()
 		box.add_theme_stylebox_override("panel", _team_style(_team_color(team)))

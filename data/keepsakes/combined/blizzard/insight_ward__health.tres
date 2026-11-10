@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Keepsake" format=3]
+
+[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/blizzard/insight_ward__health_effect.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_keep")
+keepsake_name = "Blizzard"
+first_shard = 5
+second_shard = 6
+effect = ExtResource("2_effect")
+insight_ward = 25.0
+health = 250.0
+description = "You are surrounded by an icy aura that deals 30 Insight damage to nearby enemies every second."
+metadata/_custom_type_script = "uid://c24ieqfh48rkj"

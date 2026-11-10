@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://b0tkhga728f01"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_vmjp1"]
+
+[resource]
+script = ExtResource("1")
+description = "Enemy projectiles inside the bubble move more slowly."
+gambit_overrides = Dictionary[String, float]({
+"projectile_slow": 0.25
+})

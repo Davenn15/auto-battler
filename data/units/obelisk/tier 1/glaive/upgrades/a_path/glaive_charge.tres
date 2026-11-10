@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="MaxChargePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/glaive/upgrades/a_path/scripts/max_charge_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Quick Cycle"
+change = -30.0
+description = "His Gambit needs less Charge."

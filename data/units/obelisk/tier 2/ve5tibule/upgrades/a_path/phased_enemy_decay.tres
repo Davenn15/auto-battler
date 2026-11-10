@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ChargeFlowPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/a_path/scripts/charge_flow_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+self_regen = 0.0
+phased_ally_regen = 0.0
+phased_enemy_decay = 15.0
+passive_name = "Phased Drain"
+description = "His enemies lose Charge over time while phased."

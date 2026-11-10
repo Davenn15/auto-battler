@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="HaywireGambit" format=3 uid="uid://dlxihu3vnw7sk"]
+
+[ext_resource type="Script" uid="uid://ciuv642myvxxf" path="res://data/units/obelisk/tier 1/scour/upgrades/b_path/scripts/haywire_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+dash_cells = 4
+dash_time = 0.5
+damage = 350.0
+might_scaling = 2.5
+gambit_name = "Haywire"
+cast_time = 0.4
+description = "Dashes to where the most enemies are, then detonates, dealing heavy damage around him and dying."

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LowHealthTriggerEffect" format=3 uid="uid://i3gqhs21x33i"]
+
+[ext_resource type="Script" uid="uid://dhc1ukjl0mmn8" path="res://data/keepsakes/effects/low_health_trigger_effect.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+threshold = 0.4
+hide_time = 2.0
+passive_name = "Phase"
+description = "The first time each combat BAR.RAJ drops below 50% health, he phases for 2 seconds: stunned and untargetable."
