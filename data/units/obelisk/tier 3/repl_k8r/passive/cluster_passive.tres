@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="ClusterPassive" format=3]
+[gd_resource type="Resource" script_class="ClusterPassive" format=3 uid="uid://cwkis2gvtf6r1"]
 
-[ext_resource type="Script" path="res://data/units/obelisk/tier 3/repl_k8r/passive/cluster_passive.gd" id="1"]
+[ext_resource type="Script" uid="uid://cf3do8b484akm" path="res://data/units/obelisk/tier 3/repl_k8r/passive/cluster_passive.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 passive_name = "Cluster"
-description = "Gains wards for each nearby ally."
+description = "Gains 6 Celerity for each ally within 2 cells (its duplicates count)."

@@ -84,14 +84,30 @@ func _fire_tick(unit: BattleUnit, enemy: BattleUnit, share: float) -> void:
 	for status in unit.statuses.duplicate():
 		base = status.modify_outgoing_damage(unit, base)
 	base *= 1.0 + minf(damage_ramp_per_second * _firing_time, max_damage_ramp)
+	base *= damage_multiplier(unit, enemy)
 	var hit := base * share * Stats.wrack_multiplier(wrack_level, unit.get_wrack_damage_against(enemy))
 	var dealt := enemy.take_damage(hit, wrack_level, unit.get_attack_damage_type(), unit.ignores_wards(), unit, false)
 	unit.get_tree().call_group("damage_tracker", "record_damage", unit.get_credit_id(), dealt)
 	_dealt += dealt
 	_best_wrack = maxi(_best_wrack, wrack_level)
 	_progress += share
-	if _progress >= 1.0 or not enemy.alive:
+	if _progress >= 1.0 / maxf(proc_rate(unit), 0.01) or not enemy.alive:
 		_flush(unit)
+
+
+## Hooks for beams built on this one (BEAM.NG). Scour leaves them as they are.
+## Multiplies each tick's damage.
+func damage_multiplier(_unit: BattleUnit, _enemy: BattleUnit) -> float:
+	return 1.0
+
+## How often once-per-attack effects trigger: 1 = once per attack's worth of beam,
+## 1.3 = 30% more often.
+func proc_rate(_unit: BattleUnit) -> float:
+	return 1.0
+
+## The beam's colour on screen.
+func beam_color(unit: BattleUnit) -> Color:
+	return BattleUnit.team_color(unit.team).lightened(0.25)
 
 
 ## One attack's worth of beam has landed (or the beam stopped): everything that happens
@@ -143,7 +159,7 @@ func _show(unit: BattleUnit, enemy, firing: bool) -> void:
 	_visual.visible = true
 	_visual.target = enemy
 	_visual.firing = firing
-	_visual.color = BattleUnit.team_color(unit.team).lightened(0.25)
+	_visual.color = beam_color(unit)
 
 
 ## Draws the beam between its unit and target, every frame.

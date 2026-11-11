@@ -20,8 +20,8 @@ signal plan_ready(summary: String)
 @export var time_limit: float = 90.0
 ## Give up on a copy of the game that takes longer than this (seconds).
 @export var process_timeout: float = 120.0
-## Melee units that stand in the second row (same as the random battle scene's list).
-@export var second_row_units: Array[String] = ["bremes", "lunck", "wesper", "von carrow", "vere"]
+## Units that stand in the second row: the shared list (RandomTeams.second_row_units).
+var second_row_units: Array[String] = RandomTeams.second_row_units()
 
 ## Names this planner's files and its log line, so two planners can run at once (watching
 ## two computers play).
@@ -171,7 +171,7 @@ func _finish(index: int) -> void:
 	_player.adopt(_plans[index])
 	busy = false
 	var seconds := (Time.get_ticks_msec() - _started_ms) / 1000.0
-	var tested := _results.filter(func(r): return r != null).size()
+	var tested := _results.filter(func(result): return result != null).size()
 	var summary := "%s planned in %.1fs (%d plans tested, %d battles each%s)" % [
 			label, seconds, tested, battles_per_candidate, ", against a stand-in army" if _used_stand_in else ""]
 	var r = _results[index] if index < _results.size() else null

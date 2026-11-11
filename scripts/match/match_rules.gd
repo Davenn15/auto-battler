@@ -8,7 +8,7 @@ const START_HP := 64
 const START_AURA := 6
 const START_RESERVE := 10
 ## Loss damage starts from this, plus half the round number (see round_damage).
-const ROUND_DAMAGE_BASE := 4
+const ROUND_DAMAGE_BASE := 3
 ## The most Aura a player is ever given in a match, counting the starting Aura.
 const MAX_AURA_RECEIVED := 48
 
@@ -113,20 +113,26 @@ static func pay_income(player: PlayerState, round_number: int) -> Dictionary:
 
 ## Damage to the loser of a player combat in round `round_number`, when the winner has
 ## `surviving_aura` Aura of units left (upgrades count; summons and keepsakes don't):
-## the round part plus half the survivors, rounded down.
+## the round part plus the survivor part.
 static func loss_damage(round_number: int, surviving_aura: int) -> int:
-	return round_damage(round_number) + surviving_aura / 2
+	return round_damage(round_number) + survivor_damage(surviving_aura)
+
+
+## The part of a loss that comes from the winner's surviving units: a third of their
+## Aura, rounded down.
+static func survivor_damage(surviving_aura: int) -> int:
+	return floori(surviving_aura / 3.0)
 
 
 ## The part of a loss that comes from the round: starts higher and grows half as fast
-## as the round number (5 in round 3, 6 in round 5, 7 in round 7, ...).
+## as the round number (4 in round 3, 5 in round 5, 6 in round 7, ...).
 static func round_damage(round_number: int) -> int:
-	return ROUND_DAMAGE_BASE + round_number / 2
+	return ROUND_DAMAGE_BASE + floori(round_number / 2.0)
 
 
 ## Draws: each player takes half of what they'd take for losing, rounded down.
 static func draw_damage(round_number: int, enemy_surviving_aura: int) -> int:
-	return loss_damage(round_number, enemy_surviving_aura) / 2
+	return floori(loss_damage(round_number, enemy_surviving_aura) / 2.0)
 
 
 # ---------- Units and upgrades ----------
@@ -308,7 +314,7 @@ static func unequip(player: PlayerState, unit: ArmyUnit, item_index: int) -> boo
 ## The player's own cells (the bottom half), back row first, each row left to right.
 static func own_cells() -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
-	for r in range(GRID_ROWS - 1, GRID_ROWS / 2 - 1, -1):
+	for r in range(GRID_ROWS - 1, floori(GRID_ROWS / 2.0) - 1, -1):
 		var q_start := -floori(r / 2.0)
 		for i in GRID_COLUMNS:
 			cells.append(Vector2i(q_start + i, r))

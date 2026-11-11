@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ColumnHealBeamWeapon" format=3 uid="uid://ma46rqcinngq"]
+
+[ext_resource type="Script" uid="uid://btyigm5p2yc7w" path="res://data/units/obelisk/tier 4/column/weapons/heal_beam_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+heal = 35.0
+insight_scaling = 0.5
+interval = 1.8
+passive_name = "Mending Beam"
+description = "A continuous healing beam at the hurt ally in range with the lowest share of its health, healing 20 + 0.2x Insight per attack timer."

@@ -22,23 +22,15 @@ func execute(caster: BattleUnit) -> void:
 	caster.show_float_text("Phase", PHASE_COLOR)
 
 
-## Stuns `unit` and makes it untargetable for `duration` seconds, tinted blue.
+## Phases `unit` for `time` seconds (see PhaseStatus, which every Phase goes through).
+## With a `source` it's crowd control from an enemy.
 static func phase(unit: BattleUnit, time: float, source: BattleUnit = null) -> void:
-	unit.stun(time, source)
-	unit.add_status(UntargetableStatus.new(time))
-	KeepsakeVfx.phase_tint(unit, time)
-	unit.show_float_text("Phased", PHASE_COLOR)
+	PhaseStatus.phase(unit, time, source)
 
 
-## True while `unit` is phased: stunned and untargetable at once (this Gambit, BAR.RAJ's
-## passive, the Phase Button keepsake).
+## True while `unit` is Phased.
 static func is_phased(unit: BattleUnit) -> bool:
-	if unit == null or not unit.alive or unit._stunned_time <= 0.0:
-		return false
-	for status in unit.statuses:
-		if status is UntargetableStatus:
-			return true
-	return false
+	return PhaseStatus.is_phased(unit)
 
 
 ## The enemy in range that has dealt the most damage this combat (ties go to the nearest),

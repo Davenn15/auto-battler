@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-bonus_chance = 0.85
+bonus_chance = 0.5
 passive_name = "Exploit"
 description = "Attacks gain Wrack chance against enemies with Mono-Virus."

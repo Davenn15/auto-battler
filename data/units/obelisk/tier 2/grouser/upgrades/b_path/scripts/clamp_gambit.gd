@@ -46,13 +46,13 @@ func execute(caster: BattleUnit) -> void:
 		return
 	var hold := hold_time * caster.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
 	caster.lock_for(hold)
-	target.lock_for(hold)
-	var clamp := ClampHold.new()
-	clamp.grouser = caster
-	clamp.target = target
-	clamp.time_left = hold
-	clamp.z_index = 12
-	caster.get_tree().current_scene.add_child(clamp)
+	target.lock_for(hold * target.crowd_control_multiplier())
+	var claw := ClampHold.new()
+	claw.grouser = caster
+	claw.target = target
+	claw.time_left = hold
+	claw.z_index = 12
+	caster.get_tree().current_scene.add_child(claw)
 
 
 ## His current target if it's alive and within his attack range.

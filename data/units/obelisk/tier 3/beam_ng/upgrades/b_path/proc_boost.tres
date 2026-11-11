@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ProcBoostPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/beam_ng/upgrades/b_path/scripts/proc_boost_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+bonus = 0.3
+passive_name = "Overclocked Beams"
+description = "Its continuous beams trigger on-hit and on-attack effects 30% more often."

@@ -4,9 +4,11 @@
 
 [resource]
 script = ExtResource("1")
-missiles = 8
+missiles = 6
 cone_degrees = 25.0
 interval = 0.1
+damage = 40.0
+might_scaling = 0.3
 damage_type = 1
 gambit_name = "Injector"
 cast_time = 0.4

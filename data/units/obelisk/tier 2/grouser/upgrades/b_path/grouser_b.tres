@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://kqj60tr2x1qn"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/clamp_gambit.tres" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/grouser_b1.tres" id="3"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" uid="uid://cp14kjf5h3sdj" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/clamp_gambit.tres" id="2"]
+[ext_resource type="Resource" uid="uid://c56sq4rc3e6p" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/grouser_b1.tres" id="3"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 2/grouser/upgrades/b_path/grouser_b2.tres" id="4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="5_xcbwo"]
 
 [resource]
 script = ExtResource("1")

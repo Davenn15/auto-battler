@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/b_path/windup_gambit.tres" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/b_path/mallet_b1.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/b_path/mallet_b2.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Pinpoint"
+description = "New Gambit: shields up and winds up, then flies at the enemy with the highest Insight for massive damage and a stun."
+gambit = ExtResource("2")
+next_choices = Array[ExtResource("1")]([ExtResource("3"), ExtResource("4")])

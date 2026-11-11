@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/a_path/whole_board.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "Its passive covers the entire battlefield."
+passives = Array[ExtResource("2")]([ExtResource("3")])

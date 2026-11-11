@@ -1,15 +1,15 @@
 class_name ClusterPassive
 extends Passive
-## REPL\K8R gains wards for each ally near it (its duplicates count).
+## REPL\K8R gains Celerity for each ally near it (its duplicates count).
 
-## Added to each of its three wards per nearby ally.
-@export var wards_per_ally: float = 6.0
+## Celerity it gains per nearby ally.
+@export var celerity_per_ally: float = 6.0
 ## How close an ally must be, in hex cells.
 @export var radius_cells: int = 2
 
 
 func on_battle_start(unit: BattleUnit) -> void:
-	unit.add_status(ClusterStatus.new(wards_per_ally, radius_cells))
+	unit.add_status(ClusterStatus.new(celerity_per_ally, radius_cells))
 
 
 class ClusterStatus extends Status:
@@ -49,6 +49,6 @@ class ClusterStatus extends Status:
 				KeepsakeVfx.clear(unit, GLOW_KEY)
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
-		if stat == Stats.Stat.MIGHT_WARD or stat == Stats.Stat.INSIGHT_WARD or stat == Stats.Stat.CELERITY_WARD:
+		if stat == Stats.Stat.CELERITY:
 			return value + per_ally * allies
 		return value

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_d0eil")
-max_health_percent = 0.25
+max_health_percent = 0.2
 cast_time = 1.0
 description = "Fires a bolt in a line that pierces every enemy in its path."
 metadata/_custom_type_script = "uid://d2u5eujsfvtsi"

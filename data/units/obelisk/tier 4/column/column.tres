@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://dpml4fsfgh8gt"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/passive/column_passive.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/beam_1.tres" id="5"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/beam_2.tres" id="6"]
+[ext_resource type="Texture2D" uid="uid://dfo2veexb48v" path="res://assets/column.png" id="6_6ncs4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/upgrades/a_path/column_a.tres" id="7"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/upgrades/b_path/column_b.tres" id="8"]
+
+[resource]
+script = ExtResource("1")
+display_name = "COLUMN"
+tier = 4
+upgrades = Array[ExtResource("3")]([ExtResource("7"), ExtResource("8")])
+max_health = 1400.0
+attack_range_cells = 5
+frontline = true
+passives = Array[ExtResource("2")]([ExtResource("4"), ExtResource("5"), ExtResource("6")])
+sprite = ExtResource("6_6ncs4")
+might = 130.0
+insight = 90.0
+celerity = 85.0
+might_ward = 50.0
+insight_ward = 40.0
+celerity_ward = 45.0

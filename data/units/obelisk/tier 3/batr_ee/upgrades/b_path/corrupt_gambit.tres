@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DischargeGambit" format=3 uid="uid://cp5j5ibllg0j0"]
+
+[ext_resource type="Script" uid="uid://bsky80e61lx3o" path="res://data/units/obelisk/tier 3/batr_ee/gambit/discharge_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 40.0
+insight_scaling = 0.3
+phase_time = 3.0
+virus_stacks = 1
+gambit_name = "Corrupt"
+cast_time = 0.3
+description = "Phases for 3 seconds, then for every 30 Voltage it has, fires a Mono-Virus Volt at a random enemy, dealing 40 + 0.3x Insight damage and giving 1 stack of Mono-Virus."

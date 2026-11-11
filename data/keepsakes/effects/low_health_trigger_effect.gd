@@ -34,6 +34,4 @@ class Watch extends Status:
 			unit.add_status(TimedStatStatus.new(Stats.Stat.VAMPIRISM, effect.vampirism, effect.vampirism_duration))
 			KeepsakeVfx.pulse_glow(unit, "VfxLastChance", KeepsakeVfx.LAST_CHANCE_GLOW, effect.vampirism_duration)
 		if effect.hide_time > 0.0:
-			unit.stun(effect.hide_time)
-			unit.add_status(UntargetableStatus.new(effect.hide_time))
-			KeepsakeVfx.phase_tint(unit, effect.hide_time)
+			PhaseStatus.phase(unit, effect.hide_time)

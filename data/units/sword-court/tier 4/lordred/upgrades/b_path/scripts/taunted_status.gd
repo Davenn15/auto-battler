@@ -12,6 +12,7 @@ func _init(p_taunter: BattleUnit, p_duration: float) -> void:
 
 
 func on_applied(unit: BattleUnit) -> void:
+	time_left *= unit.crowd_control_multiplier()
 	unit.target = taunter
 	unit.show_float_text("Taunted", Color(0.85, 0.15, 0.15))
 

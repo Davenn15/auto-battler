@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ColumnBeamWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/beam_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 1.8
+slot = 0
+passive_name = "Beam I"
+description = "A continuous beam at the nearest enemy in range. Deals 60% of a normal attack per attack timer."

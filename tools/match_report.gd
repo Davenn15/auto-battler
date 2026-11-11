@@ -16,10 +16,10 @@ func _init() -> void:
 	var gens := 0
 	for m in matches:
 		gens = maxi(gens, int(m["gen"]) + 1)
-	var late := matches.filter(func(m): return int(m["gen"]) >= gens - maxi(gens / 3, 1))
+	var late := matches.filter(func(m): return int(m["gen"]) >= gens - maxi(floori(gens / 3.0), 1))
 
 	_out("MATCH SIM REPORT  (%d matches over %d generations; 'late' = last %d generations, %d matches)" %
-			[matches.size(), gens, maxi(gens / 3, 1), late.size()])
+			[matches.size(), gens, maxi(floori(gens / 3.0), 1), late.size()])
 	_evolution(history)
 	_final(finals)
 	_champion(champion)
@@ -61,7 +61,7 @@ func _evolution(history) -> void:
 	_out("== Evolution: fitness per generation (win share + HP margin / 640) ==")
 	for h in history:
 		var f: Array = h["fitness"]
-		_out("  gen %2d   best %5.2f   median %5.2f   worst %5.2f" % [int(h["gen"]) + 1, f[0], f[f.size() / 2], f[f.size() - 1]])
+		_out("  gen %2d   best %5.2f   median %5.2f   worst %5.2f" % [int(h["gen"]) + 1, f[0], f[floori(f.size() / 2.0)], f[f.size() - 1]])
 
 
 func _final(finals: Array) -> void:
@@ -104,21 +104,21 @@ func _match_shape(all: Array, late: Array) -> void:
 	for set_name in ["all", "late"]:
 		var set_: Array = all if set_name == "all" else late
 		var combats := 0.0
-		var draws := 0
+		var drawn := 0
 		var reserve := 0.0
 		var loose := 0.0
 		var hp := 0.0
 		for m in set_:
 			combats += m["combats"].size()
 			if float(m["a"]["result"]) == 0.5:
-				draws += 1
+				drawn += 1
 			for side in ["a", "b"]:
 				reserve += float(m[side]["reserve_left"])
 				loose += float(m[side]["loose_items"])
 				hp += maxf(float(m[side]["hp"]), 0.0)
 		var n := maxf(set_.size(), 1)
 		_out("  %-4s  combats per match %.1f   drawn matches %d   Reserve unspent at end %.1f   loose items at end %.1f   winner HP left %.1f" %
-				[set_name, combats / n, draws, reserve / (2 * n), loose / (2 * n), hp / n])
+				[set_name, combats / n, drawn, reserve / (2 * n), loose / (2 * n), hp / n])
 	var lengths := {}
 	for m in late:
 		var c: int = m["combats"].size()

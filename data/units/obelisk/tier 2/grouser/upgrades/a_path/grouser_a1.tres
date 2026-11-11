@@ -1,11 +1,10 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cn1y5bt2w7wqp"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 2/grouser/upgrades/a_path/ward_steal.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
 description = "Whenever Grouser reduces an enemy's ward, he gains that much of that ward for a while."
 passives = Array[ExtResource("2")]([ExtResource("3")])
-

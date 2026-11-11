@@ -152,9 +152,9 @@ func _refresh_teams() -> void:
 	for id in on_board:
 		var unit: BattleUnit = on_board[id]
 		if not known.has(id):
-			var record := {"id": id}
-			_seen.append(record)
-			known[id] = record
+			var fresh := {"id": id}
+			_seen.append(fresh)
+			known[id] = fresh
 		var record: Dictionary = known[id]
 		record["team"] = unit.team
 		record["text"] = _unit_entry(unit)

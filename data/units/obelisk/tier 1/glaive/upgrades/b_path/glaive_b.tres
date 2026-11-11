@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cmaw3v7bskiqq"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/serrated_gambit.tres" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/glaive_b1.tres" id="3"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/glaive_b2.tres" id="4"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" uid="uid://bwqyobtpkko1w" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/serrated_gambit.tres" id="2"]
+[ext_resource type="Resource" uid="uid://cd0d6vc2hy45v" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/glaive_b1.tres" id="3"]
+[ext_resource type="Resource" uid="uid://ygvla2l1aetu" path="res://data/units/obelisk/tier 1/glaive/upgrades/b_path/glaive_b2.tres" id="4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="5_fx5im"]
 
 [resource]
 script = ExtResource("1")

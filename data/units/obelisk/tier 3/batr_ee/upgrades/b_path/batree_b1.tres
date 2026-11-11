@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+description = "Volts silence enemies hit for 1.5 seconds: they can't cast their Gambit or gain Charge."
+gambit_overrides = Dictionary[String, float]({
+"silence_time": 1.5
+})

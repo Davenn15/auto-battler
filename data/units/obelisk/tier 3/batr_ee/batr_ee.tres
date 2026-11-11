@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://d1t01o5fb1kue"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/passive/grid_passive.tres" id="4"]
+[ext_resource type="Resource" uid="uid://dfwq8v35bs1yx" path="res://data/units/obelisk/tier 3/batr_ee/gambit/discharge_gambit.tres" id="5"]
+[ext_resource type="Texture2D" uid="uid://spub0jvwqs6a" path="res://assets/batr.ee.png" id="5_01c7g"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/a_path/batree_a.tres" id="6"]
+[ext_resource type="Resource" uid="uid://bqgbabdry8w57" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b.tres" id="7"]
+
+[resource]
+script = ExtResource("1")
+display_name = "BATR.EE"
+tier = 3
+upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
+attack_range_cells = 4
+passives = Array[ExtResource("2")]([ExtResource("4")])
+gambit = ExtResource("5")
+max_charge = 80.0
+starting_charge = 10.0
+sprite = ExtResource("5_01c7g")
+might = 50.0
+insight = 110.0
+celerity = 60.0
+might_ward = 30.0
+insight_ward = 50.0
+celerity_ward = 35.0
+attack_damage_type = 1

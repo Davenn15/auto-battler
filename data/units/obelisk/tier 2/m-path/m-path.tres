@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 2/m-path/passive/m-path_passive.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/m-path/gambit/m-path_gambit.tres" id="5"]
+[ext_resource type="Resource" uid="uid://t2mic63p1em8" path="res://data/units/obelisk/tier 2/m-path/gambit/m-path_gambit.tres" id="5"]
 [ext_resource type="Resource" uid="uid://d4dwxjrnt2v4r" path="res://data/units/obelisk/tier 2/m-path/upgrades/a_path/m-path_a.tres" id="6"]
 [ext_resource type="Resource" uid="uid://ceobg1u545kh2" path="res://data/units/obelisk/tier 2/m-path/upgrades/b_path/m-path_b.tres" id="7"]
 [ext_resource type="Texture2D" uid="uid://dd8i1c17v1y75" path="res://assets/m-path.png" id="8"]
@@ -16,6 +16,7 @@ tier = 2
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 max_health = 950.0
 attack_range_cells = 2
+frontline = true
 passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("5")
 max_charge = 90.0

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ColumnCannonWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/cannon_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 5.0
+passive_name = "Energy Cannon"
+description = "Every 5 seconds: fires an energy shell at the enemy within 6 cells with the most enemies around it. It explodes on impact for 90 + 0.6x Might damage to every enemy within 1 cell."

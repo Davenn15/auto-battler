@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+description = "Allies it revives also get copies of its keepsakes, as many as they have room for."
+gambit_overrides = Dictionary[String, float]({
+"copy_keepsakes": 1.0
+})

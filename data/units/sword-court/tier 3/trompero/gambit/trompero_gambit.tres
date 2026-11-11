@@ -9,5 +9,5 @@ burst_damage = 150.0
 burst_insight_scaling = 0.6
 stun_time = 0.5
 cast_time = 1.75
-description = "Places a ring that damages enemies inside it, then explodes and stuns them."
+description = "Places a ring that damages enemies inside it, then explodes and stuns them. He can't gain Charge until the ring explodes."
 metadata/_custom_type_script = "uid://d1nc5eow08rsl"

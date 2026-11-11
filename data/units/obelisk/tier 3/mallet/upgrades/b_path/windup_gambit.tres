@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WindupGambit" format=3 uid="uid://2al7w11iv4ot"]
+
+[ext_resource type="Script" uid="uid://cetp72cran4id" path="res://data/units/obelisk/tier 3/mallet/upgrades/b_path/scripts/windup_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 250.0
+might_scaling = 2.0
+bonus_per_second = 0.4
+gambit_name = "Pinpoint Strike"
+description = "Gains a shield (30% of max health) and winds up, faster and faster. When the shield breaks or after 4 seconds, flies to the enemy with the highest Insight, dealing massive damage and stunning it for 1.5 seconds. +50% damage per second spent winding up."

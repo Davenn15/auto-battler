@@ -303,6 +303,112 @@ func combine_table() -> void:
 	changed()
 
 
+# ---------- Dragging items ----------
+
+## Where a dragged item comes from: {"from": "inventory", "index": i},
+## {"from": "table", "slot": s} or {"from": "unit", "unit": ArmyUnit, "index": i}.
+## Where it goes: {"to": "inventory"}, {"to": "table", "slot": s} or {"to": "unit", "unit": ArmyUnit}.
+
+func item_at(source: Dictionary) -> Keepsake:
+	match source.get("from"):
+		"inventory":
+			var i: int = source["index"]
+			return player.inventory[i] if i >= 0 and i < player.inventory.size() else null
+		"table":
+			return table[source["slot"]]
+		"unit":
+			var unit: ArmyUnit = source["unit"]
+			var i: int = source["index"]
+			return unit.items[i] if player.units.has(unit) and i >= 0 and i < unit.items.size() else null
+	return null
+
+
+## True if the item at `source` may go to `dest`. Only Shards go on the table or come off a
+## unit; keepsakes stay on the unit wearing them.
+func can_move_item(source: Dictionary, dest: Dictionary) -> bool:
+	if phase != Phase.PLANNING or spectating:
+		return false
+	var item := item_at(source)
+	if item == null:
+		return false
+	if source["from"] == "unit" and not item.is_shard:
+		return false
+	match dest.get("to"):
+		"inventory":
+			return source["from"] != "inventory"
+		"table":
+			return item.is_shard and not (source["from"] == "table" and source["slot"] == dest["slot"])
+		"unit":
+			var unit: ArmyUnit = dest["unit"]
+			if not player.units.has(unit) or (source["from"] == "unit" and source["unit"] == unit):
+				return false
+			return unit.items.size() < BattleUnit.MAX_KEEPSAKES
+	return false
+
+
+## Moves an item by dragging. A Shard dropped on a full table slot swaps places with the
+## one there if it came from the other slot; otherwise the one there goes to the inventory.
+func move_item(source: Dictionary, dest: Dictionary) -> void:
+	if not can_move_item(source, dest):
+		return
+	var item := item_at(source)
+	var bumped: Keepsake = null
+	if dest["to"] == "table":
+		bumped = table[dest["slot"]]
+		table[dest["slot"]] = null
+	match source["from"]:
+		"inventory":
+			player.inventory.remove_at(source["index"])
+		"table":
+			table[source["slot"]] = null
+		"unit":
+			source["unit"].items.remove_at(source["index"])
+	if bumped != null:
+		if source["from"] == "table":
+			table[source["slot"]] = bumped
+		else:
+			player.inventory.append(bumped)
+	match dest["to"]:
+		"inventory":
+			player.inventory.append(item)
+		"table":
+			table[dest["slot"]] = item
+		"unit":
+			player.inventory.append(item)
+			MatchRules.equip(player, dest["unit"], player.inventory.size() - 1)
+			selected = dest["unit"]
+	held = {}
+	changed()
+
+
+## A screen position (as the HUD sees it) on the board.
+func screen_to_world(screen: Vector2) -> Vector2:
+	return get_canvas_transform().affine_inverse() * screen
+
+
+## True if a bench unit dragged to this screen position would land on one of your cells.
+func can_place_at_screen(screen: Vector2) -> bool:
+	return phase == Phase.PLANNING and not spectating \
+			and MatchRules.is_own_cell(grid.world_to_cell(screen_to_world(screen)))
+
+
+## Places a unit dragged from the bench on the cell at this screen position. A unit
+## already there goes to the bench.
+func place_at_screen(unit: ArmyUnit, screen: Vector2) -> void:
+	if not can_place_at_screen(screen) or not player.units.has(unit):
+		return
+	if MatchRules.place(player, unit, grid.world_to_cell(screen_to_world(screen))):
+		held = {}
+		selected = unit
+		changed()
+
+
+## Your unit standing at a screen position, or null.
+func own_army_unit_at_screen(screen: Vector2) -> ArmyUnit:
+	var unit := _own_unit_near(screen_to_world(screen))
+	return _army_of(unit) if unit != null else null
+
+
 func _return_table() -> void:
 	for slot in 2:
 		if table[slot] != null:
@@ -345,6 +451,18 @@ func _press(world: Vector2) -> void:
 			held = {}
 		changed()
 		return
+	# A Shard's badge above a unit's health bar: drag it off.
+	for node in units_parent.get_children():
+		var badge_owner := node as BattleUnit
+		if badge_owner == null or badge_owner.team != PLAYER_TEAM:
+			continue
+		var index := badge_owner.keepsake_index_at(world)
+		if index >= 0:
+			var source := {"from": "unit", "unit": _army_of(badge_owner), "index": index}
+			if item_at(source) != null and item_at(source).is_shard:
+				selected = source["unit"]
+				hud.start_item_drag(source)
+				return
 	if unit != null:
 		_drag_unit = unit
 		_drag_army = _army_of(unit)
@@ -540,7 +658,8 @@ func _on_battle_ended(winner: int) -> void:
 			"aura_2": ArmySpawner.surviving_aura(get_tree(), ENEMY_TEAM),
 			"fingerprint": BattleArena.fingerprint(get_tree(), roundi(_manager.combat_time * 60.0))}
 	_my_fingerprint = result["fingerprint"]
-	print("Round %d fight: winner %d, fingerprint %s" % [round_number, winner, _my_fingerprint])
+	if online:   # for checking both computers saw the same fight
+		print("Round %d fight: winner %d, fingerprint %s" % [round_number, winner, _my_fingerprint])
 	if not online:
 		_apply_result(result)
 	elif Net.is_host():
@@ -580,12 +699,12 @@ func _apply_result(result: Dictionary) -> void:
 		var damage := MatchRules.loss_damage(round_number, mine)
 		ai.hp -= damage
 		lines.append("You won! %d Aura of your units survived." % mine)
-		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, mine / 2])
+		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, MatchRules.survivor_damage(mine)])
 	elif winner == other_team:
 		var damage := MatchRules.loss_damage(round_number, theirs)
 		player.hp -= damage
 		lines.append("You lost. %d Aura of their units survived." % theirs)
-		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, theirs / 2])
+		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, MatchRules.survivor_damage(theirs)])
 	else:
 		var to_player := MatchRules.draw_damage(round_number, theirs)
 		var to_ai := MatchRules.draw_damage(round_number, mine)

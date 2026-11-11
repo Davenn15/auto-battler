@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ColumnPulseWeapon" format=3 uid="uid://b2xv4nd3psu0d"]
+
+[ext_resource type="Script" uid="uid://d0uak1mu3jeum" path="res://data/units/obelisk/tier 4/column/weapons/pulse_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+shield_share = 0.07
+passive_name = "Pulse"
+description = "Every 3 seconds: a shield worth 4% of max health for 3 seconds, and 40 + 0.3x Might damage to every enemy within 1 cell."

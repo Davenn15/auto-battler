@@ -36,8 +36,8 @@ func _ready() -> void:
 		Net.join(args[i + 1] if i >= 0 and i + 1 < args.size() else "127.0.0.1")
 
 
-func _int_arg(args: PackedStringArray, name: String) -> int:
-	var i := args.find(name)
+func _int_arg(args: PackedStringArray, flag: String) -> int:
+	var i := args.find(flag)
 	return int(args[i + 1]) if i >= 0 and i + 1 < args.size() else -1
 
 

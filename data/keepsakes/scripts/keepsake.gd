@@ -65,8 +65,8 @@ func get_icon(size: int = 32) -> Texture2D:
 	if _icon == null:
 		var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
 		var right: Shard.Kind = first_shard if is_shard else second_shard
-		image.fill_rect(Rect2i(0, 0, size / 2, size), Shard.COLORS[first_shard])
-		image.fill_rect(Rect2i(size / 2, 0, size - size / 2, size), Shard.COLORS[right])
+		image.fill_rect(Rect2i(0, 0, floori(size / 2.0), size), Shard.COLORS[first_shard])
+		image.fill_rect(Rect2i(floori(size / 2.0), 0, size - floori(size / 2.0), size), Shard.COLORS[right])
 		if not is_shard:
 			var border := ICON_BORDER_WIDTH
 			image.fill_rect(Rect2i(0, 0, size, border), Color.WHITE)

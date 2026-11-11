@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="GridBoostPassive" format=3 uid="uid://cbfo2yc6d8yjd"]
+
+[ext_resource type="Script" uid="uid://dbhcuudduyh8i" path="res://data/units/obelisk/tier 3/batr_ee/passive/grid_boost_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+phased_voltage = 30.0
+passive_name = "Corrupted Grid"
+description = "While Phased, gains 50 Voltage per second."

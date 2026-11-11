@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="LinkGambit" format=3]
+[gd_resource type="Resource" script_class="LinkGambit" format=3 uid="uid://t2mic63p1em8"]
 
-[ext_resource type="Script" path="res://data/units/obelisk/tier 2/m-path/gambit/link_gambit.gd" id="1"]
+[ext_resource type="Script" uid="uid://c7k28grtje02k" path="res://data/units/obelisk/tier 2/m-path/gambit/link_gambit.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
+ward_bonus = 30.0
+damage_share = 0.4
 gambit_name = "Link"
 cast_time = 0.3
 description = "Links M-PATH to the nearby ally that has taken the most damage. While linked, both have more wards and each takes a share of the other's damage."

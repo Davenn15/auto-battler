@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ColumnPassive" format=3 uid="uid://d3erlptyv55pm"]
+
+[ext_resource type="Script" uid="uid://dupbkxjfdvj1c" path="res://data/units/obelisk/tier 4/column/passive/column_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Structure"
+description = "Can't move or gain Charge, is immune to crowd control, and has no Gambit. Its attacks come from its weapons, each with its own attack timer that Celerity speeds up."

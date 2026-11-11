@@ -1,13 +1,16 @@
 class_name DuplicateGambit
 extends Gambit
-## REPL\K8R duplicates itself: its current health and max health are split evenly between
-## it and its duplicates, and its keepsakes are shared out at random between them.
+## REPL\K8R duplicates itself: Health Share of its current and max health is split evenly
+## between it and its duplicates, and its keepsakes are shared out at random between them.
 ## Duplicates have Charge and can cast this too.
 ##   A (Exponential): every duplicate gets all of its keepsakes instead.
 ##   A1: one more duplicate.
 
 ## How many REPL\K8Rs there are after the split, counting itself (2 = one duplicate).
 @export var copies: int = 2
+## How much of its current and max health is shared out between it and its duplicates,
+## evenly (1.2 = 120%: two copies get 60% each). Upgrades can raise it.
+@export var health_share: float = 1.2
 ## A: 1 = every duplicate gets all of its keepsakes; 0 = they're split at random.
 @export_range(0, 1) var share_keepsakes: int = 0
 
@@ -24,8 +27,9 @@ func execute(caster: BattleUnit) -> void:
 	if cells.is_empty():
 		return
 	var total := cells.size() + 1
-	var new_max := caster.max_health / total
-	var new_hp := caster.health / total
+	# Health Share of its health is shared out evenly: above 1, splitting gains health overall.
+	var new_max := caster.max_health * health_share / total
+	var new_hp := caster.health * health_share / total
 
 	# Who gets which keepsake: index 0 is REPL\K8R itself.
 	var shares: Array = []

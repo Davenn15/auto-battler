@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+description = "When a Volt hits an enemy that already has Mono-Virus, it doubles their stacks instead of adding 1."
+gambit_overrides = Dictionary[String, float]({
+"double_virus": 1.0
+})

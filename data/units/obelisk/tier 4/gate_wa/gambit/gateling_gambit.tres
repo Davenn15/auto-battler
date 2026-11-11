@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="GatelingGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/gate_wa/gambit/gateling_gambit.gd" id="1"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gambit/gateling.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Open Gate"
+cast_time = 0.4
+profile = ExtResource("2")
+description = "Summons a Gateling beside it: a ranged fighter (range 3) with 35% of its max health and 60% of its Might, Insight and Celerity."

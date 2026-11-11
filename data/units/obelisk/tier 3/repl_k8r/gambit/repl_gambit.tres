@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="DuplicateGambit" format=3]
+[gd_resource type="Resource" script_class="DuplicateGambit" format=3 uid="uid://ccyc3asmcdpxi"]
 
-[ext_resource type="Script" path="res://data/units/obelisk/tier 3/repl_k8r/gambit/duplicate_gambit.gd" id="1"]
+[ext_resource type="Script" uid="uid://d4mk270vn1xtw" path="res://data/units/obelisk/tier 3/repl_k8r/gambit/duplicate_gambit.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 gambit_name = "Replicate"
-cast_time = 0.3
-description = "Duplicates itself, splitting its current health, max health and keepsakes between both duplicates. Duplicates have Charge and can cast Gambits."
+cast_time = 0.75
+description = "Duplicates itself. 120% of its current and max health is split evenly between it and its duplicate (60% each), and its keepsakes are split between them. Duplicates have Charge and can cast Gambits."

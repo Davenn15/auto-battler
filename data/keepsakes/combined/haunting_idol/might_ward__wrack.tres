@@ -10,6 +10,6 @@ first_shard = 1
 second_shard = 7
 effect = ExtResource("2_effect")
 might_ward = 25.0
-wrack_chance = 0.25
+wrack_chance = 0.15
 description = "Your control and debuff effects can Wrack."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ReviveGambit" format=3 uid="uid://cqsa40pgbohi5"]
+
+[ext_resource type="Script" uid="uid://4rwbfsw4qx4m" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/b_path/scripts/revive_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+count = 1
+gambit_name = "Return"
+cast_time = 0.4
+description = "Revives the last two allies that died beside it, with 40% of their max health."

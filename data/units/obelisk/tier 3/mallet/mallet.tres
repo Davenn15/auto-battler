@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://wm37uyxfif1l"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
+[ext_resource type="Resource" uid="uid://dnuifgj6b21p7" path="res://data/units/obelisk/tier 3/mallet/passive/unyielding_passive.tres" id="4"]
+[ext_resource type="Resource" uid="uid://dx8g1t1rxgmb8" path="res://data/units/obelisk/tier 3/mallet/gambit/slam_gambit.tres" id="5"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/a_path/mallet_a.tres" id="6"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/b_path/mallet_b.tres" id="7"]
+[ext_resource type="Texture2D" uid="uid://cd381keruq2m0" path="res://assets/mallet.png" id="8"]
+
+[resource]
+script = ExtResource("1")
+display_name = "MALLET"
+tier = 3
+upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
+max_health = 1100.0
+passives = Array[ExtResource("2")]([ExtResource("4")])
+gambit = ExtResource("5")
+max_charge = 90.0
+starting_charge = 30.0
+sprite = ExtResource("8")
+might = 130.0
+insight = 75.0
+celerity = 80.0
+might_ward = 45.0
+insight_ward = 25.0
+celerity_ward = 30.0

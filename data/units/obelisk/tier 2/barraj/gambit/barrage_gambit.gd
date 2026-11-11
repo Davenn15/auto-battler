@@ -55,9 +55,9 @@ static func random_point(grid: BattleGrid, center: Vector2i, spread: int) -> Vec
 	var cells: Array[Vector2i] = []
 	for dq in range(-spread, spread + 1):
 		for dr in range(-spread, spread + 1):
-			var cell := center + Vector2i(dq, dr)
-			if grid.get_distance(center, cell) <= spread and grid.has_cell(cell):
-				cells.append(cell)
+			var option := center + Vector2i(dq, dr)
+			if grid.get_distance(center, option) <= spread and grid.has_cell(option):
+				cells.append(option)
 	if cells.is_empty():
 		cells.append(center)
 	var cell: Vector2i = CombatRng.pick(cells)

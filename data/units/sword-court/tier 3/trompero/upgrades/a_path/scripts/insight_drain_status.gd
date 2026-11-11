@@ -19,9 +19,9 @@ func refresh() -> void:
 	time_left = LINGER
 
 
-func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
+func modify_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	if stat == Stats.Stat.INSIGHT:
-		return value - amount
+		return value - amount * unit.debuff_multiplier()
 	return value
 
 

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/virus_bolt.tres" id="3"]
+
+
+[resource]
+script = ExtResource("1")
+description = "New weapon, Virus Bolt: every 3 seconds, a bolt that gives 2 stacks of Mono-Virus."
+passives = Array[ExtResource("2")]([ExtResource("3")])
+
+

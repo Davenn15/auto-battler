@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="FocusBeamGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/beam_ng/upgrades/b_path/scripts/focus_beam_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Focus Beam"
+cast_time = 0.2
+description = "Channels a damaging beam for 4 seconds at the enemy in range that the most allies are attacking, dealing 150% of a normal attack per attack interval. While the beam is on it, allied attacks on it deal 2% of its max health on top."

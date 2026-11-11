@@ -13,14 +13,20 @@ func _init(p_reduction: float, p_duration: float) -> void:
 	time_left = p_duration
 
 
+var _holder   # untyped: may be freed
+
+
 func on_applied(unit: BattleUnit) -> void:
+	_holder = unit
+	time_left *= unit.debuff_multiplier()
 	unit.show_float_text("Sundered", TEXT_COLOR)
 
 
 ## Called when the Gambit hits a unit that's already sundered: keeps the stronger values.
 func refresh(p_reduction: float, p_duration: float) -> void:
 	reduction = maxf(reduction, p_reduction)
-	time_left = maxf(time_left, p_duration)
+	var multiplier: float = _holder.debuff_multiplier() if is_instance_valid(_holder) else 1.0
+	time_left = maxf(time_left, p_duration * multiplier)
 
 
 func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:

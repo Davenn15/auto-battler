@@ -28,7 +28,7 @@ func set_targets(list: Array) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not is_instance_valid(caster) or not caster.alive or time_left <= 0.0:
+	if not is_instance_valid(caster) or not caster.alive or not caster.is_inside_tree() or time_left <= 0.0:
 		_end()
 		return
 	time_left -= delta
@@ -42,7 +42,7 @@ func _physics_process(delta: float) -> void:
 		if not is_instance_valid(target) or not target.alive:
 			continue
 		var dealt: float = target.take_damage(target.max_health * damage_per_second * delta, 0, damage_type, false, caster, false)
-		caster.get_tree().call_group("damage_tracker", "record_damage", credit, dealt)
+		get_tree().call_group("damage_tracker", "record_damage", credit, dealt)
 		var id: int = target.get_instance_id()
 		_pending[id] = _pending.get(id, 0.0) + dealt
 		if target.alive and execute_threshold > 0.0 and target.health / target.max_health < execute_threshold:

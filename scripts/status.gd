@@ -99,6 +99,16 @@ func modify_shield_received(_unit: BattleUnit, amount: float) -> float:
 func blocks_crowd_control(_unit: BattleUnit) -> bool:
 	return false
 
+## Crowd control on this unit lasts multiplier times as long (0.65 = 35% shorter).
+## MALLET's passive lowers it. Pass the value on, changed or not.
+func modify_crowd_control(_unit: BattleUnit, multiplier: float) -> float:
+	return multiplier
+
+## How effective debuffs on this unit are (0.65 = 35% less): timed ones wear off that much
+## sooner, ones that last all combat are that much weaker. MALLET's passive lowers it.
+func modify_debuff_strength(_unit: BattleUnit, multiplier: float) -> float:
+	return multiplier
+
 ## Called when the unit dodges a hit.
 func on_dodge(_unit: BattleUnit) -> void:
 	pass
@@ -145,6 +155,10 @@ func modify_wrack_damage(_unit: BattleUnit, _target: BattleUnit, value: float) -
 
 ## True makes all of the unit's damage skip the target's wards.
 func ignores_wards(_unit: BattleUnit) -> bool:
+	return false
+
+## True stops the unit from walking. It still attacks enemies already in range.
+func blocks_movement(_unit: BattleUnit) -> bool:
 	return false
 
 ## True stops the unit from casting its Gambit, even with full charge.

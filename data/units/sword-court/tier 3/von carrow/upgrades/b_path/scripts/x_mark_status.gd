@@ -13,6 +13,7 @@ func _init(p_duration: float, p_ward_cut: float) -> void:
 
 
 func on_applied(unit: BattleUnit) -> void:
+	time_left *= unit.debuff_multiplier()
 	_label = Label.new()
 	_label.text = "X"
 	_label.add_theme_font_size_override("font_size", 28)

@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://nwlnyg1v8h0o"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/cutting.tres" id="3"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a1.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a2.tres" id="5"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" uid="uid://4u4r68xeojcj" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/cutting.tres" id="3"]
+[ext_resource type="Resource" uid="uid://dyijoysdrcljr" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a1.tres" id="4"]
+[ext_resource type="Resource" uid="uid://ccbkasl7uc252" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a2.tres" id="5"]
 
 [resource]
 script = ExtResource("1")

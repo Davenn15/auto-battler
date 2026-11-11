@@ -29,7 +29,7 @@ func on_applied(unit: BattleUnit) -> void:
 	_host = unit
 	unit.died.connect(_on_host_died)
 	_mark = SeedMark.new()
-	_mark.seed = self
+	_mark.source = self
 	_mark.z_index = 13
 	unit.add_child(_mark)
 	_mark.position = Vector2(20, 14)   # beside the host, clear of icons over its head
@@ -73,7 +73,7 @@ func _hatch(host: BattleUnit) -> void:
 
 ## The seed drawn on its host: a green seed that swells, ringed by how far along it is.
 class SeedMark extends Node2D:
-	var seed: SeedStatus
+	var source: SeedStatus
 	var _time := 0.0
 
 	func _process(delta: float) -> void:
@@ -81,9 +81,9 @@ class SeedMark extends Node2D:
 		queue_redraw()
 
 	func _draw() -> void:
-		if seed == null:
+		if source == null:
 			return
-		var p := seed.progress()
+		var p := source.progress()
 		var pulse := 1.0 + 0.12 * sin(_time * (4.0 + 8.0 * p))
 		var size := (6.0 + 5.0 * p) * pulse
 		draw_circle(Vector2.ZERO, 17.0, Color(0.0, 0.0, 0.0, 0.45))   # dark backing so it reads

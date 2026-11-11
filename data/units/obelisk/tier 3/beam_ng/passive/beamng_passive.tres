@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BeamngPassive" format=3 uid="uid://spdgs0mnu8wd"]
+
+[ext_resource type="Script" uid="uid://b6krardn3nqu" path="res://data/units/obelisk/tier 3/beam_ng/passive/beamng_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+bonus_per_cell = 0.15
+passive_name = "Long Beam"
+description = "Its attack is a continuous beam. Its damage and shielding grow by 10% for every cell its target is past the first."

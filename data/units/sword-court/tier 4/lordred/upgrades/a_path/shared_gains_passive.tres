@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_gm5k1")
-share = 0.8
+share = 1.2
 description = "Copies part of the permanent stats his allies gain."
 metadata/_custom_type_script = "uid://ch7avldltm8m6"

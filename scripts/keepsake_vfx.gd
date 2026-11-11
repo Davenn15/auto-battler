@@ -792,7 +792,7 @@ class WindSwirl extends Node2D:
 ## A small icon over a unit's head that pops in, then fades out at the end of its life.
 class HeadIcon extends Node2D:
 	enum { FLAG, HEART }
-	var kind := FLAG
+	var kind: int = FLAG   # FLAG or HEART
 	var color := Color.WHITE
 	var life := 1.0
 	var time := 0.0

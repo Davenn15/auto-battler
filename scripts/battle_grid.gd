@@ -237,7 +237,7 @@ func _draw() -> void:
 		# watched turned around, so your own half is always the blue one.
 		var swap := not Engine.is_editor_hint() and BattleUnit.swap_team_colors
 		for cell in _ids:
-			var bottom: bool = cell.y >= rows / 2
+			var bottom: bool = cell.y >= floori(rows / 2.0)
 			draw_colored_polygon(_hex_points(cell, 6), BOTTOM_TINT if bottom != swap else TOP_TINT)
 	if show_debug:
 		for cell in _ids:

@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 duration = 5.0
-damage_per_second = 0.075
+damage_per_second = 0.15
 gambit_name = "Vacuum"
 cast_time = 0.4
 description = "Channels a life-draining vacuum on the enemy with the most health near him, dealing a share of its max health every second for a while."

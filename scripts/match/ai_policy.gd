@@ -220,7 +220,7 @@ static func _weighted(options: Array) -> Array:
 ## which row each group starts from and whether columns fill from the middle; without
 ## one, the very front and very back rows in random columns.
 static func lay_out(p: PlayerState, second_row: Array[String], g: Dictionary = {}) -> void:
-	var front_row := MatchRules.GRID_ROWS / 2 + (0 if randf() < float(g.get("front_row", 1.0)) else 1)
+	var front_row := floori(MatchRules.GRID_ROWS / 2.0) + (0 if randf() < float(g.get("front_row", 1.0)) else 1)
 	var back_row := MatchRules.GRID_ROWS - 1 - (0 if randf() < float(g.get("back_row", 1.0)) else 1)
 	var centered := randf() < float(g.get("center_bias", 0.0))
 	var column_key := {}

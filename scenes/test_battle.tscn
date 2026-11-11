@@ -16,7 +16,7 @@
 [ext_resource type="Resource" uid="uid://cucqvohyusw30" path="res://data/units/sword-court/tier 2/crommel/crommel.tres" id="12_xk6eq"]
 [ext_resource type="Resource" uid="uid://byi436axrwjqx" path="res://data/units/sword-court/tier 2/wesper/wesper.tres" id="13_7f1eh"]
 [ext_resource type="Resource" uid="uid://bpnxufpm5ys0j" path="res://data/units/sword-court/tier 1/lunck/lunck.tres" id="14_7f1eh"]
-[ext_resource type="Script" path="res://scripts/combat_timer.gd" id="20_ctimer"]
+[ext_resource type="Script" uid="uid://cdb6ykw72b3xd" path="res://scripts/combat_timer.gd" id="20_ctimer"]
 [ext_resource type="Script" uid="uid://be32jbour7gbe" path="res://scripts/item_toolbox.gd" id="21_itembox"]
 
 [node name="TestBattle" type="Node2D" unique_id=1912766257 node_paths=PackedStringArray("prep")]
@@ -95,7 +95,7 @@ offset_bottom = 20.0
 grow_vertical = 2
 script = ExtResource("4_fbnr0")
 
-[node name="CombatTimer" type="Label" parent="CanvasLayer/UI"]
+[node name="CombatTimer" type="Label" parent="CanvasLayer/UI" unique_id=1688018498]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -107,7 +107,7 @@ offset_bottom = 52.0
 grow_horizontal = 2
 script = ExtResource("20_ctimer")
 
-[node name="ItemToolbox" type="PanelContainer" parent="CanvasLayer/UI"]
+[node name="ItemToolbox" type="PanelContainer" parent="CanvasLayer/UI" unique_id=365713714]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0

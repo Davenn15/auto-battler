@@ -133,8 +133,29 @@ static func min_cost(forced: Array) -> int:
 
 ## True for a melee pick that isn't listed in `second_row`: the units that stand in front
 ## and take the first hits.
+## The one list of units that start in the second row (lower-case display names), used by
+## every computer-run army: random battles, the computer opponent and both sims. It's the
+## random battle scene's second_row_units, so edit it there. Front-liners come from each
+## unit's own UnitData.frontline.
+static func second_row_units() -> Array[String]:
+	if _second_row_cache.is_empty():
+		var scene := load(SECOND_ROW_SCENE) as PackedScene
+		if scene != null:
+			var state := scene.get_state()
+			for i in state.get_node_property_count(0):   # node 0 is the scene's root
+				if state.get_node_property_name(0, i) == "second_row_units":
+					_second_row_cache.assign(state.get_node_property_value(0, i))
+		if _second_row_cache.is_empty():
+			push_warning("RandomTeams: no second_row_units in %s." % SECOND_ROW_SCENE)
+	return _second_row_cache.duplicate()
+
+const SECOND_ROW_SCENE := "res://scenes/random_battle.tscn"
+static var _second_row_cache: Array[String] = []
+
+
 static func is_frontline(pick: Dictionary, second_row: Array[String] = []) -> bool:
-	return attack_range(pick) <= 1 and not second_row.has(pick["data"].display_name.to_lower())
+	return (attack_range(pick) <= 1 or pick["data"].frontline) and not pick["data"].back_row \
+			and not second_row.has(pick["data"].display_name.to_lower())
 
 
 ## A pick's attack range: the unit's own plus every chosen upgrade's bonus, the same
@@ -179,7 +200,10 @@ static func place_teams(grid: BattleGrid, teams: Dictionary, second_row: Array[S
 			var i: int = mover[1]
 			var cells: Array = placement[team]
 			var enemies: Array = placement[3 - team]
-			var reach := attack_range(teams[team][i])
+			# A front-liner with a longer range (UnitData.frontline) is placed like a melee unit.
+			var reach := 1 if teams[team][i]["data"].frontline else attack_range(teams[team][i])
+			if teams[team][i]["data"].back_row:
+				reach = 99   # any distance is "in range", so it stands as far back as it can
 			var in_second_row := second_row.has(teams[team][i]["data"].display_name.to_lower())
 			var hides_behind_front := reach > 1 and not in_second_row
 			var fronts: Array = []   # cells of this team's front-liners, for ranged units to stay behind
@@ -215,7 +239,7 @@ static func place_teams(grid: BattleGrid, teams: Dictionary, second_row: Array[S
 
 ## Every cell in a team's half of the grid: team 2 gets the top rows, team 1 the bottom.
 static func half_cells(grid: BattleGrid, team: int) -> Array[Vector2i]:
-	var half_rows := grid.rows / 2
+	var half_rows := floori(grid.rows / 2.0)
 	var first_row := half_rows if team == 1 else 0
 	var cells: Array[Vector2i] = []
 	for r in range(first_row, first_row + half_rows):
@@ -278,7 +302,7 @@ static func _second_row_score(grid: BattleGrid, team: int, cell: Vector2i, teamm
 
 ## The row `depth` rows back from a team's front: 0 is the row facing the enemy.
 static func _row_from_front(grid: BattleGrid, team: int, depth: int) -> int:
-	var half_rows := grid.rows / 2
+	var half_rows := floori(grid.rows / 2.0)
 	return half_rows + depth if team == 1 else half_rows - 1 - depth
 
 

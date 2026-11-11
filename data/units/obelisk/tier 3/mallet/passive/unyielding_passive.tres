@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnyieldingPassive" format=3 uid="uid://dnuifgj6b21p7"]
+
+[ext_resource type="Script" uid="uid://cr1xbolkmku5e" path="res://data/units/obelisk/tier 3/mallet/passive/unyielding_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+crowd_control_reduction = 0.4
+debuff_reduction = 0.4
+passive_name = "Unyielding"
+description = "Crowd control on MALLET lasts 35% shorter. Debuffs on it wear off 35% sooner, and ones that last all combat (Sapped stats, ward shred, Mono-Virus) are 35% weaker."

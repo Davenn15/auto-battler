@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="StatBonusPassive" format=3]
+[gd_resource type="Resource" script_class="StatBonusPassive" format=3 uid="uid://bkcgiktu58it1"]
 
-[ext_resource type="Script" path="res://scripts/stat_bonus_passive.gd" id="1"]
+[ext_resource type="Script" uid="uid://sdo6eme3alib" path="res://scripts/stat_bonus_passive.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 stat = 2
-amount = 60.0
+amount = 45.0
 passive_name = "Scuttle"
 description = "A large amount of bonus Celerity."

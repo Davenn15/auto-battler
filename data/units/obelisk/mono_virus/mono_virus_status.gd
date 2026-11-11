@@ -1,8 +1,8 @@
 class_name MonoVirusStatus
 extends Status
 ## Mono-Virus, used across the Obelisk faction. A debuff that lasts the rest of combat:
-## each stack deals a share of the carrier's max health every second, and stacks have no
-## limit. When the carrier dies, its stacks jump to its nearest living ally.
+## each stack deals a share of the carrier's max health every second, or a flat minimum if
+## that's higher, and stacks have no limit. When the carrier dies, its stacks jump to its nearest living ally.
 ## Give stacks with MonoVirusStatus.infect(); never add this status directly.
 
 ## Its numbers (damage, wards, jumping, colour) are in mono_virus.tres, next to this script.
@@ -64,7 +64,8 @@ func blocks_charge_gain(_unit: BattleUnit) -> bool:
 func tick(unit: BattleUnit, delta: float) -> void:
 	if not unit.active or not unit.alive or stacks <= 0:
 		return
-	var amount := unit.max_health * SETTINGS.damage_per_stack * stacks * delta
+	var per_stack := maxf(unit.max_health * SETTINGS.damage_per_stack, SETTINGS.min_damage_per_stack)
+	var amount := per_stack * stacks * delta * unit.debuff_multiplier()
 	if not SETTINGS.ignore_wards:
 		amount *= Stats.ward_multiplier(unit.get_stat(Stats.ward_stat_for(SETTINGS.damage_type)))
 	var dealt := unit.take_warded_damage(amount, false, SETTINGS.damage_type)

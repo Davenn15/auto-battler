@@ -10,8 +10,8 @@ func add(more: float, cap: float) -> void:
 	amount = minf(amount + more, cap)
 
 
-func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
+func modify_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	match stat:
 		Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD:
-			return value - amount
+			return value - amount * unit.debuff_multiplier()
 	return value

@@ -85,8 +85,7 @@ func add_summon(unit: BattleUnit) -> void:
 	if in_overtime:
 		_apply_overtime(unit)   # after start_combat, which clears statuses
 
-func _on_unit_died(unit: BattleUnit) -> void:
-	print("%s died" % unit.name)
+func _on_unit_died(_unit: BattleUnit) -> void:
 	_check_battle_end()
 
 

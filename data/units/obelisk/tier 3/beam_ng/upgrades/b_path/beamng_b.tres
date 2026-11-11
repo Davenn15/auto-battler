@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/beam_ng/upgrades/b_path/proc_boost.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/beam_ng/upgrades/b_path/focus_beam_gambit.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/beam_ng/upgrades/b_path/beamng_b1.tres" id="5"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/beam_ng/upgrades/b_path/beamng_b2.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+description = "Its continuous beams trigger effects 30% more often. New Gambit: Focus Beam, a damaging beam at the enemy its allies are attacking most; their attacks on it deal extra max-health damage."
+passives = Array[ExtResource("2")]([ExtResource("3")])
+gambit = ExtResource("4")
+next_choices = Array[ExtResource("1")]([ExtResource("5"), ExtResource("6")])

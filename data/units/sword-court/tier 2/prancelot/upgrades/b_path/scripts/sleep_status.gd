@@ -17,7 +17,8 @@ func _init(p_duration: float, p_wake_at: float, p_ward_cut: float) -> void:
 
 
 func on_applied(unit: BattleUnit) -> void:
-	unit.stun(time_left)
+	unit.stun(time_left)   # the stun shortens itself for units that resist crowd control
+	time_left *= unit.crowd_control_multiplier()
 	_label = Label.new()
 	_label.text = "Zz"
 	_label.add_theme_font_size_override("font_size", 14)

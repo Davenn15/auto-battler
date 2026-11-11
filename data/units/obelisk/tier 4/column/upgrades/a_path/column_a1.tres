@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c1drq0fif3p6t"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/energy_cannon.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "New weapon, Energy Cannon: every 5 seconds, an energy shell that explodes on impact, damaging every enemy within 1 cell."
+passives = Array[ExtResource("2")]([ExtResource("3")])

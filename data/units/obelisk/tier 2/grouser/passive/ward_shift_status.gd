@@ -26,7 +26,7 @@ static func shred(grouser: BattleUnit, target: BattleUnit, stat: Stats.Stat, amo
 
 ## The ward `target` has the most of right now.
 static func highest_ward(target: BattleUnit) -> Stats.Stat:
-	var best: Stats.Stat = WARDS[0]
+	var best := WARDS[0] as Stats.Stat
 	for stat in WARDS:
 		if target.get_stat(stat) > target.get_stat(best):
 			best = stat
@@ -42,11 +42,11 @@ static func _on(unit: BattleUnit) -> WardShiftStatus:
 	return shift
 
 
-var _unit   # untyped: may be freed
+var _holder   # untyped: may be freed
 
 
 func on_applied(unit: BattleUnit) -> void:
-	_unit = unit
+	_holder = unit
 
 
 func on_removed(unit: BattleUnit) -> void:
@@ -54,6 +54,8 @@ func on_removed(unit: BattleUnit) -> void:
 
 
 func add(stat: Stats.Stat, amount: float, duration: float) -> void:
+	if amount < 0.0 and is_instance_valid(_holder):
+		duration *= _holder.debuff_multiplier()   # a shred wears off sooner on units that resist debuffs
 	_entries.append([stat, amount, duration])
 	_update_glow()
 
@@ -83,12 +85,12 @@ func tick(_unit_ref: BattleUnit, delta: float) -> void:
 
 ## A neon yellow glow that grows with how much ward is shifted.
 func _update_glow() -> void:
-	if not is_instance_valid(_unit):
+	if not is_instance_valid(_holder):
 		return
 	var total := 0.0
 	for entry in _entries:
 		total += absf(entry[1])
 	if total <= 0.0:
-		KeepsakeVfx.clear(_unit, GLOW_KEY)
+		KeepsakeVfx.clear(_holder, GLOW_KEY)
 	else:
-		KeepsakeVfx.set_glow(_unit, GLOW_KEY, Color(COLOR, 0.6), clampf(total / 80.0, 0.0, 0.5))
+		KeepsakeVfx.set_glow(_holder, GLOW_KEY, Color(COLOR, 0.6), clampf(total / 80.0, 0.0, 0.5))

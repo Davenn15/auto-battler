@@ -13,6 +13,12 @@ func _init(p_stat: Stats.Stat, p_amount: float, p_duration: float) -> void:
 	time_left = p_duration
 
 
+## A loss someone else gave wears off sooner on units that resist debuffs.
+func on_applied(unit: BattleUnit) -> void:
+	if amount < 0.0:
+		time_left *= unit.debuff_multiplier()
+
+
 func modify_stat(_unit: BattleUnit, which: Stats.Stat, value: float) -> float:
 	return value + amount if which == stat else value
 

@@ -22,6 +22,8 @@ extends Gambit
 @export var insight_drain: float = 0.0
 ## Charge the caster gains for each enemy the final explosion damages. 0 = none.
 @export var charge_per_burst_hit: float = 0.0
+## The caster can't gain Charge from casting until the ring explodes.
+@export var no_charge_until_burst: bool = true
 
 
 ## Only casts if there's an enemy in reach, so charge isn't wasted.
@@ -48,6 +50,9 @@ func execute(caster: BattleUnit) -> void:
 	ring.wrack_multiplier = caster.effect_wrack_multiplier(1, Stats.EffectKind.GAMBIT_DAMAGE, can_wrack)   # per level
 	ring.insight_drain = insight_drain * caster.wrack_effect_multiplier(Stats.EffectKind.CONTROL)
 	ring.charge_per_burst_hit = charge_per_burst_hit
+	if no_charge_until_burst:
+		ring.charge_lock = ArcaneRing.ChargeLock.new()
+		caster.add_status(ring.charge_lock)
 	caster.get_tree().current_scene.add_child(ring)
 	ring.global_position = caster.grid.cell_to_world(ring.center)
 

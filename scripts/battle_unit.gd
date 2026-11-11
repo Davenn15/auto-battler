@@ -31,8 +31,8 @@ static var swap_team_colors := false
 
 
 ## Health bar and shot colour for `team`, after any swap.
-static func team_color(team: int) -> Color:
-	var shown := (3 - team) if swap_team_colors and (team == 1 or team == 2) else team
+static func team_color(for_team: int) -> Color:
+	var shown := (3 - for_team) if swap_team_colors and (for_team == 1 or for_team == 2) else for_team
 	return TEAM_COLORS.get(shown, Color.GRAY)
 
 ## Keepsakes this unit has equipped, at most MAX_KEEPSAKES.
@@ -498,6 +498,16 @@ func _setup_keepsake_icons() -> void:
 	var width := keepsakes.size() * KEEPSAKE_ICON_SIZE + (keepsakes.size() - 1) * BADGE_GAP
 	_keepsake_icons.position = Vector2((health_bar.size.x - width) / 2.0, -KEEPSAKE_ICON_SIZE - BADGE_GAP)
 
+## Which keepsake badge is at `world` (with a little slack, as they're small), or -1.
+func keepsake_index_at(world: Vector2, slack: float = 3.0) -> int:
+	if _keepsake_icons == null or not is_instance_valid(_keepsake_icons):
+		return -1
+	var icons := _keepsake_icons.get_children()
+	for i in icons.size():
+		if (icons[i] as Control).get_global_rect().grow(slack).has_point(world):
+			return i
+	return -1
+
 ## Moves the unit onto `new_cell`, keeping position, `cell`, and grid occupancy in sync.
 func place_at(new_cell: Vector2i) -> void:
 	grid.vacate(cell, self)   # no-op if we weren't holding that cell
@@ -784,7 +794,31 @@ func _physics_process(delta: float) -> void:
 		if _attack_timer <= 0.0:
 			_attack(target)
 		return
+	if is_immobile():
+		target = _enemy_in_range()   # can't walk to it: switch to one it can reach, if any
+		return
 	_start_step()
+
+
+## True while a status stops the unit from walking (BATR.EE never moves).
+func is_immobile() -> bool:
+	for status in statuses:
+		if status.blocks_movement(self):
+			return true
+	return false
+
+
+## The nearest enemy within attack range, or null.
+func _enemy_in_range() -> BattleUnit:
+	var best: BattleUnit = null
+	for node in get_tree().get_nodes_in_group("units"):
+		var unit := node as BattleUnit
+		if unit == null or not _is_valid_target(unit):
+			continue
+		var dist := grid.get_distance(cell, unit.cell)
+		if dist <= attack_range and (best == null or dist < grid.get_distance(cell, best.cell)):
+			best = unit
+	return best
 
 ## True while the unit is busy with its Gambit: casting it, or held in place by one
 ## (dashes, channels, flurries, tosses). Its attack timer doesn't wind up meanwhile.
@@ -831,6 +865,21 @@ func _continue_step(delta: float) -> void:
 		grid.vacate(cell, self)   # release the old cell only once we've arrived
 		cell = _dest_cell
 		_moving = false
+		if retarget_on_move:
+			_retarget_after_step()
+
+
+## Test rule: after every step, a unit picks its best target again (the nearest enemy,
+## unless a status like a taunt says otherwise) instead of sticking with its old one.
+## The balance sim can turn it off (--no-retarget-on-move) to compare.
+static var retarget_on_move := true
+
+
+func _retarget_after_step() -> void:
+	var best := _choose_target()
+	if best != null and best != target:
+		target = best
+		_blocked_time = 0.0
 
 
 func _find_nearest_enemy(exclude: BattleUnit = null) -> BattleUnit:
@@ -899,10 +948,10 @@ func get_stat_before_final(stat: Stats.Stat) -> float:
 	return value
 
 ## Wrack damage against a particular target, after statuses that care who's being hit.
-func get_wrack_damage_against(target: BattleUnit) -> float:
+func get_wrack_damage_against(victim: BattleUnit) -> float:
 	var value := get_stat(Stats.Stat.WRACK_DAMAGE)
 	for status in statuses:
-		value = status.modify_wrack_damage(self, target, value)
+		value = status.modify_wrack_damage(self, victim, value)
 	return value
 
 ## Aura spent on this unit: its purchase price plus any upgrades.
@@ -927,6 +976,8 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 	for status in statuses:
 		chance = status.modify_wrack_chance(self, enemy, chance)
 	var wrack_level := Stats.roll_wrack(chance + extra_wrack_chance)
+	if wrack_level > 0:
+		wracked.emit(self)   # Sumpton's Wrack Tally counts these
 	if wrack_level >= 3:
 		show_float_text("UBER!", Stats.UBER_WRACK_COLOR)
 	elif wrack_level == 2:
@@ -988,6 +1039,8 @@ static func run_hit_effects(effects: Array[HitEffect], hit_target: BattleUnit, d
 
 func _fire_projectile(enemy: BattleUnit, hit_damage: float, wrack_level: int, color: Color,
 		hit_effects: Array[HitEffect], projectile: Projectile = null) -> void:
+	if not is_inside_tree():
+		return   # off the board: no shot
 	if projectile == null:
 		for status in statuses:
 			projectile = status.create_projectile(self)
@@ -1072,6 +1125,22 @@ func lock_for(duration: float) -> void:
 
 const STUN_TINT := Color(0.55, 0.55, 0.55)   # sprite darkens while stunned
 
+## How long crowd control lasts on this unit, as a multiple (1 = normal). Stuns use it
+## themselves; other crowd control (taunts, sleep, Clamp) applies it when it lands.
+func crowd_control_multiplier() -> float:
+	var multiplier := 1.0
+	for status in statuses:
+		multiplier = status.modify_crowd_control(self, multiplier)
+	return maxf(multiplier, 0.0)
+
+## How effective debuffs on this unit are, as a multiple (1 = normal). Timed debuffs
+## shorten by it when they land; debuffs that last all combat weaken by it.
+func debuff_multiplier() -> float:
+	var multiplier := 1.0
+	for status in statuses:
+		multiplier = status.modify_debuff_strength(self, multiplier)
+	return maxf(multiplier, 0.0)
+
 ## True while something makes the unit immune to crowd control. Every CC effect checks this.
 func is_cc_immune() -> bool:
 	for status in statuses:
@@ -1138,6 +1207,7 @@ func stun(duration: float, source: BattleUnit = null) -> void:
 	if is_cc_immune():
 		show_float_text("Immune", DODGE_COLOR)
 		return
+	duration *= crowd_control_multiplier()
 	lock_for(duration)
 	_stunned_time = maxf(_stunned_time, duration)
 	if sprite != null:
@@ -1262,6 +1332,8 @@ func _spawn_damage_number(amount: float, color: Color = Color.WHITE, wrack_level
 
 ## Floating text that rises and fades above the unit. Statuses can use this too.
 func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = DAMAGE_FONT_MIN) -> void:
+	if not is_inside_tree():
+		return   # off the board (cleared between rounds): nowhere to show it
 	var label := Label.new()
 	label.text = text
 	label.size = FLOAT_TEXT_BOX
@@ -1450,13 +1522,13 @@ func gain_charge(amount: float) -> void:
 ## taken (charge_per_damage). Set to true to bring the flat charge_on_hit back.
 const FLAT_HIT_CHARGE := false
 
-func gain_charge_from_attack(dealt: float, target: BattleUnit = null) -> void:
+func gain_charge_from_attack(dealt: float, victim: BattleUnit = null) -> void:
 	if dealt <= 0.0:
 		return
 	var amount := charge_on_attack
-	if target != null:
-		for status in target.statuses:
-			amount = status.modify_attacker_charge(target, self, amount)
+	if victim != null:
+		for status in victim.statuses:
+			amount = status.modify_attacker_charge(victim, self, amount)
 	gain_charge(amount)
 
 ## Charge for being hit by an attack: a share of the damage taken (plus a flat amount when

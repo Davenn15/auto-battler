@@ -16,6 +16,12 @@ extends Resource
 @export var max_health: float = 1000.0
 ## How far this unit can attack, in hex cells. 1 = melee (adjacent cells only).
 @export_range(1, 10, 1, "or_greater") var attack_range_cells: int = 1
+## Starts in the front row like a melee unit, and counts as a front-liner, even with a
+## longer attack range.
+@export var frontline: bool = false
+## Starts as far back as it can, and never counts as a front-liner (GATE.W(A), which
+## doesn't attack).
+@export var back_row: bool = false
 @export_range(0.0, 1.0, 0.01, "or_greater") var wrack_chance: float = 0.25
 @export_range(0.0, 5.0, 0.05, "or_greater") var wrack_damage: float = 0.3
 @export var health_regen: float = 2.0   # health restored per second during combat

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/a_path/mallet_a1.tres" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/mallet/upgrades/a_path/mallet_a2.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Devastating"
+description = "The slam stuns enemies hit: 1.5 seconds at the center, down to 0.5 seconds at the edge."
+next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])
+gambit_overrides = Dictionary[String, float]({
+"stun_center": 1.5,
+"stun_edge": 0.5
+})

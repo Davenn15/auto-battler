@@ -5,6 +5,9 @@ extends Resource
 
 ## Share of the carrier's max health each stack deals per second (0.005 = 0.5%).
 @export_range(0.0, 0.1, 0.0005) var damage_per_stack: float = 0.005
+## The least each stack deals per second, so stacks still matter on units with little max
+## health. Each stack deals whichever is higher: this or its share of max health.
+@export var min_damage_per_stack: float = 15.0
 ## The damage type: picks the colour of the damage numbers, and which ward reduces it
 ## when Ignore Wards is off.
 @export_enum("Might", "Insight", "Celerity") var damage_type: int = 1

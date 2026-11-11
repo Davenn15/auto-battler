@@ -21,7 +21,8 @@ var _time := 0.0
 
 
 func _physics_process(delta: float) -> void:
-	if not is_instance_valid(caster) or not caster.alive:
+	# Gone with him if he dies or leaves the board (the board is cleared between rounds).
+	if not is_instance_valid(caster) or not caster.alive or not caster.is_inside_tree():
 		queue_free()
 		return
 	time_left -= delta
@@ -55,8 +56,9 @@ func _hit(enemy: BattleUnit) -> void:
 		var ward := enemy.get_stat(Stats.ward_stat_for(damage_type))
 		amount *= Stats.ward_multiplier(maxf(ward - ward_pierce, 0.0))
 		ignore = true   # the wards were already counted, less the pierce
+	var credit := caster.get_credit_id()   # before the hit, in case it changes anything
 	var dealt := enemy.take_damage(amount, 0, damage_type, ignore, caster)
-	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
+	get_tree().call_group("damage_tracker", "record_damage", credit, dealt)
 
 
 func _process(_delta: float) -> void:
@@ -68,9 +70,9 @@ func _draw() -> void:
 	var fade := clampf(time_left / 0.3, 0.0, 1.0)
 	for i in 6:
 		var a := angle - i * 0.12
-		var dir := Vector2.from_angle(a)
+		var trail := Vector2.from_angle(a)
 		var alpha := (1.0 - i / 6.0) * 0.35 * fade
-		draw_line(dir * (radius - blade_half), dir * (radius + blade_half), Color(ROTOR_COLOR, alpha), 6.0, true)
+		draw_line(trail * (radius - blade_half), trail * (radius + blade_half), Color(ROTOR_COLOR, alpha), 6.0, true)
 	var dir := Vector2.from_angle(angle)
 	draw_line(Vector2.ZERO, dir * (radius - blade_half), Color(ROTOR_COLOR, 0.15 * fade), 1.5, true)
 	draw_line(dir * (radius - blade_half), dir * (radius + blade_half), Color(ROTOR_COLOR, 0.95 * fade), 5.0, true)

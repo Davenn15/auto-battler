@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="GridPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/batr_ee/passive/grid_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Power Grid"
+description = "Can't move. Allies on its side of the battlefield gain 2 Charge per second. Whenever one of them casts its Gambit, BATR.EE gains Voltage equal to that ally's max Charge."

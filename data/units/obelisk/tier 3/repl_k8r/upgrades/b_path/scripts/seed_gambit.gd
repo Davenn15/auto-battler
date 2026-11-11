@@ -33,13 +33,13 @@ func plant(unit: BattleUnit, from: Vector2i) -> bool:
 	var host := pick_host(unit, from, range_cells)
 	if host == null:
 		return false
-	var seed := SeedStatus.new()
-	seed.tmpl = Replicator.template(unit)
-	seed.gestation = gestation
-	seed.hatch_count = hatch_count
-	seed.min_share = min_health_share
-	seed.max_share = max_health_share
-	host.add_status(seed)
+	var planted := SeedStatus.new()
+	planted.tmpl = Replicator.template(unit)
+	planted.gestation = gestation
+	planted.hatch_count = hatch_count
+	planted.min_share = min_health_share
+	planted.max_share = max_health_share
+	host.add_status(planted)
 	KeepsakeVfx.virus_jump(unit.global_position, host)
 	host.show_float_text("Seeded", Replicator.LIGHT)
 	return true
@@ -47,13 +47,13 @@ func plant(unit: BattleUnit, from: Vector2i) -> bool:
 
 ## The ally near `from` with the lowest health that isn't a REPL\K8R, preferring ones
 ## without a seed already. Null if there's none.
-static func pick_host(unit: BattleUnit, from: Vector2i, range_cells: int) -> BattleUnit:
+static func pick_host(unit: BattleUnit, from: Vector2i, reach: int) -> BattleUnit:
 	var best: BattleUnit = null
 	var best_seeded := true
 	for node in unit.get_tree().get_nodes_in_group("units"):
 		var ally := node as BattleUnit
 		if ally == null or ally == unit or not ally.alive or ally.team != unit.team \
-				or Replicator.is_replk8r(ally) or unit.grid.get_distance(from, ally.cell) > range_cells:
+				or Replicator.is_replk8r(ally) or unit.grid.get_distance(from, ally.cell) > reach:
 			continue
 		var seeded := SeedStatus.has_seed(ally)
 		if best == null or (best_seeded and not seeded) \

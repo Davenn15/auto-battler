@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dyjcysrw355xh"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_ngghi"]
+
+[resource]
+script = ExtResource("1")
+description = "Its Gambit deals +25% damage per equipped Keepsake, and the hit consumes a random equipped Keepsake for the rest of the battle."
+gambit_overrides = Dictionary[String, float]({
+"consume_keepsake": 1.0,
+"keepsake_bonus": 0.25
+})

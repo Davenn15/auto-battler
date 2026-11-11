@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_mb5w4")
-scaling = 0.15
+scaling = 0.1
 description = "Wards based on his attributes."
 metadata/_custom_type_script = "uid://b0jewntwhwuo3"

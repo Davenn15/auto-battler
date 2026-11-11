@@ -11,7 +11,6 @@ func _ready() -> void:
 	
 	fight_button.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	fight_button.position.y -= 40
-	print(fight_button.get_global_rect(), " visible: ", fight_button.is_visible_in_tree())
 
 
 func _on_fight_pressed() -> void:

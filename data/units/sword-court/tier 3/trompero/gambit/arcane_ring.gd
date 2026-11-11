@@ -28,6 +28,7 @@ var wrack_chance: float = 0.0          # rolled once per tick and once for the b
 var wrack_multiplier: float = 1.0
 var insight_drain: float = 0.0         # Insight enemies lose while inside. 0 = none
 var charge_per_burst_hit: float = 0.0  # charge the caster gains per enemy the burst damages
+var charge_lock: ChargeLock = null     # on the caster until the burst; null = none
 var _time_left: float
 var _tick_timer: float = TICK_INTERVAL
 
@@ -73,12 +74,32 @@ func _explode() -> void:
 		if enemy.alive:
 			enemy.stun(stun_time, instance_from_id(caster_id) as BattleUnit)
 	var caster := instance_from_id(caster_id) as BattleUnit
+	_release_charge_lock()   # before the burst's charge, so he gets it
 	if caster != null and charge_per_burst_hit > 0.0 and hits > 0:
 		caster.gain_charge(charge_per_burst_hit * hits)
 	var tween := create_tween().set_parallel(true)
 	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.25)
 	tween.tween_property(self, "modulate:a", 0.0, 0.25)
 	tween.chain().tween_callback(queue_free)
+
+
+## Lets the caster gain Charge again.
+func _release_charge_lock() -> void:
+	var caster := instance_from_id(caster_id) as BattleUnit
+	if charge_lock != null and caster != null and caster.statuses.has(charge_lock):
+		caster.remove_status(charge_lock)
+	charge_lock = null
+
+
+## A ring removed early (the battle ending) doesn't leave him locked.
+func _exit_tree() -> void:
+	_release_charge_lock()
+
+
+## On the caster while his ring is out: he can't gain Charge until it explodes.
+class ChargeLock extends Status:
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return true
 
 
 func _damage(enemy: BattleUnit, amount: float, wrack_level: int) -> float:

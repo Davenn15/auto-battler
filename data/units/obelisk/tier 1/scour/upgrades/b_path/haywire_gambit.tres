@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-dash_cells = 4
 dash_time = 0.5
 damage = 350.0
 might_scaling = 2.5

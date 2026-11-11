@@ -17,7 +17,8 @@ extends Node
 ##
 ## Worker (started by the coordinator): --worker --in <job.json> --out <result.json>
 
-const SECOND_ROW: Array[String] = ["bremes", "lunck", "wesper", "von carrow", "vere"]
+## Units that stand in the second row: the shared list every computer-run army uses.
+var SECOND_ROW: Array[String] = RandomTeams.second_row_units()
 const COMBAT_LIMIT := 180.0     # same safety net as the match screen
 const PLAN_BATTLE_LIMIT := 90.0
 const MAX_COMBATS := 40
@@ -102,8 +103,8 @@ func _ablate(path: String) -> void:
 	get_tree().quit()
 
 
-func _arg(args: PackedStringArray, name: String, fallback: String) -> String:
-	var i := args.find(name)
+func _arg(args: PackedStringArray, flag: String, fallback: String) -> String:
+	var i := args.find(flag)
 	return args[i + 1] if i >= 0 and i + 1 < args.size() else fallback
 
 
@@ -159,7 +160,7 @@ func _coordinate() -> void:
 		var fitness: Array = ranked.map(func(i): return snappedf(score.get(i, 0.0) / maxf(played.get(i, 1), 1), 0.01))
 		history.append({"gen": gen, "fitness": fitness, "best": pop[best]})
 		print("Gen %d done (%.0f min): best %.2f, median %.2f, %d matches" % [gen + 1,
-				(Time.get_ticks_msec() - started) / 60000.0, fitness[0], fitness[fitness.size() / 2], records.size()])
+				(Time.get_ticks_msec() - started) / 60000.0, fitness[0], fitness[floori(fitness.size() / 2.0)], records.size()])
 		_write_json("best_gen_%02d.json" % (gen + 1), pop[best])
 		if gen < generations - 1:
 			pop = _next_generation(pop, ranked)
@@ -200,10 +201,10 @@ func _pairings(count: int) -> Array:
 ## Keeps the best quarter as they are; fills the rest with children of the top half.
 func _next_generation(pop: Array, ranked: Array) -> Array:
 	var next: Array = []
-	var elites := maxi(pop.size() / 4, 1)
+	var elites := maxi(floori(pop.size() / 4.0), 1)
 	for i in elites:
 		next.append(pop[ranked[i]])
-	var parents: Array = ranked.slice(0, maxi(pop.size() / 2, 2))
+	var parents: Array = ranked.slice(0, maxi(floori(pop.size() / 2.0), 2))
 	while next.size() < pop.size():
 		var a := AiPolicy.from_dict(pop[parents.pick_random()])
 		var child := a

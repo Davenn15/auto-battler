@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShieldBeamGambit" format=3 uid="uid://budnbg8shdavh"]
+
+[ext_resource type="Script" uid="uid://1sa1g6pcigji" path="res://data/units/obelisk/tier 3/beam_ng/gambit/shield_beam_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+shield_per_second = 75.0
+gambit_name = "Shield Beam"
+cast_time = 0.2
+description = "Channels a beam at the ally with the lowest health for 4 seconds, shielding it for 30 + 0.25x Insight per second (more the farther away it is). The shield lingers for 3 seconds."

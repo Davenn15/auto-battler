@@ -18,6 +18,8 @@ extends Node2D
 ##   --no-frontline-rule  allow teams with no front-liner (by default every team has at least
 ##                    one melee unit that isn't in the second-row list)
 ##   --show-placement print where every unit starts and how far it is from the nearest enemy
+##   --no-retarget-on-move  units keep their target while they walk, the old rule (by default
+##                    they pick their best target again after every step)
 ##   --second-row A,B units that start one row behind the front (default: the random battle
 ##                    scene's second_row_units; "none" for nobody)
 ##   --tier-health A,B,C   multiply max health by tier: A for tier 1, B for tier 2, ... (default all 1)
@@ -53,7 +55,7 @@ var time_limit: float = 90.0
 var seed_value: int = 0
 var allow_duplicates: bool = false
 var show_placement: bool = false
-var second_row: Array[String] = ["bremes", "lunck", "wesper"]
+var second_row: Array[String] = []   # the shared list, read in _parse_args
 var require_frontline: bool = true
 var tier_health: PackedFloat64Array = []   # index 0 = tier 1; missing tiers count as 1
 var tier_stats: PackedFloat64Array = []
@@ -111,6 +113,7 @@ func _parse_args() -> void:
 	allow_duplicates = args.has("--duplicates")
 	require_frontline = not args.has("--no-frontline-rule")
 	show_placement = args.has("--show-placement")
+	BattleUnit.retarget_on_move = not args.has("--no-retarget-on-move")
 	for i in args.size() - 1:
 		var value := args[i + 1]
 		match args[i]:
@@ -145,6 +148,7 @@ func _parse_args() -> void:
 ## scene, so both build and place teams the same way. Keeps the built-in values if the
 ## scene or a setting can't be found. --second-row and --reserve still override them.
 func _second_row_from_scene() -> void:
+	second_row = RandomTeams.second_row_units()   # the list every computer-run army shares
 	var scene := load(RANDOM_BATTLE_SCENE) as PackedScene
 	if scene == null:
 		push_warning("Balance sim: couldn't load %s; using the built-in settings." % RANDOM_BATTLE_SCENE)
@@ -157,11 +161,9 @@ func _second_row_from_scene() -> void:
 	var state := scene.get_state()
 	for i in state.get_node_property_count(0):   # node 0 is the scene's root
 		match state.get_node_property_name(0, i):
-			"second_row_units":
-				second_row.assign(state.get_node_property_value(0, i))
 			"reserve_scale":
-				var scale: float = state.get_node_property_value(0, i)
-				reserve_scale = [scale, scale]
+				var saved: float = state.get_node_property_value(0, i)
+				reserve_scale = [saved, saved]
 
 
 ## "Reserve: 1x ARV" or "Reserve: team 1 1x ARV, team 2 0x ARV", for the logs.
@@ -487,6 +489,7 @@ func _summary() -> String:
 				max_team, "duplicates allowed" if allow_duplicates else "no duplicates", seed_value],
 		"Extra tier scaling (on top of the game's own): health %s, Might/Insight/Celerity %s" % [_scale_text(tier_health), _scale_text(tier_stats)],
 		"Damage scale (test only, not in the game): %s" % ("none" if is_equal_approx(damage_scale, 1.0) else "x%s" % damage_scale),
+		"Retarget after every step: %s" % ("yes" if BattleUnit.retarget_on_move else "no (old rule)"),
 		"Second row: %s. At least one front-liner per team: %s" % [", ".join(second_row) if not second_row.is_empty() else "nobody",
 				"yes" if require_frontline else "no"],
 		"%s, rounded down to whole Shards (3). Average Reserve spent: team 1 %.1f, team 2 %.1f" % [_reserve_text(), reserve_spent[1] / n_battles, reserve_spent[2] / n_battles],

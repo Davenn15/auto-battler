@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MalletSlamGambit" format=3 uid="uid://dx8g1t1rxgmb8"]
+
+[ext_resource type="Script" uid="uid://da1bb8e1yo4l7" path="res://data/units/obelisk/tier 3/mallet/gambit/mallet_slam_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 200.0
+might_scaling = 1.2
+gambit_name = "Slam"
+cast_time = 0.75
+description = "Leaps to the spot that hits the most enemies and slams down, damaging every enemy within 2 cells. Damage is highest at the center and falls to half at the edge."

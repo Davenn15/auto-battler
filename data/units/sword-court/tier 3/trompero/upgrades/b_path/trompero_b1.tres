@@ -7,6 +7,6 @@
 script = ExtResource("1_k8is0")
 description = "He gains Charge each time a blade shot hits."
 gambit_overrides = Dictionary[String, float]({
-"charge_per_blade_hit": 2.5
+"charge_per_blade_hit": 1.5
 })
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"
