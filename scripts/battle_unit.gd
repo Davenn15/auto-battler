@@ -162,6 +162,8 @@ var is_summon: bool = false
 var _summon_max_health: float = 0.0
 var _summon_stats: Dictionary = {}
 var _summoner_id: int = 0   # who a summon's damage is credited to
+## Summons normally don't cast. True keeps the summon's own data Gambit (GATE.W(A)'s Gatelings).
+var summon_keeps_gambit: bool = false
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -248,7 +250,8 @@ func _apply_data() -> void:
 	if is_summon:
 		max_health = _summon_max_health
 		base_stats = _summon_stats
-		gambit = null   # summons don't cast
+		if not summon_keeps_gambit:
+			gambit = null   # summons don't cast
 
 ## A copy of `base` with bonuses added to, and overrides replacing, the matching properties.
 func _gambit_with_changes(base: Gambit, bonuses: Dictionary, overrides: Dictionary) -> Gambit:
@@ -547,6 +550,10 @@ func setup_as_profile_summon(profile: UnitData, source: BattleUnit, health_fract
 func get_credit_id() -> int:
 	return _summoner_id if is_summon else get_instance_id()
 
+## The id of the unit that summoned this one (0 if it isn't a summon).
+func get_summoner_id() -> int:
+	return _summoner_id if is_summon else 0
+
 ## Kills the unit outright, for effects that end it rather than damage it.
 func kill() -> void:
 	if not alive:
@@ -744,6 +751,9 @@ func _physics_process(delta: float) -> void:
 	_update_attack_bar()
 	if active:
 		heal(get_health_regen() * delta, 0, false)
+		var charge_regen := get_charge_regen()
+		if charge_regen > 0.0 and gambit != null:
+			gain_charge(charge_regen * delta)
 
 
 
@@ -771,7 +781,7 @@ func _physics_process(delta: float) -> void:
 	if target == null:
 		target = _choose_target()
 		_blocked_time = 0.0
-	if _ready_to_gambit():
+	if _ready_to_gambit() and not _finishing_attack():
 		_begin_gambit()
 		return
 	if target == null:
@@ -800,7 +810,7 @@ func _physics_process(delta: float) -> void:
 	_start_step()
 
 
-## True while a status stops the unit from walking (BATR.EE never moves).
+## True while a status stops the unit from walking (COLUMN and GATE.W(A) never move).
 func is_immobile() -> bool:
 	for status in statuses:
 		if status.blocks_movement(self):
@@ -867,6 +877,28 @@ func _continue_step(delta: float) -> void:
 		_moving = false
 		if retarget_on_move:
 			_retarget_after_step()
+
+
+## Test rule: a unit whose attack is at least FINISH_ATTACK_SHARE wound up, with its target
+## in range, lands that attack before casting its Gambit. The balance sim can turn it off
+## (--no-finish-attack) to compare.
+static var finish_attack_before_gambit := true
+const FINISH_ATTACK_SHARE := 0.5
+## Test rule: casting a Gambit restarts the attack wind-up, so the next attack comes a full
+## attack cooldown after the cast. The balance sim can turn it off (--no-gambit-resets-attack).
+static var gambit_resets_attack := true
+
+
+## True while the unit should hold its Gambit to land an attack it has mostly wound up.
+func _finishing_attack() -> bool:
+	if not finish_attack_before_gambit or _attack_cooldown_total <= 0.0:
+		return false
+	for status in statuses:
+		if status.blocks_attacks(self):
+			return false   # no normal attack is coming
+	if not _is_valid_target(target) or grid.get_distance(cell, target.cell) > attack_range:
+		return false
+	return 1.0 - _attack_timer / _attack_cooldown_total >= FINISH_ATTACK_SHARE
 
 
 ## Test rule: after every step, a unit picks its best target again (the nearest enemy,
@@ -1383,6 +1415,12 @@ func set_health(amount: float) -> void:
 	_update_health_bar()
 
 ## The unit's current regen per second, after status effects.
+## Charge per second this unit regenerates in combat (0 without the Insight rework).
+func get_charge_regen() -> float:
+	var base := data.charge_regen if data != null else 0.0
+	return Stats.charge_regen(base, get_stat(Stats.Stat.INSIGHT))
+
+
 func get_health_regen() -> float:
 	var regen := health_regen
 	for status in statuses:
@@ -1477,6 +1515,10 @@ func _ready_to_gambit() -> bool:
 ## Runs the Action and marks any statuses it attached, so they block charge gain.
 func _run_gambit() -> void:
 	var before := statuses.duplicate()
+	if gambit_resets_attack:   # the next attack winds up from the start after a cast
+		_attack_timer = get_attack_cooldown()
+		_attack_cooldown_total = _attack_timer
+		_update_attack_bar()
 	gambit.execute(self)
 	for status in statuses:
 		if not before.has(status):

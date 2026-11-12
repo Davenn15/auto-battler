@@ -10,6 +10,9 @@ func on_battle_start(unit: BattleUnit) -> void:
 
 
 class StructureStatus extends Status:
+	func blocks_attacks(_unit: BattleUnit) -> bool:
+		return true   # its weapons are its only attacks
+
 	func blocks_movement(_unit: BattleUnit) -> bool:
 		return true
 

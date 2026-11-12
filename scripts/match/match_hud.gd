@@ -664,7 +664,7 @@ func _refresh_top() -> void:
 		online_bits = "   [color=#7fdc7f]Ready ✓[/color]" if game.ai_ready else "   [color=#9a9aa5]planning…[/color]"
 	_top.text = "[b]Round %d[/b] · %s        [color=#66a6ff][b]%s[/b][/color]  HP %d   Aura %d   Reserve %d   [color=#9a9aa5](Aura given %d / %d)[/color]        [color=#ff6666][b]%s[/b][/color]  HP %d%s" % [
 			game.round_number, phase_name, p.player_name, maxi(p.hp, 0), p.aura, p.reserve, p.aura_received,
-			MatchRules.MAX_AURA_RECEIVED, game.ai.player_name, maxi(game.ai.hp, 0), online_bits]
+			MatchRules.max_aura_received(), game.ai.player_name, maxi(game.ai.hp, 0), online_bits]
 
 
 func _refresh_shop() -> void:

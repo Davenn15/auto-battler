@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dthf3cgu3uoii"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/magnetic_core.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
-description = "Volts silence enemies hit for 1.5 seconds: they can't cast their Gambit or gain Charge."
-gambit_overrides = Dictionary[String, float]({
-"silence_time": 1.5
-})
+description = "Gains 10 Voltage per second."
+passives = Array[ExtResource("2")]([ExtResource("3")])

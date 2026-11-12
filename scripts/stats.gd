@@ -111,9 +111,29 @@ static func attack_cooldown(celerity: float) -> float:
 	return BASE_ATTACK_COOLDOWN / maxf(celerity / ATTRIBUTE_BASELINE, 0.01)
 
 
-## Insight multiplies all charge gained. 200 builds charge twice as fast.
+## TESTING (2026-11-11): the Insight rework. true = every unit regenerates Charge each
+## second (its Charge Regen plus INSIGHT_CHARGE_REGEN per point of Insight), and Insight no
+## longer multiplies other Charge. false = the old rule: no Charge Regen, and Insight
+## multiplies all Charge gained. The balance sim's --old-insight flag sets it false.
+static var insight_charge_regen := true
+## Charge per second each point of Insight adds to Charge Regen (100 Insight = +1.5/s).
+const INSIGHT_CHARGE_REGEN := 0.015
+
+
+## What all Charge gained is multiplied by. Old rule: Insight / 100 (200 builds charge
+## twice as fast). With the Insight rework: always 1.
 static func charge_multiplier(insight: float) -> float:
+	if insight_charge_regen:
+		return 1.0
 	return maxf(insight / ATTRIBUTE_BASELINE, 0.0)
+
+
+## Charge per second a unit regenerates: its own Charge Regen plus what its Insight adds.
+## 0 without the Insight rework.
+static func charge_regen(base_regen: float, insight: float) -> float:
+	if not insight_charge_regen:
+		return 0.0
+	return maxf(base_regen + INSIGHT_CHARGE_REGEN * maxf(insight, 0.0), 0.0)
 
 ## A Gambit or passive value that scales with an attribute: a flat base plus an amount
 ## per point of the attribute. Every scaling effect goes through here, so changing how
@@ -131,31 +151,47 @@ const UPGRADE_STAT_GROWTH := {
 	Stat.CELERITY_WARD: .1,
 }
 const UPGRADE_HEALTH_GROWTH := 0.2
+## How many times the growth above each upgrade level gives: [level 1, level 2].
+## The tier rework (Economy.tier_rework) makes level 2 count double.
+const NEW_LEVEL_GROWTH_STEPS := [1.0, 2.0]
+const OLD_LEVEL_GROWTH_STEPS := [1.0, 1.0]
+
+
+## Growth steps a unit has at this upgrade level: 0, then 1, then 3 with the tier rework.
+static func growth_steps(level: int) -> float:
+	var steps: Array = NEW_LEVEL_GROWTH_STEPS if Economy.tier_rework else OLD_LEVEL_GROWTH_STEPS
+	var total := 0.0
+	for i in mini(level, steps.size()):
+		total += steps[i]
+	return total
 
 
 static func upgrade_multiplier(stat: Stat, level: int) -> float:
-	return 1.0 + UPGRADE_STAT_GROWTH.get(stat, 0.0) * level
+	return 1.0 + UPGRADE_STAT_GROWTH.get(stat, 0.0) * growth_steps(level)
 
 
 static func upgrade_health_multiplier(level: int) -> float:
-	return 1.0 + UPGRADE_HEALTH_GROWTH * level
+	return 1.0 + UPGRADE_HEALTH_GROWTH * growth_steps(level)
 
 ## Extra stats and health by unit tier, so expensive units are worth their Aura.
-## Tuned with the balance sim (tools/sim_results/tier_G). Tiers not listed get 1.
-const TIER_STAT_MULTIPLIER := {2: 1.1, 3: 1.15, 4: 1.2}
-const TIER_HEALTH_MULTIPLIER := {2: 1.25, 3: 1.4, 4: 1.55}
+## The old numbers were tuned with the balance sim (tools/sim_results/tier_G); the tier
+## rework (Economy.tier_rework) roughly halves them. Tiers not listed get 1.
+const NEW_TIER_STAT_MULTIPLIER := {2: 1.05, 3: 1.08, 4: 1.1}
+const NEW_TIER_HEALTH_MULTIPLIER := {2: 1.12, 3: 1.2, 4: 1.28}
+const OLD_TIER_STAT_MULTIPLIER := {2: 1.1, 3: 1.15, 4: 1.2}
+const OLD_TIER_HEALTH_MULTIPLIER := {2: 1.25, 3: 1.4, 4: 1.55}
 ## Only these stats grow with tier. Wards and wrack stay as each unit sets them.
 const TIER_SCALED_STATS := [Stat.MIGHT, Stat.INSIGHT, Stat.CELERITY]
 
 
 static func tier_multiplier(stat: Stat, tier: int) -> float:
 	if stat in TIER_SCALED_STATS:
-		return TIER_STAT_MULTIPLIER.get(tier, 1.0)
+		return (NEW_TIER_STAT_MULTIPLIER if Economy.tier_rework else OLD_TIER_STAT_MULTIPLIER).get(tier, 1.0)
 	return 1.0
 
 
 static func tier_health_multiplier(tier: int) -> float:
-	return TIER_HEALTH_MULTIPLIER.get(tier, 1.0)
+	return (NEW_TIER_HEALTH_MULTIPLIER if Economy.tier_rework else OLD_TIER_HEALTH_MULTIPLIER).get(tier, 1.0)
 
 
 ## Reserve buffs for fully upgraded units, bought in the match shop. Each buff grows the

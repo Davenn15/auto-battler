@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BubbleGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/scripts/bubble_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+projectile_slow = 0.25
+gambit_name = "Warding"
+cast_time = 0.5
+description = "Blows a protective bubble around himself that stays where it was cast for a while. Allies inside gain Wards, and enemy projectiles inside move more slowly."

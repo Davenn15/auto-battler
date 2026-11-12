@@ -3,7 +3,7 @@
 class_name UnitData
 extends Resource
 @export var display_name: String = "Unit"
-## Shop tier (1-4). Sets how much Aura this unit costs; see Economy.TIER_AURA_COSTS.
+## Shop tier (1-4). Sets how much Aura this unit costs; see Economy.tier_aura_costs.
 @export_range(1, 4) var tier: int = 1
 
 ## Only created by other units, like Sumpton's blade bag. Never bought or drafted.
@@ -25,6 +25,9 @@ extends Resource
 @export_range(0.0, 1.0, 0.01, "or_greater") var wrack_chance: float = 0.25
 @export_range(0.0, 5.0, 0.05, "or_greater") var wrack_damage: float = 0.3
 @export var health_regen: float = 2.0   # health restored per second during combat
+## Charge gained per second during combat, before Insight adds to it (see Stats.charge_regen).
+## Only used with the Insight rework (Stats.insight_charge_regen).
+@export var charge_regen: float = 0.5
 
 @export var passives: Array[Passive] = []
 

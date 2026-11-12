@@ -30,6 +30,7 @@ var insight_drain: float = 0.0         # Insight enemies lose while inside. 0 = 
 var charge_per_burst_hit: float = 0.0  # charge the caster gains per enemy the burst damages
 var charge_lock: ChargeLock = null     # on the caster until the burst; null = none
 var _time_left: float
+var _duration: float = 1.0   # for the timer ring
 var _tick_timer: float = TICK_INTERVAL
 
 
@@ -41,6 +42,7 @@ func setup(p_caster: BattleUnit, p_center: Vector2i, p_radius_cells: int, p_dura
 	center = p_center
 	radius_cells = p_radius_cells
 	_time_left = p_duration
+	_duration = maxf(p_duration, 0.01)
 	tick_damage = p_tick_damage
 	burst_damage = p_burst_damage
 	stun_time = p_stun_time
@@ -147,3 +149,7 @@ func _draw() -> void:
 		var wave := WAVE_HEIGHT * sin(angle * WAVES - _spin * WAVE_SPEED)
 		points.append(Vector2.from_angle(angle) * (r + wave))
 	draw_polyline(points, COLOR, 2.0, true)
+	# The fuse: a fainter ring that grows from the middle and reaches the edge as it explodes.
+	var fuse := clampf(1.0 - _time_left / _duration, 0.0, 1.0)
+	if fuse > 0.0 and fuse < 1.0:
+		draw_arc(Vector2.ZERO, r * fuse, 0.0, TAU, 64, Color(COLOR.lightened(0.3), 0.4), 1.5, true)

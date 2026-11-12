@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dhe70jirfys8x"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 
 [resource]
 script = ExtResource("1")
-description = "When a Volt hits an enemy, BATR.EE gains a 50 shield for 4 seconds."
+description = "Volts silence enemies hit for 1.5 seconds: they can't cast their Gambit or gain Charge."
 gambit_overrides = Dictionary[String, float]({
-"hit_shield": 50.0
+"silence_time": 1.5
 })

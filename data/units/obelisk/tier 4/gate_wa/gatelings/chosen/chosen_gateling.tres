@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://cwnx28it6k5hc"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/chosen/chosen_slam_gambit.tres" id="3"]
+[ext_resource type="Texture2D" uid="uid://40sqxco1w4yk" path="res://assets/chosen_gateling.png" id="4_bsqe1"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="5_iqxhx"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Chosen Gateling"
+summon_only = true
+max_health = 1400.0
+frontline = true
+gambit = ExtResource("3")
+starting_charge = 30.0
+sprite = ExtResource("4_bsqe1")
+might = 130.0
+insight = 70.0
+celerity = 90.0
+might_ward = 50.0
+insight_ward = 40.0
+celerity_ward = 40.0

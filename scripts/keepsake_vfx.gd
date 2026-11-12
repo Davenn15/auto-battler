@@ -63,6 +63,29 @@ void fragment() {
 	COLOR = vec4(tint.rgb, clamp(near - alpha_at(TEXTURE, UV), 0.0, 1.0) * tint.a);
 }
 """,
+	# GATE.W(A)'s summons: an outline broken into drifting scanlines that flickers a little,
+	# like a hologram.
+	"digital_outline": """
+shader_type canvas_item;
+uniform vec4 tint : source_color = vec4(1.0);
+uniform float width = 1.5;
+float alpha_at(sampler2D tex, vec2 uv) {
+	if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) { return 0.0; }
+	return texture(tex, uv).a;
+}
+void fragment() {
+	vec2 step_size = TEXTURE_PIXEL_SIZE * width;
+	float near = 0.0;
+	for (int i = 0; i < 8; i++) {
+		float angle = float(i) * 0.785398;
+		near = max(near, alpha_at(TEXTURE, UV + vec2(cos(angle), sin(angle)) * step_size));
+	}
+	float edge = clamp(near - alpha_at(TEXTURE, UV), 0.0, 1.0);
+	float lines = 0.55 + 0.45 * step(0.5, fract(UV.y * 28.0 - TIME * 2.5));
+	float flicker = 0.85 + 0.15 * sin(TIME * 23.0) * sin(TIME * 7.0);
+	COLOR = vec4(tint.rgb, edge * lines * flicker * tint.a);
+}
+""",
 	# A see-through brick wall in the sprite's shape.
 	"bricks": """
 shader_type canvas_item;
@@ -292,6 +315,22 @@ static func phase_tint(unit: BattleUnit, duration: float) -> void:
 	tween.tween_property(unit.sprite, "self_modulate", Color.WHITE, 0.15)
 
 
+## GATE.W(A)'s summons and revived allies: a faint yellow hologram outline and glow that
+## get brighter (and the outline thicker) with each of its boosts. 0 boosts = just summoned.
+static func gate_glow(unit: BattleUnit, boosts: int, color: Color) -> void:
+	if not enabled() or not is_instance_valid(unit) or unit.sprite == null:
+		return
+	var strength := 0.25 + 0.75 * stack_strength(boosts)   # 25%, then 51%, 68%, 80%, ...
+	var outline := _sprite_copy(unit, "VfxGateGlow", "digital_outline", 4)
+	var material := outline.material as ShaderMaterial
+	material.set_shader_parameter("tint", Color(color, 0.35 + 0.65 * strength))
+	material.set_shader_parameter("width", 1.0 + 1.5 * strength)
+	set_glow(unit, "VfxGateAura", color, strength * 0.5)
+	var aura := unit.get_node_or_null("VfxGateAura") as Sprite2D
+	if aura != null:
+		aura.modulate.a *= 0.35 + 0.65 * strength   # starts faint
+
+
 ## Manadrinker and Quickscar: a quick green outline when the item heals.
 static func heal_flash(unit: BattleUnit) -> void:
 	if not enabled() or unit.sprite == null:
@@ -360,6 +399,23 @@ static func dim_aura(unit: BattleUnit, radius_cells: int) -> void:
 ## Blue instead of orange when it also gives Insight (his A2 upgrade).
 static func rally_aura(unit: BattleUnit, radius_cells: int, gives_insight: bool = false) -> void:
 	_range_aura(unit, "VfxRally", radius_cells, false, RALLY_INSIGHT_COLOR if gives_insight else RALLY_COLOR, RALLY_STRENGTH)
+
+
+## BATR.EE's Power Grid: a crackling purple ring at the passive's reach. Made once per
+## unit; call clear(unit, "VfxGrid") first to redraw it at a new size.
+static func grid_aura(unit: BattleUnit, radius_cells: int, color: Color) -> void:
+	if not enabled():
+		return
+	var ground := _ground(unit)
+	var name := _ground_key(unit, "VfxGrid")
+	if ground.has_node(name):
+		return
+	var aura := StaticAura.new()
+	aura.name = name
+	aura.unit = unit
+	aura.color = color
+	aura.radius = (radius_cells + 0.5) * unit.grid.hex_size * BattleGrid.SQRT3
+	ground.add_child(aura)
 
 
 ## Merribold's Bellow: a spiky red ring that bursts out to the Bellow's reach.
@@ -765,6 +821,40 @@ class RangeAura extends Follower:
 		for arm in 3:
 			var dir := Vector2.from_angle(spin + arm * PI / 3.0) * size
 			draw_line(center - dir, center + dir, Color(color, alpha), 1.2, true)
+
+
+## BATR.EE's Power Grid: a faint purple disc whose edge is a crackling ring of little
+## lightning arcs that jump to new shapes several times a second, with a few sparks.
+class StaticAura extends Follower:
+	const ARCS := 14          # pieces the edge is broken into
+	const JUMPS := 12.0       # times a second the arcs change shape
+	var radius := 100.0
+	var color := Color.WHITE
+
+	## A repeatable "random" number from 0 to 1 for this arc and moment (looks only, so it
+	## never touches the battle's random numbers).
+	func _noise(a: float, b: float) -> float:
+		return fposmod(sin(a * 12.9898 + b * 78.233) * 43758.5453, 1.0)
+
+	func _draw() -> void:
+		draw_circle(Vector2.ZERO, radius, Color(color, 0.06))
+		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(color, 0.18), 1.0, true)
+		var tick := floorf(time * JUMPS)
+		for arc in ARCS:
+			if _noise(arc, tick) < 0.3:
+				continue   # some gaps, so the ring flickers
+			var start := TAU * arc / ARCS
+			var points := PackedVector2Array()
+			for i in 5:
+				var angle := start + TAU / ARCS * i / 4.0
+				var jitter := (_noise(arc * 7.0 + i, tick) - 0.5) * 7.0
+				points.append(Vector2.from_angle(angle) * (radius + jitter))
+			var bright := 0.35 + 0.45 * _noise(arc + 3.0, tick)
+			draw_polyline(points, Color(color, bright), 1.5, true)
+		for spark in 4:   # little sparks hopping round the edge
+			var angle := TAU * _noise(spark + 11.0, tick)
+			var at := Vector2.from_angle(angle) * radius
+			draw_circle(at, 1.8, Color(color.lightened(0.5), 0.8))
 
 
 class WindSwirl extends Node2D:

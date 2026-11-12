@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-count = 1
 gambit_name = "Return"
 cast_time = 0.4
-description = "Revives the last two allies that died beside it, with 40% of their max health."
+description = "Revives the last ally that died beside it, with 40% of its max health. Each ally can only be revived once."

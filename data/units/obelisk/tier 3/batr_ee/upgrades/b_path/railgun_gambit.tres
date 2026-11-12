@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RailgunGambit" format=3 uid="uid://1iptelc56nfd"]
+
+[ext_resource type="Script" uid="uid://djxjery75bjce" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/scripts/railgun_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 160.0
+per_voltage = 2.5
+per_voltage_insight = 0.02
+min_voltage = 0.0
+gambit_name = "Railgun"
+cast_time = 1.5
+description = "Charges up, then spends all its Voltage on a railgun shot at the enemy with the highest Might, dealing 50 + (1 + 1% of Insight) per Voltage spent as Insight damage. Needs at least 40 Voltage."

@@ -7,8 +7,8 @@ var is_ai := false
 var faction := MatchRules.DEFAULT_FACTION
 
 var hp: int = MatchRules.START_HP
-var aura: int = MatchRules.START_AURA
-var aura_received: int = MatchRules.START_AURA   # counts toward MatchRules.MAX_AURA_RECEIVED
+var aura: int = MatchRules.start_aura()
+var aura_received: int = MatchRules.start_aura()   # counts toward MatchRules.max_aura_received()
 var reserve: int = MatchRules.START_RESERVE
 
 var units: Array[ArmyUnit] = []

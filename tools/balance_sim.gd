@@ -20,6 +20,14 @@ extends Node2D
 ##   --show-placement print where every unit starts and how far it is from the nearest enemy
 ##   --no-retarget-on-move  units keep their target while they walk, the old rule (by default
 ##                    they pick their best target again after every step)
+##   --old-insight    Insight multiplies all Charge again and nobody has Charge Regen (see
+##                    Stats.insight_charge_regen)
+##   --old-economy    the numbers from before the tier rework: old Aura costs, bigger tier
+##                    bonuses, equal upgrade growth (see Economy.tier_rework)
+##   --no-finish-attack  cast a full Gambit at once, even mid-attack (by default a unit at
+##                    least half wound up, with its target in range, lands that attack first)
+##   --no-gambit-resets-attack  casting leaves the attack wind-up where it was (by default a
+##                    cast restarts it)
 ##   --second-row A,B units that start one row behind the front (default: the random battle
 ##                    scene's second_row_units; "none" for nobody)
 ##   --tier-health A,B,C   multiply max health by tier: A for tier 1, B for tier 2, ... (default all 1)
@@ -114,6 +122,10 @@ func _parse_args() -> void:
 	require_frontline = not args.has("--no-frontline-rule")
 	show_placement = args.has("--show-placement")
 	BattleUnit.retarget_on_move = not args.has("--no-retarget-on-move")
+	Economy.tier_rework = not args.has("--old-economy")
+	Stats.insight_charge_regen = not args.has("--old-insight")
+	BattleUnit.finish_attack_before_gambit = not args.has("--no-finish-attack")
+	BattleUnit.gambit_resets_attack = not args.has("--no-gambit-resets-attack")
 	for i in args.size() - 1:
 		var value := args[i + 1]
 		match args[i]:
@@ -490,6 +502,15 @@ func _summary() -> String:
 		"Extra tier scaling (on top of the game's own): health %s, Might/Insight/Celerity %s" % [_scale_text(tier_health), _scale_text(tier_stats)],
 		"Damage scale (test only, not in the game): %s" % ("none" if is_equal_approx(damage_scale, 1.0) else "x%s" % damage_scale),
 		"Retarget after every step: %s" % ("yes" if BattleUnit.retarget_on_move else "no (old rule)"),
+		"Insight rework (Charge Regen = unit's own + %s per Insight; Insight no longer multiplies Charge): %s" % [
+				Stats.INSIGHT_CHARGE_REGEN, "yes" if Stats.insight_charge_regen else "no (old rule)"],
+		"Tier rework (costs %s, tier bonus x%s attributes / x%s health, level 2 growth x%s): %s" % [
+				", ".join(PackedStringArray([1, 2, 3, 4].map(func(t): return "/".join(PackedStringArray(Economy.tier_aura_costs(t).map(func(c): return str(c))))))),
+				Stats.tier_multiplier(Stats.Stat.MIGHT, 4), Stats.tier_health_multiplier(4),
+				Stats.growth_steps(2) - Stats.growth_steps(1), "yes" if Economy.tier_rework else "no (old numbers)"],
+		"Finish a %d%%+ wound-up attack before casting: %s. Casting restarts the attack wind-up: %s" % [
+				roundi(BattleUnit.FINISH_ATTACK_SHARE * 100), "yes" if BattleUnit.finish_attack_before_gambit else "no (old rule)",
+				"yes" if BattleUnit.gambit_resets_attack else "no (old rule)"],
 		"Second row: %s. At least one front-liner per team: %s" % [", ".join(second_row) if not second_row.is_empty() else "nobody",
 				"yes" if require_frontline else "no"],
 		"%s, rounded down to whole Shards (3). Average Reserve spent: team 1 %.1f, team 2 %.1f" % [_reserve_text(), reserve_spent[1] / n_battles, reserve_spent[2] / n_battles],

@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c1ir1luygnsjt"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/a_path/whole_board.tres" id="3"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 
 [resource]
 script = ExtResource("1")
-description = "Its passive covers the entire battlefield."
-passives = Array[ExtResource("2")]([ExtResource("3")])
+description = "Volts give 1 stack of Mono-Virus."
+gambit_overrides = Dictionary[String, float]({
+"virus_stacks": 1.0
+})

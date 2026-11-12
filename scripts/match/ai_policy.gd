@@ -22,6 +22,8 @@ const RANGES := {
 	"front_row": [1.0, 0.0, 1.0],      # chance front-liners take the very front row (else one back)
 	"back_row": [1.0, 0.0, 1.0],       # chance the others take the very back row (else one forward)
 	"center_bias": [0.0, 0.0, 1.0],    # chance to fill columns from the middle outward
+	"keepsake_sense": [1.5, 0.0, 4.0], # how closely items go to the units KeepsakeSense rates best, and which Shards it combines
+	"shard_sense": [0.7, 0.0, 3.0],    # how much KeepsakeSense steers which Shards it buys
 }
 
 ## How a plan treats Shards. Plans take turns (by variant), so each is tested every round:
@@ -127,10 +129,18 @@ func make_plan(p: PlayerState, combat_number: int, variant: int, second_row: Arr
 					continue
 				weight *= g["buff_bias"]
 			options.append([weight, "unit", slot])
+		# KeepsakeSense only changes which Shards it prefers, not how many it buys: each
+		# offer is rated against the average offer.
+		var desires: Array = p.shard_offers.map(func(offer): return _shard_desire(p, offer))
+		var average_desire := 0.0
+		for d in desires:
+			average_desire += d / desires.size()
 		for slot in p.shard_offers.size():
 			if p.reserve - MatchRules.SHARD_COST >= g["reserve_floor"]:
 				var name: String = Shard.NAMES[p.shard_offers[slot].first_shard]
-				options.append([g["shard_rate"] * float(g["shards"].get(name, 1.0)), "shard", slot])
+				var weight: float = g["shard_rate"] * float(g["shards"].get(name, 1.0))
+				weight *= exp(float(g.get("shard_sense", 0.0)) * (desires[slot] - average_desire))
+				options.append([weight, "shard", slot])
 		if p.reserve - p.reroll_cost >= g["reserve_floor"] + MatchRules.SHARD_COST and randf() < g["reroll_rate"]:
 			options.append([1.0, "reroll", 0])
 		if options.is_empty() or randf() < g["save_rate"]:
@@ -161,30 +171,75 @@ func make_plan(p: PlayerState, combat_number: int, variant: int, second_row: Arr
 	if handling == ShardHandling.POOL:
 		_pull_shards_off(p)   # every Shard the army has becomes available to combine
 	var combine_all := handling != ShardHandling.KEEP
+	var sense: float = g.get("keepsake_sense", 0.0)
 	while combine_all or randf() < g["combine_rate"]:
-		var loose: Array = []
+		# Every pair of loose Shards, rated by how well its keepsake suits the army.
+		var pairs: Array = []
+		var scores: Array = []
 		for i in p.inventory.size():
-			if p.inventory[i].is_shard:
-				loose.append(i)
-		if loose.size() < 2:
+			for j in range(i + 1, p.inventory.size()):
+				var result := MatchRules.combine_result(p.inventory[i], p.inventory[j])
+				if result != null:
+					pairs.append([i, j])
+					scores.append(_army_score(p, result))
+		if pairs.is_empty():
 			break
-		loose.shuffle()
-		if MatchRules.combine(p, loose[0], loose[1]):
+		var pair: Array = pairs[KeepsakeSense.weighted_pick(pairs, scores, sense)]
+		if MatchRules.combine(p, pair[0], pair[1]):
 			stats["combines"] += 1
 		else:
 			break
-	for i in range(p.inventory.size() - 1, -1, -1):
-		var open := p.units.filter(func(u): return u.items.size() < BattleUnit.MAX_KEEPSAKES)
+	# Items go out best first, each to a unit picked by how well it suits them.
+	var order: Array = range(p.inventory.size())
+	var item_scores := {}
+	for i in order:
+		item_scores[i] = _army_score(p, p.inventory[i])
+	order.sort_custom(func(a, b): return item_scores[a] > item_scores[b])
+	var placed: Array[int] = []
+	for i in order:
+		var open: Array = p.units.filter(func(u): return u.items.size() < BattleUnit.MAX_KEEPSAKES)
 		if open.is_empty():
 			break
 		if handling == ShardHandling.HOLD and p.inventory[i].is_shard:
 			continue   # a lone Shard waits loose for a partner
 		if randf() < g["equip_rate"]:
-			MatchRules.equip(p, open.pick_random(), i)
+			var fits: Array = open.map(func(u): return KeepsakeSense.score_for(p.inventory[i], u))
+			var unit: ArmyUnit = open[KeepsakeSense.weighted_pick(open, fits, sense)]
+			unit.items.append(p.inventory[i])
+			placed.append(i)
+	placed.sort()
+	for k in range(placed.size() - 1, -1, -1):   # highest index first, so the rest stay right
+		p.inventory.remove_at(placed[k])
 	if variant == 0 or randf() < g["layout_rate"]:
 		lay_out(p, second_row, g)
 	MatchRules.auto_place_bench(p)
 	return stats
+
+
+## How well `item` suits the best unit in the army that still has a free slot (KeepsakeSense
+## scale). An army with no free slot rates everything 0.
+static func _army_score(p: PlayerState, item: Keepsake) -> float:
+	var best := KeepsakeSense.best_score(item, p.units)
+	return best if best > -INF else 0.0
+
+
+## How much the army wants a Shard on offer: the best keepsake it would make with a Shard
+## already held, or failing that, how good its keepsakes are for the army on average.
+static func _shard_desire(p: PlayerState, offer: Keepsake) -> float:
+	var desire := -INF
+	for item in p.inventory:
+		var result := MatchRules.combine_result(offer, item)
+		if result != null:
+			desire = maxf(desire, _army_score(p, result))
+	var potential := 0.0
+	var recipes := 0
+	for keepsake in MatchRules.keepsakes():
+		if keepsake.first_shard == offer.first_shard or keepsake.second_shard == offer.first_shard:
+			potential += _army_score(p, keepsake)
+			recipes += 1
+	if recipes > 0:
+		desire = maxf(desire, potential / recipes)
+	return clampf(desire, -2.0, 3.0) if desire > -INF else 0.0
 
 
 ## Takes every Shard off the army's units and back into the inventory. Keepsakes stay on.

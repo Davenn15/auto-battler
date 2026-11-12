@@ -3,22 +3,23 @@
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/passive/gate_passive.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gambit/gateling_gambit.tres" id="5"]
+[ext_resource type="Resource" uid="uid://b38b0i5a26uj7" path="res://data/units/obelisk/tier 4/gate_wa/passive/gate_passive.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gambit/gate_sequence_gambit.tres" id="5"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/a_path/gate_a.tres" id="6"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/b_path/gate_b.tres" id="7"]
+[ext_resource type="Resource" uid="uid://dbja1m5onq1dl" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/b_path/gate_b.tres" id="7"]
 [ext_resource type="Texture2D" uid="uid://bidmd5opxwty" path="res://assets/gate.w(a).png" id="8"]
 
 [resource]
 script = ExtResource("1")
-display_name = "GATE.W(A)"
+display_name = "gateway"
 tier = 4
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
-max_health = 1150.0
+max_health = 900.0
 back_row = true
+charge_regen = 4.0
 passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("5")
-max_charge = 80.0
+max_charge = 75.0
 starting_charge = 40.0
 sprite = ExtResource("8")
 insight = 115.0

@@ -1,10 +1,13 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3]
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
 
 [resource]
 script = ExtResource("1")
-description = "Allies it revives also get copies of its keepsakes, as many as they have room for."
+upgrade_name = "Renewed"
+description = "Revived allies come back with full Charge."
 gambit_overrides = Dictionary[String, float]({
-"copy_keepsakes": 1.0
+"full_charge": 1.0
 })

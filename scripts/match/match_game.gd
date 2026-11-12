@@ -202,6 +202,9 @@ func _show_planning_board() -> void:
 		var rally := RallyPassive.aura_range(unit)   # Lunck's aura reach, to plan around
 		if rally >= 0:
 			KeepsakeVfx.rally_aura(unit, rally, RallyPassive.aura_gives_insight(unit))
+		var grid_reach := GridPassive.aura_range(unit)   # BATR.EE's Power Grid reach
+		if grid_reach >= 0:
+			KeepsakeVfx.grid_aura(unit, grid_reach, VoltageStatus.COLOR)
 	for unit in ArmySpawner.spawn(ai.last_fielded, ENEMY_TEAM, true, units_parent):
 		unit.modulate.a = 0.6
 	_fog.show_fog(grid, ai.faction, ai.last_fielded_round)

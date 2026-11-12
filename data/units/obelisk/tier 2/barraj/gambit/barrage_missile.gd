@@ -61,7 +61,7 @@ func _point_at(t: float) -> Vector2:
 	return _start.lerp(target_point, t) + Vector2.UP * lift
 
 
-## Bubbler's A1 bubble slows enemy missiles too.
+## BUBL(R)'s Warding bubble (B path) slows enemy missiles too.
 func _speed_scale() -> float:
 	var factor := 1.0
 	for node in get_tree().get_nodes_in_group("projectile_slowers"):

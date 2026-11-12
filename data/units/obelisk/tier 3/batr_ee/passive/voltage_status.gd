@@ -7,6 +7,10 @@ const COLOR := Color(0.62, 0.3, 1.0)
 const LIGHT := Color(0.85, 0.7, 1.0)
 
 var stacks: float = 0.0
+## Most Voltage it can hold; gains past it are lost.
+var max_stacks: float = INF
+## Extra Charge per second while Voltage is full.
+var full_charge_regen: float = 0.0
 var _label: Label
 
 
@@ -42,8 +46,17 @@ func on_removed(_unit: BattleUnit) -> void:
 
 
 func add(amount: float) -> void:
-	stacks += amount
+	stacks = minf(stacks + amount, max_stacks)
 	_show()
+
+
+func is_full() -> bool:
+	return stacks >= max_stacks
+
+
+func tick(unit: BattleUnit, delta: float) -> void:
+	if is_full() and full_charge_regen > 0.0 and unit.active and unit.alive:
+		unit.gain_charge(full_charge_regen * delta)
 
 
 ## Takes `amount` off, if there's that much. Returns true if it did.
@@ -58,3 +71,5 @@ func spend(amount: float) -> bool:
 func _show() -> void:
 	if is_instance_valid(_label):
 		_label.text = "⚡%d" % floori(stacks)
+		# Brighter, warmer number while full (and earning extra Charge).
+		_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5) if is_full() else LIGHT)

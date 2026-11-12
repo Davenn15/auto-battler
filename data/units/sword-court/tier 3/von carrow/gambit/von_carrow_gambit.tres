@@ -4,9 +4,10 @@
 
 [resource]
 script = ExtResource("1_rvo8f")
-description = "Fires an explosive shot in a cone. Enemies closer to her take more damage."
-far_multiplier = 0.75
+far_multiplier = 0.6
+might_scaling = 0.8
 range_cells = 3
 cone_angle = 45.0
 cast_time = 0.5
+description = "Fires an explosive shot in a cone. Enemies closer to her take more damage."
 metadata/_custom_type_script = "uid://clopy65v0opx"

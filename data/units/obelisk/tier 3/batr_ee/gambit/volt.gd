@@ -1,6 +1,7 @@
 class_name Volt
 extends Node2D
-## A purple bolt that flies from BATR.EE to an enemy and runs `on_hit` when it gets there.
+## A purple bolt that flies to a unit and runs `on_hit` (if any) when it gets there: BATR.EE's
+## Volts at enemies, and the small jolts allies send it when they give it Voltage.
 ## Drawn as a jagged line that flickers, trailing back towards where it was fired.
 
 const SPEED := 520.0   # pixels per second
@@ -18,7 +19,7 @@ var _flicker := 0.0
 
 ## Fires a Volt from `from` at `p_target` after `delay` seconds.
 static func fire(parent: Node, from: Vector2, p_target: BattleUnit, p_color: Color, delay: float,
-		p_on_hit: Callable) -> void:
+		p_on_hit: Callable) -> Volt:
 	var volt := Volt.new()
 	volt.target = p_target
 	volt.color = p_color
@@ -29,6 +30,7 @@ static func fire(parent: Node, from: Vector2, p_target: BattleUnit, p_color: Col
 	volt.visible = delay <= 0.0
 	parent.add_child(volt)
 	volt.global_position = from
+	return volt
 
 
 func _physics_process(delta: float) -> void:

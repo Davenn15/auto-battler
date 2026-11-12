@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://ci6ifr21yqtf"]
+
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" uid="uid://bly0p8gxg6wog" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/slim/slim_strike_gambit.tres" id="3"]
+[ext_resource type="Resource" uid="uid://bikg7p4jn150n" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/slim/slim_bleed_passive.tres" id="4"]
+[ext_resource type="Texture2D" uid="uid://0quiigkbvwu0" path="res://assets/slim_gateling.png" id="5"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_05r40"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Slim Gateling"
+summon_only = true
+max_health = 350.0
+passives = Array[ExtResource("2")]([ExtResource("4")])
+gambit = ExtResource("3")
+max_charge = 60.0
+sprite = ExtResource("5")
+might = 60.0
+insight = 60.0
+celerity = 115.0
+attack_damage_type = 2

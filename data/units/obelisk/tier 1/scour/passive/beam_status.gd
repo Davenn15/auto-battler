@@ -41,6 +41,10 @@ func on_removed(_unit: BattleUnit) -> void:
 		_visual.queue_free()
 
 
+func blocks_attacks(_unit: BattleUnit) -> bool:
+	return true   # the beam is its only attack
+
+
 func tick(unit: BattleUnit, delta: float) -> void:
 	# The beam is the only attack: keep the normal attack from ever firing.
 	unit._attack_timer = maxf(unit._attack_timer, 1.0)

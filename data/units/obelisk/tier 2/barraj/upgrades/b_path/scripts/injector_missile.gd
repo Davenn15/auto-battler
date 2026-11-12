@@ -77,7 +77,7 @@ func _hit(unit: BattleUnit) -> void:
 	KeepsakeVfx.missile_blast(get_parent(), unit.global_position, 16.0, MonoVirusStatus.SETTINGS.color)
 
 
-## Bubbler's A1 bubble slows enemy missiles too.
+## BUBL(R)'s Warding bubble (B path) slows enemy missiles too.
 func _speed_scale() -> float:
 	var factor := 1.0
 	for node in get_tree().get_nodes_in_group("projectile_slowers"):

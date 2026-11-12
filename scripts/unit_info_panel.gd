@@ -305,6 +305,8 @@ func _stat_table(u: BattleUnit) -> String:
 	extra.append(["Range", "[b]%d[/b]" % u.attack_range])
 	extra.append(["Attack every", "[b]%.2fs[/b]" % u.get_attack_cooldown()])
 	extra.append(["Regen", "[b]%.1f/s[/b]" % u.get_health_regen()])
+	if Stats.insight_charge_regen and u.gambit != null:
+		extra.append(["Charge Regen", "[b]%.1f/s[/b]" % u.get_charge_regen()])
 	var dodge := u.get_dodge_chance()
 	if dodge > 0.0:
 		extra.append(["Dodge", "[b]%d%%[/b]" % roundi(dodge * 100.0)])

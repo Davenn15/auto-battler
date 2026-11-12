@@ -3,11 +3,11 @@
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/passive/grid_passive.tres" id="4"]
+[ext_resource type="Resource" uid="uid://c6pcfksrivyu3" path="res://data/units/obelisk/tier 3/batr_ee/passive/grid_passive.tres" id="4"]
 [ext_resource type="Resource" uid="uid://dfwq8v35bs1yx" path="res://data/units/obelisk/tier 3/batr_ee/gambit/discharge_gambit.tres" id="5"]
 [ext_resource type="Texture2D" uid="uid://spub0jvwqs6a" path="res://assets/batr.ee.png" id="5_01c7g"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/a_path/batree_a.tres" id="6"]
-[ext_resource type="Resource" uid="uid://bqgbabdry8w57" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b.tres" id="7"]
+[ext_resource type="Resource" uid="uid://dh60ndarhyieg" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/a_path/batree_a.tres" id="6"]
+[ext_resource type="Resource" uid="uid://c5tkp6p2ecq6t" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b.tres" id="7"]
 
 [resource]
 script = ExtResource("1")

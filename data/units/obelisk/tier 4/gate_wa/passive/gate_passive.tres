@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="GatePassive" format=3]
+[gd_resource type="Resource" script_class="GatePassive" format=3 uid="uid://b38b0i5a26uj7"]
 
-[ext_resource type="Script" path="res://data/units/obelisk/tier 4/gate_wa/passive/gate_passive.gd" id="1"]
+[ext_resource type="Script" uid="uid://dtlv11f13mux8" path="res://data/units/obelisk/tier 4/gate_wa/passive/gate_passive.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 passive_name = "Gateway"
-description = "Can't move or attack. Gains 8 Charge per second."
+description = "Can't move or attack. Has strong Charge Regen. Whenever it casts, every unit it brought in (its Gatelings, or allies it revived) is healed for 25% of its max health and permanently gains +10% attributes and wards, stacking. While it's the only living unit on its team, it loses health each second, faster and faster."

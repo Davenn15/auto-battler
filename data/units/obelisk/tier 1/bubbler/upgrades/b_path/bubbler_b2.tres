@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://csj08imc1eeug"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_4qrat"]
 
 [resource]
 script = ExtResource("1")
-description = "Blows more bubbles."
-gambit_bonuses = Dictionary[String, float]({
-"bubbles": 2.0
+description = "Enemies inside the bubble lose Celerity."
+gambit_overrides = Dictionary[String, float]({
+"enemy_celerity_cut": 25.0
 })

@@ -52,6 +52,10 @@ func try_reflect(unit: BattleUnit, projectile: Projectile) -> bool:
 	return true
 
 
+func blocks_attacks(_unit: BattleUnit) -> bool:
+	return true   # no attacking while spinning
+
+
 func tick(unit: BattleUnit, delta: float) -> void:
 	unit._attack_timer = maxf(unit._attack_timer, 0.5)   # no attacking while spinning
 	time_left -= delta

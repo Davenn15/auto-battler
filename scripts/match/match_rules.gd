@@ -5,12 +5,29 @@ extends RefCounted
 ## play by the same rules.
 
 const START_HP := 64
-const START_AURA := 6
 const START_RESERVE := 10
 ## Loss damage starts from this, plus half the round number (see round_damage).
 const ROUND_DAMAGE_BASE := 3
+
+# Match Aura, new numbers (Economy.tier_rework) and old ones.
+const NEW_START_AURA := 10
+const OLD_START_AURA := 6
 ## The most Aura a player is ever given in a match, counting the starting Aura.
-const MAX_AURA_RECEIVED := 48
+const NEW_MAX_AURA_RECEIVED := 72
+const OLD_MAX_AURA_RECEIVED := 48
+## Aura income per round is the round number times this, rounded down.
+const NEW_AURA_INCOME_SCALE := 1.75
+## Loss damage from survivors is their Aura divided by this, rounded down.
+const NEW_SURVIVOR_DIVISOR := 5.0
+const OLD_SURVIVOR_DIVISOR := 3.0
+
+
+static func start_aura() -> int:
+	return NEW_START_AURA if Economy.tier_rework else OLD_START_AURA
+
+
+static func max_aura_received() -> int:
+	return NEW_MAX_AURA_RECEIVED if Economy.tier_rework else OLD_MAX_AURA_RECEIVED
 
 const UNIT_OFFERS := 3
 const SHARD_OFFERS := 3
@@ -96,15 +113,21 @@ static func _keepsake_pools() -> Dictionary:
 
 # ---------- Rounds and money ----------
 
-## Aura and Reserve each player gets after a player combat in round `round_number`.
+## Reserve each player gets after a player combat in round `round_number`.
 static func combat_income(round_number: int) -> int:
 	return round_number
 
 
-## Pays both kinds of income. Aura stops once the player has been given MAX_AURA_RECEIVED.
+## Aura each player gets after a player combat in round `round_number` (before the cap).
+## With the tier rework it's the round number x NEW_AURA_INCOME_SCALE, rounded down.
+static func aura_income(round_number: int) -> int:
+	return floori(round_number * NEW_AURA_INCOME_SCALE) if Economy.tier_rework else round_number
+
+
+## Pays both kinds of income. Aura stops once the player has been given max_aura_received().
 static func pay_income(player: PlayerState, round_number: int) -> Dictionary:
 	var income := combat_income(round_number)
-	var aura := clampi(income, 0, MAX_AURA_RECEIVED - player.aura_received)
+	var aura := clampi(aura_income(round_number), 0, max_aura_received() - player.aura_received)
 	player.aura += aura
 	player.aura_received += aura
 	player.reserve += income
@@ -118,10 +141,10 @@ static func loss_damage(round_number: int, surviving_aura: int) -> int:
 	return round_damage(round_number) + survivor_damage(surviving_aura)
 
 
-## The part of a loss that comes from the winner's surviving units: a third of their
-## Aura, rounded down.
+## The part of a loss that comes from the winner's surviving units: their Aura divided by
+## 5 (3 before the tier rework), rounded down.
 static func survivor_damage(surviving_aura: int) -> int:
-	return floori(surviving_aura / 3.0)
+	return floori(surviving_aura / (NEW_SURVIVOR_DIVISOR if Economy.tier_rework else OLD_SURVIVOR_DIVISOR))
 
 
 ## The part of a loss that comes from the round: starts higher and grows half as fast
@@ -162,7 +185,7 @@ static func buff_cost(tier: int, buffs_bought: int) -> int:
 ## {kind: "buy" | "upgrade" | "buff", aura: cost, reserve: cost}.
 static func offer_info(player: PlayerState, data: UnitData) -> Dictionary:
 	var owned := player.find_unit(data)
-	var costs: Array = Economy.TIER_AURA_COSTS[data.tier]
+	var costs: Array = Economy.tier_aura_costs(data.tier)
 	if owned == null:
 		return {"kind": "buy", "aura": costs[0], "reserve": 0}
 	if not owned.is_maxed():

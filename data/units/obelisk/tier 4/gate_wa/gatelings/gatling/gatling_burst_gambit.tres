@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="GatlingBurstGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/gatling/gatling_burst_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Overdrive"
+description = "Shields itself for 100 + 60% of Insight, and for 6 seconds its attacks deal an extra 25 + 30% of Insight as Insight damage."

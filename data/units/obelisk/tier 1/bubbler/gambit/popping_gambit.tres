@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PoppingGambit" format=3 uid="uid://dua47ax2kc2go"]
+
+[ext_resource type="Script" uid="uid://d1krkled34ugn" path="res://data/units/obelisk/tier 1/bubbler/gambit/popping_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+shield_amount = 100.0
+shield_duration = 3.0
+pop_might_scaling = 0.4
+gambit_name = "Popping"
+cast_time = 0.5
+description = "Blows bubbles that float to the most hurt nearby allies and shield them. When a bubble's shield breaks or runs out, it pops and damages nearby enemies."

@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c5v53jftu4p2k"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_u8v3j"]
 
 [resource]
 script = ExtResource("1")
-description = "Popping bubbles briefly stun the enemies they hit."
+description = "The bubble keeps building a Shield on allies inside it."
 gambit_overrides = Dictionary[String, float]({
-"pop_stun": 0.5
+"shield_per_second": 20.0
 })

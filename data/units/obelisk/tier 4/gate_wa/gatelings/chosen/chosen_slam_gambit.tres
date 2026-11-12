@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ChosenSlamGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/chosen/chosen_slam_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Ascension"
+cast_time = 0.3
+description = "Shields itself for 200 + 100% of Insight, lifts every enemy next to it into the air, then slams them down for 15% of their max health."

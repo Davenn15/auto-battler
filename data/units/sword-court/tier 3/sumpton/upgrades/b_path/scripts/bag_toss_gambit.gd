@@ -141,4 +141,4 @@ func _find_bag(caster: BattleUnit) -> BattleUnit:
 
 ## Untyped on purpose: the unit may have been freed by the time this is called.
 func _alive(unit) -> bool:
-	return is_instance_valid(unit) and unit.alive
+	return is_instance_valid(unit) and unit.alive and unit.is_inside_tree()   # off the board at battle end

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="GateWideBoonPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/a_path/scripts/gate_wide_boon_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Open Arms"
+description = "The cast heal and boost go to every summoned or revived ally."

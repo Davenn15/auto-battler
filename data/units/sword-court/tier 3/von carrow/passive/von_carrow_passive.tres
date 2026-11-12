@@ -4,7 +4,8 @@
 
 [resource]
 script = ExtResource("1_5tomj")
-description = "Every few attacks, Von Carrow fires a longer-range pistol shot with extra damage and Wrack Chance."
 pistol_range = 3
 wrack_bonus = 0.35
+extra_might_scaling = 0.4
+description = "Every few attacks, Von Carrow fires a longer-range pistol shot with extra damage and Wrack Chance."
 metadata/_custom_type_script = "uid://bsjm513k7q825"

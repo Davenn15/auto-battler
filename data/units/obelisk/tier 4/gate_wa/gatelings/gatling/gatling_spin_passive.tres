@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="GatlingSpinPassive" format=3 uid="uid://dnq1kccw56i40"]
+
+[ext_resource type="Script" uid="uid://drmtgcf3ffeq3" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/gatling/gatling_spin_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+celerity_per_hit = 25.0
+max_celerity = 200.0
+passive_name = "Spin Up"
+description = "Each attack on the same target as the last gives +12 Celerity, up to +120. Switching targets resets it."

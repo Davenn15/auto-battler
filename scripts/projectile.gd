@@ -17,7 +17,7 @@ var credit_id: int    # who the damage meter credits; the summoner for summons
 var ignore_ward: bool = false   # the hit skips the target's wards
 var grants_charge: bool = true   # false for extra shots that shouldn't build attack charge
 var is_attack: bool = true   # false for shots that aren't attacks (no charge, no on-hit, no retaliation)
-var team: int = 0   # the shooter's team, so areas like Bubbler's bubble can slow enemy shots
+var team: int = 0   # the shooter's team, so areas like BUBL(R)'s Warding bubble can slow enemy shots
 
 func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack_level: int = 0, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
 	hit_effects = p_hit_effects
@@ -66,7 +66,7 @@ func _hit() -> void:
 	
 
 ## How fast this shot moves right now (1 = full speed): slowed while it's inside an enemy
-## area that slows shots, such as Bubbler's bubble (nodes in the "projectile_slowers" group).
+## area that slows shots, such as BUBL(R)'s Warding bubble (nodes in the "projectile_slowers" group).
 func speed_scale() -> float:
 	var factor := 1.0
 	for node in get_tree().get_nodes_in_group("projectile_slowers"):

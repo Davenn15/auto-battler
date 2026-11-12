@@ -4,9 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-voltage_per_volt = 25.0
-voltage_on_cast = 100.0
-damage = 90.0
 gambit_name = "Discharge"
 cast_time = 1.0
-description = "Gains 100 Voltage. Then for every 50 Voltage it has, spends it and fires a Volt at a random enemy, dealing 70 + 0.6x Insight damage."
+description = "For every 20 Voltage it has, spends it and fires a Volt at a random enemy, dealing 90 + 0.6x Insight damage."

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SlimBleedPassive" format=3 uid="uid://bikg7p4jn150n"]
+
+[ext_resource type="Script" uid="uid://cd4i7t03n0ppv" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/slim/slim_bleed_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+percent = 0.005
+passive_name = "Serrated"
+description = "Attacks make the target bleed for 1% of its max health per second for 4 seconds, ignoring wards."

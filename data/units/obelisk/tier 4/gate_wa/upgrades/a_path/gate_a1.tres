@@ -2,9 +2,12 @@
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/a_path/newcomer_haste.tres" id="3"]
+
 
 [resource]
 script = ExtResource("1")
-description = "Whenever it casts its Gambit, allies that didn't start the battle gain 80 Celerity for 5 seconds."
-passives = Array[ExtResource("2")]([ExtResource("3")])
+upgrade_name = "Chosen"
+description = "A fourth cast summons a Chosen Gateling: a melee bruiser with very high stats that shields itself and slams nearby enemies for 15% of their max health."
+gambit_bonuses = Dictionary[String, float]({
+"casts": 1.0
+})

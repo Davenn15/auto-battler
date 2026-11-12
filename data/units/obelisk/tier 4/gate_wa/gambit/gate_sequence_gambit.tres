@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="GateSequenceGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/gate_wa/gambit/gate_sequence_gambit.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/broad/broad_gateling.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/slim/slim_gateling.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/gatling/gatling_gateling.tres" id="5"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/gatelings/chosen/chosen_gateling.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+steps = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])
+gambit_name = "Open Gate"
+cast_time = 0.4
+description = "Each of its first three casts summons a different Gateling beside it: a Broad Gateling (tank, shields allies), then two Slim Gatelings (assassins that bleed and execute), then a Gatling Gateling (ranged, spins up on one target). Each has its own stats plus 20% of GATE.W(A)'s max health and 30% of its attributes and wards. Later casts summon nothing."

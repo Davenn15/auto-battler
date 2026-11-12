@@ -2,7 +2,7 @@ class_name UnshieldedChargePassive
 extends Passive
 ## While the unit has no shield, it gains charge over time.
 
-## Charge per second while unshielded (before Insight's charge multiplier).
+## Charge per second while unshielded (multiplied by Insight only under the old rule; see Stats.charge_multiplier).
 @export var per_second: float = 8.0
 
 

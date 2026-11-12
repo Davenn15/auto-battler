@@ -1,10 +1,13 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3]
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
 
 [resource]
 script = ExtResource("1")
-description = "Its Gambit revives one more ally."
+upgrade_name = "Mass Return"
+description = "Revives one more ally."
 gambit_bonuses = Dictionary[String, float]({
 "count": 1.0
 })

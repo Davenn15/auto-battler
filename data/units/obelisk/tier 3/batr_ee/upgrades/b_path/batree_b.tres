@@ -1,16 +1,14 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bqgbabdry8w57"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c5tkp6p2ecq6t"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" uid="uid://cp5j5ibllg0j0" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/corrupt_gambit.tres" id="3"]
-[ext_resource type="Resource" uid="uid://cbfo2yc6d8yjd" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/phased_voltage.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b1.tres" id="5"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b2.tres" id="6"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/railgun_gambit.tres" id="3"]
+[ext_resource type="Resource" uid="uid://dthf3cgu3uoii" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b1.tres" id="4"]
+[ext_resource type="Resource" uid="uid://do2608l1ashpx" path="res://data/units/obelisk/tier 3/batr_ee/upgrades/b_path/batree_b2.tres" id="5"]
 
 [resource]
 script = ExtResource("1")
-upgrade_name = "Corrupted"
-description = "While Phased, gains 50 Voltage per second. New Gambit: Phases for 3 seconds, then fires Mono-Virus Volts, one per 30 Voltage."
-passives = Array[ExtResource("2")]([ExtResource("4")])
+upgrade_name = "Magnetic"
+description = "New Gambit: Railgun. Charges up, then spends all its Voltage on one shot at the enemy with the highest Might, dealing Insight damage that grows with the Voltage spent."
 gambit = ExtResource("3")
-next_choices = Array[ExtResource("1")]([ExtResource("5"), ExtResource("6")])
+next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

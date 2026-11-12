@@ -1,32 +1,28 @@
 class_name GridBoostPassive
 extends Passive
-## Upgrades to BATR.EE's passive (GridPassive), granted by its upgrades.
-##   A1: whole_board = the passive covers the entire battlefield.
-##   B: phased_voltage = Voltage per second while BATR.EE is Phased.
+## Upgrades to BATR.EE's passive (GridPassive), granted by its upgrades. Several add up.
+##   A (Charged): range_bonus and insight_bonus.
+##   B1: max_voltage_bonus and voltage_per_second.
 
-@export var whole_board: bool = false
-@export var phased_voltage: float = 0.0
+## Extra hex cells of passive range.
+@export var range_bonus: int = 0
+## Extra Insight allies in range gain.
+@export var insight_bonus: float = 0.0
+## Extra Voltage BATR.EE can hold.
+@export var max_voltage_bonus: float = 0.0
+## Voltage BATR.EE gains every second.
+@export var voltage_per_second: float = 0.0
 
 
-func on_battle_start(unit: BattleUnit) -> void:
-	unit.add_status(BoostStatus.new(self))
-
-
-## Every boost on `unit`, added up: {"whole_board": bool, "phased_voltage": float}.
+## Every boost on `unit`, added up: {range, insight, max_voltage, voltage_per_second}.
+## Reads the unit's passive list, so it works before any battle-start status exists.
 static func boosts(unit: BattleUnit) -> Dictionary:
-	var result := {"whole_board": false, "phased_voltage": 0.0}
-	for status in unit.statuses:
-		if status is BoostStatus:
-			result["whole_board"] = result["whole_board"] or status.passive.whole_board
-			result["phased_voltage"] += status.passive.phased_voltage
+	var result := {"range": 0, "insight": 0.0, "max_voltage": 0.0, "voltage_per_second": 0.0}
+	for passive in unit.passives:
+		if passive is GridBoostPassive:
+			result["range"] += passive.range_bonus
+			result["insight"] += passive.insight_bonus
+			result["max_voltage"] += passive.max_voltage_bonus
+			result["voltage_per_second"] += passive.voltage_per_second
 	return result
 
-
-class BoostStatus extends Status:
-	var passive: GridBoostPassive
-
-	func _init(p_passive: GridBoostPassive) -> void:
-		passive = p_passive
-
-	func blocks_charge_gain(_unit: BattleUnit) -> bool:
-		return false

@@ -2,9 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/a_path/newcomer_charge.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/gate_wa/upgrades/a_path/wide_boon.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
-description = "Whenever an ally that didn't start the battle dies, gains 25 Charge."
+upgrade_name = "Open Arms"
+description = "The cast heal and boost go to every summoned or revived ally, not just its own."
 passives = Array[ExtResource("2")]([ExtResource("3")])

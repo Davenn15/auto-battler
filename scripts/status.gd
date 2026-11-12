@@ -161,6 +161,12 @@ func ignores_wards(_unit: BattleUnit) -> bool:
 func blocks_movement(_unit: BattleUnit) -> bool:
 	return false
 
+## True while the unit's normal attacks are off (Scour's beam, Glaive's spin, COLUMN and
+## GATE.W(A)), so it never holds its Gambit to finish an attack that won't come.
+## The status still has to keep the attack timer from firing itself.
+func blocks_attacks(_unit: BattleUnit) -> bool:
+	return false
+
 ## True stops the unit from casting its Gambit, even with full charge.
 func blocks_gambit(_unit: BattleUnit) -> bool:
 	return false
