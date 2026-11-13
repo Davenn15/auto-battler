@@ -1,16 +1,15 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3]
+[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://btpelym77b3mt"]
 
 [ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" path="res://data/keepsakes/combined/opportunist/might__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Resource" uid="uid://q5vbblu2nnrj" path="res://data/keepsakes/combined/opportunist/might__wrack_effect.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Opportunist"
-first_shard = 0
 second_shard = 7
-effect = ExtResource("2_effect")
 might = 20.0
 wrack_chance = 0.15
 wrack_damage = 0.15
+effect = ExtResource("2_effect")
 description = "Your Wracks ignore 50% of the target's Wards."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

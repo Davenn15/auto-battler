@@ -15,6 +15,7 @@ display_name = "wesper"
 tier = 2
 upgrades = Array[ExtResource("6_cjyw8")]([ExtResource("7_lk86c"), ExtResource("8_t2u6e")])
 max_health = 900.0
+placement = 1
 passives = Array[ExtResource("1_t25rx")]([ExtResource("3_e05yv")])
 gambit = ExtResource("1_vjyvd")
 max_charge = 80.0

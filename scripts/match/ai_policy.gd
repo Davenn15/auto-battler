@@ -111,7 +111,7 @@ static func crossover(a: AiPolicy, b: AiPolicy) -> AiPolicy:
 
 ## Spends `p`'s money on shop actions chosen by the strategy, then combines, equips and
 ## places. `variant` 0 always re-lays the army; others follow layout_rate.
-func make_plan(p: PlayerState, combat_number: int, variant: int, second_row: Array[String]) -> Dictionary:
+func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 	var g := genome
 	var stats := {"units": 0, "upgrades": 0, "buffs": 0, "shards": 0, "rerolls": 0, "combines": 0}
 	for step in 40:
@@ -211,7 +211,7 @@ func make_plan(p: PlayerState, combat_number: int, variant: int, second_row: Arr
 	for k in range(placed.size() - 1, -1, -1):   # highest index first, so the rest stay right
 		p.inventory.remove_at(placed[k])
 	if variant == 0 or randf() < g["layout_rate"]:
-		lay_out(p, second_row, g)
+		lay_out(p, g)
 	MatchRules.auto_place_bench(p)
 	return stats
 
@@ -274,7 +274,7 @@ static func _weighted(options: Array) -> Array:
 ## Front-liners toward the front, everyone else toward the back. With a genome, it picks
 ## which row each group starts from and whether columns fill from the middle; without
 ## one, the very front and very back rows in random columns.
-static func lay_out(p: PlayerState, second_row: Array[String], g: Dictionary = {}) -> void:
+static func lay_out(p: PlayerState, g: Dictionary = {}) -> void:
 	var front_row := floori(MatchRules.GRID_ROWS / 2.0) + (0 if randf() < float(g.get("front_row", 1.0)) else 1)
 	var back_row := MatchRules.GRID_ROWS - 1 - (0 if randf() < float(g.get("back_row", 1.0)) else 1)
 	var centered := randf() < float(g.get("center_bias", 0.0))
@@ -291,7 +291,7 @@ static func lay_out(p: PlayerState, second_row: Array[String], g: Dictionary = {
 		unit.placed = false
 	for unit in p.units:
 		var pick := {"data": unit.data, "path": unit.path}
-		var list: Array = cells if RandomTeams.is_frontline(pick, second_row) else back
+		var list: Array = cells if RandomTeams.is_frontline(pick) else back
 		for cell in list:
 			if not taken.has(cell):
 				taken[cell] = true

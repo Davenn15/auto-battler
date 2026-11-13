@@ -12,6 +12,9 @@ var shooter   # untyped: he may be freed while it's in the air
 var credit_id: int
 var team: int
 var target_point: Vector2
+## The enemy it's aimed at, if any: the missile follows it and lands where it is. Untyped:
+## it may be freed in flight (the missile then lands where it last was).
+var target_unit = null
 var blast_radius: float
 var damage: float
 var damage_type: int
@@ -48,6 +51,8 @@ func _physics_process(delta: float) -> void:
 			return
 		_flying = true
 		visible = true
+	if is_instance_valid(target_unit) and target_unit.alive:
+		target_point = target_unit.global_position   # follows its target
 	_progress += delta / _flight * _speed_scale()
 	if _progress >= 1.0:
 		_explode()

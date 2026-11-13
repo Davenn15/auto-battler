@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_spty5")
 display_name = "gallavost"
+placement = 0
 tier = 4
 upgrades = Array[ExtResource("3_5x6kj")]([ExtResource("7_csvwi"), ExtResource("8_tf4ku")])
 max_health = 1300.0

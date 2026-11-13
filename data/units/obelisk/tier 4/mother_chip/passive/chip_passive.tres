@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ChipPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/mother_chip/passive/chip_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Motherboard"
+description = "Attacks give a stack of Mono-Virus. Orbited by 2 Chips that shoot her target whenever she attacks, each for 25% of her attack damage."

@@ -5,5 +5,6 @@
 [resource]
 script = ExtResource("1")
 shield_share = 0.07
+interval = 4.0
 passive_name = "Pulse"
-description = "Every 3 seconds: a shield worth 4% of max health for 3 seconds, and 40 + 0.3x Might damage to every enemy within 1 cell."
+description = "Every 3 seconds: 40 + 0.3x Might damage to every enemy within 1 cell, and a shield worth 7% of max health, plus 2% for each enemy hit, for 3 seconds."

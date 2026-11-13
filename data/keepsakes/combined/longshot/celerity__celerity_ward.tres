@@ -10,6 +10,6 @@ first_shard = 2
 second_shard = 3
 effect = ExtResource("2_effect")
 celerity = 20.0
-celerity_ward = 25.0
+celerity_ward = 35.0
 description = "You gain +1 Attack Range."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

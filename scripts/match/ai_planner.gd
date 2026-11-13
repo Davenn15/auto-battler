@@ -20,8 +20,6 @@ signal plan_ready(summary: String)
 @export var time_limit: float = 90.0
 ## Give up on a copy of the game that takes longer than this (seconds).
 @export var process_timeout: float = 120.0
-## Units that stand in the second row: the shared list (RandomTeams.second_row_units).
-var second_row_units: Array[String] = RandomTeams.second_row_units()
 
 ## Names this planner's files and its log line, so two planners can run at once (watching
 ## two computers play).
@@ -84,21 +82,21 @@ var policy := AiPolicy.new()
 
 
 func _random_plan(p: PlayerState, combat_number: int, variant: int) -> void:
-	policy.make_plan(p, combat_number, variant, second_row_units)
+	policy.make_plan(p, combat_number, variant)
 
 
 ## PLACEHOLDER: before the first combat there's no army to plan against, so plans are
 ## tested against a random army worth the Aura both players have been given so far.
 func _stand_in_opponent(aura: int) -> Array[ArmyUnit]:
 	var army: Array[ArmyUnit] = []
-	var picks := RandomTeams.make_team(MatchRules.roster(), aura, 8, false, true, second_row_units)
+	var picks := RandomTeams.make_team(MatchRules.roster(), aura, 8, false, true)
 	for pick in picks:
 		var unit := ArmyUnit.new(pick["data"])
 		unit.path.assign(pick["path"])
 		army.append(unit)
 	var p := PlayerState.new()
 	p.units = army
-	AiPolicy.lay_out(p, second_row_units)
+	AiPolicy.lay_out(p)
 	return army
 
 

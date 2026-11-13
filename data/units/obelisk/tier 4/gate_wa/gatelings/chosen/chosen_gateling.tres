@@ -9,9 +9,9 @@
 [resource]
 script = ExtResource("1")
 display_name = "Chosen Gateling"
+placement = 0
 summon_only = true
 max_health = 1400.0
-frontline = true
 gambit = ExtResource("3")
 starting_charge = 30.0
 sprite = ExtResource("4_bsqe1")

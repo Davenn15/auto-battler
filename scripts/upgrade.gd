@@ -24,3 +24,9 @@ extends Resource
 
 ## Extra attack range, in hex cells, while this upgrade is chosen.
 @export var attack_range_bonus: int = 0
+
+## Where computer-run armies place the unit while this upgrade is chosen (see
+## UnitData.placement). Inherit keeps what it had before this upgrade: the level 1
+## upgrade's choice for a level 2 upgrade, otherwise the unit's own Placement.
+enum Placement { INHERIT, FRONT, SECOND_ROW, BACK, RANGED }
+@export var placement: Placement = Placement.INHERIT

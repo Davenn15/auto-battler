@@ -92,6 +92,7 @@ func _fire_tick(unit: BattleUnit, enemy: BattleUnit, share: float) -> void:
 	var hit := base * share * Stats.wrack_multiplier(wrack_level, unit.get_wrack_damage_against(enemy))
 	var dealt := enemy.take_damage(hit, wrack_level, unit.get_attack_damage_type(), unit.ignores_wards(), unit, false)
 	unit.get_tree().call_group("damage_tracker", "record_damage", unit.get_credit_id(), dealt)
+	enemy.add_running_damage("beam_%d" % unit.get_instance_id(), dealt, Stats.damage_color(unit.get_attack_damage_type(), wrack_level), wrack_level)
 	_dealt += dealt
 	_best_wrack = maxi(_best_wrack, wrack_level)
 	_progress += share
@@ -134,8 +135,6 @@ func _flush(unit: BattleUnit) -> void:
 	if not is_instance_valid(enemy):
 		return
 	if dealt > 0.0:
-		if enemy.alive:
-			enemy._spawn_damage_number(dealt, Stats.damage_color(unit.get_attack_damage_type(), wrack), wrack)
 		unit.gain_charge_from_attack(dealt, enemy)
 		enemy.gain_charge_from_hit(dealt)
 	enemy.notify_attacked(unit, dealt)

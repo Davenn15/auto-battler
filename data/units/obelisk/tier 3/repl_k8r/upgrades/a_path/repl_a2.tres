@@ -1,8 +1,13 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3]
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
 
 [resource]
 script = ExtResource("1")
-description = "+1 Attack range."
-attack_range_bonus = 1
+upgrade_name = "Viral Copies"
+description = "REPLK4NT attacks apply 1 stack of Mono-Virus."
+gambit_overrides = Dictionary[String, float]({
+"virus_stacks": 1.0
+})

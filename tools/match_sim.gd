@@ -17,8 +17,6 @@ extends Node
 ##
 ## Worker (started by the coordinator): --worker --in <job.json> --out <result.json>
 
-## Units that stand in the second row: the shared list every computer-run army uses.
-var SECOND_ROW: Array[String] = RandomTeams.second_row_units()
 const COMBAT_LIMIT := 180.0     # same safety net as the match screen
 const PLAN_BATTLE_LIMIT := 90.0
 const MAX_COMBATS := 40
@@ -296,7 +294,7 @@ func _play_match(policy_a: AiPolicy, policy_b: AiPolicy) -> Dictionary:
 			for key in stats:
 				totals[i][key] = totals[i].get(key, 0) + stats[key]
 		if round_number == 1:
-			round_number += 2   # past the skipped Encounter
+			round_number += 1   # Opening Shop done: round 2 is the first combat
 			continue
 		# Combat
 		for p in players:
@@ -321,7 +319,7 @@ func _play_match(policy_a: AiPolicy, policy_b: AiPolicy) -> Dictionary:
 		combats_done += 1
 		if not players[0].is_alive() or not players[1].is_alive() or combats_done >= MAX_COMBATS:
 			break
-		round_number += 2
+		round_number += 1
 	var result_a := 0.5
 	if players[0].is_alive() and not players[1].is_alive():
 		result_a = 1.0
@@ -343,7 +341,7 @@ func _plan(p: PlayerState, policy: AiPolicy, opponent_army: Array[ArmyUnit], com
 	var best_score := -INF
 	for c in candidates:
 		var trial := p.copy()
-		var stats := policy.make_plan(trial, combat_number, c, SECOND_ROW)
+		var stats := policy.make_plan(trial, combat_number, c)
 		var score := 0.0
 		for b in battles:
 			var r: Dictionary = await BattleArena.fight(self, opponent, trial.units, PLAN_BATTLE_LIMIT)
@@ -361,13 +359,13 @@ func _plan(p: PlayerState, policy: AiPolicy, opponent_army: Array[ArmyUnit], com
 ## (the same placeholder the game uses).
 func _stand_in(aura: int) -> Array[ArmyUnit]:
 	var army: Array[ArmyUnit] = []
-	for pick in RandomTeams.make_team(MatchRules.roster(), aura, 8, false, true, SECOND_ROW):
+	for pick in RandomTeams.make_team(MatchRules.roster(), aura, 8, false, true):
 		var unit := ArmyUnit.new(pick["data"])
 		unit.path.assign(pick["path"])
 		army.append(unit)
 	var holder := PlayerState.new()
 	holder.units = army
-	AiPolicy.lay_out(holder, SECOND_ROW)
+	AiPolicy.lay_out(holder)
 	return army
 
 

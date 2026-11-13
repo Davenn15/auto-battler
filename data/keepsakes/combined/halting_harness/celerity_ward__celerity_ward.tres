@@ -9,6 +9,6 @@ keepsake_name = "Halting Harness"
 first_shard = 3
 second_shard = 3
 effect = ExtResource("2_effect")
-celerity_ward = 50.0
+celerity_ward = 60.0
 description = "Whenever an enemy attacks you, they lose 5 Celerity for 2 seconds."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

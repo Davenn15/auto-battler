@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="VirusRotPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/mother_chip/upgrades/a_path/scripts/virus_rot_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+full_transfer = true
+passive_name = "Total Infection"
+description = "Enemies who die pass ALL their Mono-Virus stacks to their nearest ally, not half."

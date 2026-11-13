@@ -13,4 +13,5 @@ description = "New Gambit: Taunt. Forces nearby enemies to attack him and gives 
 passives = Array[ExtResource("2_jc0rf")]([ExtResource("6_m4ecb")])
 gambit = ExtResource("1_aso1m")
 next_choices = Array[ExtResource("1_3v0nq")]([ExtResource("3_51enw"), ExtResource("4_4eyvx")])
+placement = 1
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

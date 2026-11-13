@@ -10,6 +10,6 @@ first_shard = 0
 second_shard = 5
 effect = ExtResource("2_effect")
 might = 25.0
-insight_ward = 25.0
+insight_ward = 35.0
 description = "Whenever an enemy within 1 hex plays their Gambit, you attack them."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

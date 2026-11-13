@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_xdauj")
 display_name = "lunck"
+placement = 1
 upgrades = Array[ExtResource("6_h4b42")]([ExtResource("7_eoujo"), ExtResource("8_bu15v")])
 max_health = 850.0
 passives = Array[ExtResource("1_p8i6k")]([ExtResource("3_n8o46")])

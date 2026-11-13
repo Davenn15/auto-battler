@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="DodgeEffect" format=3]
+
+[ext_resource type="Script" path="res://data/keepsakes/effects/dodge_effect.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+chance = 0.25
+passive_name = "Evasive Copies"
+description = "25% chance to dodge each hit."

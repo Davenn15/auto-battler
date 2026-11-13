@@ -47,7 +47,8 @@ func _physics_process(delta: float) -> void:
 			if unit == null or not unit.alive or not unit.active or unit.team == team:
 				continue
 			if SlamGambit.in_rectangle(unit.global_position, origin, dir, length, half_width):
-				var dealt := unit.take_damage(damage_per_second * TICK_INTERVAL, 0, damage_type)
+				var dealt := unit.take_damage(damage_per_second * TICK_INTERVAL, 0, damage_type, false, null, false)
+				unit.add_running_damage("lava_%d" % get_instance_id(), dealt, Stats.damage_color(damage_type), 0, TICK_INTERVAL + 0.25)
 				get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)
 	if _time_left <= 0.0:
 		set_physics_process(false)

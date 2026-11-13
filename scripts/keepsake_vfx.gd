@@ -857,6 +857,33 @@ class StaticAura extends Follower:
 			draw_circle(at, 1.8, Color(color.lightened(0.5), 0.8))
 
 
+## Highlights exactly the cells an area effect hits (a tinted hex on each, with a gently
+## pulsing outline), so what you see is what it hits. Set `cells` again to move it.
+## Works whatever the scene's offset or turn, since corners come from the grid.
+class CellZone extends Node2D:
+	var grid: BattleGrid
+	var cells: Array = []
+	var color := Color.WHITE
+	var strength := 1.0   # 0-1, for fading in and out
+	var _time := 0.0
+
+	func _process(delta: float) -> void:
+		_time += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		if grid == null:
+			return
+		var pulse := 0.8 + 0.2 * sin(_time * 5.0)
+		for cell in cells:
+			var points := PackedVector2Array()
+			for corner in grid.hex_corners_world(cell):
+				points.append(to_local(corner))
+			draw_colored_polygon(points, Color(color, 0.22 * strength * pulse))
+			points.append(points[0])
+			draw_polyline(points, Color(color.lightened(0.3), 0.75 * strength), 1.5, true)
+
+
 class WindSwirl extends Node2D:
 	var radius := 24.0
 	var time := 0.0

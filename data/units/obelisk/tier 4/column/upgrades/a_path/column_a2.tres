@@ -1,13 +1,11 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dbyd84p255kdd"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/virus_bolt.tres" id="3"]
-
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/siphon.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
-description = "New weapon, Virus Bolt: every 3 seconds, a bolt that gives 2 stacks of Mono-Virus."
+upgrade_name = "Siphon"
+description = "New weapon, Siphon: every 7 seconds, a drone drains max health from the nearby enemy with the most health and brings it back to heal COLUMN."
 passives = Array[ExtResource("2")]([ExtResource("3")])
-
-

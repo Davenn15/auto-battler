@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_6pfn8")
 display_name = "trompero"
+placement = 3
 tier = 3
 upgrades = Array[ExtResource("6_46rfb")]([ExtResource("7_htyim"), ExtResource("8_l4lbu")])
 max_health = 950.0

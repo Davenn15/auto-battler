@@ -10,6 +10,6 @@ first_shard = 0
 second_shard = 3
 effect = ExtResource("2_effect")
 might = 25.0
-celerity_ward = 25.0
+celerity_ward = 35.0
 description = "Whenever an enemy damages you, they gain a stack of Revenge up to a maximum of 10. Each stack causes the enemy to deal 1% less damage to you and take 1% more damage from you."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -15,8 +15,10 @@ extends Node2D
 ##   --time-limit S   seconds of battle time before the battle is called a draw (default 90)
 ##   --seed N         random seed, to repeat a run exactly (default: random)
 ##   --duplicates     let a team have more than one of the same unit (off by default, like the game)
+##   --mix-factions   build teams from every faction (by default each team is a single,
+##                    randomly picked faction)
 ##   --no-frontline-rule  allow teams with no front-liner (by default every team has at least
-##                    one melee unit that isn't in the second-row list)
+##                    one unit whose Placement on its path is Front)
 ##   --show-placement print where every unit starts and how far it is from the nearest enemy
 ##   --no-retarget-on-move  units keep their target while they walk, the old rule (by default
 ##                    they pick their best target again after every step)
@@ -28,8 +30,6 @@ extends Node2D
 ##                    least half wound up, with its target in range, lands that attack first)
 ##   --no-gambit-resets-attack  casting leaves the attack wind-up where it was (by default a
 ##                    cast restarts it)
-##   --second-row A,B units that start one row behind the front (default: the random battle
-##                    scene's second_row_units; "none" for nobody)
 ##   --tier-health A,B,C   multiply max health by tier: A for tier 1, B for tier 2, ... (default all 1)
 ##   --tier-stats A,B,C    the same for Might, Insight, and Celerity
 ##   --damage-scale X      multiply all damage every unit takes by X (0.8 = 20% less), as a
@@ -63,8 +63,8 @@ var time_limit: float = 90.0
 var seed_value: int = 0
 var allow_duplicates: bool = false
 var show_placement: bool = false
-var second_row: Array[String] = []   # the shared list, read in _parse_args
 var require_frontline: bool = true
+var isolate_factions: bool = true   # each team from a single faction (--mix-factions turns it off)
 var tier_health: PackedFloat64Array = []   # index 0 = tier 1; missing tiers count as 1
 var tier_stats: PackedFloat64Array = []
 var damage_scale: float = 1.0
@@ -116,10 +116,11 @@ func _run() -> void:
 
 func _parse_args() -> void:
 	seed_value = randi()
-	_second_row_from_scene()
+	_settings_from_scene()
 	var args := OS.get_cmdline_user_args()   # everything after "--" on the command line
 	allow_duplicates = args.has("--duplicates")
 	require_frontline = not args.has("--no-frontline-rule")
+	isolate_factions = not args.has("--mix-factions")
 	show_placement = args.has("--show-placement")
 	BattleUnit.retarget_on_move = not args.has("--no-retarget-on-move")
 	Economy.tier_rework = not args.has("--old-economy")
@@ -141,8 +142,6 @@ func _parse_args() -> void:
 				time_limit = value.to_float()
 			"--seed":
 				seed_value = value.to_int()
-			"--second-row":
-				second_row.assign(Array() if value == "none" else Array(value.to_lower().split(",")))
 			"--tier-health":
 				tier_health = value.split_floats(",")
 			"--damage-scale":
@@ -156,11 +155,10 @@ func _parse_args() -> void:
 				out_dir = value
 
 
-## Uses the random battle scene's second_row_units and reserve_scale, as saved in the
-## scene, so both build and place teams the same way. Keeps the built-in values if the
-## scene or a setting can't be found. --second-row and --reserve still override them.
-func _second_row_from_scene() -> void:
-	second_row = RandomTeams.second_row_units()   # the list every computer-run army shares
+## Uses the random battle scene's reserve_scale, as saved in the scene, so both give teams
+## the same items. Keeps the built-in value if the scene or setting can't be found.
+## --reserve still overrides it. Placement comes from each unit's Placement field.
+func _settings_from_scene() -> void:
 	var scene := load(RANDOM_BATTLE_SCENE) as PackedScene
 	if scene == null:
 		push_warning("Balance sim: couldn't load %s; using the built-in settings." % RANDOM_BATTLE_SCENE)
@@ -194,8 +192,9 @@ func _run_battle(index: int, target: int) -> void:
 	var loadouts := {}
 	for team in [1, 2]:
 		var reserve := RandomTeams.reserve_budget(target, reserve_scale[team - 1])
-		teams[team] = RandomTeams.make_team(_roster, target, max_team, allow_duplicates,
-				require_frontline, second_row)
+		var pool := RandomTeams.team_roster(_roster, isolate_factions)
+		teams[team] = RandomTeams.make_team(pool, target, max_team, allow_duplicates,
+				require_frontline)
 		loadouts[team] = RandomTeams.buy_keepsakes(_keepsake_pools, reserve, teams[team].size(), BattleUnit.MAX_KEEPSAKES)
 	if teams[1].is_empty() or teams[2].is_empty():
 		push_warning("Battle %d: couldn't build a team for %d ARV; skipped." % [index, target])
@@ -212,7 +211,7 @@ func _run_battle(index: int, target: int) -> void:
 	_records.clear()
 	var lineups := {}
 	var reserves := {1: 0, 2: 0}   # Reserve actually spent; slots can run out first
-	var placement := RandomTeams.place_teams(grid, teams, second_row)
+	var placement := RandomTeams.place_teams(grid, teams)
 	if show_placement:
 		_print_placement(grid, teams, placement)
 	for team in teams:
@@ -511,7 +510,8 @@ func _summary() -> String:
 		"Finish a %d%%+ wound-up attack before casting: %s. Casting restarts the attack wind-up: %s" % [
 				roundi(BattleUnit.FINISH_ATTACK_SHARE * 100), "yes" if BattleUnit.finish_attack_before_gambit else "no (old rule)",
 				"yes" if BattleUnit.gambit_resets_attack else "no (old rule)"],
-		"Second row: %s. At least one front-liner per team: %s" % [", ".join(second_row) if not second_row.is_empty() else "nobody",
+		"Factions: %s." % ("each team from one faction, picked at random" if isolate_factions else "mixed"),
+		"Placement: each unit's and path's Placement field. At least one front-liner per team: %s" % [
 				"yes" if require_frontline else "no"],
 		"%s, rounded down to whole Shards (3). Average Reserve spent: team 1 %.1f, team 2 %.1f" % [_reserve_text(), reserve_spent[1] / n_battles, reserve_spent[2] / n_battles],
 		"Draws: %d (%d hit the %.0fs time limit)" % [draws, timeouts, time_limit],

@@ -38,7 +38,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	if time_left <= 0.0:
 		unit.remove_status(self)
 		return
-	unit.take_warded_damage(unit.max_health * burn_per_second * delta)
+	unit.add_running_damage("self_burn", unit.take_warded_damage(unit.max_health * burn_per_second * delta), OverdriveStatus.OVERDRIVE_GLOW)
 
 
 const OVERDRIVE_GLOW := Color(1.0, 0.35, 0.15)

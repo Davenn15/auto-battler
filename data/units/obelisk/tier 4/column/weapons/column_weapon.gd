@@ -66,6 +66,62 @@ static func lowest_ally(unit: BattleUnit, range_cells: int, hurt_only: bool) -> 
 	return best
 
 
+## For weapons that fire in a straight line (A1's wave, B2's laser): the direction, in the
+## world (as from cell_to_world), of the line from COLUMN that hits the most enemies within `length_cells`
+## (aimed at each enemy in reach in turn). Vector2.ZERO if no enemy is in reach.
+static func best_line(unit: BattleUnit, length_cells: int, width_cells: float = 1.1) -> Vector2:
+	var best := Vector2.ZERO
+	var most := 0
+	for enemy in enemies_in_range(unit, length_cells):
+		var dir := (unit.grid.cell_to_world(enemy.cell) - unit.grid.cell_to_world(unit.cell)).normalized()
+		var count := enemies_on_line(unit, dir, length_cells, width_cells).size()
+		if count > most:
+			most = count
+			best = dir
+	return best
+
+
+## Living, targetable enemies on the line from COLUMN along `dir` (world space, as from cell_to_world), up to
+## `length_cells` long and `width_cells` wide (1.1 = a little over one cell).
+static func enemies_on_line(unit: BattleUnit, dir: Vector2, length_cells: int, width_cells: float = 1.1) -> Array[BattleUnit]:
+	var result: Array[BattleUnit] = []
+	if dir == Vector2.ZERO:
+		return result
+	var start := unit.grid.cell_to_world(unit.cell)
+	var spacing := unit.grid.cell_spacing()
+	var reach := (length_cells + 0.5) * spacing
+	for node in unit.get_tree().get_nodes_in_group("units"):
+		var other := node as BattleUnit
+		if other == null or not other.alive or other.team == unit.team or not other.is_targetable():
+			continue
+		if _on_line(start, unit.grid.cell_to_world(other.cell), dir, reach, spacing * width_cells * 0.5):
+			result.append(other)
+	return result
+
+
+## Every cell the same line covers (the same test as enemies_on_line), to show its exact
+## hit zone on the ground.
+static func cells_on_line(unit: BattleUnit, dir: Vector2, length_cells: int, width_cells: float = 1.1) -> Array:
+	var result := []
+	if dir == Vector2.ZERO:
+		return result
+	var start := unit.grid.cell_to_world(unit.cell)
+	var spacing := unit.grid.cell_spacing()
+	var reach := (length_cells + 0.5) * spacing
+	for cell in unit.grid.all_cells():
+		if _on_line(start, unit.grid.cell_to_world(cell), dir, reach, spacing * width_cells * 0.5):
+			result.append(cell)
+	return result
+
+
+## True if `point` is ahead of `start` along `dir`, no farther than `reach`, and within
+## `half_width` of the line.
+static func _on_line(start: Vector2, point: Vector2, dir: Vector2, reach: float, half_width: float) -> bool:
+	var offset := point - start
+	var along := offset.dot(dir)
+	return along > 0.0 and along <= reach and absf(offset.cross(dir)) <= half_width
+
+
 ## Runs a weapon's timer.
 class TimerStatus extends Status:
 	const RETRY := 0.25   # seconds before trying again when there was nothing to fire at

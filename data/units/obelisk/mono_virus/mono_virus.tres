@@ -6,4 +6,3 @@
 script = ExtResource("1")
 damage_per_stack = 0.01
 transfer_share = 0.5
-number_interval = 0.5

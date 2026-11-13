@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("1")
 display_name = "BATR.EE"
+placement = 1
 tier = 3
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 attack_range_cells = 4

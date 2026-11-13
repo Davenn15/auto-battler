@@ -61,7 +61,7 @@ func _physics_process(delta: float) -> void:
 		_tick_timer += TICK_INTERVAL
 		var wrack_level := Stats.roll_wrack(wrack_chance)   # one roll per tick, for everyone it hits
 		for enemy in inside:
-			_damage(enemy, tick_damage, wrack_level)
+			_damage(enemy, tick_damage, wrack_level, true)
 	if _time_left <= 0.0:
 		_explode()
 
@@ -104,9 +104,13 @@ class ChargeLock extends Status:
 		return true
 
 
-func _damage(enemy: BattleUnit, amount: float, wrack_level: int) -> float:
+## `ticking`: one of the ring's steady ticks, shown as one running number per enemy;
+## the burst shows its own number.
+func _damage(enemy: BattleUnit, amount: float, wrack_level: int, ticking: bool = false) -> float:
 	amount *= pow(wrack_multiplier, wrack_level)
-	var dealt := enemy.take_damage(amount, wrack_level, damage_type)
+	var dealt := enemy.take_damage(amount, wrack_level, damage_type, false, null, not ticking)
+	if ticking:
+		enemy.add_running_damage("ring_%d" % get_instance_id(), dealt, Stats.damage_color(damage_type, wrack_level), wrack_level, TICK_INTERVAL + 0.25)
 	get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)
 	return dealt
 

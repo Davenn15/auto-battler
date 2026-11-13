@@ -95,6 +95,7 @@ func _ready() -> void:
 
 	column.add_child(HSeparator.new())
 	_text = _rich(11)
+	_text.mouse_filter = Control.MOUSE_FILTER_PASS   # so hovering a ward shows its tooltip (see _ward_value)
 	column.add_child(_text)
 	hide()
 
@@ -295,13 +296,14 @@ func _stat_table(u: BattleUnit) -> String:
 			grid += _grid_cell(_stat_color(attribute), Stats.STAT_NAMES[attribute])
 		grid += "[cell padding=0,1,12,1]%s[/cell]" % _stat_value(u, attribute)
 		grid += "[cell padding=0,1,0,1][color=%s]%s[/color][/cell]" % [
-				_stat_color(ward).to_html(false), _stat_value(u, ward)]
+				_stat_color(ward).to_html(false), _ward_value(u, ward)]
 	var out := "[table=3]%s[/table]" % grid
 
 	var cells: PackedStringArray = []
 	var extra: Array = []   # [name, value] pairs, two to a row
 	if _shown_stat(u, Stats.Stat.VAMPIRISM) > 0.0:
 		extra.append([Stats.STAT_NAMES[Stats.Stat.VAMPIRISM], _stat_value(u, Stats.Stat.VAMPIRISM)])
+	extra.append(["Damage", _attack_type_text(u)])
 	extra.append(["Range", "[b]%d[/b]" % u.attack_range])
 	extra.append(["Attack every", "[b]%.2fs[/b]" % u.get_attack_cooldown()])
 	extra.append(["Regen", "[b]%.1f/s[/b]" % u.get_health_regen()])
@@ -317,6 +319,15 @@ func _stat_table(u: BattleUnit) -> String:
 	return out + "\n[table=4]%s[/table]" % "".join(cells)
 
 
+## The kind of damage the unit's attacks deal (after anything changing it), in that damage
+## type's colour; "None" for a unit that never attacks (GATE.W(A)).
+func _attack_type_text(u: BattleUnit) -> String:
+	if u.data != null and u.data.passives.any(func(p): return p is GatePassive):
+		return "[b]None[/b]"
+	var damage_type := u.get_attack_damage_type()
+	return "[b][color=%s]%s[/color][/b]" % [Stats.DAMAGE_TYPE_COLORS[damage_type].to_html(false), Stats.DAMAGE_TYPE_NAMES[damage_type]]
+
+
 func _heading_row(first: String, second: String) -> String:
 	return "[cell][/cell][cell padding=0,3,12,0][color=%s][font_size=10]%s[/font_size][/color][/cell][cell padding=0,3,0,0][color=%s][font_size=10]%s[/font_size][/color][/cell]" % [
 			DIM, first.to_upper(), DIM, second.to_upper()]
@@ -329,6 +340,21 @@ func _grid_cell(color: Color, label: String) -> String:
 func _cells(color: Color, label: String, value: String) -> String:
 	return "[cell padding=0,1,5,1][color=%s]%s[/color][/cell][cell padding=0,1,12,1]%s[/cell]" % [
 			color.to_html(false), label.replace(" ", char(160)), value]   # names never wrap
+
+
+## A ward's value, with a tooltip saying how much of its damage type it blocks.
+const WARD_TYPES := {
+	Stats.Stat.MIGHT_WARD: Stats.DamageType.MIGHT,
+	Stats.Stat.INSIGHT_WARD: Stats.DamageType.INSIGHT,
+	Stats.Stat.CELERITY_WARD: Stats.DamageType.CELERITY,
+}
+
+func _ward_value(u: BattleUnit, ward: Stats.Stat) -> String:
+	if not WARD_TYPES.has(ward):
+		return _stat_value(u, ward)   # the wrack row's second column isn't a ward
+	var blocked := 1.0 - Stats.ward_multiplier(_shown_stat(u, ward))
+	var hint := "Blocks %d%% of %s damage" % [roundi(blocked * 100.0), Stats.DAMAGE_TYPE_NAMES[WARD_TYPES[ward]]]
+	return "[hint=\"%s\"]%s[/hint]" % [hint, _stat_value(u, ward)]
 
 
 ## The stat's value in bold, and how far it is from base if something is changing it.

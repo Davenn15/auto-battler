@@ -13,8 +13,6 @@ const BADGE_KEY := "VfxMonoVirusCount"
 var stacks := 0
 ## Who the damage meter credits: whoever infected the carrier last.
 var credit_id := 0
-var _pending := 0.0   # damage not yet shown as a number
-var _number_left := SETTINGS.number_interval
 
 
 ## Gives `target` `amount` more stacks, credited to `credit` (an instance id).
@@ -70,13 +68,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		amount *= Stats.ward_multiplier(unit.get_stat(Stats.ward_stat_for(SETTINGS.damage_type)))
 	var dealt := unit.take_warded_damage(amount, false, SETTINGS.damage_type)
 	unit.get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
-	_pending += dealt
-	_number_left -= delta
-	if _number_left <= 0.0:
-		_number_left += SETTINGS.number_interval
-		if unit.alive and _pending > 0.0:
-			unit._spawn_damage_number(_pending, SETTINGS.color)
-		_pending = 0.0
+	unit.add_running_damage("virus", dealt, SETTINGS.color)
 
 
 ## The carrier died: its stacks (or a share of them) jump to its nearest living ally.
@@ -87,7 +79,9 @@ func _on_carrier_died(dead: BattleUnit) -> void:
 	if heir == null:
 		return
 	KeepsakeVfx.virus_jump(dead.global_position, heir)
-	infect(heir, maxi(floori(stacks * SETTINGS.transfer_share), 1), credit_id)
+	# MOTHER-CHIP's A2 makes every stack jump, not just the usual share.
+	var share := 1.0 if VirusRotPassive.full_transfer_against(dead) else SETTINGS.transfer_share
+	infect(heir, maxi(floori(stacks * share), 1), credit_id)
 
 
 func _nearest_ally(dead: BattleUnit) -> BattleUnit:

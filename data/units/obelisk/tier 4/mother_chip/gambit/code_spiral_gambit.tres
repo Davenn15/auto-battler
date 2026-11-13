@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CodeSpiralGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/mother_chip/gambit/code_spiral_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Code Spiral"
+cast_time = 0.4
+description = "Calls down a corrupted code spiral on the spot within her range that covers the most enemies (1 cell around it). For 5 seconds, every enemy inside gets a stack of Mono-Virus each second."

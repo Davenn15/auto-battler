@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_q583n")
 display_name = "geomond"
+placement = 0
 tier = 4
 upgrades = Array[ExtResource("3_fw7oq")]([ExtResource("7_o2q6g"), ExtResource("8_sqitd")])
 max_health = 1300.0

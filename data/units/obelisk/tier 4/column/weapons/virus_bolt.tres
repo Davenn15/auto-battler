@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="ColumnVirusBoltWeapon" format=3]
-
-[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/virus_bolt_weapon.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-interval = 3.0
-passive_name = "Virus Bolt"
-description = "Every 3 seconds: fires a Mono-Virus bolt at a random enemy in range, giving 2 stacks of Mono-Virus."

@@ -67,10 +67,11 @@ var _flash_collecting := false    # true while it's still adding up hits
 var _flash_top: float             # health when the current flash started
 var _flash_low: float             # lowest health since then
 
-const DAMAGE_FONT_MIN := 7          # font size for the smallest hits
-const DAMAGE_FONT_MAX := 22          # font size for hits at or above DAMAGE_FOR_MAX_FONT
+const DAMAGE_FONT_MIN := 5.6        # font size for the smallest hits
+const DAMAGE_FONT_MAX := 17.6        # font size for hits at or above DAMAGE_FOR_MAX_FONT
 const DAMAGE_FOR_MAX_FONT := 400.0   # damage that reaches the biggest size
-const WRACK_FONT_BONUS := 2          # wracks are this much bigger again
+const WRACK_FONT_BONUS := 1.6        # each wrack level makes the number this much bigger again
+const FLOAT_TEXT_FONT := 7           # font size for floating words ("Overdrive", "Revived", ...)
 const DODGE_COLOR := Color(0.464, 0.464, 0.464, 1.0)
 const CHARGE_COLOR := Color(0.6, 0.4, 1.0)   # purple, so it reads differently from the team-colored health bar
 const CASTING_COLOR := Color(1.0, 0.45, 0.75)   # pink, while the bar drains
@@ -1351,7 +1352,9 @@ func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_nu
 		_die()
 	return dealt
 
-## Font size for a damage number: bigger for bigger hits, plus a bonus for wracks.
+## Font size for a damage number: from DAMAGE_FONT_MIN for tiny hits up to DAMAGE_FONT_MAX
+## at DAMAGE_FOR_MAX_FONT, growing fast for small hits and levelling off (square root), plus
+## WRACK_FONT_BONUS per wrack level. Worked out in fractions, rounded once at the end.
 func _damage_font_size(amount: float, wrack_level: int) -> int:
 	var t := clampf(amount / DAMAGE_FOR_MAX_FONT, 0.0, 1.0)   # 0 = tiny hit, 1 = huge hit
 	t = sqrt(t)   # grows quickly for small hits, then levels off
@@ -1360,12 +1363,76 @@ func _damage_font_size(amount: float, wrack_level: int) -> int:
 	return roundi(font_size)
 
 func _spawn_damage_number(amount: float, color: Color = Color.WHITE, wrack_level: int = 0) -> void:
-	show_float_text(str(roundi(amount)), color, _damage_font_size(amount, wrack_level))
+	var label := show_float_text(str(roundi(amount)), color, _damage_font_size(amount, wrack_level))
+	if label != null and wrack_level > 0:
+		add_wrack_icon(label)
 
-## Floating text that rises and fades above the unit. Statuses can use this too.
-func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = DAMAGE_FONT_MIN) -> void:
+
+## Colour of the little triangle beside a damage number that wracked.
+const WRACK_ICON_COLOR := Color(0.7, 0.3, 1.0)
+
+## Puts a small purple triangle just left of `label`'s text, marking a wracked hit. The
+## triangle is a child of the label, so it rises and fades with it. Call again after the
+## text changes (running numbers) to move it; it reuses the one already there.
+static func add_wrack_icon(label: Label) -> void:
+	var icon := label.get_node_or_null("WrackIcon") as Polygon2D
+	var font_size := label.get_theme_font_size("font_size")
+	var text_width := label.get_theme_font("font").get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var size := maxf(font_size * 0.55, 4.0)
+	if icon == null:
+		icon = Polygon2D.new()
+		icon.name = "WrackIcon"
+		icon.color = WRACK_ICON_COLOR
+		label.add_child(icon)
+	icon.polygon = PackedVector2Array([Vector2(0, -size), Vector2(size * 0.9, size * 0.6), Vector2(-size * 0.9, size * 0.6)])
+	# The label's text is centred in its box and sits on its bottom edge.
+	icon.position = Vector2(label.size.x / 2.0 - text_width / 2.0 - size - 2.0, label.size.y - font_size * 0.45)
+
+
+## Running damage numbers on this unit, by effect key (see add_running_damage).
+var _running: Dictionary = {}
+
+## Adds damage to this unit's running number for `key` (one per effect: "virus", "bleed",
+## a beam's id, ...), so damage that keeps coming shows as one number that counts up and
+## fades once it stops. A new number starts if the old one has already faded.
+func add_running_damage(key: String, amount: float, color: Color, wrack_level: int = 0, linger: float = RunningNumber.LINGER) -> void:
+	if amount <= 0.0 or not is_inside_tree() or not KeepsakeVfx.enabled():
+		return
+	var number = _running.get(key)   # untyped: it may have faded out and been freed
+	if not is_instance_valid(number) or not number.is_open():
+		var used := {}   # slots taken by numbers still counting, so a new one stacks above them
+		for other in _running.values():
+			if is_instance_valid(other) and other.is_open():
+				used[other.slot] = true
+		var slot := 0
+		while used.has(slot):
+			slot += 1
+		number = RunningNumber.new()
+		number.unit = self
+		number.slot = slot
+		number.size = FLOAT_TEXT_BOX
+		number.pivot_offset = FLOAT_TEXT_BOX / 2.0
+		number.rotation = view_rotation
+		number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		number.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		number.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		number.z_index = 20
+		number.add_theme_color_override("font_outline_color", Color.BLACK)
+		number.add_theme_constant_override("outline_size", 4)
+		get_tree().current_scene.add_child(number)   # not the unit's child, so it outlives a killing blow
+		for old in _running.keys():   # forget finished ones
+			if not is_instance_valid(_running[old]) or not _running[old].is_open():
+				_running.erase(old)
+		_running[key] = number
+	number.linger = maxf(number.linger, linger)   # pulsing effects keep it up between pulses
+	number.add(amount, color, wrack_level)
+	number._process(0.0)   # place it above the unit right away
+
+## Floating text that rises and fades above the unit. Statuses can use this too. Returns the
+## label (null if the unit is off the board).
+func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = FLOAT_TEXT_FONT) -> Label:
 	if not is_inside_tree():
-		return   # off the board (cleared between rounds): nowhere to show it
+		return null   # off the board (cleared between rounds): nowhere to show it
 	var label := Label.new()
 	label.text = text
 	label.size = FLOAT_TEXT_BOX
@@ -1391,6 +1458,7 @@ func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = 
 	tween.tween_property(label, "global_position", label.global_position + Vector2(0.0, -FLOAT_RISE).rotated(view_rotation), FLOAT_TIME)
 	tween.tween_property(label, "modulate:a", 0.0, FLOAT_TIME)
 	tween.chain().tween_callback(label.queue_free)
+	return label
 
 func heal(amount: float, source_id: int = 0, can_wrack: bool = true) -> void:
 	if not alive or amount <= 0.0 or health >= max_health:

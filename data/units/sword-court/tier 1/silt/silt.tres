@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("4_0ajra")
 display_name = "silt"
+placement = 3
 upgrades = Array[ExtResource("6_rivjx")]([ExtResource("7_ll8tn"), ExtResource("8_uwfht")])
 max_health = 750.0
 attack_range_cells = 3

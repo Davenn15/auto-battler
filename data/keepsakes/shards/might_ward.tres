@@ -6,6 +6,6 @@
 script = ExtResource("1_keep")
 first_shard = 1
 second_shard = 1
-might_ward = 15.0
+might_ward = 20.0
 is_shard = true
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

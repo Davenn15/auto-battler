@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ColumnGatlingWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/gatling_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Gatling Cannon"
+description = "Fires small shots at the nearest enemy in range for 8 + 0.18x Celerity damage each. Shots come faster the longer it fires at the same enemy, from 0.8 down to 0.15 seconds apart."

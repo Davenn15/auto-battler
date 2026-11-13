@@ -40,6 +40,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	# climbing: a quarter of the total lands in the first half, three quarters in the second.
 	var amount := total * (_elapsed * _elapsed - before * before) / (duration * duration)
 	var dealt := unit.take_warded_damage(amount)
+	unit.add_running_damage("starburn", dealt, StarburnStar.COLOR)
 	unit.get_tree().call_group("damage_tracker", "record_damage", source_id, dealt)
 	if _elapsed >= duration:
 		unit.remove_status(self)

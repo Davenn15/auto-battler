@@ -9,6 +9,6 @@ keepsake_name = "Frailty Frame"
 first_shard = 1
 second_shard = 1
 effect = ExtResource("2_effect")
-might_ward = 50.0
+might_ward = 60.0
 description = "You can't take more than 25% of your health from one instance of damage."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

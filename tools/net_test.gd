@@ -9,7 +9,6 @@ extends Node
 ##          --shot <file.png> save a screenshot 6 s into the first fight (needs a window)
 ## Each copy plans with the computer strategy and prints what happens.
 
-const SECOND_ROW: Array[String] = ["bremes", "lunck", "wesper", "von carrow", "vere"]
 
 
 func _ready() -> void:
@@ -74,7 +73,7 @@ class Driver extends Node:
 					print("[%s] quitting at round %d" % [label, game.round_number])
 					get_tree().quit()
 					return
-				policy.make_plan(game.player, game.combat_number(), 0, SECOND_ROW)
+				policy.make_plan(game.player, game.combat_number(), 0)
 				game.changed()
 				if game.round_number == idle_round:
 					print("[%s] round %d: not pressing Ready" % [label, game.round_number])

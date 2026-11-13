@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_q3a4s")
 display_name = "vere"
+placement = 1
 tier = 4
 upgrades = Array[ExtResource("3_7woj0")]([ExtResource("7_frp7o"), ExtResource("8_82v00")])
 max_health = 950.0

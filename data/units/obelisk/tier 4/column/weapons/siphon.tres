@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ColumnSiphonWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/siphon_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 7.0
+passive_name = "Siphon"
+description = "Every 7 seconds: sends a drone to the enemy with the most health within 3 cells. It hovers over it for 1.5 seconds, beaming away 6% of its max health (for the rest of combat), then flies back and heals COLUMN that much."

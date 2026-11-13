@@ -1,13 +1,11 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bi8dr2okyogbv"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/shard_print.tres" id="3"]
-
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" uid="uid://cjuxvp3y02tj3" path="res://data/units/obelisk/tier 4/column/weapons/laser.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
-description = "New weapon, Shard Printer: every 8 seconds, gives a random Shard to the nearby ally with the fewest keepsakes, until combat ends."
+upgrade_name = "Laser"
+description = "New weapon, Laser: every 10 seconds, a laser along a line that burns every enemy in it for 50 + 0.3x Insight + 10% of their max health per second for 2.5 seconds."
 passives = Array[ExtResource("2")]([ExtResource("3")])
-
-

@@ -35,5 +35,6 @@ class Chill extends Status:
 			var enemy := node as BattleUnit
 			if enemy != null and enemy.alive and enemy.team != unit.team \
 					and unit.grid.get_distance(unit.cell, enemy.cell) <= effect.radius_cells:
-				var dealt := enemy.take_damage(effect.damage, 0, effect.damage_type)
+				var dealt := enemy.take_damage(effect.damage, 0, effect.damage_type, false, null, false)
+				enemy.add_running_damage("icy_%d" % unit.get_instance_id(), dealt, Stats.damage_color(effect.damage_type), 0, 1.25)
 				unit.get_tree().call_group("damage_tracker", "record_damage", unit.get_instance_id(), dealt)

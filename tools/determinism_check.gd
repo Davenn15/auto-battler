@@ -5,7 +5,6 @@ extends SceneTree
 ##   2. run --run <armies.json> with --headless --fixed-fps 60, then 144, 37, 23 ...
 ##   Every run must print the same RESULT line (fight number, fingerprint, winner).
 
-const SECOND_ROW: Array[String] = ["bremes", "lunck", "wesper", "von carrow", "vere"]
 
 
 func _initialize() -> void:
@@ -48,5 +47,5 @@ func _army() -> Array:
 		p.aura = mini(48, 6 * c)
 		p.reserve += 25
 		MatchRules.start_planning(p, c)
-		policy.make_plan(p, c, 0, SECOND_ROW)
+		policy.make_plan(p, c, 0)
 	return ArmyUnit.army_to_array(p.board_units())

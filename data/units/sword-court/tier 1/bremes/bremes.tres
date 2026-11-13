@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_44gax")
 display_name = "bremes"
+placement = 1
 upgrades = Array[ExtResource("6_30vy6")]([ExtResource("7_8x456"), ExtResource("8_rtaju")])
 max_health = 900.0
 passives = Array[ExtResource("1_6pai0")]([ExtResource("3_1aj46")])

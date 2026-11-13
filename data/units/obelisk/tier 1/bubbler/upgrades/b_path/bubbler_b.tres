@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bidd020p3qlev"]
 
-[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/warding_gambit.tres" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/bubbler_b1.tres" id="3"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/bubbler_b2.tres" id="4"]
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Resource" uid="uid://b0vbeqtrubsiu" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/warding_gambit.tres" id="2"]
+[ext_resource type="Resource" uid="uid://c5v53jftu4p2k" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/bubbler_b1.tres" id="3"]
+[ext_resource type="Resource" uid="uid://csj08imc1eeug" path="res://data/units/obelisk/tier 1/bubbler/upgrades/b_path/bubbler_b2.tres" id="4"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="5_in0st"]
 
 [resource]
 script = ExtResource("1")

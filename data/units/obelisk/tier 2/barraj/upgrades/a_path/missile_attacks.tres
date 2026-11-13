@@ -4,9 +4,8 @@
 
 [resource]
 script = ExtResource("1")
-spread_cells = 2
 blast_cells = 1.3
 damage = 90.0
 might_scaling = 0.35
 passive_name = "Missile Attacks"
-description = "Each attack also fires a missile that explodes near the target."
+description = "Each attack also fires a missile at a random enemy in range that explodes on it."

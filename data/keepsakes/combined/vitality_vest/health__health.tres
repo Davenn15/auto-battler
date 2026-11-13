@@ -1,14 +1,14 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3]
+[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://c3mths44naewa"]
 
 [ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/vitality_vest/health__health_effect.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_keep")
+keepsake_name = "Vitality Vest"
 first_shard = 6
 second_shard = 6
+health = 400.0
 effect = ExtResource("2_effect")
-keepsake_name = "Vitality Vest"
-health = 500.0
 description = "Your Regeneration is increased by 1.5% of your Maximum Health."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

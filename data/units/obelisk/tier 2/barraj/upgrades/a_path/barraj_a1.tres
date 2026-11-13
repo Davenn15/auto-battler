@@ -7,5 +7,5 @@
 script = ExtResource("1")
 description = "All of his missiles explode in a bigger area."
 gambit_bonuses = Dictionary[String, float]({
-"blast_cells": 0.3
+"blast_cells": 0.5
 })

@@ -15,6 +15,7 @@ display_name = "lordred"
 tier = 4
 upgrades = Array[ExtResource("3_3ceq5")]([ExtResource("7_eq5kh"), ExtResource("8_frb6k")])
 max_health = 1350.0
+placement = 1
 passives = Array[ExtResource("1_cgawd")]([ExtResource("3_iohu0")])
 gambit = ExtResource("1_fsych")
 max_charge = 60.0

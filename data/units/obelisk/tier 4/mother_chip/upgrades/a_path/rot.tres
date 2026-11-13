@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="VirusRotPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/mother_chip/upgrades/a_path/scripts/virus_rot_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+rot_per_stack = 0.04
+passive_name = "Bitrot"
+description = "Enemies lose 4% of their healing, shielding and wards for each Mono-Virus stack on them, up to 60%."

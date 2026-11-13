@@ -59,7 +59,7 @@ func _decay(unit: BattleUnit, delta: float) -> void:
 		unit.show_float_text("Unraveling", DECAY_COLOR)
 	_orphaned_for += delta
 	var rate := decay_start + decay_ramp * _orphaned_for   # share of max health per second
-	unit.take_warded_damage(unit.max_health * rate * delta)
+	unit.add_running_damage("self_burn", unit.take_warded_damage(unit.max_health * rate * delta), DECAY_COLOR)
 
 func _random_enemy(unit: BattleUnit) -> BattleUnit:
 	var options: Array[BattleUnit] = []

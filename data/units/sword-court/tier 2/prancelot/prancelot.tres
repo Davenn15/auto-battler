@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("2_b6amk")
 display_name = "prancelot"
+placement = 3
 tier = 2
 upgrades = Array[ExtResource("3_8pcnp")]([ExtResource("7_ksn28"), ExtResource("8_f1y6p")])
 max_health = 800.0

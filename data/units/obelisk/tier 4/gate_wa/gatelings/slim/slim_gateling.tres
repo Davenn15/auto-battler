@@ -10,6 +10,7 @@
 [resource]
 script = ExtResource("1")
 display_name = "Slim Gateling"
+placement = 0
 summon_only = true
 max_health = 350.0
 passives = Array[ExtResource("2")]([ExtResource("4")])

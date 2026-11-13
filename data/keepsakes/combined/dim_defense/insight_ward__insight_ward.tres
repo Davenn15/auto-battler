@@ -9,6 +9,6 @@ keepsake_name = "Dim Defense"
 first_shard = 5
 second_shard = 5
 effect = ExtResource("2_effect")
-insight_ward = 50.0
+insight_ward = 60.0
 description = "Nearby enemies gain reduced Charge."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

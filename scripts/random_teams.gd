@@ -50,7 +50,7 @@ static func paths_by_level(data: UnitData) -> Array:
 ## parse_pick) always go in first; one whose path is null gets a random affordable path.
 ## Empty if none was found.
 static func make_team(roster: Array[UnitData], target: int, max_team: int = 8, allow_duplicates: bool = false,
-		require_frontline: bool = false, second_row: Array[String] = [], forced: Array = []) -> Array:
+		require_frontline: bool = false, forced: Array = []) -> Array:
 	for attempt in MAX_ATTEMPTS:
 		var team: Array = []
 		var remaining := target
@@ -78,10 +78,33 @@ static func make_team(roster: Array[UnitData], target: int, max_team: int = 8, a
 			remaining -= Economy.unit_aura_value(data.tier, path.size())
 		if remaining != 0:
 			continue
-		if require_frontline and not team.any(func(pick): return is_frontline(pick, second_row)):
+		if require_frontline and not team.any(func(pick): return is_frontline(pick)):
 			continue   # all back line: roll again
 		return team
 	return []
+
+
+## The units one team may be built from. With `isolate_factions` (the default in random
+## battles and the sims) it's a single faction: the faction of the team's first forced pick,
+## or else a random faction from the roster; each team picks its own, so it can be the same
+## as the other's. Without it, the whole roster.
+static func team_roster(roster: Array[UnitData], isolate_factions: bool, forced: Array = []) -> Array[UnitData]:
+	if not isolate_factions:
+		return roster
+	var faction := ""
+	if not forced.is_empty():
+		faction = MatchRules.faction_of(forced[0]["data"])
+	else:
+		var factions: Array[String] = []
+		for data in roster:
+			var name := MatchRules.faction_of(data)
+			if not factions.has(name):
+				factions.append(name)
+		if factions.is_empty():
+			return roster
+		factions.sort()   # a fixed order, so the same seed picks the same faction
+		faction = factions.pick_random()
+	return roster.filter(func(data): return MatchRules.faction_of(data) == faction)
 
 
 ## A random level the unit can afford with `budget` Aura (at least level 0), then a
@@ -131,31 +154,33 @@ static func min_cost(forced: Array) -> int:
 	return total
 
 
-## True for a melee pick that isn't listed in `second_row`: the units that stand in front
-## and take the first hits.
-## The one list of units that start in the second row (lower-case display names), used by
-## every computer-run army: random battles, the computer opponent and both sims. It's the
-## random battle scene's second_row_units, so edit it there. Front-liners come from each
-## unit's own UnitData.frontline.
-static func second_row_units() -> Array[String]:
-	if _second_row_cache.is_empty():
-		var scene := load(SECOND_ROW_SCENE) as PackedScene
-		if scene != null:
-			var state := scene.get_state()
-			for i in state.get_node_property_count(0):   # node 0 is the scene's root
-				if state.get_node_property_name(0, i) == "second_row_units":
-					_second_row_cache.assign(state.get_node_property_value(0, i))
-		if _second_row_cache.is_empty():
-			push_warning("RandomTeams: no second_row_units in %s." % SECOND_ROW_SCENE)
-	return _second_row_cache.duplicate()
+## Where a pick starts (UnitData.Placement): the unit's own Placement, changed by its
+## upgrades: the latest one not set to Inherit wins, so a level 2 upgrade on Inherit keeps
+## its level 1's choice.
+static func row_of(pick: Dictionary) -> UnitData.Placement:
+	var data: UnitData = pick["data"]
+	var row := data.placement
+	var choices := data.upgrades
+	for choice in (pick["path"] if pick["path"] != null else []):
+		if choice < 0 or choice >= choices.size():
+			break
+		var upgrade: Upgrade = choices[choice]
+		match upgrade.placement:
+			Upgrade.Placement.FRONT:
+				row = UnitData.Placement.FRONT
+			Upgrade.Placement.SECOND_ROW:
+				row = UnitData.Placement.SECOND_ROW
+			Upgrade.Placement.BACK:
+				row = UnitData.Placement.BACK
+			Upgrade.Placement.RANGED:
+				row = UnitData.Placement.RANGED
+		choices = upgrade.next_choices
+	return row
 
-const SECOND_ROW_SCENE := "res://scenes/random_battle.tscn"
-static var _second_row_cache: Array[String] = []
 
-
-static func is_frontline(pick: Dictionary, second_row: Array[String] = []) -> bool:
-	return (attack_range(pick) <= 1 or pick["data"].frontline) and not pick["data"].back_row \
-			and not second_row.has(pick["data"].display_name.to_lower())
+## True for a pick that stands in front and takes the first hits (see row_of).
+static func is_frontline(pick: Dictionary) -> bool:
+	return row_of(pick) == UnitData.Placement.FRONT
 
 
 ## A pick's attack range: the unit's own plus every chosen upgrade's bonus, the same
@@ -164,7 +189,7 @@ static func attack_range(pick: Dictionary) -> int:
 	var data: UnitData = pick["data"]
 	var reach := data.attack_range_cells
 	var choices := data.upgrades
-	for choice in pick["path"]:
+	for choice in (pick["path"] if pick["path"] != null else []):
 		var upgrade: Upgrade = choices[choice]
 		reach += upgrade.attack_range_bonus
 		choices = upgrade.next_choices
@@ -176,12 +201,12 @@ static func attack_range(pick: Dictionary) -> int:
 ## can while that enemy is still in its attack range; a unit that can't reach any enemy
 ## from its half stands as close as it can instead. Units take turns moving to their
 ## best cell until nobody wants to move.
-## Units named in `second_row` (lower-case display names) always start one row behind the
-## front, preferably right behind a teammate in the front row.
+## Each unit's row comes from row_of (its upgrades' Placement, else the unit's own). Second-row
+## units always start one row behind the front, preferably right behind a front-liner.
 ## Ranged units first make sure every enemy has a front-liner of theirs strictly closer
 ## than they are, so the enemy's nearest-target pick lands on the front line first. Only
 ## then do they look for the best range.
-static func place_teams(grid: BattleGrid, teams: Dictionary, second_row: Array[String] = []) -> Dictionary:
+static func place_teams(grid: BattleGrid, teams: Dictionary) -> Dictionary:
 	var placement := {}
 	for team in teams:
 		var half := half_cells(grid, team)
@@ -200,16 +225,18 @@ static func place_teams(grid: BattleGrid, teams: Dictionary, second_row: Array[S
 			var i: int = mover[1]
 			var cells: Array = placement[team]
 			var enemies: Array = placement[3 - team]
-			# A front-liner with a longer range (UnitData.frontline) is placed like a melee unit.
-			var reach := 1 if teams[team][i]["data"].frontline else attack_range(teams[team][i])
-			if teams[team][i]["data"].back_row:
+			var row := row_of(teams[team][i])
+			var reach := attack_range(teams[team][i])
+			if row == UnitData.Placement.FRONT:
+				reach = 1    # a front-liner with a longer range is placed like a melee unit
+			elif row == UnitData.Placement.BACK:
 				reach = 99   # any distance is "in range", so it stands as far back as it can
-			var in_second_row := second_row.has(teams[team][i]["data"].display_name.to_lower())
+			var in_second_row := row == UnitData.Placement.SECOND_ROW
 			var hides_behind_front := reach > 1 and not in_second_row
 			var fronts: Array = []   # cells of this team's front-liners, for ranged units to stay behind
 			if hides_behind_front:
 				for j in teams[team].size():
-					if j != i and is_frontline(teams[team][j], second_row):
+					if j != i and is_frontline(teams[team][j]):
 						fronts.append(cells[j])
 			var score_of := func(cell: Vector2i) -> int:
 				if in_second_row:

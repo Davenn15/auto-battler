@@ -102,7 +102,7 @@ class GateStatus extends Status:
 			unit.show_float_text("Collapsing", GateRules.LIGHT)
 		_alone_for += delta
 		var rate := passive.lone_decay_start + passive.lone_decay_ramp * _alone_for   # share of max health per second
-		unit.take_warded_damage(unit.max_health * rate * delta)
+		unit.add_running_damage("self_burn", unit.take_warded_damage(unit.max_health * rate * delta), GateRules.LIGHT)
 
 	func _on_ally_died(ally: BattleUnit) -> void:
 		if not is_instance_valid(_holder) or not _holder.alive or not _holder.active:

@@ -117,7 +117,7 @@ static func attack_cooldown(celerity: float) -> float:
 ## multiplies all Charge gained. The balance sim's --old-insight flag sets it false.
 static var insight_charge_regen := true
 ## Charge per second each point of Insight adds to Charge Regen (100 Insight = +1.5/s).
-const INSIGHT_CHARGE_REGEN := 0.015
+const INSIGHT_CHARGE_REGEN := 0.04
 
 
 ## What all Charge gained is multiplied by. Old rule: Insight / 100 (200 builds charge

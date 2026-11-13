@@ -4,10 +4,11 @@
 
 [resource]
 script = ExtResource("1")
+missiles = 6
 interval = 0.15
 blast_cells = 1.0
-damage = 110.0
-might_scaling = 0.35
+damage = 90.0
+might_scaling = 0.3
 gambit_name = "Barrage"
-cast_time = 0.4
-description = "Launches a barrage of missiles at a large area. Each missile lands on a random point in the area and explodes."
+cast_time = 0.5
+description = "Launches a barrage of missiles. Each one flies at a random enemy within 5 cells, following it, and explodes on it, damaging everyone nearby."

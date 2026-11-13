@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="WrackPierceEffect" format=3]
+[gd_resource type="Resource" script_class="WrackPierceEffect" format=3 uid="uid://q5vbblu2nnrj"]
 
 [ext_resource type="Script" uid="uid://777o0e60qksw" path="res://data/keepsakes/combined/opportunist/wrack_pierce_effect.gd" id="1_eff"]
 
 [resource]
 script = ExtResource("1_eff")
-ignored = 0.5
+ignored = 0.3
 metadata/_custom_type_script = "uid://777o0e60qksw"

@@ -8,6 +8,7 @@
 [resource]
 script = ExtResource("2_br16x")
 display_name = "blade bag"
+placement = 0
 summon_only = true
 health_regen = 0.0
 sprite = ExtResource("3_br16x")

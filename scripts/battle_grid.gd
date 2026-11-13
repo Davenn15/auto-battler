@@ -136,6 +136,12 @@ func _axial_round(q: float, r: float) -> Vector2i:
 
 # ---------- Queries ----------
 
+## Every cell on the board.
+func all_cells() -> Array:
+	_ensure_built()
+	return _ids.keys()
+
+
 func has_cell(cell: Vector2i) -> bool:
 	_ensure_built()
 	return _ids.has(cell)
@@ -218,6 +224,14 @@ func get_next_step(from: Vector2i, to: Vector2i) -> Vector2i:
 	if path.size() < 2:
 		return from
 	return _cells_by_id[path[1]]   # path[0] is `from`
+
+
+## A cell's six corners in world space (for effects that highlight exact cells).
+func hex_corners_world(cell: Vector2i) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for point in _hex_points(cell, 6):
+		points.append(to_global(point))
+	return points
 
 
 # ---------- Debug drawing ----------

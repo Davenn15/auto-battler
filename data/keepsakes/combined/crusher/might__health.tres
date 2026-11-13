@@ -1,15 +1,14 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3]
+[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://2i3buu0jiyjf"]
 
 [ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" path="res://data/keepsakes/combined/crusher/might__health_effect.tres" id="2_effect"]
+[ext_resource type="Resource" uid="uid://iae7krnm20qs" path="res://data/keepsakes/combined/crusher/might__health_effect.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Crusher"
-first_shard = 0
 second_shard = 6
-effect = ExtResource("2_effect")
 might = 20.0
 health = 250.0
+effect = ExtResource("2_effect")
 description = "Your attacks deal 2.5% of your Maximum Health as damage."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/mother_chip/upgrades/b_path/harvest.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Source Code"
+description = "Whenever an ally dies, she absorbs its source code as another Chip."
+passives = Array[ExtResource("2")]([ExtResource("3")])

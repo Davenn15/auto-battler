@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Firewall"
+description = "Harvest also gives her a shield for 5 seconds: 100, plus 40 for each stack consumed."
+gambit_overrides = Dictionary[String, float]({
+"shield": 100.0,
+"shield_per_stack": 40.0
+})

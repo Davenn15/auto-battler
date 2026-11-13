@@ -109,7 +109,7 @@ class RevivedStatus extends Status:
 		if not unit.active:
 			return
 		_time += delta
-		unit.take_warded_damage(unit.max_health * (start + ramp * _time) * delta)
+		unit.add_running_damage("self_burn", unit.take_warded_damage(unit.max_health * (start + ramp * _time) * delta), Color(0.75, 0.9, 0.6))
 
 
 ## On Recycloid while his copy lives: no Charge for him.

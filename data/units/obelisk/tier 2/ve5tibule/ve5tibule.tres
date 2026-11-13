@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("1")
 display_name = "VE5TIBULE"
+placement = 3
 tier = 2
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 max_health = 800.0

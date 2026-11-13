@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MotherBeamPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/mother_chip/upgrades/b_path/scripts/mother_beam_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passive_name = "Overclock"
+description = "Her and her Chips' attacks become continuous beams that deal up to double damage the lower the target's health."

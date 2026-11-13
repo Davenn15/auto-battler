@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ColumnKineticWaveWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/kinetic_wave_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 6.0
+passive_name = "Kinetic Wave"
+description = "Every 6 seconds: a wave along the line that hits the most enemies (4 cells, 1.5 cells wide), dealing 30 + 0.4x Might damage and stunning each for 1 second."

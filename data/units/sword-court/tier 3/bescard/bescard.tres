@@ -12,6 +12,7 @@
 [resource]
 script = ExtResource("4_udata")
 display_name = "bescard"
+placement = 0
 tier = 3
 upgrades = Array[ExtResource("6_jm8m8")]([ExtResource("7_cxw56"), ExtResource("8_2bcig")])
 max_health = 1250.0

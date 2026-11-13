@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SelfRepairGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/repl_k8r/replk4nt/self_repair_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Self-Repair"
+cast_time = 0.3
+description = "Heals itself for 30% of its max health."

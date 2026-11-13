@@ -16,6 +16,7 @@ tier = 3
 upgrades = Array[ExtResource("3_ktop8")]([ExtResource("7_kkayf"), ExtResource("8_2dwrb")])
 max_health = 1200.0
 attack_range_cells = 2
+placement = 1
 passives = Array[ExtResource("1_ff10o")]([ExtResource("3_t1uk1")])
 gambit = ExtResource("1_ldwk4")
 max_charge = 90.0

@@ -13,7 +13,7 @@ const ROUND_DAMAGE_BASE := 3
 const NEW_START_AURA := 10
 const OLD_START_AURA := 6
 ## The most Aura a player is ever given in a match, counting the starting Aura.
-const NEW_MAX_AURA_RECEIVED := 72
+const NEW_MAX_AURA_RECEIVED := 100
 const OLD_MAX_AURA_RECEIVED := 48
 ## Aura income per round is the round number times this, rounded down.
 const NEW_AURA_INCOME_SCALE := 1.75
@@ -113,15 +113,23 @@ static func _keepsake_pools() -> Dictionary:
 
 # ---------- Rounds and money ----------
 
+## Encounter rounds are left out for now, so combats are rounds 2, 3, 4, ... Income and
+## loss damage are still sized as when an Encounter came between combats (combats on rounds
+## 3, 5, 7, ...), by using this paced round instead: 3 for round 2, 5 for round 3, and so on.
+static func paced_round(round_number: int) -> int:
+	return 2 * round_number - 1
+
+
 ## Reserve each player gets after a player combat in round `round_number`.
 static func combat_income(round_number: int) -> int:
-	return round_number
+	return paced_round(round_number)
 
 
 ## Aura each player gets after a player combat in round `round_number` (before the cap).
-## With the tier rework it's the round number x NEW_AURA_INCOME_SCALE, rounded down.
+## With the tier rework it's the paced round x NEW_AURA_INCOME_SCALE, rounded down.
 static func aura_income(round_number: int) -> int:
-	return floori(round_number * NEW_AURA_INCOME_SCALE) if Economy.tier_rework else round_number
+	var paced := paced_round(round_number)
+	return floori(paced * NEW_AURA_INCOME_SCALE) if Economy.tier_rework else paced
 
 
 ## Pays both kinds of income. Aura stops once the player has been given max_aura_received().
@@ -148,9 +156,9 @@ static func survivor_damage(surviving_aura: int) -> int:
 
 
 ## The part of a loss that comes from the round: starts higher and grows half as fast
-## as the round number (4 in round 3, 5 in round 5, 6 in round 7, ...).
+## as the paced round (4 for the first combat, 5 for the second, 6 for the third, ...).
 static func round_damage(round_number: int) -> int:
-	return ROUND_DAMAGE_BASE + floori(round_number / 2.0)
+	return ROUND_DAMAGE_BASE + floori(paced_round(round_number) / 2.0)
 
 
 ## Draws: each player takes half of what they'd take for losing, rounded down.

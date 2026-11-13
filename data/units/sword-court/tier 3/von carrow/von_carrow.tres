@@ -15,6 +15,7 @@ display_name = "von carrow"
 tier = 3
 upgrades = Array[ExtResource("3_xlp4v")]([ExtResource("7_0x5b2"), ExtResource("8_p10ub")])
 max_health = 950.0
+placement = 1
 passives = Array[ExtResource("1_igrbh")]([ExtResource("3_mbowq")])
 gambit = ExtResource("1_4h1u2")
 max_charge = 65.0

@@ -4,10 +4,12 @@
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Resource" uid="uid://b2xv4nd3psu0d" path="res://data/units/obelisk/tier 4/column/weapons/pulse.tres" id="3"]
 [ext_resource type="Resource" uid="uid://c1drq0fif3p6t" path="res://data/units/obelisk/tier 4/column/upgrades/a_path/column_a1.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/upgrades/a_path/column_a2.tres" id="5"]
+[ext_resource type="Resource" uid="uid://dbyd84p255kdd" path="res://data/units/obelisk/tier 4/column/upgrades/a_path/column_a2.tres" id="5"]
 
 [resource]
 script = ExtResource("1")
-description = "New weapon, Pulse: every 3 seconds, a small shield and damage to enemies within 1 cell."
+upgrade_name = "Industrial"
+description = "New weapon, Pulse: every 3 seconds, damages enemies within 1 cell and gains a shield that grows with each enemy hit."
 passives = Array[ExtResource("2")]([ExtResource("3")])
 next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])
+placement = 1

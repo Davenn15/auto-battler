@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="HealthStrikeEffect" format=3]
+[gd_resource type="Resource" script_class="HealthStrikeEffect" format=3 uid="uid://iae7krnm20qs"]
 
 [ext_resource type="Script" uid="uid://c83iidbmmnf5c" path="res://data/keepsakes/combined/crusher/health_strike_effect.gd" id="1_eff"]
 
 [resource]
 script = ExtResource("1_eff")
-share = 0.025
+share = 0.02
 metadata/_custom_type_script = "uid://c83iidbmmnf5c"

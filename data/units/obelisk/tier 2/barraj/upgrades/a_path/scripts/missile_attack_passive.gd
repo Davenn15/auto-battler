@@ -1,10 +1,9 @@
 class_name MissileAttackPassive
 extends Passive
-## BAR.RAJ A: each of his attacks also fires a missile that lands on a random point within
-## Spread Cells of his target and explodes. Damage = Damage + Might Scaling x Might.
+## BAR.RAJ A: each of his attacks also fires a missile at a random enemy within his attack
+## range, which follows it and explodes on it. Damage = Damage + Might Scaling x Might.
 ## The blast is the same size as his Barrage missiles (so A1 grows both).
 
-@export var spread_cells: int = 1
 ## Blast size, in hex cells, used only if his Gambit isn't Barrage.
 @export var blast_cells: float = 0.8
 @export var damage: float = 40.0
@@ -23,12 +22,17 @@ class MissileAttackStatus extends Status:
 		passive = p_passive
 
 	func on_attack(unit: BattleUnit) -> void:
-		var target := unit.target
-		if not is_instance_valid(target) or not target.alive:
+		var enemies: Array = []
+		for node in unit.get_tree().get_nodes_in_group("units"):
+			var enemy := node as BattleUnit
+			if enemy != null and enemy.alive and enemy.team != unit.team and enemy.is_targetable() \
+					and unit.grid.get_distance(unit.cell, enemy.cell) <= unit.attack_range:
+				enemies.append(enemy)
+		if enemies.is_empty():
 			return
-		var point := BarrageGambit.random_point(unit.grid, target.cell, passive.spread_cells)
+		var target: BattleUnit = CombatRng.pick(enemies)
 		var amount := Stats.scaled(passive.damage, passive.might_scaling, unit.get_stat(Stats.Stat.MIGHT))
-		BarrageGambit.fire(unit, point, _blast_cells(unit) * unit.grid.cell_spacing(), amount,
+		BarrageGambit.fire(unit, target, _blast_cells(unit) * unit.grid.cell_spacing(), amount,
 				passive.damage_type, 0, 0.0)
 
 

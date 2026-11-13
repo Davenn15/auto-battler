@@ -1,7 +1,7 @@
 class_name MatchGame
 extends Node2D
 ## A match: you against the computer, or online against another player (see Net). Runs
-## the rounds (Opening Shop, then Encounter and Player Combat in turn), the planning phase
+## the rounds (Opening Shop, then Player Combats; Encounters come later), the planning phase
 ## (shop, placing units, items, the ritual table), the combats, damage and income. The
 ## screen panels are MatchHud.
 ##
@@ -583,11 +583,9 @@ func _on_opponent_left() -> void:
 	Net.leave()
 
 
-## Moves on from the round just played, past the (skipped for now) Encounter round, to
-## the next combat round.
+## Moves on from the round just played to the next combat round. (Encounter rounds are
+## left out until encounters exist; see MatchRules.paced_round.)
 func _advance_rounds() -> void:
-	round_number += 1
-	add_log("Round %d: Encounter (skipped for now)." % round_number)
 	round_number += 1
 	add_log("Round %d: Player Combat. Plan, then fight." % round_number)
 

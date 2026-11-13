@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Structure"
-description = "Can't move or gain Charge, is immune to crowd control, and has no Gambit. Its attacks come from its weapons, each with its own attack timer that Celerity speeds up."
+description = "Can't gain Charge, is immune to crowd control, and has no Gambit. It walks like a normal unit, but its attacks come from its weapons: two continuous beams at two different enemies to start, each weapon on its own timer that Celerity speeds up."

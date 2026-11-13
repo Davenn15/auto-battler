@@ -1,11 +1,10 @@
-[gd_resource type="Resource" script_class="LowHealthTriggerEffect" format=3]
+[gd_resource type="Resource" script_class="LowHealthTriggerEffect" format=3 uid="uid://bsov4tvhaorks"]
 
 [ext_resource type="Script" uid="uid://dhc1ukjl0mmn8" path="res://data/keepsakes/effects/low_health_trigger_effect.gd" id="1_eff"]
 
 [resource]
 script = ExtResource("1_eff")
-threshold = 0.3
-shield_share = 0.2
+shield_share = 0.15
 vampirism = 0.15
-vampirism_duration = 5.0
+vampirism_duration = 4.0
 metadata/_custom_type_script = "uid://dhc1ukjl0mmn8"

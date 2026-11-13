@@ -17,7 +17,5 @@ extends Resource
 @export var transfers_on_death: bool = true
 ## Share of the stacks that jump (1.0 = all of them). Rounded down, but at least 1.
 @export_range(0.0, 1.0, 0.05) var transfer_share: float = 1.0
-## Seconds between the carrier's virus damage numbers.
-@export var number_interval: float = 1.0
 ## The colour of the glow, damage numbers, jump orb and Injector trail.
 @export var color: Color = Color(0.75, 0.35, 1.0)

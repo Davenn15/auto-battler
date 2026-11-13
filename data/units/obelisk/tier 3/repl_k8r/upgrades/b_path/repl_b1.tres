@@ -2,9 +2,12 @@
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/repl_k8r/upgrades/b_path/duplicate_virus.tres" id="3"]
+
 
 [resource]
 script = ExtResource("1")
-description = "Duplicates' attacks apply 1 stack of Mono-Virus."
-passives = Array[ExtResource("2")]([ExtResource("3")])
+upgrade_name = "Triplicate"
+description = "Replicate creates 3 copies instead of 2."
+gambit_bonuses = Dictionary[String, float]({
+"copies": 1.0
+})

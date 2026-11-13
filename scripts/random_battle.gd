@@ -13,10 +13,11 @@ const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 @export var team_seed: int = 0
 ## Start fighting as soon as the teams are placed.
 @export var auto_fight: bool = false
-## Units that start in the second row instead of the front (lower-case display names).
-@export var second_row_units: Array[String] = ["bremes", "lunck", "wesper"]
-## Every team gets at least one front-liner: a melee unit not in second_row_units.
+## Every team gets at least one front-liner (a unit whose Placement is Front on its path).
 @export var require_frontline: bool = true
+## Each team is built from a single faction (picked at random, or from its first forced
+## unit). Off mixes every faction into both teams.
+@export var isolate_factions: bool = true
 ## Reserve each team spends on random keepsakes and Shards, per point of ARV: 1 = as much
 ## Reserve as Aura, 0 = no items. Rounded down to whole Shards. The balance sim uses it too.
 @export_range(0.0, 3.0, 0.25) var reserve_scale: float = 1.0
@@ -70,14 +71,15 @@ func _spawn_teams(arv: int, used_seed: int) -> void:
 	var teams := {}
 	var loadouts := {}
 	for team in forced:
-		teams[team] = RandomTeams.make_team(roster, arv, max_team, allow_duplicates, require_frontline,
-				second_row_units, forced[team])
+		var pool := RandomTeams.team_roster(roster, isolate_factions, forced[team])
+		teams[team] = RandomTeams.make_team(pool, arv, max_team, allow_duplicates, require_frontline,
+				forced[team])
 		loadouts[team] = RandomTeams.buy_keepsakes(pools, reserve, teams[team].size(), BattleUnit.MAX_KEEPSAKES)
 	if teams[1].is_empty() or teams[2].is_empty():
 		lineup_panel.set_message("Couldn't build two teams worth exactly %d ARV. Try another range." % arv, Color(1.0, 0.5, 0.5))
 		fight_button.disabled = true
 		return
-	var placement := RandomTeams.place_teams(grid, teams, second_row_units)
+	var placement := RandomTeams.place_teams(grid, teams)
 	lineup_panel.set_header("ARV %d    seed %d" % [arv, used_seed])
 	for team in teams:
 		for i in teams[team].size():

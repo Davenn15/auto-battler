@@ -175,9 +175,10 @@ static func _profile(data: UnitData, path: Array) -> Dictionary:
 		if passive != null:
 			_add_scaling(passive, scaling, {})
 	var exposure := 0.4
-	if data.back_row:
+	var row := RandomTeams.row_of({"data": data, "path": path})
+	if row == UnitData.Placement.BACK:
 		exposure = 0.3
-	elif data.frontline or reach <= 1:
+	elif row == UnitData.Placement.FRONT or reach <= 1:
 		exposure = 1.0
 	elif reach == 2:
 		exposure = 0.75

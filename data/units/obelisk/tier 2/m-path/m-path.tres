@@ -12,11 +12,11 @@
 [resource]
 script = ExtResource("1")
 display_name = "M-PATH"
+placement = 0
 tier = 2
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 max_health = 950.0
 attack_range_cells = 2
-frontline = true
 passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("5")
 max_charge = 90.0

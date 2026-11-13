@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SeedGambit" format=3 uid="uid://boj31msu2cwn5"]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/repl_k8r/gambit/seed_gambit.gd" id="1"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/repl_k8r/replk4nt/replk4nt.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+profile = ExtResource("2")
+gambit_name = "Replication Seed"
+cast_time = 0.75
+description = "Plants a replication seed in the nearby non-REPL\\K8R ally with the lowest health. It hatches after 8 seconds, or when that ally dies, into a REPLK4NT beside it. The longer it gestates, the more health the REPLK4NT starts with (30% at once, up to full)."

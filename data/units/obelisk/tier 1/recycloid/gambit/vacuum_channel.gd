@@ -10,13 +10,10 @@ var damage_per_second: float
 var damage_type: int
 var charge_on_kill: float
 var execute_threshold: float
-var _pending := {}         # target id -> damage not yet shown as a number
 var _living := {}          # ids of targets not yet seen dead, so each death counts once
 var _ids: Array[int] = []  # each target's id, recorded while it was alive
-var _number_left := NUMBER_EVERY
 var _time := 0.0
 
-const NUMBER_EVERY := 0.5   # seconds between damage numbers per target
 
 
 ## Sets who it drains, remembering each one so their deaths can be counted later.
@@ -32,10 +29,6 @@ func _physics_process(delta: float) -> void:
 		_end()
 		return
 	time_left -= delta
-	_number_left -= delta
-	var show_now := _number_left <= 0.0
-	if show_now:
-		_number_left += NUMBER_EVERY
 	var credit := caster.get_credit_id()
 	_count_deaths()
 	for target in targets.duplicate():
@@ -43,14 +36,10 @@ func _physics_process(delta: float) -> void:
 			continue
 		var dealt: float = target.take_damage(target.max_health * damage_per_second * delta, 0, damage_type, false, caster, false)
 		get_tree().call_group("damage_tracker", "record_damage", credit, dealt)
-		var id: int = target.get_instance_id()
-		_pending[id] = _pending.get(id, 0.0) + dealt
+		target.add_running_damage("vacuum_%d" % get_instance_id(), dealt, Stats.damage_color(damage_type))
 		if target.alive and execute_threshold > 0.0 and target.health / target.max_health < execute_threshold:
 			target.show_float_text("Executed", VACUUM_COLOR)
 			target.kill()
-		if target.alive and show_now and _pending[id] > 0.0:
-			target._spawn_damage_number(_pending[id], Stats.damage_color(damage_type))
-			_pending[id] = 0.0
 	_count_deaths()
 	if targets.all(func(t): return not is_instance_valid(t) or not t.alive):
 		_end()

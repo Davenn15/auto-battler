@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ColumnDroneWeapon" format=3 uid="uid://dv0q2nswvhptx"]
+
+[ext_resource type="Script" uid="uid://qjmv5qad8lty" path="res://data/units/obelisk/tier 4/column/weapons/drone_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 90.0
+interval = 5.0
+passive_name = "Hunter Drone"
+description = "Every 5 seconds: a homing drone flies to the enemy with the lowest health and explodes over it, dealing 60 + 0.6x Might damage to every enemy within 1 cell."
