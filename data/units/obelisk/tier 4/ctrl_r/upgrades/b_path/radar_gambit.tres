@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CtrlRadarGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/ctrl_r/upgrades/b_path/scripts/radar_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Radar Pulse"
+cast_time = 0.4
+description = "Emanates a radar pulse. Every enemy within 3 cells loses 25 Celerity for 5 seconds, or 50 if it was targeting CTRL(R)."

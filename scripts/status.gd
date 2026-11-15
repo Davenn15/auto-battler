@@ -27,8 +27,16 @@ func modify_outgoing_damage(_unit: BattleUnit, damage: float) -> float:
 func on_attack(_unit: BattleUnit) -> void:
 	pass
 
+## Called when the unit deals direct damage (any damage that shows a number: attacks,
+## Gambit hits, splashes, projectiles; not damage over time) to `target`. `target` may
+## have just died from it.
+func on_direct_damage_dealt(_unit: BattleUnit, _target: BattleUnit, _amount: float) -> void:
+	pass
+
 ## Called when one of the unit's attacks lands, with the damage it dealt. For a ranged
-## unit this is when the projectile arrives. Use for lifesteal and on-hit effects.
+## unit this is when the projectile arrives. For passives that only watch hits land.
+## Anything the attack does TO its target is a Hit Effect instead: return one from
+## get_hit_effect (see HitEffect).
 func on_attack_hit(_unit: BattleUnit, _target: BattleUnit, _dealt: float) -> void:
 	pass
 
@@ -60,6 +68,11 @@ func get_shield(_unit: BattleUnit) -> float:
 ## Damage this status is holding back, to be dealt later (like Bescard's passive).
 ## Shown on the health bar as health about to be lost.
 func get_pending_damage(_unit: BattleUnit) -> float:
+	return 0.0
+
+## Healing this status will give later (like Quickscar or M-PATH's passive). Shown on the
+## health bar as a darker stretch after current health.
+func get_pending_healing(_unit: BattleUnit) -> float:
 	return 0.0
 
 func modify_health_regen(_unit: BattleUnit, regen: float) -> float:

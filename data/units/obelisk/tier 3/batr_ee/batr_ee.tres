@@ -12,10 +12,11 @@
 [resource]
 script = ExtResource("1")
 display_name = "BATR.EE"
-placement = 1
 tier = 3
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
-attack_range_cells = 4
+max_health = 900.0
+attack_range_cells = 3
+placement = 1
 passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("5")
 max_charge = 80.0

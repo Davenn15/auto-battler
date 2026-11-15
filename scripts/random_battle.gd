@@ -41,6 +41,7 @@ func _ready() -> void:
 	fight_button.pressed.connect(_on_fight_pressed)
 	reroll_button.pressed.connect(get_tree().reload_current_scene)
 	battle_manager.battle_ended.connect(_on_battle_ended)
+	add_child(EscapeMenu.new())
 	var used_seed := team_seed if team_seed != 0 else randi()
 	seed(used_seed)
 	_spawn_teams(randi_range(arv_min, arv_max), used_seed)

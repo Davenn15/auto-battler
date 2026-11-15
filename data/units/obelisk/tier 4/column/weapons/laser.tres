@@ -8,4 +8,4 @@ damage_per_second = 65.0
 insight_scaling = 0.4
 interval = 10.0
 passive_name = "Laser"
-description = "Every 10 seconds: a laser along the line that hits the most enemies (6 cells long, 1.5 cells wide) for 2.5 seconds, dealing 50 + 0.3x Insight + 10% of each enemy's max health per second as Insight damage."
+description = "Every 10 seconds: a laser along the line that hits the most enemies (6 cells long, 1.5 cells wide) for 2.5 seconds, dealing 65 + 0.4x Insight + 6% of each enemy's max health per second as Insight damage."

@@ -38,7 +38,11 @@ func execute(caster: BattleUnit) -> void:
 		if not _alive(caster) or not caster.active or not _alive(target):
 			return
 		caster.lock_for((_total_strikes(wracks) - done) * strike_interval)
+		# Each strike shows as a brutal slash across the target instead of the usual swing.
+		caster.hide_next_swing = KeepsakeVfx.enabled()
 		caster.attack_now(target, 0.0, 0.0, null, effects)
+		caster.hide_next_swing = false
+		KeepsakeVfx.brutal_slash(target, done)
 		done += 1
 		await caster.get_tree().create_timer(strike_interval, true, true).timeout
 

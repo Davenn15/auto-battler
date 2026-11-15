@@ -4,6 +4,9 @@ extends PanelContainer
 ## click another unit or empty ground. Refreshes every frame while open, so buffs and
 ## damage show as they happen. In a match the board is rebuilt after every change; the
 ## panel then follows the same unit to its new copy.
+##
+## Stats and abilities are on two tabs, and the panel always fits on screen (between
+## top_reserve and bottom_reserve): if a unit's text is still too long, its font shrinks.
 
 const PICK_RADIUS := 30.0   # how close to a unit's centre a click must be, in pixels
 const MARKER_COLOR := Color(1.0, 0.85, 0.3, 0.9)   # gold ring under the selected unit
@@ -18,7 +21,7 @@ const UP := "#7fdc7f"           # a stat above its base
 const DOWN := "#ff7a7a"         # a stat below its base
 const HEALTH_COLOR := Color(0.42, 0.75, 0.35)
 const SHIELD_COLOR := Color(0.75, 0.85, 1.0)
-const CHARGE_COLOR := Color(0.35, 0.6, 1.0)
+const CHARGE_COLOR := BattleUnit.CHARGE_COLOR   # purple, same as the bar over each unit
 
 ## Stats that a Shard gives, drawn in that Shard's colour.
 const STAT_SHARDS := {
@@ -55,6 +58,22 @@ var _charge_text: Label
 var _text: RichTextLabel
 var _marker: Line2D   # the ring under the selected unit; a child of that unit
 
+## Screen space kept free above and below the panel (the top bar, a log...).
+@export var top_reserve := 40.0
+@export var bottom_reserve := 8.0
+## Filled by whoever owns the screen (the match HUD puts the unit's items here). Hidden
+## when empty.
+var item_row: HBoxContainer
+enum Tab { STATS, ABILITIES }
+## Which tab is showing; kept from unit to unit.
+var tab := Tab.STATS
+var _tab_buttons: Array[Button] = []
+var _shown_text := ""
+## Index into TEXT_SIZES of the font size in use.
+var _size_index := 0
+## Font sizes tried, largest first, until the text fits.
+const TEXT_SIZES := [11, 10, 9, 8]
+
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(WIDTH, 0)
@@ -85,6 +104,11 @@ func _ready() -> void:
 	_title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(_title)
 
+	item_row = HBoxContainer.new()
+	item_row.add_theme_constant_override("separation", 4)
+	item_row.visible = false
+	column.add_child(item_row)
+
 	# Health and charge as bars with numbers.
 	var bars := _bar_row(column, "Health", HEALTH_COLOR)
 	_health_bar = bars[0]
@@ -93,7 +117,23 @@ func _ready() -> void:
 	_charge_bar = bars[0]
 	_charge_text = bars[1]
 
-	column.add_child(HSeparator.new())
+	# Stats / Abilities tabs.
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 4)
+	column.add_child(tabs)
+	var group := ButtonGroup.new()
+	for t in [Tab.STATS, Tab.ABILITIES]:
+		var button := Button.new()
+		button.text = "Stats" if t == Tab.STATS else "Abilities"
+		button.toggle_mode = true
+		button.button_group = group
+		button.focus_mode = Control.FOCUS_NONE
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 12)
+		button.button_pressed = t == tab
+		button.pressed.connect(func(): _set_tab(t))
+		tabs.add_child(button)
+		_tab_buttons.append(button)
 	_text = _rich(11)
 	_text.mouse_filter = Control.MOUSE_FILTER_PASS   # so hovering a ward shows its tooltip (see _ward_value)
 	column.add_child(_text)
@@ -179,6 +219,7 @@ func _select(unit: BattleUnit) -> void:
 	if unit == null:
 		_army_index = -1
 		return
+	_shown_text = ""   # fit the new unit's text afresh
 	_team = unit.team
 	_army_index = unit.get_meta("army_index", -1)
 	_marker = _make_marker()
@@ -246,9 +287,52 @@ func _refresh() -> void:
 		_charge_bar.value = u.charge
 		_charge_text.text = "%d / %d" % [roundi(u.charge), roundi(u.max_charge)]
 
+	var text := _stat_table(u) if tab == Tab.STATS else _abilities_text(u)
+	if text != _shown_text:
+		if _shown_text == "":   # a new unit or tab: start large again; _fit steps it down
+			_set_text_size(0)
+		_shown_text = text
+		_text.text = text
+	_fit()
+
+
+## Fits the panel again from the largest font, after top_reserve or bottom_reserve change.
+func relayout() -> void:
+	if is_instance_valid(_unit) and visible:
+		_shown_text = ""
+		_refresh()
+
+
+func _set_tab(t: Tab) -> void:
+	tab = t
+	for i in _tab_buttons.size():
+		_tab_buttons[i].set_pressed_no_signal(i == t)
+	_shown_text = ""
+	if is_instance_valid(_unit):
+		_refresh()
+
+
+func _set_text_size(index: int) -> void:
+	_size_index = index
+	_text.add_theme_font_size_override("normal_font_size", TEXT_SIZES[index])
+	_text.add_theme_font_size_override("bold_font_size", TEXT_SIZES[index])
+
+
+## Keeps the panel between top_reserve and bottom_reserve, centred in that space. Text only
+## gets its real height once laid out, so this runs every frame: while the panel is still
+## too tall it steps the font down one size.
+func _fit() -> void:
+	var room := get_viewport_rect().size.y - top_reserve - bottom_reserve
+	if get_combined_minimum_size().y > room and _size_index < TEXT_SIZES.size() - 1:
+		_set_text_size(_size_index + 1)
+	reset_size()
+	anchor_top = 0.0
+	anchor_bottom = 0.0
+	position.y = top_reserve + maxf((room - size.y) / 2.0, 0.0)
+
+
+func _abilities_text(u: BattleUnit) -> String:
 	var lines: PackedStringArray = []
-	lines.append(_stat_table(u))
-	lines.append("")
 	for passive in u.passives:
 		lines.append(_ability_line("Passive", _ability_name(passive, passive.passive_name, "Passive"), passive.description))
 	if u.gambit != null:
@@ -256,7 +340,10 @@ func _refresh() -> void:
 	for upgrade in u.get_chosen_upgrades():
 		if upgrade.description != "":
 			lines.append(_ability_line("Upgrade", upgrade.upgrade_name, upgrade.description))
-	_text.text = "\n".join(lines)
+	for ascension in u.ascensions:
+		if ascension.is_chosen():
+			lines.append(_ability_line("Ascension", ascension.get_display_name(), ascension.description))
+	return "\n".join(lines).strip_edges()
 
 
 func _refresh_header(u: BattleUnit) -> void:
@@ -383,7 +470,7 @@ func _shown_stat(u: BattleUnit, stat: Stats.Stat) -> float:
 static func _stat_color(stat: Stats.Stat) -> Color:
 	if not STAT_SHARDS.has(stat):
 		return Color(0.85, 0.85, 0.9)
-	return (Shard.COLORS[STAT_SHARDS[stat]] as Color).lightened(0.3)
+	return Keyphrases.color_of(STAT_SHARDS[stat])
 
 
 ## Wrack chance and vampirism as percentages, wrack damage as "+N%", everything else as a
@@ -400,7 +487,7 @@ static func _format(stat: Stats.Stat, value: float, bare: bool = false) -> Strin
 static func _ability_line(kind: String, ability_name: String, description: String) -> String:
 	var line := "[color=%s]%s[/color]  [b]%s[/b]" % [DIM, kind.to_upper(), ability_name]
 	if description != "":
-		line += "\n[color=%s]%s[/color]" % [DESCRIPTION, description]
+		line += "\n[color=%s]%s[/color]" % [DESCRIPTION, Keyphrases.format(description)]
 	return line + "\n"
 
 

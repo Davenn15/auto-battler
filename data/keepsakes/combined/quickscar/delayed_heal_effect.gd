@@ -30,3 +30,10 @@ class Afterglow extends Status:
 			unit.heal(_due.pop_front()[1], unit.get_instance_id())
 			if unit.health > before:
 				KeepsakeVfx.heal_flash(unit)
+
+	## Health still waiting to come back, shown on the health bar.
+	func get_pending_healing(_unit: BattleUnit) -> float:
+		var total := 0.0
+		for entry in _due:
+			total += entry[1]
+		return total

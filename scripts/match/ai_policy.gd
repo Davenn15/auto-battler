@@ -113,7 +113,7 @@ static func crossover(a: AiPolicy, b: AiPolicy) -> AiPolicy:
 ## places. `variant` 0 always re-lays the army; others follow layout_rate.
 func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 	var g := genome
-	var stats := {"units": 0, "upgrades": 0, "buffs": 0, "shards": 0, "rerolls": 0, "combines": 0}
+	var stats := {"units": 0, "upgrades": 0, "buffs": 0, "shards": 0, "keepsakes": 0, "rerolls": 0, "combines": 0}
 	for step in 40:
 		var options: Array = []   # [weight, kind, slot]
 		for slot in p.unit_offers.size():
@@ -141,6 +141,12 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 				var weight: float = g["shard_rate"] * float(g["shards"].get(name, 1.0))
 				weight *= exp(float(g.get("shard_sense", 0.0)) * (desires[slot] - average_desire))
 				options.append([weight, "shard", slot])
+		# The discounted Keepsake: as likely as a Shard, then rated the same way against
+		# the average Shard on offer (so a Keepsake that suits the army is wanted more).
+		if p.keepsake_offer != null and p.reserve - MatchRules.KEEPSAKE_COST >= g["reserve_floor"]:
+			var weight: float = g["shard_rate"]
+			weight *= exp(float(g.get("shard_sense", 0.0)) * (_army_score(p, p.keepsake_offer) - average_desire))
+			options.append([weight, "keepsake", 0])
 		if p.reserve - p.reroll_cost >= g["reserve_floor"] + MatchRules.SHARD_COST and randf() < g["reroll_rate"]:
 			options.append([1.0, "reroll", 0])
 		if options.is_empty() or randf() < g["save_rate"]:
@@ -162,6 +168,9 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 			"shard":
 				MatchRules.buy_shard_offer(p, pick[2])
 				stats["shards"] += 1
+			"keepsake":
+				MatchRules.buy_keepsake_offer(p)
+				stats["keepsakes"] += 1
 			"reroll":
 				MatchRules.reroll(p, combat_number)
 				stats["rerolls"] += 1

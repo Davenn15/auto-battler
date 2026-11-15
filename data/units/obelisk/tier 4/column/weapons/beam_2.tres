@@ -6,5 +6,6 @@
 script = ExtResource("1")
 interval = 1.8
 slot = 1
+portal = Vector2(30.5, -2.5)
 passive_name = "Beam II"
 description = "A second continuous beam, at a different enemy in range when there is one. Deals 60% of a normal attack per attack timer."

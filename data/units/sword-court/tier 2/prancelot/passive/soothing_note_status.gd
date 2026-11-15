@@ -25,6 +25,8 @@ func _pick_target(unit: BattleUnit) -> BattleUnit:
 	return best
 
 
-func _arrive(unit, target: BattleUnit, strength: float) -> void:
+func _arrive(unit, target: BattleUnit, strength: float) -> Status:
 	var source_id: int = unit.get_instance_id() if is_instance_valid(unit) else 0
-	target.add_status(RegenBurstStatus.new(source_id, heal_per_second * strength, duration))
+	var burst := RegenBurstStatus.new(source_id, heal_per_second * strength, duration)
+	target.add_status(burst)
+	return burst

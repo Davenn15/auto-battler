@@ -29,4 +29,24 @@ func execute(caster: BattleUnit) -> void:
 	bubble.enemy_celerity_cut = enemy_celerity_cut
 	caster.get_tree().current_scene.add_child(bubble)
 	bubble.global_position = caster.grid.cell_to_world(caster.cell)
+	caster.add_status(ChargeLock.new(bubble))
 	caster.show_float_text("Bubble", BubbleZone.BUBBLE_COLOR)
+
+
+## On Bubbler while his bubble is up: no Charge gain, wherever he walks. Comes off by
+## itself once the bubble is gone.
+class ChargeLock extends Status:
+	var bubble   # untyped: freed when it pops
+
+	func _init(p_bubble: BubbleZone) -> void:
+		bubble = p_bubble
+
+	func _bubble_up() -> bool:
+		return is_instance_valid(bubble) and not bubble.is_queued_for_deletion() and bubble.time_left > 0.0
+
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return _bubble_up()
+
+	func tick(unit: BattleUnit, _delta: float) -> void:
+		if not _bubble_up():
+			unit.remove_status(self)

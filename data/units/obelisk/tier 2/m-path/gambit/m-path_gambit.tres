@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1")
-ward_bonus = 30.0
+regen_bonus = 25.0
 damage_share = 0.4
 gambit_name = "Link"
 cast_time = 0.3
-description = "Links M-PATH to the nearby ally that has taken the most damage. While linked, both have more wards and each takes a share of the other's damage."
+description = "Links M-PATH to the nearby ally that has taken the most damage this combat. While linked, both have +25 health regen and each takes 40% of the other's damage."

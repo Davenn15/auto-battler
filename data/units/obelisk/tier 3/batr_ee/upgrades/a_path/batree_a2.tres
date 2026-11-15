@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Volts silence enemies hit for 1.5 seconds: they can't cast their Gambit or gain Charge."
+description = "Volts silence enemies hit for 1 second: they can't cast their Gambit or gain Charge."
 gambit_overrides = Dictionary[String, float]({
-"silence_time": 1.5
+"silence_time": 1.0
 })

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CtrlSiphonGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/ctrl_r/gambit/siphon_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Siphon Drones"
+cast_time = 0.4
+description = "Launches two siphon drones at the enemies within 3 cells with the most health. Each drains 8% of its enemy's max health for the rest of combat, then flies back and heals CTRL(R) that much."

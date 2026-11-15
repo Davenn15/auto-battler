@@ -10,5 +10,5 @@ first_shard = 2
 second_shard = 2
 effect = ExtResource("2_effect")
 celerity = 35.0
-description = "Whenever you attack, gain 1 Celerity."
+description = "Hit Effect: Gain 1 Celerity."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

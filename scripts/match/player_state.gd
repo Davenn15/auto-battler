@@ -16,7 +16,12 @@ var inventory: Array[Keepsake] = []   # Shards and keepsakes not on a unit
 
 var unit_offers: Array[UnitData] = []   # the shop; a bought slot is removed
 var shard_offers: Array[Keepsake] = []
+var keepsake_offer: Keepsake   # the discounted full Keepsake; null before it unlocks or once bought
 var reroll_cost: int = MatchRules.REROLL_START
+## Ascensions taken at Encounters, for the whole match.
+var ascensions: Array[Ascension] = []
+## The Ascensions on offer at the current Encounter (empty outside one).
+var ascension_offers: Array[Ascension] = []
 ## Keeps this shop for the next planning phase instead of a fresh one (then unlocks).
 var shop_locked := false
 
@@ -24,6 +29,8 @@ var shop_locked := false
 ## (and what the computer opponent plans against). Empty before the first combat.
 var last_fielded: Array[ArmyUnit] = []
 var last_fielded_round := 0
+## The Ascensions that army had (what the other player has seen of them).
+var last_fielded_ascensions: Array[Ascension] = []
 
 
 func is_alive() -> bool:
@@ -74,10 +81,14 @@ func copy() -> PlayerState:
 	other.inventory = inventory.duplicate()
 	other.unit_offers = unit_offers.duplicate()
 	other.shard_offers = shard_offers.duplicate()
+	other.keepsake_offer = keepsake_offer
 	other.reroll_cost = reroll_cost
 	other.shop_locked = shop_locked
 	other.last_fielded = ArmyUnit.copy_army(last_fielded)
 	other.last_fielded_round = last_fielded_round
+	other.ascensions = ascensions.duplicate()
+	other.ascension_offers = ascension_offers.duplicate()
+	other.last_fielded_ascensions = last_fielded_ascensions.duplicate()
 	return other
 
 
@@ -89,4 +100,7 @@ func adopt(other: PlayerState) -> void:
 	inventory = other.inventory
 	unit_offers = other.unit_offers
 	shard_offers = other.shard_offers
+	keepsake_offer = other.keepsake_offer
+	ascensions = other.ascensions
+	ascension_offers = other.ascension_offers
 	reroll_cost = other.reroll_cost

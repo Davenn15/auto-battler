@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ColumnFabricatorWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/fabricator_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+interval = 10.0
+passive_name = "Fabricator"
+description = "Every 10 seconds: manufactures a random full keepsake and magnetizes it to the nearest ally with an open slot, which equips it for the rest of combat and gains a 150 Shield for 4 seconds. If no ally has an open slot, the nearest ally still gets the Shield."

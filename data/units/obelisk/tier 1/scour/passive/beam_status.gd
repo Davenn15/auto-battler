@@ -172,6 +172,9 @@ class BeamLine extends Node2D:
 	var firing := false
 	var color := Color.WHITE
 	var time := 0.0
+	## Where on the owner's sprite the beam starts, in the sprite's own pixels from its
+	## centre (e.g. COLUMN's portals). Null = the default spot just above the unit.
+	var sprite_point = null
 
 	func _process(delta: float) -> void:
 		if not is_instance_valid(owner_unit) or not owner_unit.alive:
@@ -186,6 +189,8 @@ class BeamLine extends Node2D:
 		# Converted into this node's own space: the scene it sits in may be moved or turned
 		# (the random battle scene's root is offset), so world points can't be drawn directly.
 		var from := to_local(owner_unit.global_position + Vector2(0, -10).rotated(owner_unit.global_rotation))
+		if sprite_point != null and is_instance_valid(owner_unit.sprite):
+			from = to_local(owner_unit.sprite.to_global(sprite_point))
 		var to := to_local(target.global_position)
 		if firing:
 			var pulse := 1.0 + 0.25 * sin(time * 30.0)

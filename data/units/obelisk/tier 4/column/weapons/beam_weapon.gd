@@ -13,6 +13,9 @@ extends ColumnWeapon
 @export var retarget_delay: float = 0.3
 ## Which beam this is (0 = first). Later beams avoid earlier beams' targets.
 @export var slot: int = 0
+## Where the beam leaves COLUMN's sprite, in the sprite's own pixels from its centre: one
+## of the two green portals on his sides.
+@export var portal: Vector2 = Vector2.ZERO
 
 
 func make_status() -> Status:
@@ -133,6 +136,22 @@ class BeamStatusColumn extends Status:
 
 	func _show(unit: BattleUnit, enemy, firing: bool) -> void:
 		ColumnBeamWeapon.show_beam(self, unit, enemy, firing, ColumnWeapon.COLOR)
+		if is_instance_valid(_visual):
+			_visual.sprite_point = _portal(unit)
+
+	## This beam's own portal, unless the other beam has a different target on the other
+	## side: then each fires from the portal on its target's side, so they never cross.
+	func _portal(unit: BattleUnit) -> Vector2:
+		if not is_instance_valid(target) or not is_instance_valid(unit.sprite):
+			return weapon.portal
+		for status in unit.statuses:
+			if status is BeamStatusColumn and status != self and is_instance_valid(status.target) \
+					and status.target != target:
+				var mine := unit.sprite.to_local(target.global_position).x
+				var theirs := unit.sprite.to_local(status.target.global_position).x
+				var side := -1.0 if mine < theirs else 1.0
+				return Vector2(absf(weapon.portal.x) * side, weapon.portal.y)
+		return weapon.portal
 
 
 ## Draws a beam for `holder` (any object with a `_visual` BeamLine field) from COLUMN to

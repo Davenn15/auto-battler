@@ -322,7 +322,7 @@ func _on_unit_died(unit: BattleUnit) -> void:
 
 # ---------- What the units report (same calls the DamageTracker receives) ----------
 
-func record_damage(unit_id: int, amount: float) -> void:
+func record_damage(unit_id: int, amount: float, _lifesteal: bool = true) -> void:
 	# Units report damage before their statuses (including --damage-scale) change it, so
 	# scale the report to match. Close, not exact: a killing blow's overkill is scaled too.
 	amount *= damage_scale

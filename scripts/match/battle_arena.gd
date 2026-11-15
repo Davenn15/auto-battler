@@ -8,8 +8,9 @@ extends RefCounted
 ## `bottom` stands as team 1 on its own half; `top` is team 2, mirrored onto the far half,
 ## the same layout as a real combat. A fight still going after `time_limit` seconds is a
 ## draw. Returns {winner: 1, 2 or 0 for a draw, bottom_aura, top_aura, time}: the Aura of
-## each side's surviving units.
-static func fight(host: Node, bottom: Array[ArmyUnit], top: Array[ArmyUnit], time_limit: float, combat_seed: int = -1) -> Dictionary:
+## each side's surviving units. Each side's Ascensions, if any, go to all its units.
+static func fight(host: Node, bottom: Array[ArmyUnit], top: Array[ArmyUnit], time_limit: float, combat_seed: int = -1,
+		bottom_ascensions: Array[Ascension] = [], top_ascensions: Array[Ascension] = []) -> Dictionary:
 	clear(host)
 	var grid := BattleGrid.new()
 	grid.show_debug = false
@@ -18,8 +19,8 @@ static func fight(host: Node, bottom: Array[ArmyUnit], top: Array[ArmyUnit], tim
 	manager.auto_start = false
 	manager.combat_seed = combat_seed
 	host.add_child(manager)
-	ArmySpawner.spawn(bottom, 1, false, host)
-	ArmySpawner.spawn(top, 2, true, host)
+	ArmySpawner.spawn(bottom, 1, false, host, bottom_ascensions)
+	ArmySpawner.spawn(top, 2, true, host, top_ascensions)
 	var tree := host.get_tree()
 	await tree.physics_frame
 	var state := {"over": false, "winner": 0}

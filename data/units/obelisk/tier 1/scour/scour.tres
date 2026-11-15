@@ -4,24 +4,24 @@
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/passive/scour_passive.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/gambit/scour_gambit.tres" id="5"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a.tres" id="6"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/b_path/scour_b.tres" id="7"]
+[ext_resource type="Resource" uid="uid://cnr4rgomntst3" path="res://data/units/obelisk/tier 1/scour/gambit/scour_gambit.tres" id="5"]
+[ext_resource type="Resource" uid="uid://nwlnyg1v8h0o" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a.tres" id="6"]
+[ext_resource type="Resource" uid="uid://di3fk1a17uhyo" path="res://data/units/obelisk/tier 1/scour/upgrades/b_path/scour_b.tres" id="7"]
 [ext_resource type="Texture2D" uid="uid://d3ck3jlsr1y2n" path="res://assets/scour.png" id="8"]
 
 [resource]
 script = ExtResource("1")
 display_name = "scour"
-placement = 3
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 max_health = 800.0
 attack_range_cells = 3
+placement = 3
 passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("5")
 max_charge = 80.0
 starting_charge = 40.0
 sprite = ExtResource("8")
-might = 85.0
+might = 95.0
 celerity = 90.0
 might_ward = 25.0
 insight_ward = 25.0

@@ -1,6 +1,6 @@
 class_name ShredPassive
 extends Passive
-## Grouser's attacks shred wards for a while; the shreds stack.
+## Grouser's attacks have a Hit Effect that shreds wards for a while; the shreds stack.
 ##   Passive: each hit takes Highest Amount from the target's highest ward.
 ##   Snipped (A): another copy with All Amount takes some from every ward too.
 
@@ -20,9 +20,22 @@ class ShredStatus extends Status:
 	func _init(p_passive: ShredPassive) -> void:
 		passive = p_passive
 
-	func on_attack_hit(unit: BattleUnit, target: BattleUnit, _dealt: float) -> void:
+	func get_hit_effect(unit: BattleUnit) -> HitEffect:
+		return ShredHit.new(unit, passive)
+
+
+class ShredHit extends HitEffect:
+	var grouser   # untyped: may be freed before the hit lands
+	var passive: ShredPassive
+
+	func _init(p_grouser: BattleUnit, p_passive: ShredPassive) -> void:
+		grouser = p_grouser
+		passive = p_passive
+
+	func apply(target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
+		var source: BattleUnit = grouser if is_instance_valid(grouser) else null
 		if passive.highest_amount > 0.0:
-			WardShiftStatus.shred(unit, target, WardShiftStatus.highest_ward(target), passive.highest_amount, passive.duration)
+			WardShiftStatus.shred(source, target, WardShiftStatus.highest_ward(target), passive.highest_amount, passive.duration)
 		if passive.all_amount > 0.0:
 			for stat in WardShiftStatus.WARDS:
-				WardShiftStatus.shred(unit, target, stat, passive.all_amount, passive.duration)
+				WardShiftStatus.shred(source, target, stat, passive.all_amount, passive.duration)

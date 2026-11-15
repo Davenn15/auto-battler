@@ -132,16 +132,15 @@ static func pick_host(unit: BattleUnit, from: Vector2i, reach: int, skip: UnitDa
 	return best
 
 
-## A2: a REPLK4NT's attacks give Mono-Virus.
+## A2: a REPLK4NT's attacks have the Hit Effect: give Mono-Virus.
 class ReplicantVirusStatus extends Status:
 	var stacks: int
 
 	func _init(p_stacks: int) -> void:
 		stacks = p_stacks
 
-	func on_attack_hit(unit: BattleUnit, target: BattleUnit, dealt: float) -> void:
-		if dealt > 0.0 and target.alive:
-			MonoVirusStatus.infect(target, stacks, unit.get_credit_id())
+	func get_hit_effect(unit: BattleUnit) -> HitEffect:
+		return ChipPassive.VirusHit.new(stacks, unit.get_credit_id())
 
 
 ## A1: when this REPLK4NT dies, it plants a new seed nearby.

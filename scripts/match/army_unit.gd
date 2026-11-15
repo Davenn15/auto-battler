@@ -10,6 +10,8 @@ var placed := false            # false = on the bench
 var cell := Vector2i.ZERO      # where it stands, from its owner's side (the bottom half)
 var items: Array[Keepsake] = []   # Shards and keepsakes on the unit
 var buffs := 0                 # Reserve buffs bought once it was fully upgraded
+## Chosen-unit Ascensions given to this unit (also in its owner's ascensions list).
+var ascensions: Array[Ascension] = []
 
 
 func _init(p_data: UnitData = null) -> void:
@@ -49,6 +51,7 @@ func copy() -> ArmyUnit:
 	other.cell = cell
 	other.items = items.duplicate()
 	other.buffs = buffs
+	other.ascensions = ascensions.duplicate()
 	return other
 
 
@@ -58,6 +61,7 @@ func to_dict() -> Dictionary:
 	return {
 		"unit": data.resource_path, "path": Array(path), "placed": placed,
 		"cell": [cell.x, cell.y], "items": items.map(func(k): return k.resource_path), "buffs": buffs,
+		"ascensions": ascensions_to_array(ascensions),
 	}
 
 
@@ -70,6 +74,7 @@ static func from_dict(d: Dictionary) -> ArmyUnit:
 	for item_path in d["items"]:
 		unit.items.append(load(item_path) as Keepsake)
 	unit.buffs = int(d["buffs"])
+	unit.ascensions = ascensions_from_array(d.get("ascensions", []))
 	return unit
 
 
@@ -82,6 +87,21 @@ static func army_from_array(list: Array) -> Array[ArmyUnit]:
 	for d in list:
 		army.append(from_dict(d))
 	return army
+
+
+## Ascensions as text (their keys: file paths, or a family file and index), for sending
+## or saving with an army.
+static func ascensions_to_array(list: Array[Ascension]) -> Array:
+	return list.map(func(a): return a.get_key())
+
+
+static func ascensions_from_array(list: Array) -> Array[Ascension]:
+	var out: Array[Ascension] = []
+	for key in list:
+		var ascension := MatchRules.ascension_by_key(key)
+		if ascension != null:
+			out.append(ascension)
+	return out
 
 
 static func copy_army(army: Array[ArmyUnit]) -> Array[ArmyUnit]:

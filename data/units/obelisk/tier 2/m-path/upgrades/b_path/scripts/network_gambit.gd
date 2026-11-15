@@ -2,7 +2,7 @@ class_name NetworkGambit
 extends Gambit
 ## M-PATH B (Networked): lays a rectangular field where it covers the most allies. For the
 ## duration it keeps evening out the health of every ally inside (see NetworkField).
-##   B1: allies inside have more wards.  B2: allies inside have more health regen.
+##   B1: allies inside have more Might.  B2: allies inside have more health regen and Insight Ward.
 
 ## Field size: Width Cells hexes across, Depth Rows rows deep.
 @export var width_cells: float = 3.0
@@ -10,10 +10,12 @@ extends Gambit
 @export var duration: float = 5.0
 ## How fast health evens out: the share of the gap closed each second.
 @export_range(0.0, 2.0, 0.05) var rate: float = 0.6
-## B1: wards allies inside gain. 0 = none.
-@export var ward_bonus: float = 0.0
+## B1: Might allies inside gain. 0 = none.
+@export var might_bonus: float = 0.0
 ## B2: health regen (per second) allies inside gain. 0 = none.
 @export var regen_bonus: float = 0.0
+## B2: Insight Ward allies inside gain. 0 = none.
+@export var insight_ward_bonus: float = 0.0
 
 
 ## Only worth it when the field would hold at least two allies.
@@ -34,10 +36,12 @@ func execute(caster: BattleUnit) -> void:
 	field.rect = best["rect"]
 	field.time_left = duration
 	field.rate = rate
-	field.ward_bonus = ward_bonus
+	field.might_bonus = might_bonus
+	field.insight_ward_bonus = insight_ward_bonus
 	field.regen_bonus = regen_bonus
 	field.z_index = 1
 	caster.get_tree().current_scene.add_child(field)
+	field.lock_charge(caster)
 	caster.show_float_text("Networked", NetworkField.COLOR)
 
 

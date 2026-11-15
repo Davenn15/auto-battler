@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3 uid="uid://5hji4hl4ayal"]
+
+[ext_resource type="Script" uid="uid://civb8w40bfnkx" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="3_1arhr"]
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 10 Might Ward, 10 Celerity Ward and 10 Insight Ward."
+might_ward = 10.0
+celerity_ward = 10.0
+insight_ward = 10.0
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 15 Might Ward, 15 Celerity Ward and 15 Insight Ward."
+tier = 2
+might_ward = 15.0
+celerity_ward = 15.0
+insight_ward = 15.0
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 25 Might Ward, 25 Celerity Ward and 25 Insight Ward."
+tier = 3
+might_ward = 25.0
+celerity_ward = 25.0
+insight_ward = 25.0
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 35 Might Ward, 35 Celerity Ward and 35 Insight Ward."
+tier = 4
+might_ward = 35.0
+celerity_ward = 35.0
+insight_ward = 35.0
+
+[resource]
+script = ExtResource("1")
+family_name = "Neutral Wards"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

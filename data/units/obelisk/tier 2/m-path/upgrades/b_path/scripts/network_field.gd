@@ -2,8 +2,8 @@ class_name NetworkField
 extends Node2D
 ## M-PATH's Networked field (see NetworkGambit): a rectangle that, while it lasts, keeps
 ## evening out the health of every ally inside it. Health moves from the healthiest to the
-## most hurt (by share of max health), so the total stays the same. B1 and B2 give allies
-## inside more wards and health regen.
+## most hurt (by share of max health), so the total stays the same. B1 gives allies inside
+## more Might, B2 more health regen and Insight Ward.
 
 const COLOR := PathLink.COLOR
 
@@ -14,11 +14,13 @@ var rect: Rect2   # in world space
 var time_left: float
 ## Share of the gap to the even level closed each second (1.0 = all of it in a second).
 var rate: float
-var ward_bonus: float
+var might_bonus: float
 var regen_bonus: float
+var insight_ward_bonus: float
 var _bonus := {}   # instance id -> FieldStatus on allies inside, for B1/B2
 var _time := 0.0
 var _inside: Array[BattleUnit] = []
+var _lock: Status = null   # ChargeLock on M-PATH while the field lasts
 
 
 func _physics_process(delta: float) -> void:
@@ -54,13 +56,13 @@ func _allies_inside() -> Array[BattleUnit]:
 
 
 func _update_bonuses() -> void:
-	if ward_bonus <= 0.0 and regen_bonus <= 0.0:
+	if might_bonus <= 0.0 and regen_bonus <= 0.0 and insight_ward_bonus <= 0.0:
 		return
 	var ids := {}
 	for unit in _inside:
 		ids[unit.get_instance_id()] = true
 		if not _bonus.has(unit.get_instance_id()):
-			var status := FieldStatus.new(ward_bonus, regen_bonus)
+			var status := FieldStatus.new(might_bonus, regen_bonus, insight_ward_bonus)
 			_bonus[unit.get_instance_id()] = status
 			unit.add_status(status)
 	for id in _bonus.keys():
@@ -75,9 +77,18 @@ func _remove_bonus(id: int) -> void:
 	_bonus.erase(id)
 
 
+## M-PATH gains no Charge while his field is up. Call once when the field is laid.
+func lock_charge(caster: BattleUnit) -> void:
+	_lock = ChargeLock.new()
+	caster.add_status(_lock)
+
+
 func end() -> void:
 	for id in _bonus.keys():
 		_remove_bonus(id)
+	if _lock != null and is_instance_valid(source):
+		source.remove_status(_lock)
+	_lock = null
 	queue_free()
 
 
@@ -106,21 +117,32 @@ func _draw() -> void:
 	draw_circle(middle, 4.0, Color(COLOR, 0.9 * fade))
 
 
-## On allies inside the field with B1 or B2: more wards and health regen.
-class FieldStatus extends Status:
-	var wards: float
-	var regen: float
+## On M-PATH while his field lasts: no Charge gain.
+class ChargeLock extends Status:
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return true
 
-	func _init(p_wards: float, p_regen: float) -> void:
-		wards = p_wards
+
+## On allies inside the field with B1 or B2: more Might (B1), health regen and Insight Ward (B2).
+class FieldStatus extends Status:
+	var might: float
+	var regen: float
+	var insight_ward: float
+
+	func _init(p_might: float, p_regen: float, p_insight_ward: float) -> void:
+		might = p_might
 		regen = p_regen
+		insight_ward = p_insight_ward
 
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
-		if stat in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
-			return value + wards
+		match stat:
+			Stats.Stat.MIGHT:
+				return value + might
+			Stats.Stat.INSIGHT_WARD:
+				return value + insight_ward
 		return value
 
 	func modify_health_regen(_unit: BattleUnit, value: float) -> float:

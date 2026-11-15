@@ -1,7 +1,7 @@
 class_name OrbitingKnifeStatus
 extends Status
-## One of Silt's knives orbiting this unit. Each of the unit's attacks that lands is
-## followed by a knife strike. Can also grant Insight Ward.
+## One of Silt's knives orbiting this unit. The unit's attacks gain a Hit Effect: a knife
+## flies at the target and strikes it (see KnifeHitEffect). Can also grant Insight Ward.
 
 const ORBIT_RADIUS := 22.0
 const ORBIT_SPEED := 4.0   # radians per second
@@ -59,5 +59,5 @@ func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	return value
 
 
-func get_hit_effect(_unit: BattleUnit) -> HitEffect:
-	return KnifeHitEffect.new(silt_id, damage, damage_type, wrack_multiplier)
+func get_hit_effect(unit: BattleUnit) -> HitEffect:
+	return KnifeHitEffect.new(silt_id, damage, damage_type, wrack_multiplier, unit)

@@ -1,25 +1,26 @@
 class_name LinkGambit
 extends Gambit
-## M-PATH links himself to the nearby ally that has lost the most health this combat. While
-## linked, both have more wards and each passes a share of the damage it takes to the other.
-##   Bonded (A): a share of the healing either one receives is given to the other too.
+## M-PATH links himself to the nearby ally that has taken the most damage this combat. While
+## linked, both have more health regen and each passes a share of the damage it takes to the other.
+##   Bonded (A): the link also raises both units' Might Ward and Celerity Ward.
 ##   A1: the link also raises both units' Insight.
-##   A2: if the linked ally would die, M-PATH dies instead and heals it.
+##   A2: once per link, if the linked ally would die, M-PATH gives up a share of his max
+##       health instead and heals it for the same amount.
 
 ## How close the ally must be, in hex cells.
 @export var range_cells: int = 3
 @export var duration: float = 6.0
-## Wards both linked units gain.
-@export var ward_bonus: float = 20.0
+## Health regen (per second) both linked units gain.
+@export var regen_bonus: float = 25.0
 ## Share of the damage each one takes that goes to the other instead (0.3 = 30%).
 @export_range(0.0, 1.0, 0.05) var damage_share: float = 0.3
-## Bonded (A): share of the healing either one receives that the other also gets. 0 = none.
-@export_range(0.0, 1.0, 0.05) var heal_share: float = 0.0
+## Bonded (A): Might Ward and Celerity Ward both linked units gain. 0 = none.
+@export var ward_bonus: float = 0.0
 ## A1: Insight both linked units gain. 0 = none.
 @export var insight_bonus: float = 0.0
-## A2: share of M-PATH's max health the ally is healed for when he dies in its place.
-## 0 = he doesn't.
-@export_range(0.0, 1.0, 0.05) var sacrifice_heal: float = 0.0
+## A2: share of M-PATH's max health he gives up (and heals the ally for) when the ally
+## would die. He never drops below 1 health from it. 0 = he doesn't.
+@export_range(0.0, 1.0, 0.05) var sacrifice_share: float = 0.0
 
 
 func can_use(caster: BattleUnit) -> bool:
@@ -38,18 +39,18 @@ func execute(caster: BattleUnit) -> void:
 			node.end()
 	var link := PathLink.new()
 	link.time_left = duration
+	link.regen_bonus = regen_bonus
 	link.ward_bonus = ward_bonus
 	link.insight_bonus = insight_bonus
 	link.damage_share = damage_share
-	link.heal_share = heal_share
-	link.sacrifice_heal = sacrifice_heal
+	link.sacrifice_share = sacrifice_share
 	link.add_to_group("path_links")
 	caster.get_tree().current_scene.add_child(link)
 	link.start(caster, ally)
 	caster.show_float_text("Link", PathLink.COLOR)
 
 
-## The ally within range that has lost the most health this combat; ties go to the nearest.
+## The ally within range that has taken the most damage this combat; ties go to the nearest.
 func _pick_ally(caster: BattleUnit) -> BattleUnit:
 	var best: BattleUnit = null
 	for node in caster.get_tree().get_nodes_in_group("units"):

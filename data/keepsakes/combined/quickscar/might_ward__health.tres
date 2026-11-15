@@ -1,15 +1,15 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3]
+[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://dmuf8esptsx7j"]
 
 [ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" path="res://data/keepsakes/combined/quickscar/might_ward__health_effect.tres" id="2_effect"]
+[ext_resource type="Resource" uid="uid://jd0108sb3y4b" path="res://data/keepsakes/combined/quickscar/might_ward__health_effect.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Quickscar"
 first_shard = 1
 second_shard = 6
-effect = ExtResource("2_effect")
 might_ward = 35.0
-health = 250.0
+health = 200.0
+effect = ExtResource("2_effect")
 description = "Whenever you take damage, you Heal for 15% of it after a 3 second delay."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

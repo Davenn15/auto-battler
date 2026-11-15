@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Obelisk Placeholder 3D"
+description = "PLACEHOLDER. All your units gain 40 Insight Ward and 40 Celerity Ward."
+tier = 3
+insight_ward = 40.0
+celerity_ward = 40.0

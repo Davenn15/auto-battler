@@ -7,4 +7,4 @@ script = ExtResource("1")
 shield_per_second = 75.0
 gambit_name = "Shield Beam"
 cast_time = 0.2
-description = "Channels a beam at the ally with the lowest health for 4 seconds, shielding it for 30 + 0.25x Insight per second (more the farther away it is). The shield lingers for 3 seconds."
+description = "Channels a beam at the ally with the lowest health for 4 seconds, shielding it for 75 + 0.25x Insight per second (more the farther away it is). The shield lingers for 3 seconds."

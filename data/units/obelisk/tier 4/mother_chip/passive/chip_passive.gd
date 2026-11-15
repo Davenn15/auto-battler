@@ -62,9 +62,11 @@ class ChipStatus extends Status:
 	func get_hit_effect(unit: BattleUnit) -> HitEffect:
 		return VirusHit.new(passive.virus_per_attack, unit.get_credit_id())
 
-	## Her attack landed: every Chip shoots the same target (only when she fires shots;
-	## her B beam handles the Chips itself).
-	func on_attack_hit(unit: BattleUnit, target: BattleUnit, _dealt: float) -> void:
+	## She attacks: every Chip shoots the same target along with her (only when she fires
+	## shots; her B beam handles the Chips itself). Not a Hit Effect: it happens as she
+	## attacks, whether or not her attack lands.
+	func on_attack(unit: BattleUnit) -> void:
+		var target := unit.attack_target
 		if MotherBeamStatus.of(unit) != null or not is_instance_valid(target) or not target.alive:
 			return
 		var amount := Stats.attack_damage(unit.get_stat(Stats.Stat.MIGHT)) * passive.chip_share

@@ -8,4 +8,4 @@ damage = 250.0
 might_scaling = 2.0
 bonus_per_second = 0.4
 gambit_name = "Pinpoint Strike"
-description = "Gains a shield (30% of max health) and winds up, faster and faster. When the shield breaks or after 4 seconds, flies to the enemy with the highest Insight, dealing massive damage and stunning it for 1.5 seconds. +50% damage per second spent winding up."
+description = "Gains a shield (30% of max health) and winds up, faster and faster. When the shield breaks or after 4 seconds, flies to the enemy with the highest Insight, dealing massive damage and stunning it for 1.5 seconds. +40% damage per second spent winding up."

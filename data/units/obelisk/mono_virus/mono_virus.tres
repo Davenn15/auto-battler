@@ -4,5 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-damage_per_stack = 0.01
+damage_per_stack = 0.007
+min_damage_per_stack = 10.0
 transfer_share = 0.5

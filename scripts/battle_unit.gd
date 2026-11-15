@@ -87,16 +87,32 @@ const SHIELD_BAR_OVERHANG := 1.0   # pixels it sticks out above and below the he
 const SHIELD_BAR_MIN_WIDTH := 3.0  # pixels, so a tiny shield is still visible
 const PENDING_COLOR := Color(0.45, 0.05, 0.05)   # dark red: health about to be lost
 var pending_bar: ColorRect
+## Health about to come back (delayed heals): the team color, darkened.
+const PENDING_HEAL_DARKEN := 0.4
+var pending_heal_bar: ColorRect
 
-const BADGE_SIZE := 6.0   # pixels, square
-const BADGE_GAP := 2.0    # between badges, and between the badges and the health bar
 ## Badge color for the first and second choice at level 1. Shared by every unit.
 const PATH_COLORS: Array[Color] = [Color(0.94, 0.55, 0.16), Color(0.18, 0.72, 0.69)]   # orange, teal
 ## How far a level-2 badge is shaded from its path color: lighter for the first
 ## follow-up, darker for the second.
 const FOLLOW_UP_SHADE := 0.4
 
-const KEEPSAKE_ICON_SIZE := 8.0   # pixels, square: the item icons above the health bar
+const KEEPSAKE_ICON_SIZE := 6.0   # pixels, square: the item icons just above the plate
+
+# ---------- The status plate ----------
+# Health, Charge, the attack wind-up, upgrade pips and the Ascension diamond sit on one
+# small dark plate above the unit, with the Keepsake icons just above it (see _layout_plate).
+const PLATE_WIDTH := 44.0     # well under the hex spacing, so neighbours' plates never touch
+const PLATE_BOTTOM := -28.0   # the plate's bottom edge, from the unit's centre
+const PLATE_PAD := 1.0        # inside the plate's edge
+const PLATE_GAP := 1.0        # between the rows
+const HEALTH_HEIGHT := 4.0
+const CHARGE_HEIGHT := 2.0
+const ATTACK_HEIGHT := 1.0
+const PIP_SIZE := Vector2(3, 3)   # one upgrade pip in the plate's left tab
+const PLATE_COLOR := Color(0.08, 0.08, 0.1, 0.75)
+const PLATE_BORDER := Color(0.35, 0.35, 0.4)
+var _plate: Panel
 
 
 
@@ -186,11 +202,13 @@ func _ready() -> void:
 	
 	_setup_upgrade_badges()
 	_setup_keepsake_icons()
+	_setup_ascension_marker()
 	
 	charge = starting_charge
 	_setup_charge_bar()
 	
 	_setup_attack_bar()
+	_layout_plate()
 
 	# Units placed by hand in the editor snap to the nearest cell. Units created by
 	# a spawner set auto_place = false and call place_at() themselves.
@@ -207,6 +225,8 @@ func _ready() -> void:
 
 ## Reserve buffs bought in the match shop once the unit was fully upgraded.
 var buffs: int = 0
+## The army's Ascensions (match Encounters). Set before the unit enters the tree.
+var ascensions: Array[Ascension] = []
 
 ## Copies stats from the UnitData resource, if one is assigned.
 func _apply_data() -> void:
@@ -218,6 +238,9 @@ func _apply_data() -> void:
 			* Stats.buff_health_multiplier(buffs)
 	for keepsake in keepsakes:
 		max_health += keepsake.health
+	for ascension in ascensions:
+		if ascension.applies_to(data):
+			max_health += ascension.health
 	move_speed = 120
 	attack_range = data.attack_range_cells
 	health_regen = data.health_regen
@@ -305,6 +328,7 @@ func _setup_health_bar() -> void:
 	_setup_health_ticks()
 	_update_health_ticks()
 	_setup_pending_bar()   # before the shield bar, so the shield draws on top
+	_setup_pending_heal_bar()
 	_setup_shield_bar()
 
 
@@ -366,6 +390,30 @@ func _update_pending_bar() -> void:
 	pending_bar.position = Vector2(start_frac * width, 0.0)
 	pending_bar.size = Vector2((end_frac - start_frac) * width, health_bar.size.y)
 	pending_bar.visible = true
+
+
+func _setup_pending_heal_bar() -> void:
+	pending_heal_bar = ColorRect.new()
+	pending_heal_bar.color = team_color(team).darkened(PENDING_HEAL_DARKEN)
+	pending_heal_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pending_heal_bar.visible = false
+	health_bar.add_child(pending_heal_bar)
+
+
+## Shows the healing the unit is still due (delayed heals) as a darker stretch right after
+## its current health, up to max health.
+func _update_pending_heal_bar() -> void:
+	if pending_heal_bar == null or health_bar == null or max_health <= 0.0:
+		return
+	var coming := minf(get_pending_healing(), max_health - maxf(health, 0.0))
+	if coming <= 0.0 or not alive:
+		pending_heal_bar.visible = false
+		return
+	var width := health_bar.size.x
+	var start_frac := maxf(health, 0.0) / max_health
+	pending_heal_bar.position = Vector2(start_frac * width, 0.0)
+	pending_heal_bar.size = Vector2(coming / max_health * width, health_bar.size.y)
+	pending_heal_bar.visible = true
 
 
 func _setup_shield_bar() -> void:
@@ -436,10 +484,10 @@ func _size_flash() -> void:
 	_flash.position = Vector2(start * width, 0.0)
 	_flash.size = Vector2((end - start) * width, health_bar.size.y)
 
-var _badges: HBoxContainer
+var _badges: VBoxContainer
 
-## Small badges to the left of the health bar, one per upgrade taken. How many = level;
-## colors (or icons) = which path. Safe to call again if the upgrades change.
+## Small pips in the plate's left tab, one per upgrade taken, top to bottom. How many =
+## level; colors = which path. Safe to call again if the upgrades change.
 func _setup_upgrade_badges() -> void:
 	if _badges != null:
 		_badges.queue_free()
@@ -449,21 +497,20 @@ func _setup_upgrade_badges() -> void:
 	var chosen := get_chosen_upgrades()
 	if chosen.is_empty():
 		return
-	_badges = HBoxContainer.new()
-	_badges.add_theme_constant_override("separation", int(BADGE_GAP))
+	_badges = VBoxContainer.new()
+	_badges.add_theme_constant_override("separation", int(PLATE_GAP))
 	_badges.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for level in chosen.size():
 		_badges.add_child(_make_badge(_badge_color(level)))
 	health_bar.add_child(_badges)   # a child of the bar, so it moves with it
-	var width := chosen.size() * BADGE_SIZE + (chosen.size() - 1) * BADGE_GAP
-	_badges.position = Vector2(-width - BADGE_GAP, (health_bar.size.y - BADGE_SIZE) / 2.0)
+	_layout_plate()
 
 
 ## A small square of the given color.
 func _make_badge(color: Color) -> Control:
 	var badge := ColorRect.new()
 	badge.color = color
-	badge.custom_minimum_size = Vector2(BADGE_SIZE, BADGE_SIZE)
+	badge.custom_minimum_size = PIP_SIZE
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return badge
 
@@ -479,8 +526,8 @@ func _badge_color(level: int) -> Color:
 
 var _keepsake_icons: HBoxContainer
 
-## A small icon above the health bar for each equipped keepsake, centred over the bar.
-## Safe to call again whenever the keepsakes change.
+## A small icon for each equipped keepsake, in a row just above the plate. Safe to
+## call again whenever the keepsakes change.
 func _setup_keepsake_icons() -> void:
 	if _keepsake_icons != null:
 		_keepsake_icons.queue_free()
@@ -488,7 +535,7 @@ func _setup_keepsake_icons() -> void:
 	if health_bar == null or keepsakes.is_empty():
 		return
 	_keepsake_icons = HBoxContainer.new()
-	_keepsake_icons.add_theme_constant_override("separation", int(BADGE_GAP))
+	_keepsake_icons.add_theme_constant_override("separation", int(PLATE_GAP))
 	_keepsake_icons.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for keepsake in keepsakes:
 		var icon := TextureRect.new()
@@ -499,8 +546,71 @@ func _setup_keepsake_icons() -> void:
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_keepsake_icons.add_child(icon)
 	health_bar.add_child(_keepsake_icons)   # a child of the bar, so it moves with it
-	var width := keepsakes.size() * KEEPSAKE_ICON_SIZE + (keepsakes.size() - 1) * BADGE_GAP
-	_keepsake_icons.position = Vector2((health_bar.size.x - width) / 2.0, -KEEPSAKE_ICON_SIZE - BADGE_GAP)
+	_layout_plate()
+
+## A small gold diamond on the plate's top-left corner of a unit holding a chosen-unit
+## Ascension, so it's easy to spot on the board.
+const ASCENSION_MARKER_COLOR := Color(1.0, 0.82, 0.3)
+
+func _setup_ascension_marker() -> void:
+	if health_bar == null or not ascensions.any(func(a): return a.is_chosen()):
+		return
+	var marker := Polygon2D.new()
+	marker.name = "AscensionMarker"
+	marker.polygon = PackedVector2Array([Vector2(0, -4), Vector2(3, 0), Vector2(0, 4), Vector2(-3, 0)])
+	marker.color = ASCENSION_MARKER_COLOR
+	var outline := Line2D.new()
+	outline.points = PackedVector2Array([Vector2(0, -4), Vector2(3, 0), Vector2(0, 4), Vector2(-3, 0), Vector2(0, -4)])
+	outline.width = 1.0
+	outline.default_color = Color(0, 0, 0, 0.8)
+	marker.add_child(outline)
+	health_bar.add_child(marker)
+	_layout_plate()
+
+## Lays out the status plate: a dark panel behind everything, an upgrade-pip tab on its
+## left (when the unit has upgrades), then Health, Charge and the attack wind-up stacked,
+## the Keepsake icons in a row just above the plate (when it has any), and the Ascension diamond on
+## the top-left corner. Everything hangs off the health bar, so it moves, turns and hides
+## with it. Safe to call again whenever upgrades, items or Ascensions change.
+func _layout_plate() -> void:
+	if health_bar == null:
+		return
+	var tab := (PIP_SIZE.x + PLATE_GAP) if _badges != null and is_instance_valid(_badges) else 0.0
+	var width := PLATE_WIDTH - PLATE_PAD * 2.0 - tab
+	health_bar.size = Vector2(width, HEALTH_HEIGHT)
+	var y := HEALTH_HEIGHT + PLATE_GAP
+	if charge_bar != null:
+		charge_bar.position = Vector2(0, y)
+		charge_bar.size = Vector2(width, CHARGE_HEIGHT)
+		y += CHARGE_HEIGHT + PLATE_GAP
+	if attack_bar != null:
+		attack_bar.position = Vector2(0, y)
+		attack_bar.size = Vector2(width, ATTACK_HEIGHT)
+		y += ATTACK_HEIGHT
+	if _badges != null and is_instance_valid(_badges):
+		_badges.position = Vector2(-tab, 0)
+	var marker := health_bar.get_node_or_null("AscensionMarker")
+	if marker != null:
+		marker.position = Vector2(-PLATE_PAD - tab, -PLATE_PAD)
+	if _plate == null:
+		_plate = Panel.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = PLATE_COLOR
+		style.border_color = PLATE_BORDER
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(2)
+		_plate.add_theme_stylebox_override("panel", style)
+		_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_plate.show_behind_parent = true   # behind the health bar and everything on it
+		health_bar.add_child(_plate)
+	_plate.position = Vector2(-PLATE_PAD - tab, -PLATE_PAD)
+	_plate.size = Vector2(PLATE_WIDTH, y + PLATE_PAD * 2.0)
+	health_bar.position = Vector2(-PLATE_WIDTH / 2.0 + PLATE_PAD + tab, PLATE_BOTTOM - _plate.size.y + PLATE_PAD)
+	if _keepsake_icons != null and is_instance_valid(_keepsake_icons):   # centred just above the plate
+		var count := _keepsake_icons.get_child_count()
+		var row := count * KEEPSAKE_ICON_SIZE + maxf(count - 1, 0) * PLATE_GAP
+		_keepsake_icons.position = Vector2(_plate.position.x + (PLATE_WIDTH - row) / 2.0,
+				-PLATE_PAD - 1.0 - KEEPSAKE_ICON_SIZE)
 
 ## Which keepsake badge is at `world` (with a little slack, as they're small), or -1.
 func keepsake_index_at(world: Vector2, slack: float = 3.0) -> int:
@@ -546,6 +656,22 @@ func setup_as_profile_summon(profile: UnitData, source: BattleUnit, health_fract
 		_summon_stats[ward] *= ward_multiplier
 	_summoner_id = source.get_credit_id()
 
+## A summon joining the fight takes its army's Ascensions (their stats are added by
+## start_combat). Their Health only needs adding to summons rebuilt as a full unit (revives,
+## copies): ones sized from a source's health already include it.
+func give_ascensions(list: Array[Ascension]) -> void:
+	list = list.filter(func(a): return not a.is_chosen())   # those belong to one unit only
+	if list.is_empty() or not ascensions.is_empty():
+		return
+	ascensions.assign(list)
+	if _summon_stats.is_empty():   # built as a normal unit, then made a summon
+		var bonus := 0.0
+		for ascension in ascensions:
+			if ascension.applies_to(data):
+				bonus += ascension.health
+		if bonus != 0.0:
+			resize_health(max_health + bonus, health + bonus)
+
 ## The id this unit's damage is credited to on the damage meter: its summoner for
 ## summons, itself otherwise.
 func get_credit_id() -> int:
@@ -582,12 +708,37 @@ func get_chosen_upgrades() -> Array[Upgrade]:
 func get_upgrade_level() -> int:
 	return get_chosen_upgrades().size()
 
-func record_damage(unit_id: int, amount: float) -> void:
+## Every damage source reports here (through the "damage_tracker" group). Vampirism heals
+## from it unless `lifesteal` is false (damage over time like Mono-Virus).
+func record_damage(unit_id: int, amount: float, lifesteal: bool = true) -> void:
 	if unit_id == get_instance_id():
 		damage_dealt += amount
 		var vampirism := get_stat(Stats.Stat.VAMPIRISM)
-		if vampirism > 0.0 and amount > 0.0:
+		if lifesteal and vampirism > 0.0 and amount > 0.0:
 			heal(amount * vampirism)
+		var hit_target := _direct_target_for(amount)
+		if hit_target != null:
+			for status in statuses.duplicate():
+				status.on_direct_damage_dealt(self, hit_target, amount)
+
+
+## The latest direct damage (take_damage with numbers shown), so record_damage, which
+## every source calls right after dealing damage, can tell direct damage from damage over
+## time and knows who took it. Cleared by damage over time and once it's been used.
+static var _direct_target_id := 0
+static var _direct_amount := -1.0
+
+static func _note_direct_damage(target: BattleUnit, dealt: float, direct: bool) -> void:
+	_direct_target_id = target.get_instance_id() if direct else 0
+	_direct_amount = dealt if direct else -1.0
+
+static func _direct_target_for(amount: float) -> BattleUnit:
+	if _direct_target_id == 0 or amount <= 0.0 or not is_equal_approx(amount, _direct_amount):
+		return null
+	var target := instance_from_id(_direct_target_id) as BattleUnit
+	_direct_target_id = 0
+	_direct_amount = -1.0
+	return target
 
 
 func record_healing(_unit_id: int, _amount: float) -> void:
@@ -710,6 +861,12 @@ func start_combat() -> void:
 	for keepsake in keepsakes:
 		add_status(KeepsakeStatsStatus.new(keepsake))
 		_start_keepsake_effect(keepsake)
+	for ascension in ascensions:
+		if not ascension.applies_to(data):
+			continue
+		add_status(Ascension.StatsStatus.new(ascension))
+		if ascension.effect != null:
+			ascension.effect.on_battle_start(self)
 	_casting = false
 	var actual := grid.world_to_cell(global_position)
 	if actual != cell:
@@ -741,6 +898,8 @@ func _physics_process(delta: float) -> void:
 	if not alive:
 		return
 
+	if active:
+		_rescale_attack_timer()
 	if _stunned_time > 0.0:
 		_stunned_time -= delta   # stunned: no winding up an attack
 	elif not _is_channeling():
@@ -749,6 +908,7 @@ func _physics_process(delta: float) -> void:
 		status.tick(self, delta)
 	_update_shield_bar()
 	_update_pending_bar()
+	_update_pending_heal_bar()
 	_update_attack_bar()
 	if active:
 		heal(get_health_regen() * delta, 0, false)
@@ -1016,6 +1176,10 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 	elif wrack_level == 2:
 		show_float_text("Hyper!", Stats.HYPER_WRACK_COLOR)
 	var base_damage := Stats.attack_damage(get_stat(Stats.Stat.MIGHT)) + extra_damage
+	# Melee or ranged is decided by the range this attack started with: on_attack below may
+	# change it for the NEXT attack (Von Carrow's pistol loads a shot on her second swing).
+	var ranged := attack_range > 1
+	attack_target = enemy
 	var shot_color: Color = team_color(team)
 	var hit_effects: Array[HitEffect] = []
 	for status in statuses.duplicate():
@@ -1027,7 +1191,7 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 		status.on_attack(self)
 	hit_effects.append_array(extra_hit_effects)
 	var hit_damage := base_damage * Stats.wrack_multiplier(wrack_level, get_wrack_damage_against(enemy))
-	if attack_range > 1 or projectile != null:
+	if ranged or projectile != null:
 		_fire_projectile(enemy, hit_damage, wrack_level, shot_color, hit_effects, projectile)
 		return wrack_level
 	_play_melee_swing(enemy.global_position)
@@ -1039,6 +1203,10 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 	notify_attack_hit(enemy, dealt)
 	run_hit_effects(hit_effects, enemy, dealt, wrack_level)
 	return wrack_level
+
+## The enemy the attack currently being made is aimed at. Set while statuses' on_attack
+## runs (an extra attack can aim at someone other than the unit's target).
+var attack_target: BattleUnit = null
 
 ## Tells this unit's statuses an enemy's attack reached it.
 func notify_attacked(attacker: BattleUnit, dealt: float) -> void:
@@ -1099,6 +1267,19 @@ func _play_melee_swing(target_pos: Vector2) -> void:
 		color = status.modify_swing_color(self, color)
 	KeepsakeVfx.swing(self, (target_pos - global_position).angle(), color)
 
+## Celerity (or anything else changing attack speed) that changes mid-swing applies to the
+## attack already winding up: the wind-up keeps how far along it is and finishes at the new
+## speed. E.g. halfway through a 2s wind-up, doubling attack speed leaves 0.5s, not 1s.
+func _rescale_attack_timer() -> void:
+	if _attack_timer <= 0.0 or _attack_cooldown_total <= 0.0:
+		return
+	var now := get_attack_cooldown()
+	if is_equal_approx(now, _attack_cooldown_total):
+		return
+	_attack_timer *= now / _attack_cooldown_total
+	_attack_cooldown_total = now
+
+
 ## The unit's current time between attacks, after status effects.
 func get_attack_cooldown() -> float:
 	var cooldown := Stats.attack_cooldown(get_stat(Stats.Stat.CELERITY))
@@ -1133,19 +1314,15 @@ func _setup_attack_bar() -> void:
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = ATTACK_BAR_COLOR
 	attack_bar.add_theme_stylebox_override("fill", fill)
-	add_child(attack_bar)
+	if health_bar != null:
+		health_bar.add_child(attack_bar)   # on the plate, under the Charge bar (see _layout_plate)
+	else:
+		add_child(attack_bar)
 
 
 func _update_attack_bar() -> void:
 	if attack_bar == null or health_bar == null:
 		return
-	# Sit just under the health and charge bars, matching their combined width.
-	var rect := health_bar.get_global_rect()
-	if charge_bar != null:
-		rect = rect.merge(charge_bar.get_global_rect())
-	attack_bar.global_position = Vector2(rect.position.x, rect.end.y + 1.0)
-	attack_bar.size = Vector2(rect.size.x, 3.0)
-
 	if _attack_cooldown_total > 0.0:
 		attack_bar.value = 1.0 - _attack_timer / _attack_cooldown_total
 	else:
@@ -1302,6 +1479,7 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	incoming_wrack_level = wrack_level
 	var dealt := _apply_damage(amount, Stats.damage_color(damage_type, wrack_level), wrack_level, show_numbers)
 	incoming_attacker = null
+	_note_direct_damage(self, dealt, show_numbers)
 	return dealt
 
 ## Damage that has already been through wards, such as damage released over time.
@@ -1314,6 +1492,7 @@ func take_warded_damage(amount: float, show_numbers: bool = false, damage_type: 
 	incoming_damage_type = damage_type
 	incoming_is_hit = false
 	incoming_wrack_level = 0
+	_note_direct_damage(self, 0.0, false)
 	return _apply_damage(amount, Stats.damage_color(damage_type), 0, show_numbers)
 
 ## The number color of the hit currently being processed, for statuses that show their
@@ -1510,6 +1689,13 @@ func remove_status(status: Status) -> void:
 		status.on_removed(self)
 
 ## Total shield from all statuses.
+## Healing this unit is still due from delayed heals, summed over its statuses.
+func get_pending_healing() -> float:
+	var total := 0.0
+	for status in statuses:
+		total += status.get_pending_healing(self)
+	return total
+
 ## Damage this unit has taken but not lost yet, summed over its statuses.
 func get_pending_damage() -> float:
 	var total := 0.0
@@ -1583,11 +1769,16 @@ func _ready_to_gambit() -> bool:
 ## Runs the Action and marks any statuses it attached, so they block charge gain.
 func _run_gambit() -> void:
 	var before := statuses.duplicate()
-	if gambit_resets_attack:   # the next attack winds up from the start after a cast
-		_attack_timer = get_attack_cooldown()
-		_attack_cooldown_total = _attack_timer
-		_update_attack_bar()
+	var timer_before := _attack_timer
 	gambit.execute(self)
+	# The next attack winds up from the start after a cast, sized after the Gambit has run
+	# so a Celerity buff it gives already counts for that first attack. If the Gambit set
+	# the timer itself (e.g. by attacking), a longer wait it chose is kept.
+	if gambit_resets_attack and alive:
+		var full := get_attack_cooldown()
+		_attack_timer = full if _attack_timer == timer_before else maxf(_attack_timer, full)
+		_attack_cooldown_total = full   # the real cooldown, so _rescale_attack_timer leaves a longer wait alone
+		_update_attack_bar()
 	for status in statuses:
 		if not before.has(status):
 			status.from_gambit = true

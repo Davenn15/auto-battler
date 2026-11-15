@@ -13,10 +13,11 @@ const ROUND_DAMAGE_BASE := 3
 const NEW_START_AURA := 10
 const OLD_START_AURA := 6
 ## The most Aura a player is ever given in a match, counting the starting Aura.
-const NEW_MAX_AURA_RECEIVED := 100
+const NEW_MAX_AURA_RECEIVED := 88
 const OLD_MAX_AURA_RECEIVED := 48
-## Aura income per round is the round number times this, rounded down.
-const NEW_AURA_INCOME_SCALE := 1.75
+## Aura income per round is the paced round times this, rounded down. 1.5 reaches the 88
+## cap at the same point (round 8) and pace the old 1.75 reached its 100.
+const NEW_AURA_INCOME_SCALE := 1.5
 ## Loss damage from survivors is their Aura divided by this, rounded down.
 const NEW_SURVIVOR_DIVISOR := 5.0
 const OLD_SURVIVOR_DIVISOR := 3.0
@@ -33,6 +34,10 @@ const UNIT_OFFERS := 3
 const SHARD_OFFERS := 3
 const SHARD_COST := 3
 const SHARD_SELL := 2
+## From this combat on (4th combat = round 5), the shop also offers one random full
+## Keepsake at a discount. It rerolls and locks with the rest of the shop.
+const KEEPSAKE_FIRST_COMBAT := 4
+const KEEPSAKE_COST := 5
 ## A loose keepsake sells for this share of what it cost.
 const KEEPSAKE_SELL_SHARE := 2.0 / 3.0
 const REROLL_START := 1
@@ -46,10 +51,13 @@ const GRID_COLUMNS := 8
 const GRID_ROWS := 8
 
 const UNITS_DIR := "res://data/units"
+const ASCENSIONS_DIR := "res://data/ascensions"
 const KEEPSAKES_DIR := "res://data/keepsakes"
 
 static var _roster: Array[UnitData] = []
 static var _pools: Dictionary = {}
+static var _ascension_pools: Dictionary = {}   # faction name ("" = Neutral) -> Array[Ascension]
+static var _ascensions_by_key: Dictionary = {}  # Ascension.key -> Ascension
 
 
 static func roster() -> Array[UnitData]:
@@ -113,11 +121,11 @@ static func _keepsake_pools() -> Dictionary:
 
 # ---------- Rounds and money ----------
 
-## Encounter rounds are left out for now, so combats are rounds 2, 3, 4, ... Income and
-## loss damage are still sized as when an Encounter came between combats (combats on rounds
-## 3, 5, 7, ...), by using this paced round instead: 3 for round 2, 5 for round 3, and so on.
+## Combats are rounds 2, 4, 6, ... (an Encounter round between each). Income and loss
+## damage are sized as when combats were rounds 3, 5, 7, ..., so they use this paced round:
+## 3 for round 2, 5 for round 4, and so on (the same numbers per combat as before).
 static func paced_round(round_number: int) -> int:
-	return 2 * round_number - 1
+	return round_number + 1
 
 
 ## Reserve each player gets after a player combat in round `round_number`.
@@ -230,6 +238,174 @@ static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> 
 	return true
 
 
+# ---------- Rounds and Encounters ----------
+# Opening Shop (round 1) -> Combat (2) -> Encounter (3) -> Combat (4) -> Encounter (5) -> ...
+
+enum EncounterKind { FACTION, NEUTRAL }
+## Ascensions offered at each Encounter.
+const ASCENSION_OFFERS := 3
+## Each type's Encounters offer tier 1, 2, 3, 4 in turn; after that, that type's
+## Encounters are skipped.
+const MAX_ASCENSION_TIER := 4
+## How likely a unit-specific Ascension is to be offered, next to an army-wide one (1):
+## when you own one of its units (bench counts), and when you own none of them.
+const OWNED_UNIT_WEIGHT := 3.0
+const UNOWNED_UNIT_WEIGHT := 1.0 / 3.0
+
+
+static func is_combat_round(round_number: int) -> bool:
+	return round_number >= 2 and round_number % 2 == 0
+
+
+static func is_encounter_round(round_number: int) -> bool:
+	return round_number >= 3 and round_number % 2 == 1
+
+
+## 1 for the first Encounter (round 3), 2 for the second (round 5), ...
+static func encounter_number(round_number: int) -> int:
+	return (round_number - 1) / 2
+
+
+## Faction Ascensions at the 1st Encounter, Neutral at the 2nd, then the cycle repeats.
+static func encounter_kind(number: int) -> EncounterKind:
+	return EncounterKind.FACTION if number % 2 == 1 else EncounterKind.NEUTRAL
+
+
+## The tier an Encounter offers: Faction Encounters are the odd-numbered ones and Neutral
+## the even, so each type's 1st is tier 1, its 2nd tier 2, and so on.
+static func encounter_tier(number: int) -> int:
+	return (number + 1) / 2
+
+
+static func encounter_title(kind: EncounterKind, faction: String) -> String:
+	return "%s Ascension" % faction if kind == EncounterKind.FACTION else "Neutral Ascension"
+
+
+## Every Ascension of `faction`'s pool ("" for the Neutral pool).
+static func ascension_pool(faction: String) -> Array[Ascension]:
+	if _ascension_pools.is_empty():
+		for folder in DirAccess.get_directories_at(ASCENSIONS_DIR):
+			if folder == "scripts":
+				continue
+			var key := "" if folder == "neutral" else faction_name(folder)
+			var pool: Array[Ascension] = []
+			_collect_ascensions(ASCENSIONS_DIR.path_join(folder), pool)
+			_ascension_pools[key] = pool
+	var found: Array[Ascension] = []
+	found.assign(_ascension_pools.get(faction, []))
+	return found
+
+
+## Every Ascension in `dir` and the folders inside it (e.g. "tier 1"). An AscensionFamily
+## file adds each of its versions.
+static func _collect_ascensions(dir: String, pool: Array[Ascension]) -> void:
+	for listed in DirAccess.get_files_at(dir):
+		var file := listed.trim_suffix(".remap")   # exported builds list "x.tres.remap"
+		if not file.ends_with(".tres"):
+			continue
+		var path := dir.path_join(file)
+		var loaded := load(path)
+		if loaded is Ascension:
+			_register_ascension(loaded, path, null, pool)
+		elif loaded is AscensionFamily:
+			for i in loaded.versions.size():
+				if loaded.versions[i] != null:
+					_register_ascension(loaded.versions[i], "%s#%d" % [path, i], loaded, pool)
+	for sub in DirAccess.get_directories_at(dir):
+		_collect_ascensions(dir.path_join(sub), pool)
+
+
+static func _register_ascension(ascension: Ascension, key: String, family: AscensionFamily, pool: Array[Ascension]) -> void:
+	ascension.key = key
+	ascension.family = family
+	_ascensions_by_key[key] = ascension
+	pool.append(ascension)
+
+
+## The Ascension saved or sent as `key` (see Ascension.key), or null.
+static func ascension_by_key(key: String) -> Ascension:
+	ascension_pool("")   # loads every pool the first time
+	if _ascensions_by_key.has(key):
+		return _ascensions_by_key[key]
+	return load(key) as Ascension if ResourceLoader.exists(key) else null
+
+
+## Up to ASCENSION_OFFERS random Ascensions for the Encounter of `round_number`: that
+## Encounter's tier only, leaving out any version of one the player already has. Empty
+## past tier 4 or when that pool has none left (the Encounter is then skipped).
+static func roll_ascension_offers(player: PlayerState, round_number: int) -> void:
+	var number := encounter_number(round_number)
+	var kind := encounter_kind(number)
+	var tier := encounter_tier(number)
+	var pool := ascension_pool(player.faction if kind == EncounterKind.FACTION else "")
+	pool = pool.filter(func(a): return a.tier == tier and not player.ascensions.any(func(owned): return a.same_family(owned)) \
+			and (not a.is_chosen() or player.units.any(func(u): return a.can_pick(u))))
+	var weights: Array = pool.map(func(a): return ascension_weight(player, a))
+	player.ascension_offers.clear()
+	while player.ascension_offers.size() < ASCENSION_OFFERS and not pool.is_empty():
+		var total := 0.0
+		for w in weights:
+			total += w
+		var roll := randf() * total
+		var pick := pool.size() - 1
+		for i in pool.size():
+			roll -= weights[i]
+			if roll < 0.0:
+				pick = i
+				break
+		player.ascension_offers.append(pool[pick])
+		pool.remove_at(pick)
+		weights.remove_at(pick)
+
+
+## How likely `ascension` is to be offered to `player`: 1 for an army-wide one; for a
+## unit-specific one, more if they own one of its units, less if they don't.
+static func ascension_weight(player: PlayerState, ascension: Ascension) -> float:
+	if ascension.affected_units.is_empty():
+		return 1.0
+	for unit in player.units:
+		if ascension.affected_units.has(unit.data):
+			return OWNED_UNIT_WEIGHT
+	return UNOWNED_UNIT_WEIGHT
+
+
+## Takes the offered Ascension at `slot`; the rest of the offer goes away. A chosen-unit
+## one also needs `unit_index`, the unit in player.units it's given to.
+static func take_ascension(player: PlayerState, slot: int, unit_index: int = -1) -> bool:
+	if slot < 0 or slot >= player.ascension_offers.size():
+		return false
+	var ascension := player.ascension_offers[slot]
+	if ascension.is_chosen():
+		if unit_index < 0 or unit_index >= player.units.size() or not ascension.can_pick(player.units[unit_index]):
+			return false
+		player.units[unit_index].ascensions.append(ascension)
+	player.ascensions.append(ascension)
+	player.ascension_offers.clear()
+	return true
+
+
+## The computer's pick for a chosen-unit Ascension: the eligible unit with the most Aura in
+## it (tier and upgrades), then the most items. -1 if none can take it.
+static func guess_unit_index(player: PlayerState, ascension: Ascension) -> int:
+	var best := -1
+	for i in player.units.size():
+		var unit := player.units[i]
+		if not ascension.can_pick(unit):
+			continue
+		if best < 0 or unit.aura_value() > player.units[best].aura_value() \
+				or (unit.aura_value() == player.units[best].aura_value() and unit.items.size() > player.units[best].items.size()):
+			best = i
+	return best
+
+
+## The unit in `army` a chosen-unit Ascension was given to, or null.
+static func holder_of(army: Array[ArmyUnit], ascension: Ascension) -> ArmyUnit:
+	for unit in army:
+		if unit.ascensions.has(ascension):
+			return unit
+	return null
+
+
 # ---------- The shop ----------
 
 ## Fills the shop for a new planning phase and resets the reroll price. A locked shop is
@@ -241,6 +417,7 @@ static func start_planning(player: PlayerState, combat_number: int) -> void:
 		return
 	roll_unit_offers(player, combat_number)
 	roll_shard_offers(player)
+	roll_keepsake_offer(player, combat_number)
 
 
 static func tier_unlocked(tier: int, combat_number: int) -> bool:
@@ -261,7 +438,16 @@ static func roll_shard_offers(player: PlayerState) -> void:
 	player.shard_offers.assign(pool.slice(0, SHARD_OFFERS))
 
 
-## Rerolls the units and the Shards together. The price goes up each time.
+## One random Keepsake once they're unlocked for `combat_number`, else none.
+static func roll_keepsake_offer(player: PlayerState, combat_number: int) -> void:
+	player.keepsake_offer = keepsakes().pick_random() if keepsake_unlocked(combat_number) else null
+
+
+static func keepsake_unlocked(combat_number: int) -> bool:
+	return combat_number >= KEEPSAKE_FIRST_COMBAT
+
+
+## Rerolls the units, the Shards and the Keepsake together. The price goes up each time.
 static func reroll(player: PlayerState, combat_number: int) -> bool:
 	if player.reserve < player.reroll_cost:
 		return false
@@ -269,6 +455,7 @@ static func reroll(player: PlayerState, combat_number: int) -> bool:
 	player.reroll_cost += REROLL_STEP
 	roll_unit_offers(player, combat_number)
 	roll_shard_offers(player)
+	roll_keepsake_offer(player, combat_number)
 	return true
 
 
@@ -278,6 +465,15 @@ static func buy_shard_offer(player: PlayerState, slot: int) -> bool:
 	player.reserve -= SHARD_COST
 	player.inventory.append(player.shard_offers[slot])
 	player.shard_offers.remove_at(slot)
+	return true
+
+
+static func buy_keepsake_offer(player: PlayerState) -> bool:
+	if player.keepsake_offer == null or player.reserve < KEEPSAKE_COST:
+		return false
+	player.reserve -= KEEPSAKE_COST
+	player.inventory.append(player.keepsake_offer)
+	player.keepsake_offer = null
 	return true
 
 

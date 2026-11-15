@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Obelisk Firewall"
+description = "PLACEHOLDER. All your units gain 10 Insight and 10 Insight Ward."
+tier = 1
+insight = 10.0
+insight_ward = 10.0

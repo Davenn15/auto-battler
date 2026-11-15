@@ -11,5 +11,5 @@ second_shard = 5
 celerity = 20.0
 insight_ward = 35.0
 effect = ExtResource("2_effect")
-description = "Your attacks Sap 2 Insight from your target."
+description = "Hit Effect: Sap 2 Insight from the target."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -25,6 +25,7 @@ func _init(p_duration: float, p_might: float, p_celerity: float, p_lifesteal: fl
 func on_applied(unit: BattleUnit) -> void:
 	if unit.sprite != null:
 		unit.sprite.self_modulate = TINT
+	KeepsakeVfx.rage_flame(unit, true)
 	if random_targets:
 		unit.target = modify_target_choice(unit, null, null)   # switch right away
 
@@ -32,6 +33,7 @@ func on_applied(unit: BattleUnit) -> void:
 func on_removed(unit: BattleUnit) -> void:
 	if unit.sprite != null:
 		unit.sprite.self_modulate = Color.WHITE
+	KeepsakeVfx.rage_flame(unit, false)
 	if random_targets:
 		unit.target = null   # back to the nearest enemy
 

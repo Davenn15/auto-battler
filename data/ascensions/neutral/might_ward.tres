@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 15 Might Ward."
+tier = 1
+might_ward = 15.0
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 25 Might Ward."
+tier = 2
+might_ward = 25.0
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 40 Might Ward."
+tier = 3
+might_ward = 40.0
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 50 Might Ward."
+tier = 4
+might_ward = 50.0
+
+[resource]
+script = ExtResource("1")
+family_name = "Neutral Might Ward"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

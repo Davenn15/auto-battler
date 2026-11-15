@@ -6,6 +6,6 @@
 script = ExtResource("1_s5ndc")
 kind = 2
 every = 5
-duration = 2.5
+duration = 3.0
 description = "Every few attacks, silences the nearby enemy with the most Charge: it can't gain Charge or cast for a while."
 metadata/_custom_type_script = "uid://b2kle04pd2vts"

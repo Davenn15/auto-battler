@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CtrlSwarmPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/ctrl_r/upgrades/a_path/scripts/swarm_passives.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+kind = 0
+passive_name = "Bore Drones"
+description = "Every siphon drone launch also sends two bore drones at the enemies in range with the most wards. Each deals 30 damage and drills 7 off all three of its enemy's wards for the rest of combat, bringing them back to CTRL(R)."

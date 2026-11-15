@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_v2mdy")
 duration = 2.5
-description = "Vere's attacks leave a burn that deals part of their damage again."
+description = "Hit Effect: Leave a burn that deals part of the attack's damage again."
 metadata/_custom_type_script = "uid://c02ciiydxr4pe"

@@ -25,6 +25,8 @@ const LUNCK_ORANGE := Color(1.0, 0.55, 0.15)       # Lunck's flag and heart
 const CRESCENDO_COLOR := Color(1.0, 0.5, 0.8)      # Prancelot's floating notes
 const BREMES_TEAL := Color(0.25, 0.85, 0.8)        # Bremes' slash and smoke
 const LORDRED_RED := Color(1.0, 0.28, 0.45)        # Lordred's cleave and taunt
+const BESCARD_FLAME := Color(0.12, 0.25, 0.95)     # Bescard's rage flame
+const BESCARD_SLASH := Color(0.75, 0.05, 0.08)     # Bescard's flurry slashes
 const HEAD_ICON_HEIGHT := -66.0                     # above the health bar and item icons
 const BURST_COLOR := Color(0.35, 0.6, 1.0)
 const SPARK_COLOR := Color(0.75, 0.35, 1.0)
@@ -460,6 +462,22 @@ static func note_swirl(unit: BattleUnit) -> void:
 	unit.add_child(swirl)
 
 
+## Prancelot's notes: once a note's effect lands, a note in its colour circles the unit for
+## as long as `buff` (a buff, or a debuff like Silence) stays on it, so it's easy to see who
+## it's on. Several on one unit spread out around it.
+static func note_linger(target: BattleUnit, buff: Status, color: Color) -> void:
+	if not enabled() or not is_instance_valid(target):
+		return
+	var linger := NoteLinger.new()
+	linger.unit = target
+	linger.buff = buff
+	linger.color = color
+	linger.radius = _sprite_size(target).x * 0.5
+	linger.phase = TAU * 0.381966 * target.get_children().filter(func(c): return c is NoteLinger).size()
+	linger.z_index = 11
+	target.add_child(linger)
+
+
 ## Bremes' Sunder Strike: a quick teal double slash across the enemy.
 static func teal_slash(target: BattleUnit) -> void:
 	if not enabled() or not is_instance_valid(target):
@@ -584,6 +602,37 @@ static func cleave_slash(target: BattleUnit) -> void:
 	slash.z_index = 13
 	_spawn(target, slash, target.global_position)
 	slash.rotation = target.global_rotation
+
+
+## Bescard's rage: deep blue flames flickering up behind him, mostly see-through.
+## `on` = false puts them out.
+static func rage_flame(unit: BattleUnit, on: bool) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	if not on:
+		clear(unit, "VfxRageFlame")
+		return
+	if unit.get_node_or_null("VfxRageFlame") != null:
+		return
+	var flame := FlameAura.new()
+	flame.name = "VfxRageFlame"
+	flame.color = BESCARD_FLAME
+	flame.size = _sprite_size(unit)
+	unit.add_child(flame)
+	unit.move_child(flame, 0)   # first child: drawn behind the sprite
+
+
+## Bescard's Flurry: one brutal slash across the target. `index` (the strike number)
+## picks its angle, so a flurry's slashes cross each other at different angles.
+static func brutal_slash(target: BattleUnit, index: int) -> void:
+	if not enabled() or not is_instance_valid(target):
+		return
+	var slash := BrutalSlash.new()
+	slash.color = BESCARD_SLASH
+	slash.length = _sprite_size(target).y * 1.35
+	slash.z_index = 13
+	_spawn(target, slash, target.global_position)
+	slash.rotation = target.global_rotation + deg_to_rad(BrutalSlash.ANGLES[index % BrutalSlash.ANGLES.size()])
 
 
 ## Lordred's Taunt: a slowly turning spiked pinkish red ring around him for `duration`
@@ -966,6 +1015,31 @@ class NoteSwirl extends Node2D:
 			draw_string(font, pos + Vector2(-5, 6), NOTES[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(color, alpha))
 
 
+## One note circling a unit while a buff lasts (see note_linger). Goes away with the buff.
+class NoteLinger extends Node2D:
+	var unit: BattleUnit
+	var buff: Status
+	var color := Color.WHITE
+	var radius := 24.0
+	var phase := 0.0
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		if not is_instance_valid(unit) or not unit.alive or not unit.statuses.has(buff):
+			queue_free()
+			return
+		time += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var font := ThemeDB.fallback_font
+		var angle := phase + time * 1.6
+		var pos := Vector2(cos(angle) * radius, -14.0 + sin(angle) * radius * 0.4 + sin(time * 3.0) * 3.0)
+		var appear := minf(time / 0.2, 1.0)
+		draw_string_outline(font, pos + Vector2(-5, 6), "♪", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, 3, Color(0, 0, 0, 0.8 * appear))
+		draw_string(font, pos + Vector2(-5, 6), "♪", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(color, appear))
+
+
 ## A spiked ring around a unit that grows in, turns slowly, and fades at the end.
 class SpikedAura extends Node2D:
 	const SPIKES := 16
@@ -1026,6 +1100,127 @@ class Slash extends Node2D:
 			draw_line(tail, tip, Color(color, 0.35 * fade), 7.0 * thickness, true)
 			draw_line(tail, tip, Color(color, fade), 3.0 * thickness, true)
 			draw_line(tail, tip, Color(1, 1, 1, 0.8 * fade), 1.0 * thickness, true)
+
+
+## An aura of flames wreathing a unit (Bescard's rage): tongues all the way around an oval
+## that hugs its body, each pointing outward and drawn upward like fire, flickering on its
+## own, over a soft oval glow. One colour, mostly see-through. Purely visual.
+class FlameAura extends Node2D:
+	const TONGUES := 18
+	var color := Color.BLUE
+	var size := Vector2(48, 48)
+	var time := 0.0
+	var _alpha := 0.0   # fades in
+
+	func _process(delta: float) -> void:
+		time += delta
+		_alpha = minf(_alpha + delta / 0.25, 1.0)
+		queue_redraw()
+
+	## A point on the oval around the body, `a` radians round from the right.
+	func _rim(a: float) -> Vector2:
+		return Vector2(cos(a) * size.x * 0.42, sin(a) * size.y * 0.46 - size.y * 0.05)
+
+	func _draw() -> void:
+		# The soft glow: a few stacked ovals, fainter as they grow.
+		for i in 3:
+			var grow := 1.0 + i * 0.12
+			var oval := PackedVector2Array()
+			for k in 24:
+				oval.append(_rim(TAU * k / 24.0) * grow)
+			draw_colored_polygon(oval, Color(color, 0.07 * _alpha))
+		for i in TONGUES:
+			var a := TAU * i / TONGUES
+			var base := _rim(a)
+			var out := base.normalized()
+			# Fire rises: the further down the oval, the shorter, and every tongue leans up.
+			var up_share := clampf(0.5 - out.y * 0.5, 0.15, 1.0)   # 1 at the top, small at the bottom
+			var dir := (out + Vector2(0, -1.1)).normalized()
+			var flick := 0.6 + 0.25 * sin(time * 9.0 + i * 1.7) + 0.15 * sin(time * 14.0 + i * 2.9)
+			var length := size.y * 0.42 * up_share * flick
+			var sway := Vector2(sin(time * 6.0 + i * 1.1) * size.x * 0.05, 0)
+			var tip := base + dir * length + sway
+			var side := dir.orthogonal() * size.x * 0.085
+			draw_colored_polygon(PackedVector2Array([
+				base - side,
+				base - side * 0.7 + (tip - base) * 0.5,
+				tip,
+				base + side * 0.7 + (tip - base) * 0.5,
+				base + side,
+			]), Color(color, 0.24 * _alpha))
+			# A lighter core in the taller tongues.
+			if up_share > 0.4:
+				var core_tip := base.lerp(tip, 0.6)
+				draw_colored_polygon(PackedVector2Array([base - side * 0.4, core_tip, base + side * 0.4]),
+						Color(color.lightened(0.5), 0.2 * _alpha))
+
+
+## One brutal slash across a target (Bescard's Flurry): a jagged, torn cut that rips across
+## in an instant along a slight crescent, zigzagging, with serrated spikes off its edge and
+## a ragged split tail, then lingers and fades with droplets flung off the end. Purely visual.
+class BrutalSlash extends Node2D:
+	const TIME := 0.75   # long enough that a flurry's slashes pile up, crossing
+	const SWEEP := 0.08          # seconds for the blade to cross
+	const ANGLES := [-38.0, 42.0, -8.0, 72.0, -66.0, 18.0, 55.0]   # degrees, one per strike
+	const BOW := 0.14            # how much the cut curves, as a share of its length
+	const POINTS := 13
+	## Zigzag offsets (share of length) at each point, and spikes off the edge.
+	const ZIG := [0.0, 0.05, -0.04, 0.06, -0.05, 0.03, -0.06, 0.05, -0.03, 0.06, -0.04, 0.03, 0.0]
+	const SPIKES := [2, 5, 8, 10]   # points that throw a serrated spike
+	var color := Color.RED
+	var length := 60.0
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		if time >= TIME:
+			queue_free()
+			return
+		queue_redraw()
+
+	## Point `i` of the jagged cut: along a crescent, kicked sideways by the zigzag.
+	func _at(i: int) -> Vector2:
+		var t := float(i) / (POINTS - 1)
+		var x := lerpf(-length * 0.5, length * 0.5, t)
+		var zig: float = ZIG[i]
+		var y := -sin(t * PI) * length * BOW + zig * length
+		return Vector2(x, y)
+
+	func _draw() -> void:
+		var reach := clampf(time / SWEEP, 0.0, 1.0)
+		var fade := 1.0 - clampf((time - SWEEP) / (TIME - SWEEP), 0.0, 1.0)
+		var shown := maxi(2, ceili((POINTS - 1) * reach) + 1)
+		var line := PackedVector2Array()
+		for i in shown:
+			line.append(_at(i))
+		# Glow, the blood-red body, the white-hot torn edge.
+		draw_polyline(line, Color(color, 0.32 * fade), 9.0, true)
+		draw_polyline(line, Color(color, 0.95 * fade), 4.0, true)
+		draw_polyline(line, Color(1.0, 0.9, 0.86, 0.95 * fade), 1.4, true)
+		# Serrated spikes jutting off the edge, alternating sides.
+		for k in SPIKES.size():
+			var i: int = SPIKES[k]
+			if i >= shown - 1:
+				continue
+			var p := _at(i)
+			var along := (_at(i + 1) - _at(i - 1)).normalized()
+			var out := along.orthogonal() * (1.0 if k % 2 == 0 else -1.0)
+			var spike := p + out * length * 0.09 + along * length * 0.04
+			draw_colored_polygon(PackedVector2Array([p - along * 2.5, spike, p + along * 2.5]), Color(color, 0.9 * fade))
+			draw_line(p, p.lerp(spike, 0.6), Color(1.0, 0.9, 0.86, 0.8 * fade), 1.0, true)
+		# A ragged tail at the start: two thin torn strands splitting off.
+		var start := _at(0)
+		var lead := (_at(1) - start).normalized()
+		for s in [-1.0, 1.0]:
+			var strand: Vector2 = start - lead * length * 0.12 + lead.orthogonal() * s * length * 0.05
+			draw_line(start, strand, Color(color, 0.7 * fade), 1.6, true)
+		if reach >= 1.0:
+			# Droplets flung off the far end, drifting outward as it fades.
+			var end := _at(POINTS - 1)
+			var drift := (time - SWEEP) * 60.0
+			for i in 5:
+				var dir := Vector2.from_angle(-0.8 + i * 0.4)
+				draw_circle(end + dir * (4.0 + drift * (0.5 + i * 0.15)), 1.9 - i * 0.25, Color(color, 0.85 * fade))
 
 
 ## A puff of smoke balls bursting out at a unit's feet and drifting up as they fade.

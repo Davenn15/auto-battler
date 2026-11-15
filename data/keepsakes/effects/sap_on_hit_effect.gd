@@ -1,6 +1,6 @@
 class_name SapOnHitEffect
 extends Passive
-## Each attack that lands Saps some of a stat from the target.
+## Hit Effect: Saps some of a stat from the target.
 
 @export var stat: Stats.Stat = Stats.Stat.INSIGHT
 @export var amount: float = 1.0
@@ -16,8 +16,21 @@ class Leech extends Status:
 	func _init(p_effect: SapOnHitEffect) -> void:
 		effect = p_effect
 
-	func on_attack_hit(unit: BattleUnit, target: BattleUnit, _dealt: float) -> void:
-		if target.alive:
-			# An item can let debuffs wrack, Sapping more.
-			var amount := effect.amount * unit.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
-			Sap.stat(unit, target, effect.stat, amount)
+	func get_hit_effect(unit: BattleUnit) -> HitEffect:
+		return SapHit.new(unit, effect)
+
+
+class SapHit extends HitEffect:
+	var attacker   # untyped: may be freed before a shot lands
+	var effect: SapOnHitEffect
+
+	func _init(p_attacker: BattleUnit, p_effect: SapOnHitEffect) -> void:
+		attacker = p_attacker
+		effect = p_effect
+
+	func apply(target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
+		if not target.alive or not is_instance_valid(attacker):
+			return   # the Sapped stat goes to the attacker, so it needs one
+		# An item can let debuffs wrack, Sapping more.
+		var amount: float = effect.amount * attacker.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
+		Sap.stat(attacker, target, effect.stat, amount)

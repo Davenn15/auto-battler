@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ColumnBombWeapon" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 4/column/weapons/bomb_weapon.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 90.0
+interval = 5.0
+passive_name = "Matter Bomb"
+description = "Every 5 seconds: lobs an unstable matter bomb at the enemy with the lowest health. It bursts on landing, dealing 90 + 0.6x Might damage to every enemy within 1 cell."

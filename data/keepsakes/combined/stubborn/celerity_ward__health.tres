@@ -10,6 +10,6 @@ first_shard = 3
 second_shard = 6
 effect = ExtResource("2_effect")
 celerity_ward = 35.0
-health = 250.0
+health = 200.0
 description = "Your Wards are increased by 30% while you are below 40% Maximum Health."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

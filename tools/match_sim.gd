@@ -319,7 +319,7 @@ func _play_match(policy_a: AiPolicy, policy_b: AiPolicy) -> Dictionary:
 		combats_done += 1
 		if not players[0].is_alive() or not players[1].is_alive() or combats_done >= MAX_COMBATS:
 			break
-		round_number += 1
+		round_number += 2   # the Encounter round in between is skipped here (no Ascensions yet)
 	var result_a := 0.5
 	if players[0].is_alive() and not players[1].is_alive():
 		result_a = 1.0

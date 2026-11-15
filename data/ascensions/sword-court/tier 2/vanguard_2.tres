@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Court Placeholder 2A"
+description = "PLACEHOLDER. All your units gain 15 Might and 75 Health."
+tier = 2
+might = 15.0
+health = 75.0

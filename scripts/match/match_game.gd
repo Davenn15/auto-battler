@@ -1,7 +1,7 @@
 class_name MatchGame
 extends Node2D
 ## A match: you against the computer, or online against another player (see Net). Runs
-## the rounds (Opening Shop, then Player Combats; Encounters come later), the planning phase
+## the rounds (Opening Shop, then Player Combats with an Encounter between each), the planning phase
 ## (shop, placing units, items, the ritual table), the combats, damage and income. The
 ## screen panels are MatchHud.
 ##
@@ -13,7 +13,8 @@ extends Node2D
 ## how the fight ended, so any difference gets noticed.
 
 ## WAITING: online, your army is sent and you're waiting for the opponent's.
-enum Phase { PLANNING, WAITING, COMBAT, RESULT, GAME_OVER }
+## ENCOUNTER: picking an Ascension between combats.
+enum Phase { PLANNING, WAITING, COMBAT, RESULT, GAME_OVER, ENCOUNTER }
 
 const PLAYER_TEAM := 1
 const ENEMY_TEAM := 2
@@ -32,6 +33,7 @@ const MENU_SCENE := "res://scenes/main_menu.tscn"
 @onready var camera: Camera2D = $Camera2D
 @onready var hud: MatchHud = $CanvasLayer/MatchHud
 @onready var damage_tracker: DamageTracker = $CanvasLayer/DamageTracker
+@onready var unit_info: UnitInfoPanel = $CanvasLayer/UnitInfoPanel
 @onready var ai_planner: AiPlanner = $AiPlanner
 
 var player := PlayerState.new()
@@ -63,6 +65,7 @@ var my_team := PLAYER_TEAM
 var planning_left := 0.0
 var _sent_army: Array = []          # online: the army you sent this round, as text
 var _remote_armies: Dictionary = {} # online: round -> the opponent's army, as text
+var _remote_ascensions: Dictionary = {} # online: round -> the opponent's Ascensions, as text
 var _fight_over := false
 var _my_fingerprint := ""
 var _host_results: Dictionary = {}  # joiner: round -> the host's result
@@ -80,6 +83,13 @@ const SPECTATE_LOG := "user://spectate_log.txt"
 static var spectate_match_number := 0
 var _blue_planner: AiPlanner
 var _blue_ready := false
+
+## Encounter: who has picked so far (the computer opponents pick with their planners).
+var _player_picked := false
+var _ai_picked := false
+## Encounter: the offer slot of a chosen-unit Ascension whose unit you're picking, or -1.
+var _picking_slot := -1
+var _encounter_heading := ""
 
 ## Factions picked in the menu: yours (Blue's when watching) and the computer's (Red's).
 ## Online, the opponent's comes from Net instead.
@@ -112,6 +122,15 @@ func _ready() -> void:
 	add_child(_fog)
 	_frame_camera()
 	hud.game = self
+	add_child(EscapeMenu.new(return_to_menu))
+	# In planning the meter shares the left strip with the unit info panel: it steps aside
+	# while a unit is selected.
+	# The damage meter is docked top-left all match; the unit info panel stacks under it.
+	damage_tracker.dock_left(MatchHud.TOP_BAR_HEIGHT)
+	damage_tracker.set_team_titles({my_team: player.player_name, 3 - my_team: ai.player_name}, my_team != PLAYER_TEAM)
+	damage_tracker.expanded_changed.connect(func(_on): _layout_left.call_deferred())
+	unit_info.unit_selected.connect(_on_unit_info_selected)
+	_layout_left.call_deferred()
 	add_log("Round 1: Opening Shop. Spend your starting Aura and Reserve.")
 	_begin_planning()
 
@@ -158,7 +177,8 @@ func _begin_planning() -> void:
 	_frame_camera()
 	for p in [player, ai]:
 		MatchRules.start_planning(p, combat_number())
-	damage_tracker.visible = false
+	# The last fight's meter stays up so it can inform planning (hidden before the first).
+	damage_tracker.set_planning(true)
 	_show_planning_board()
 	if online:
 		ai_ready = _remote_armies.has(round_number)   # they may have finished already
@@ -168,13 +188,39 @@ func _begin_planning() -> void:
 	ai_ready = false
 	hud.refresh()
 	# The opponent plans against the army you last fielded, just as you see theirs.
-	ai_planner.plan(ai, player.last_fielded, combat_number())
+	ai_planner.plan(ai, player.last_fielded, combat_number(), player.last_fielded_ascensions)
 	if spectating:
 		_blue_ready = false
-		_blue_planner.plan(player, ai.last_fielded, combat_number())
+		_blue_planner.plan(player, ai.last_fielded, combat_number(), ai.last_fielded_ascensions)
 
 
 ## Online: counts down the planning time, then readies you with the board as it stands.
+## The left side: the damage meter at the top, the unit info panel under it. Opening the
+## panel folds the meter to its title bar (and closing it unfolds it again, if it was
+## folded for the panel). Unfolding the meter while the panel is open pushes the panel down
+## and lets it use the log's corner too.
+var _meter_folded_for_info := false
+
+func _on_unit_info_selected(unit: BattleUnit) -> void:
+	hud.refresh_selected()
+	if unit != null and damage_tracker.expanded:
+		_meter_folded_for_info = true
+		damage_tracker.set_expanded(false)   # calls _layout_left
+	elif unit == null and _meter_folded_for_info:
+		_meter_folded_for_info = false
+		damage_tracker.set_expanded(true)
+	else:
+		_layout_left.call_deferred()
+
+
+func _layout_left() -> void:
+	if damage_tracker.expanded and unit_info.visible:
+		_meter_folded_for_info = false   # the player unfolded it on purpose
+	unit_info.top_reserve = damage_tracker.bottom_edge() + 6.0
+	unit_info.bottom_reserve = 8.0 if damage_tracker.expanded else MatchHud.INFO_BOTTOM_RESERVE
+	unit_info.relayout()
+
+
 func _process(delta: float) -> void:
 	if not online or phase != Phase.PLANNING or not PLANNING_TIMER_ON:
 		return
@@ -188,6 +234,11 @@ func _process(delta: float) -> void:
 
 
 func _on_ai_plan_ready(summary: String) -> void:
+	if phase == Phase.ENCOUNTER:
+		_ai_picked = true
+		add_log(summary + ".")
+		_try_end_encounter()
+		return
 	ai_ready = true
 	add_log(summary + ".")
 	if spectating:
@@ -198,14 +249,14 @@ func _on_ai_plan_ready(summary: String) -> void:
 ## Your army on your half; the opponent's last fielded army under the fog on theirs.
 func _show_planning_board() -> void:
 	_clear_board()
-	for unit in ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent):
+	for unit in ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent, player.ascensions):
 		var rally := RallyPassive.aura_range(unit)   # Lunck's aura reach, to plan around
 		if rally >= 0:
 			KeepsakeVfx.rally_aura(unit, rally, RallyPassive.aura_gives_insight(unit))
 		var grid_reach := GridPassive.aura_range(unit)   # BATR.EE's Power Grid reach
 		if grid_reach >= 0:
 			KeepsakeVfx.grid_aura(unit, grid_reach, VoltageStatus.COLOR)
-	for unit in ArmySpawner.spawn(ai.last_fielded, ENEMY_TEAM, true, units_parent):
+	for unit in ArmySpawner.spawn(ai.last_fielded, ENEMY_TEAM, true, units_parent, ai.last_fielded_ascensions):
 		unit.modulate.a = 0.6
 	_fog.show_fog(grid, ai.faction, ai.last_fielded_round)
 
@@ -239,7 +290,13 @@ func buy_shard(slot: int) -> void:
 		changed()
 
 
-## Rerolls the units and the Shards together.
+func buy_keepsake() -> void:
+	if phase == Phase.PLANNING and MatchRules.buy_keepsake_offer(player):
+		add_log("Bought %s." % player.inventory[-1].get_display_name())
+		changed()
+
+
+## Rerolls the units, the Shards and the Keepsake together.
 func reroll() -> void:
 	if phase == Phase.PLANNING and MatchRules.reroll(player, combat_number()):
 		changed()
@@ -290,6 +347,32 @@ func table_clicked(slot: int) -> void:
 		player.inventory.remove_at(held["item"])
 		held = {}
 	changed()
+
+
+## Double-clicking a Shard: moves that Shard (by identity, wherever it is now: your items
+## or one of your units) to the first empty ritual table slot. False if it isn't a Shard
+## you own, it's already on the table, or both slots are full.
+func send_shard_to_table(item: Keepsake) -> bool:
+	if item == null or not item.is_shard:
+		return false
+	var source := {}
+	for i in player.inventory.size():
+		if is_same(player.inventory[i], item):
+			source = {"from": "inventory", "index": i}
+	for unit in player.units:
+		for i in unit.items.size():
+			if is_same(unit.items[i], item):
+				source = {"from": "unit", "unit": unit, "index": i}
+	if source.is_empty():
+		return false
+	for slot in table.size():
+		if table[slot] == null:
+			var dest := {"to": "table", "slot": slot}
+			if not can_move_item(source, dest):
+				return false
+			move_item(source, dest)
+			return true
+	return false
 
 
 func table_preview() -> Keepsake:
@@ -422,6 +505,9 @@ func _return_table() -> void:
 # ---------- Moving units on the board ----------
 
 func _unhandled_input(event: InputEvent) -> void:
+	if phase == Phase.ENCOUNTER and _picking_slot >= 0:
+		_pick_input(event)
+		return
 	if phase != Phase.PLANNING or spectating:
 		return
 	var world := get_global_mouse_position()
@@ -437,6 +523,19 @@ func _unhandled_input(event: InputEvent) -> void:
 			_release(world, button.position)
 	elif event is InputEventMouseMotion and _drag_unit != null:
 		_drag_unit.global_position = world
+
+
+## Picking a unit for a chosen-unit Ascension: left-click one of yours, right-click to go back.
+func _pick_input(event: InputEvent) -> void:
+	var button := event as InputEventMouseButton
+	if button == null or not button.pressed:
+		return
+	if button.button_index == MOUSE_BUTTON_RIGHT:
+		cancel_unit_pick()
+	elif button.button_index == MOUSE_BUTTON_LEFT:
+		var unit := _own_unit_near(get_global_mouse_position())
+		if unit != null:
+			pick_unit(_army_of(unit))
 
 
 func _press(world: Vector2) -> void:
@@ -529,7 +628,8 @@ func _submit() -> void:
 	MatchRules.auto_place_bench(player)
 	_sent_army = ArmyUnit.army_to_array(player.board_units())
 	phase = Phase.WAITING
-	Net.send("army", {"round": round_number, "army": _sent_army})
+	Net.send("army", {"round": round_number, "army": _sent_army,
+			"ascensions": ArmyUnit.ascensions_to_array(player.ascensions)})
 	_show_planning_board()
 	hud.refresh()
 	_try_proceed()
@@ -552,6 +652,7 @@ func _on_net_message(kind: String, data: Dictionary) -> void:
 	match kind:
 		"army":
 			_remote_armies[for_round] = data["army"]
+			_remote_ascensions[for_round] = data.get("ascensions", [])
 			if for_round == round_number and phase in [Phase.PLANNING, Phase.WAITING]:
 				ai_ready = true
 				hud.refresh()
@@ -583,11 +684,114 @@ func _on_opponent_left() -> void:
 	Net.leave()
 
 
-## Moves on from the round just played to the next combat round. (Encounter rounds are
-## left out until encounters exist; see MatchRules.paced_round.)
+## Moves on to the next round: a combat after the Opening Shop or an Encounter, an
+## Encounter after a combat.
 func _advance_rounds() -> void:
 	round_number += 1
-	add_log("Round %d: Player Combat. Plan, then fight." % round_number)
+	if MatchRules.is_encounter_round(round_number):
+		add_log("Round %d: Encounter. Choose an Ascension." % round_number)
+	else:
+		add_log("Round %d: Player Combat. Plan, then fight." % round_number)
+
+
+# ---------- Encounters ----------
+
+## An Encounter round: each player picks one of the Ascensions on offer. An empty offer
+## (that pool has run out) skips the pick. Then on to the next combat's planning.
+func _begin_encounter() -> void:
+	phase = Phase.ENCOUNTER
+	if is_instance_valid(_manager):   # the last combat's (its banners go with it)
+		_manager.queue_free()
+	_manager = null
+	_clear_board()
+	_fog.hide_fog()
+	var number := MatchRules.encounter_number(round_number)
+	var kind := MatchRules.encounter_kind(number)
+	var tier := MatchRules.encounter_tier(number)
+	var title := "Tier %d %s" % [tier, MatchRules.encounter_title(kind, player.faction)]
+	MatchRules.roll_ascension_offers(player, round_number)
+	_player_picked = player.ascension_offers.is_empty()
+	if tier > MatchRules.MAX_ASCENSION_TIER:
+		add_log("No more %s Encounters: skipped." % ("Faction" if kind == MatchRules.EncounterKind.FACTION else "Neutral"))
+	elif _player_picked:
+		add_log("No %ss left to offer: Encounter skipped." % title)
+	_ai_picked = true
+	if not online:   # online, the opponent picks on their own computer
+		MatchRules.roll_ascension_offers(ai, round_number)
+		if not ai.ascension_offers.is_empty():
+			_ai_picked = false
+			ai_planner.pick_ascension(ai, player.last_fielded, player.last_fielded_ascensions)
+	if spectating and not _player_picked:
+		_blue_planner.pick_ascension(player, ai.last_fielded, ai.last_fielded_ascensions)
+	hud.refresh()
+	_picking_slot = -1
+	_encounter_heading = "Encounter: choose a %s" % title
+	hud.show_encounter(_encounter_heading)
+	_try_end_encounter()
+
+
+## The player's pick at an Encounter.
+func choose_ascension(slot: int) -> void:
+	if phase != Phase.ENCOUNTER or _player_picked or spectating:
+		return
+	if slot >= 0 and slot < player.ascension_offers.size() and player.ascension_offers[slot].is_chosen():
+		_begin_unit_pick(slot)
+		return
+	if MatchRules.take_ascension(player, slot):
+		_player_picked = true
+		add_log("You took %s." % player.ascensions[-1].get_display_name())
+		hud.hide_encounter()
+		hud.refresh()
+		_try_end_encounter()
+
+
+## A chosen-unit Ascension: the cards make way for your army on the board, and you click
+## the unit that gets it (bench units are listed in the banner). Units that can't take it
+## are dimmed.
+func _begin_unit_pick(slot: int) -> void:
+	_picking_slot = slot
+	var ascension := player.ascension_offers[slot]
+	hud.hide_encounter()
+	_clear_board()
+	for unit in ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent, player.ascensions):
+		if not ascension.can_pick(_army_of(unit)):
+			unit.modulate = Color(1, 1, 1, 0.35)
+	var bench := player.bench_units().filter(func(u): return ascension.can_pick(u))
+	hud.show_unit_pick(ascension, bench)
+
+
+## Gives the Ascension being picked for to `unit` (one of your army units).
+func pick_unit(unit: ArmyUnit) -> void:
+	if phase != Phase.ENCOUNTER or _picking_slot < 0:
+		return
+	var index := player.units.find(unit)
+	if not MatchRules.take_ascension(player, _picking_slot, index):
+		return
+	_picking_slot = -1
+	_player_picked = true
+	add_log("You took %s for %s." % [player.ascensions[-1].get_display_name(), unit.label().strip_edges()])
+	hud.hide_unit_pick()
+	_clear_board()
+	hud.refresh()
+	_try_end_encounter()
+
+
+## Back from picking a unit to the Encounter's cards.
+func cancel_unit_pick() -> void:
+	if phase != Phase.ENCOUNTER or _picking_slot < 0:
+		return
+	_picking_slot = -1
+	hud.hide_unit_pick()
+	_clear_board()
+	hud.show_encounter(_encounter_heading)
+
+
+func _try_end_encounter() -> void:
+	if phase != Phase.ENCOUNTER or not (_player_picked and _ai_picked):
+		return
+	hud.hide_encounter()
+	_advance_rounds()
+	_begin_planning()
 
 
 func _start_combat() -> void:
@@ -595,6 +799,8 @@ func _start_combat() -> void:
 	_fight_over = false
 	var bottom: Array[ArmyUnit]   # team 1
 	var top: Array[ArmyUnit]      # team 2, on the far side
+	var bottom_ascensions: Array[Ascension] = player.ascensions
+	var top_ascensions: Array[Ascension] = ai.ascensions
 	var combat_seed := -1
 	if online:
 		# Both computers build the fight from exactly the same text: the host's army as
@@ -604,8 +810,11 @@ func _start_combat() -> void:
 		player.last_fielded = ArmyUnit.copy_army(mine)
 		ai.last_fielded = ArmyUnit.copy_army(theirs)
 		ai.units = ArmyUnit.copy_army(theirs)
+		ai.ascensions = ArmyUnit.ascensions_from_array(_remote_ascensions.get(round_number, []))
 		bottom = mine if Net.is_host() else theirs
 		top = theirs if Net.is_host() else mine
+		bottom_ascensions = player.ascensions if Net.is_host() else ai.ascensions
+		top_ascensions = ai.ascensions if Net.is_host() else player.ascensions
 		combat_seed = hash([Net.match_seed, round_number]) & 0x7fffffff
 	else:
 		for p in [player, ai]:
@@ -615,13 +824,14 @@ func _start_combat() -> void:
 		top = ai.units
 	for p in [player, ai]:
 		p.last_fielded_round = round_number
+		p.last_fielded_ascensions = p.ascensions.duplicate()
 	_clear_board()
 	_fog.hide_fog()
 	_frame_camera(my_team != PLAYER_TEAM)   # the joiner watches it turned around
-	ArmySpawner.spawn(bottom, PLAYER_TEAM, false, units_parent)
-	ArmySpawner.spawn(top, ENEMY_TEAM, true, units_parent)
+	ArmySpawner.spawn(bottom, PLAYER_TEAM, false, units_parent, bottom_ascensions)
+	ArmySpawner.spawn(top, ENEMY_TEAM, true, units_parent, top_ascensions)
 	damage_tracker.set_team_titles({my_team: player.player_name, 3 - my_team: ai.player_name}, my_team != PLAYER_TEAM)
-	damage_tracker.visible = true
+	damage_tracker.set_planning(false)
 	hud.refresh()
 	await get_tree().physics_frame   # let every unit finish _ready
 	if is_instance_valid(_manager):
@@ -750,7 +960,7 @@ func continue_after_result() -> void:
 				new_match()
 		return
 	_advance_rounds()
-	_begin_planning()
+	_begin_encounter()
 
 
 # ---------- Watching two computers ----------
@@ -772,6 +982,11 @@ func _setup_spectating() -> void:
 
 
 func _on_blue_plan_ready(summary: String) -> void:
+	if phase == Phase.ENCOUNTER:
+		_player_picked = true
+		add_log(summary + ".")
+		_try_end_encounter()
+		return
 	_blue_ready = true
 	add_log(summary + ".")
 	hud.refresh()
@@ -789,8 +1004,8 @@ func _spectate_try_fight() -> void:
 		MatchRules.auto_place_bench(p)
 	_clear_board()
 	_fog.hide_fog()
-	ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent)
-	ArmySpawner.spawn(ai.units, ENEMY_TEAM, true, units_parent)
+	ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent, player.ascensions)
+	ArmySpawner.spawn(ai.units, ENEMY_TEAM, true, units_parent, ai.ascensions)
 	await get_tree().create_timer(SPECTATE_BOARD_PAUSE).timeout
 	_spectate_starting = false
 	if is_inside_tree() and phase == Phase.PLANNING:
@@ -851,6 +1066,17 @@ static func _spectate_write(text: String) -> void:
 	file.seek_end()
 	file.store_line(text)
 	file.close()
+
+
+## Leaves the match for the main menu, from the Escape menu or after the match. Online,
+## the connection is closed, so the opponent wins by forfeit if the match was still going.
+## Background copies the computer was planning with stop with the planner (see AiPlanner).
+func return_to_menu() -> void:
+	Engine.time_scale = 1.0
+	MatchGame.spectating = false
+	if Net.is_online():
+		Net.leave()
+	get_tree().change_scene_to_file(MENU_SCENE)
 
 
 ## After the match: online back to the menu, otherwise a fresh match against the computer.

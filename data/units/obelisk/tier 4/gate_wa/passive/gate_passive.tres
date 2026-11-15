@@ -4,5 +4,6 @@
 
 [resource]
 script = ExtResource("1")
+cast_heal_share = 0.2
 passive_name = "Gateway"
-description = "Can't move or attack. Has strong Charge Regen. Whenever it casts, every unit it brought in (its Gatelings, or allies it revived) is healed for 25% of its max health and permanently gains +10% attributes and wards, stacking. While it's the only living unit on its team, it loses health each second, faster and faster."
+description = "Can't move or attack. Has strong Charge Regen. Whenever it casts, every unit it brought in (its Gatelings, or allies it revived) is healed for 20% of its max health and permanently gains +10% attributes and wards, stacking. While it's the only living unit on its team, it loses health each second, faster and faster."

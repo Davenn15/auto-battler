@@ -22,5 +22,7 @@ func _pick_target(unit: BattleUnit) -> BattleUnit:
 	return best
 
 
-func _arrive(_unit, target: BattleUnit, strength: float) -> void:
-	target.add_status(TimedStatStatus.new(Stats.Stat.CELERITY, amount * strength, duration))
+func _arrive(_unit, target: BattleUnit, strength: float) -> Status:
+	var buff := TimedStatStatus.new(Stats.Stat.CELERITY, amount * strength, duration)
+	target.add_status(buff)
+	return buff

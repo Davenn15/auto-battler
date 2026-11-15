@@ -4,7 +4,8 @@ extends Node2D
 ## candidate a few times, and writes how each one did to another JSON file.
 ##
 ## Arguments (after --): --in <file> --out <file>
-## Input:  {"opponent": [army], "candidates": [[army], ...], "battles": n, "time_limit": s, "seed": n}
+## Input:  {"opponent": [army], "candidates": [[army], ...], "battles": n, "time_limit": s, "seed": n,
+##          "opponent_ascensions": [path], "candidate_ascensions": [[path], ...]} (both optional)
 ## Output: [{"wins": n, "draws": n, "losses": n, "margin": average surviving Aura difference}, ...]
 
 
@@ -28,10 +29,13 @@ func _ready() -> void:
 
 func _run(job: Dictionary, out_path: String) -> void:
 	var opponent := ArmyUnit.army_from_array(job["opponent"])
+	var opponent_ascensions := ArmyUnit.ascensions_from_array(job.get("opponent_ascensions", []))
+	var candidate_ascensions: Array = job.get("candidate_ascensions", [])
 	var results := []
-	for candidate in job["candidates"]:
-		var army := ArmyUnit.army_from_array(candidate)
-		results.append(await score(self, army, opponent, int(job["battles"]), float(job["time_limit"])))
+	for c in job["candidates"].size():
+		var army := ArmyUnit.army_from_array(job["candidates"][c])
+		var ascensions := ArmyUnit.ascensions_from_array(candidate_ascensions[c] if c < candidate_ascensions.size() else [])
+		results.append(await score(self, army, opponent, int(job["battles"]), float(job["time_limit"]), ascensions, opponent_ascensions))
 	var file := FileAccess.open(out_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(results))
 	file.close()
@@ -40,11 +44,12 @@ func _run(job: Dictionary, out_path: String) -> void:
 
 
 ## Fights `army` (on the far side, like the computer's army in a real combat) against
-## `opponent` `battles` times. Returns {wins, draws, losses, margin}.
-static func score(host: Node, army: Array[ArmyUnit], opponent: Array[ArmyUnit], battles: int, time_limit: float) -> Dictionary:
+## `opponent` `battles` times, each with its Ascensions. Returns {wins, draws, losses, margin}.
+static func score(host: Node, army: Array[ArmyUnit], opponent: Array[ArmyUnit], battles: int, time_limit: float,
+		ascensions: Array[Ascension] = [], opponent_ascensions: Array[Ascension] = []) -> Dictionary:
 	var tally := {"wins": 0, "draws": 0, "losses": 0, "margin": 0.0}
 	for b in battles:
-		var r: Dictionary = await BattleArena.fight(host, opponent, army, time_limit)
+		var r: Dictionary = await BattleArena.fight(host, opponent, army, time_limit, -1, opponent_ascensions, ascensions)
 		match r["winner"]:
 			2: tally["wins"] += 1
 			1: tally["losses"] += 1

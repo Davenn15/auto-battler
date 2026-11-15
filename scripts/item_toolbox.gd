@@ -99,7 +99,7 @@ static func _item_order(a: Keepsake, b: Keepsake) -> bool:
 
 
 func _item_button(keepsake: Keepsake) -> Button:
-	var button := Button.new()
+	var button := RichTooltipButton.new()
 	button.icon = keepsake.get_icon()
 	button.expand_icon = true
 	button.custom_minimum_size = BUTTON_SIZE

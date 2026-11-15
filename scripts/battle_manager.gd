@@ -12,7 +12,7 @@ signal overtime_started
 
 @export_group("Overtime")
 ## Seconds into combat before overtime starts. 0 = never.
-@export var overtime_after: float = 40.0
+@export var overtime_after: float = 30.0
 ## Celerity every unit gains when overtime starts.
 @export var overtime_celerity_bonus: float = 30.0
 ## Extra Celerity per second of overtime, on top of the bonus. 0 = a flat bonus.
@@ -67,6 +67,10 @@ func _start_overtime() -> void:
 	in_overtime = true
 	for node in get_tree().get_nodes_in_group("units"):
 		_apply_overtime(node as BattleUnit)
+	if KeepsakeVfx.enabled():
+		var grid := get_tree().get_first_node_in_group("battle_grid") as BattleGrid
+		if grid != null:
+			OvertimeBorder.spawn(grid, self)
 	overtime_started.emit()
 
 
@@ -81,9 +85,19 @@ func add_summon(unit: BattleUnit) -> void:
 		unit.queue_free()
 		return
 	unit.died.connect(_on_unit_died)
+	unit.give_ascensions(_team_ascensions(unit.team, unit))
 	unit.start_combat()
 	if in_overtime:
 		_apply_overtime(unit)   # after start_combat, which clears statuses
+
+## The Ascensions of `team`'s army (every unit of a team has the same ones), read from
+## any of its other units.
+func _team_ascensions(team: int, except: BattleUnit) -> Array[Ascension]:
+	for node in get_tree().get_nodes_in_group("units"):
+		var other := node as BattleUnit
+		if other != null and other != except and other.team == team and not other.ascensions.is_empty():
+			return other.ascensions
+	return []
 
 func _on_unit_died(_unit: BattleUnit) -> void:
 	_check_battle_end()

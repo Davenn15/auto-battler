@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3 uid="uid://delpx3tx6fr8p"]
+
+[ext_resource type="Script" uid="uid://civb8w40bfnkx" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="3_7baah"]
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 100 Health."
+health = 100.0
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 175 Health."
+tier = 2
+health = 175.0
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 250 Health."
+tier = 3
+health = 250.0
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "PLACEHOLDER. All your units gain 350 Health."
+tier = 4
+health = 350.0
+
+[resource]
+script = ExtResource("1")
+family_name = "Neutral Health"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

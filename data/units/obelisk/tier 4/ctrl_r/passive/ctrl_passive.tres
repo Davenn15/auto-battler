@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CtrlPassive" format=3 uid="uid://c75eqeuux0srl"]
+
+[ext_resource type="Script" uid="uid://bjs156rq7sbbv" path="res://data/units/obelisk/tier 4/ctrl_r/passive/ctrl_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ward_per_targeter = 7.0
+passive_name = "Command Link"
+description = "CTRL(R)'s wards rise by 7 for each enemy targeting it (up to 5 enemies, +35). The first time it drops below 66% health, and again below 33%, it launches a siphon drone that drains 8% of an enemy's max health and heals CTRL(R) that much."

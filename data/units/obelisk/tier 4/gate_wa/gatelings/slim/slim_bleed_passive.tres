@@ -6,4 +6,4 @@
 script = ExtResource("1")
 percent = 0.005
 passive_name = "Serrated"
-description = "Attacks make the target bleed for 1% of its max health per second for 4 seconds, ignoring wards."
+description = "Hit Effect: The target bleeds for 0.5% of its max health per second for 4 seconds, ignoring wards."

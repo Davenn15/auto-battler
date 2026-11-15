@@ -11,5 +11,5 @@ might = 20.0
 wrack_chance = 0.15
 wrack_damage = 0.15
 effect = ExtResource("2_effect")
-description = "Your Wracks ignore 50% of the target's Wards."
+description = "Your Wracks ignore 30% of the target's Wards."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

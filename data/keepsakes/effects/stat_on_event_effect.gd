@@ -1,9 +1,10 @@
 class_name StatOnEventEffect
 extends Passive
-## Each time something happens (a kill, an attack, a Gambit), the unit gains a stat.
+## Each time something happens (a kill, an attack, a Gambit, an attack landing), the unit
+## gains a stat. HIT is a Hit Effect: it happens when the attack lands, not when it's made.
 ## With a duration it's temporary; without one it stacks for the rest of combat.
 
-enum Event { KILL, ATTACK, GAMBIT }
+enum Event { KILL, ATTACK, GAMBIT, HIT }
 
 @export var event: Event = Event.KILL
 @export var stat: Stats.Stat = Stats.Stat.MIGHT
@@ -39,6 +40,9 @@ class Tracker extends Status:
 		if effect.event == Event.GAMBIT:
 			_gain(unit)
 
+	func get_hit_effect(unit: BattleUnit) -> HitEffect:
+		return GainHit.new(self, unit) if effect.event == Event.HIT else null
+
 	func _gain(unit: BattleUnit) -> void:
 		if effect.duration > 0.0:
 			unit.add_status(TimedStatStatus.new(effect.stat, effect.amount, effect.duration))
@@ -64,3 +68,17 @@ class Tracker extends Status:
 
 	func modify_stat(_unit: BattleUnit, which: Stats.Stat, value: float) -> float:
 		return value + stacked if which == effect.stat else value
+
+
+## HIT: the gain, once the attack lands (if the unit is still around).
+class GainHit extends HitEffect:
+	var tracker: Tracker
+	var unit   # untyped: may be freed before a shot lands
+
+	func _init(p_tracker: Tracker, p_unit: BattleUnit) -> void:
+		tracker = p_tracker
+		unit = p_unit
+
+	func apply(_target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
+		if is_instance_valid(unit) and unit.alive and tracker in unit.statuses:
+			tracker._gain(unit)

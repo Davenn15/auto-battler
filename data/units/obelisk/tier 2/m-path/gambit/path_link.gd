@@ -9,12 +9,14 @@ const COLOR := Color(1.0, 0.45, 0.75)
 var source: BattleUnit   # M-PATH
 var ally: BattleUnit
 var time_left: float
-var ward_bonus: float
+var regen_bonus: float
+var ward_bonus: float      # A: Might Ward and Celerity Ward
 var insight_bonus: float
 var damage_share: float
-var heal_share: float
-var sacrifice_heal: float
-## True while the link is passing damage or healing across, so it isn't passed straight back.
+var sacrifice_share: float
+## A2 only saves the ally once per link.
+var sacrificed := false
+## True while the link is passing damage across, so it isn't passed straight back.
 var passing := false
 var _statuses: Array = []
 var _time := 0.0
@@ -52,14 +54,20 @@ func end() -> void:
 	queue_free()
 
 
-## A2: the ally would die. M-PATH dies in its place and heals it.
-func sacrifice() -> void:
-	if not _alive(source) or not _alive(ally):
-		return
-	var amount := source.max_health * sacrifice_heal
+## A2: the ally would die. M-PATH gives up Sacrifice Share of his max health (never going
+## below 1 health) and heals the ally for the same. Once per link. Returns how much he gave.
+func sacrifice() -> float:
+	if sacrificed or not _alive(source) or not _alive(ally):
+		return 0.0
+	var amount := minf(source.max_health * sacrifice_share, source.health - 1.0)
+	if amount <= 0.0:
+		return 0.0
+	sacrificed = true
+	source.set_health(source.health - amount)
+	source.show_float_text("-%d" % roundi(amount), COLOR)
 	ally.show_float_text("Sacrifice", COLOR)
-	source.kill()
 	ally.heal(amount, source.get_instance_id())
+	return amount
 
 
 static func _alive(unit) -> bool:
@@ -87,8 +95,8 @@ func _draw() -> void:
 	draw_arc(to, 14.0, 0.0, TAU, 24, Color(COLOR, 0.5 + 0.3 * pulse), 2.0, true)
 
 
-## On each linked unit: more wards (and A1's Insight), a share of its damage passed to its
-## partner, and (Bonded) a share of its healing passed on too.
+## On each linked unit: more health regen, a share of its damage passed to its partner,
+## and (A) more Might Ward and Celerity Ward, (A1) more Insight.
 class LinkStatus extends Status:
 	var link: PathLink
 	var partner: BattleUnit
@@ -97,13 +105,13 @@ class LinkStatus extends Status:
 		link = p_link
 		partner = p_partner
 
-	## Being linked never stops either of them gaining Charge.
-	func blocks_charge_gain(_unit: BattleUnit) -> bool:
-		return false
+	## M-PATH gains no Charge while his link is up; the ally gains Charge as normal.
+	func blocks_charge_gain(unit: BattleUnit) -> bool:
+		return is_instance_valid(link) and unit == link.source and link.is_live()
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 		match stat:
-			Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD:
+			Stats.Stat.MIGHT_WARD, Stats.Stat.CELERITY_WARD:
 				return value + link.ward_bonus
 			Stats.Stat.INSIGHT:
 				return value + link.insight_bonus
@@ -118,16 +126,14 @@ class LinkStatus extends Status:
 			partner.take_warded_damage(passed, false, unit.incoming_damage_type)
 			link.passing = false
 			amount -= passed
-		# A2: the ally would die, so M-PATH dies instead.
-		if unit == link.ally and link.sacrifice_heal > 0.0 and amount >= unit.health \
-				and is_instance_valid(link.source) and link.source.alive:
-			amount = maxf(unit.health - 1.0, 0.0)
-			link.sacrifice()   # heals it before this hit lands, so it ends above 1 health
+		# A2: the ally would die, so M-PATH gives up health to save it (once per link).
+		if unit == link.ally and link.sacrifice_share > 0.0 and amount >= unit.health:
+			var survivable := maxf(unit.health - 1.0, 0.0)   # taken before the heal lands
+			if link.sacrifice() > 0.0:
+				amount = survivable   # the hit leaves it at 1 health, plus the heal
 		return amount
 
-	func modify_healing_received(_unit: BattleUnit, amount: float) -> float:
-		if is_instance_valid(link) and link.is_live() and not link.passing and link.heal_share > 0.0 and amount > 0.0:
-			link.passing = true
-			partner.heal(amount * link.heal_share, link.source.get_instance_id(), false)
-			link.passing = false
-		return amount
+	func modify_health_regen(_unit: BattleUnit, value: float) -> float:
+		if is_instance_valid(link) and link.is_live():
+			return value + link.regen_bonus
+		return value

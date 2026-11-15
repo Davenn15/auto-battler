@@ -36,8 +36,8 @@ class MendStatus extends Status:
 				_queue.erase(entry)
 				unit.heal(entry[1], unit.get_instance_id())
 
-	## Health still waiting to come back, for anything that wants to show it.
-	func pending(_unit: BattleUnit) -> float:
+	## Health still waiting to come back, shown on the health bar.
+	func get_pending_healing(_unit: BattleUnit) -> float:
 		var total := 0.0
 		for entry in _queue:
 			total += entry[1]

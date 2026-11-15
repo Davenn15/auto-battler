@@ -36,7 +36,7 @@ enum Placement { FRONT, SECOND_ROW, BACK, RANGED }
 @export var gambit: Gambit
 @export var max_charge: float = 100.0
 @export var starting_charge: float = 0.0
-@export var charge_on_attack: float = 10.0       # flat, when this unit's attack hits
+@export var charge_on_attack: float = 7       # flat, when this unit's attack hits
 @export var charge_on_hit: float = 2.5           # flat, when this unit takes an attack hit
 @export var charge_per_damage: float = 0.03      # extra charge per point of damage taken
 

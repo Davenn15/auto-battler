@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Neutral Champion"
+description = "PLACEHOLDER. Choose one of your units: it gains 40 Might and 300 Health."
+tier = 1
+target = 1
+might = 40.0
+health = 300.0

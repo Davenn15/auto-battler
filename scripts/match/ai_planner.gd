@@ -16,6 +16,9 @@ signal plan_ready(summary: String)
 @export var battles_per_candidate: int = 2
 ## Copies of the game simulating at once.
 @export var processes: int = 4
+## Battles per option when picking an Ascension at an Encounter (only a few options, so
+## each can get more).
+@export var battles_per_ascension: int = 6
 ## Seconds a simulated battle may run before it counts as a draw.
 @export var time_limit: float = 90.0
 ## Give up on a copy of the game that takes longer than this (seconds).
@@ -33,23 +36,58 @@ var _jobs: Array[Dictionary] = []   # {pid, out, indices}
 var _results: Array = []             # per plan: a result dictionary, or null
 var _started_ms := 0
 var _used_stand_in := false
+var _opponent_ascensions: Array[Ascension] = []
+var _battles := 2          # per plan, for the job running now
+var _picking_ascension := false
 
 
 ## Starts planning for `player`. `opponent_army` is the other player's last fielded army;
-## empty before the first combat. Emits plan_ready when `player` has been updated.
-func plan(player: PlayerState, opponent_army: Array[ArmyUnit], combat_number: int) -> void:
-	busy = true
-	_player = player
-	_started_ms = Time.get_ticks_msec()
-	_plans.clear()
+## empty before the first combat. `opponent_ascensions` are that army's Ascensions. Emits
+## plan_ready when `player` has been updated.
+func plan(player: PlayerState, opponent_army: Array[ArmyUnit], combat_number: int, opponent_ascensions: Array[Ascension] = []) -> void:
+	_begin(player, opponent_ascensions, battles_per_candidate, false)
 	for i in candidates:
 		var trial := player.copy()
 		_random_plan(trial, combat_number, i)
 		_plans.append(trial)
+	_test_plans(opponent_army)
+
+
+## Encounter: picks one of `player`'s ascension_offers by fighting its current army with
+## each one against the other player's last fielded army. Emits plan_ready once taken.
+func pick_ascension(player: PlayerState, opponent_army: Array[ArmyUnit], opponent_ascensions: Array[Ascension] = []) -> void:
+	_begin(player, opponent_ascensions, battles_per_ascension, true)
+	for slot in player.ascension_offers.size():
+		var trial := player.copy()
+		# A chosen-unit Ascension goes to the unit it guesses would use it best.
+		var unit_index := MatchRules.guess_unit_index(trial, trial.ascension_offers[slot]) \
+				if trial.ascension_offers[slot].is_chosen() else -1
+		if not MatchRules.take_ascension(trial, slot, unit_index):
+			continue
+		MatchRules.auto_place_bench(trial)
+		_plans.append(trial)
+	if _plans.is_empty():   # nothing on offer
+		_plans.append(player.copy())
+	_test_plans(opponent_army)
+
+
+func _begin(player: PlayerState, opponent_ascensions: Array[Ascension], battles: int, picking: bool) -> void:
+	busy = true
+	_player = player
+	_started_ms = Time.get_ticks_msec()
+	_plans.clear()
+	_results.clear()
+	_opponent_ascensions = opponent_ascensions.duplicate()
+	_battles = battles
+	_picking_ascension = picking
+
+
+func _test_plans(opponent_army: Array[ArmyUnit]) -> void:
 	var opponent := ArmyUnit.copy_army(opponent_army)
 	_used_stand_in = opponent.is_empty()
 	if _used_stand_in:
-		opponent = _stand_in_opponent(player.aura_received)
+		opponent = _stand_in_opponent(_player.aura_received)
+		_opponent_ascensions.clear()
 	if opponent.is_empty() or _plans.size() == 1:
 		_finish(0)
 		return
@@ -72,6 +110,16 @@ func _process(_delta: float) -> void:
 		_jobs.erase(job)
 	if _jobs.is_empty():
 		_finish(_best_plan())
+
+
+## Leaving the match (or starting a new one) mid-plan: stop the background copies so none
+## are left running.
+func _exit_tree() -> void:
+	for job in _jobs:
+		if OS.is_process_running(job["pid"]):
+			OS.kill(job["pid"])
+	_jobs.clear()
+	busy = false
 
 
 # ---------- Making plans ----------
@@ -124,8 +172,10 @@ func _start_jobs(opponent: Array[ArmyUnit]) -> void:
 			indices.append(i)
 		var job := {
 			"opponent": ArmyUnit.army_to_array(opponent),
+			"opponent_ascensions": ArmyUnit.ascensions_to_array(_opponent_ascensions),
 			"candidates": indices.map(func(i): return ArmyUnit.army_to_array(_plans[i].units)),
-			"battles": battles_per_candidate, "time_limit": time_limit, "seed": randi(),
+			"candidate_ascensions": indices.map(func(i): return ArmyUnit.ascensions_to_array(_plans[i].ascensions)),
+			"battles": _battles, "time_limit": time_limit, "seed": randi(),
 		}
 		var in_path := ProjectSettings.globalize_path("user://ai/%s_%d_in.json" % [job_prefix, j])
 		var out_path := ProjectSettings.globalize_path("user://ai/%s_%d_out.json" % [job_prefix, j])
@@ -171,7 +221,14 @@ func _finish(index: int) -> void:
 	var seconds := (Time.get_ticks_msec() - _started_ms) / 1000.0
 	var tested := _results.filter(func(result): return result != null).size()
 	var summary := "%s planned in %.1fs (%d plans tested, %d battles each%s)" % [
-			label, seconds, tested, battles_per_candidate, ", against a stand-in army" if _used_stand_in else ""]
+			label, seconds, tested, _battles, ", against a stand-in army" if _used_stand_in else ""]
+	if _picking_ascension:
+		var taken := _player.ascensions[-1].get_display_name() if not _player.ascensions.is_empty() else "nothing"
+		var holder := MatchRules.holder_of(_player.units, _player.ascensions[-1]) if not _player.ascensions.is_empty() else null
+		if holder != null:
+			taken += " for " + holder.label().strip_edges()
+		summary = "%s took %s (%d options tested, %d battles each%s)" % [
+				label, taken, tested, _battles, ", against a stand-in army" if _used_stand_in else ""]
 	var r = _results[index] if index < _results.size() else null
 	if r != null:
 		summary += "; its pick won %d of %d" % [r["wins"], r["wins"] + r["draws"] + r["losses"]]

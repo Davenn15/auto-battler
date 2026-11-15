@@ -1,6 +1,6 @@
 class_name WardWearEffect
 extends Passive
-## Each attack that lands lowers all of the target's wards for the rest of combat.
+## Hit Effect: lowers all of the target's wards for the rest of combat.
 
 @export var per_hit: float = 2.0
 ## Most it can lower one target's wards in total. 0 = no limit.
@@ -17,12 +17,26 @@ class Wear extends Status:
 	func _init(p_effect: WardWearEffect) -> void:
 		effect = p_effect
 
-	func on_attack_hit(unit: BattleUnit, target: BattleUnit, _dealt: float) -> void:
+	func get_hit_effect(unit: BattleUnit) -> HitEffect:
+		return WearHit.new(unit, effect)
+
+
+class WearHit extends HitEffect:
+	var attacker   # untyped: may be freed before a shot lands
+	var effect: WardWearEffect
+
+	func _init(p_attacker: BattleUnit, p_effect: WardWearEffect) -> void:
+		attacker = p_attacker
+		effect = p_effect
+
+	func apply(target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
 		if not target.alive:
 			return
 		var limit := effect.cap if effect.cap > 0.0 else INF
 		# An item can let control effects wrack, shredding more.
-		var amount := effect.per_hit * unit.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
+		var amount := effect.per_hit
+		if is_instance_valid(attacker):
+			amount *= attacker.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
 		KeepsakeVfx.shred(target)
 		for status in target.statuses:
 			if status is WardShredStatus:

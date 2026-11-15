@@ -1,10 +1,8 @@
-[gd_resource type="Resource" script_class="AttackerDebuffEffect" format=3]
+[gd_resource type="Resource" script_class="AttackerDebuffEffect" format=3 uid="uid://df5tifiw54ins"]
 
 [ext_resource type="Script" uid="uid://bbm2pseb1aar7" path="res://data/keepsakes/effects/attacker_debuff_effect.gd" id="1_eff"]
 
 [resource]
 script = ExtResource("1_eff")
-stat = 2
-amount = 5.0
-duration = 2.0
+duration = 3.0
 metadata/_custom_type_script = "uid://bbm2pseb1aar7"

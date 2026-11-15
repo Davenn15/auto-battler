@@ -1,10 +1,12 @@
 class_name MatchHud
 extends Control
 ## The match screen's panels: a top bar (round, health and money), the planning panel on
-## the right (shop, bench, items, the selected unit), the ritual table's own window, the
-## log and the
-## Ready / Fight button under the board, and pop-ups for upgrades, results and the end.
-## Everything is rebuilt from the MatchGame's state by refresh().
+## the right (shop, bench, items), the ritual table's own window, the Ascension badges, the
+## log and the Ready / Fight button under the board, and pop-ups for upgrades, results and
+## the end. Everything is rebuilt from the MatchGame's state by refresh().
+##
+## Nothing here scrolls: every panel fits on screen, and anything longer is in a hover tip
+## or a pop-up. The selected unit's items are shown in the unit info panel (item_row).
 
 const SIDE_WIDTH := 330.0
 const ICON := Vector2(26, 26)
@@ -16,16 +18,15 @@ var game: MatchGame
 
 var _top: RichTextLabel
 var _side: PanelContainer
-var _shop_units: VBoxContainer
+var _shop_units: HBoxContainer
 var _shop_shards: HBoxContainer
 var _reroll: Button
+var _shop_keepsake: HBoxContainer   # the discounted full Keepsake, from round 5
 var _lock: Button
 var _bench_box: PanelContainer
 var _bench: HFlowContainer
 var _inventory: HFlowContainer
 var _sell: Button
-var _selected_label: Label
-var _selected_items: HBoxContainer
 var _table_window: PanelContainer
 var _board_drop: Control
 var _table_slots: Array[Button] = []
@@ -40,17 +41,42 @@ var _popup_text: Label
 var _popup_buttons: VBoxContainer
 var _unit_tip: PanelContainer
 var _unit_tip_text: RichTextLabel
+## The Shard the last click was on, and when (ms), so a double-click can send that same
+## Shard to the ritual table even though the first click already moved or rebuilt it.
+var _clicked_item: Keepsake = null
+var _clicked_at := 0
+const DOUBLE_CLICK_MS := 500
 var _spectate_bar: HBoxContainer
+var _encounter: PanelContainer
+var _encounter_title: Label
+var _encounter_cards: HBoxContainer
+var _unit_pick: PanelContainer
+var _unit_pick_text: RichTextLabel
+var _unit_pick_bench: HBoxContainer
+var _ascension_strip: VBoxContainer
 var _speed_button: Button
 
 const SPEEDS := [1.0, 2.0, 4.0]
 
 const UNIT_TIP_WIDTH := 320.0
+## Currency icons, shown in place of the words "Aura" and "Reserve".
+const AURA_ICON := "res://assets/icons/aura.png"
+const RESERVE_ICON := "res://assets/icons/reserve.png"
+## Bottom of the top bar plus a gap: where panels under it start.
+const TOP_BAR_HEIGHT := 36.0
+## The log's right edge and height: it stays in the corner left of the board.
+const LOG_RIGHT := 310.0
+const LOG_HEIGHT := 150.0
+## Screen space the unit info panel leaves free below it, for the log.
+const INFO_BOTTOM_RESERVE := LOG_HEIGHT + 8.0
+const BADGE := Vector2(30, 22)
 
 ## Size of the ritual table's slots and result, in pixels.
 const TABLE_SLOT := 36.0
 ## Size of a unit's picture on the bench.
-const BENCH_TILE := Vector2(58, 70)
+const BENCH_TILE := Vector2(50, 60)
+## Size of a unit tile in the shop.
+const SHOP_TILE := Vector2(100, 92)
 
 
 func _ready() -> void:
@@ -62,6 +88,8 @@ func _ready() -> void:
 	_build_board_drop()
 	_build_bottom()
 	_build_popup()
+	_build_encounter()
+	_build_unit_pick()
 	_build_unit_tip()
 	_build_spectate_bar()
 
@@ -130,9 +158,26 @@ func _build_unit_tip() -> void:
 func show_unit_tip(button: Control, data: UnitData) -> void:
 	_unit_tip_text.text = describe_shop_unit(data, game.player.find_unit(data))
 	_unit_tip.visible = true
-	_unit_tip.reset_size()
+	_fit_font(_unit_tip, [_unit_tip_text], [13, 12, 11, 10, 9])
 	var top := clampf(button.global_position.y, 40.0, size.y - _unit_tip.size.y - 8.0)
 	_unit_tip.position = Vector2(_side.global_position.x - _unit_tip.size.x - 8.0, top)
+
+
+## Steps the font of `labels` (Labels, Buttons, RichTextLabels) down through `sizes` until
+## `panel` fits the screen's height (less a margin), then sizes the panel to its contents.
+func _fit_font(panel: Control, labels: Array, sizes: Array) -> void:
+	var room := size.y - 16.0
+	for font_size in sizes:
+		for label in labels:
+			if label is RichTextLabel:
+				label.add_theme_font_size_override("normal_font_size", font_size)
+				label.add_theme_font_size_override("bold_font_size", font_size)
+			else:
+				label.add_theme_font_size_override("font_size", font_size)
+		panel.reset_size()
+		if panel.get_combined_minimum_size().y <= room:
+			break
+	panel.reset_size()
 
 
 func hide_unit_tip() -> void:
@@ -171,7 +216,7 @@ static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
 		for choice in MatchRules.upgrade_choices(owned):
 			var path := owned.path.duplicate()
 			path.append(choice["index"])
-			lines.append("[color=#ffd24d]%s[/color]  %s" % [RandomTeams.path_label(path), describe_upgrade(choice["upgrade"]).replace("\n", " ")])
+			lines.append("[color=#ffd24d]%s[/color]  %s" % [RandomTeams.path_label(path), Keyphrases.format(describe_upgrade(choice["upgrade"]).replace("\n", " "))])
 	elif owned != null:
 		lines.append("")
 		lines.append("[b]Yours is fully upgraded:[/b] buying it buffs its stats.")
@@ -181,7 +226,7 @@ static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
 static func _ability_text(kind: String, ability_name: String, description: String) -> String:
 	var line := "[b]%s:[/b] %s" % [kind, ability_name]
 	if description != "":
-		line += "\n[color=#cccccc]%s[/color]" % description
+		line += "\n[color=#cccccc]%s[/color]" % Keyphrases.format(description)
 	return line
 
 
@@ -210,6 +255,48 @@ func _header(text: String) -> Label:
 	return _label(text, 13, Color(0.85, 0.85, 0.9))
 
 
+## An amount of Aura or Reserve as BBCode: the currency's icon, then the number.
+static func aura_text(amount: int, icon_size: int = 13) -> String:
+	return "[img=%dx%d]%s[/img] %d" % [icon_size, icon_size, AURA_ICON, amount]
+
+
+static func reserve_text(amount: int, icon_size: int = 13) -> String:
+	return "[img=%dx%d]%s[/img] %d" % [icon_size, icon_size, RESERVE_ICON, amount]
+
+
+## Gives `button` rich text (BBCode, so it can show the currency icons) in place of its
+## plain text: a RichTextLabel over it, centred, leaving `left` pixels free for the
+## button's own icon (or `top` pixels, for a picture above the text). Dimmed with the
+## button when it's disabled.
+func _set_rich_text(button: Button, bbcode: String, font_size: int = 10, left: float = 0.0, top: float = 0.0) -> void:
+	button.text = ""
+	var label := button.get_node_or_null("RichText") as RichTextLabel
+	if label == null:
+		label = RichTextLabel.new()
+		label.name = "RichText"
+		label.bbcode_enabled = true
+		label.scroll_active = false
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		button.add_child(label)
+	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	label.offset_left = left
+	label.offset_top = top
+	label.add_theme_font_size_override("normal_font_size", font_size)
+	label.add_theme_font_size_override("bold_font_size", font_size)
+	label.text = "[center]%s[/center]" % bbcode
+	label.modulate.a = 0.45 if button.disabled else 1.0
+
+
+## A header with a "(?)" that shows `tip` when hovered.
+func _header_with_tip(text: String, tip: String) -> Label:
+	var label := _header(text + "  (?)")
+	label.tooltip_text = tip
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	return label
+
+
 func _build_top() -> void:
 	var bar := PanelContainer.new()
 	bar.add_theme_stylebox_override("panel", _frame(4))
@@ -236,23 +323,23 @@ func _build_side() -> void:
 	_side.offset_top = 36
 	_side.offset_bottom = -6
 	add_child(_side)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_side.add_child(scroll)
-	# The ritual table follows the Items list when the panel scrolls or the window resizes.
-	scroll.get_v_scroll_bar().value_changed.connect(func(_value): _place_table_window())
+	_side.clip_contents = true   # never spills past the screen; everything is sized to fit
+	# The ritual table follows the Items list when the window resizes.
 	resized.connect(_place_table_window)
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation", 6)
-	scroll.add_child(column)
+	_side.add_child(column)
 
-	# Shop
+	# Shop: unit tiles side by side (hover one for what it does), then Shards, Keepsake.
 	column.add_child(_header("Shop"))
-	_shop_units = VBoxContainer.new()
+	_shop_units = HBoxContainer.new()
+	_shop_units.add_theme_constant_override("separation", 4)
 	column.add_child(_shop_units)
 	_shop_shards = HBoxContainer.new()
 	column.add_child(_shop_shards)
+	_shop_keepsake = HBoxContainer.new()
+	column.add_child(_shop_keepsake)
 	var rerolls := HBoxContainer.new()
 	column.add_child(rerolls)
 	_reroll = Button.new()
@@ -276,8 +363,7 @@ func _build_side() -> void:
 	column.add_child(_bench_box)
 	var bench_column := VBoxContainer.new()
 	_bench_box.add_child(bench_column)
-	bench_column.add_child(_header("Bench"))
-	bench_column.add_child(_label("Drag units between here and the board, or click one, then a cell.", 10, Color(0.65, 0.65, 0.7)))
+	bench_column.add_child(_header_with_tip("Bench", "Drag units between here and the board, or click one, then a cell."))
 	_bench = HFlowContainer.new()
 	bench_column.add_child(_bench)
 	column.add_child(HSeparator.new())
@@ -290,21 +376,12 @@ func _build_side() -> void:
 	column.add_child(_items_box)
 	var items_column := VBoxContainer.new()
 	_items_box.add_child(items_column)
-	items_column.add_child(_header("Items"))
-	items_column.add_child(_label("Drag items between here, your units and the ritual table, or click one to hold it.", 10, Color(0.65, 0.65, 0.7)))
+	items_column.add_child(_header_with_tip("Items", "Drag items between here, your units and the ritual table, or click one to hold it.\nDouble-click a Shard to send it to the ritual table.\nClick one of your units to see (and take off) its items."))
 	_inventory = HFlowContainer.new()
 	items_column.add_child(_inventory)
 	_sell = Button.new()
 	_sell.pressed.connect(func(): game.sell_held())
 	items_column.add_child(_sell)
-	column.add_child(HSeparator.new())
-
-	# Selected unit
-	_selected_label = _label("", 12)
-	_selected_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(_selected_label)
-	_selected_items = HBoxContainer.new()
-	column.add_child(_selected_items)
 
 
 ## The ritual table: its own narrow box, hanging off the side panel's left edge level with
@@ -326,7 +403,7 @@ func _build_table_window() -> void:
 	for slot in 2:
 		if slot == 1:
 			column.add_child(_centered_label("+"))
-		var button := Button.new()
+		var button := RichTooltipButton.new()
 		button.custom_minimum_size = Vector2(TABLE_SLOT, TABLE_SLOT)
 		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		button.expand_icon = true
@@ -335,7 +412,7 @@ func _build_table_window() -> void:
 		column.add_child(button)
 		_table_slots.append(button)
 	column.add_child(_centered_label("="))
-	_table_result = TextureRect.new()
+	_table_result = RichTooltipRect.new()
 	_table_result.custom_minimum_size = Vector2(TABLE_SLOT, TABLE_SLOT)
 	_table_result.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_table_result.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -502,8 +579,8 @@ func _build_bottom() -> void:
 	_log.anchor_top = 1.0
 	_log.anchor_bottom = 1.0
 	_log.offset_left = 8
-	_log.offset_right = 470
-	_log.offset_top = -112
+	_log.offset_right = LOG_RIGHT
+	_log.offset_top = -LOG_HEIGHT
 	_log.offset_bottom = -6
 	_log.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -518,6 +595,16 @@ func _build_bottom() -> void:
 	_ready_button.offset_bottom = -10
 	_ready_button.pressed.connect(func(): game.press_ready())
 	add_child(_ready_button)
+
+	# Ascensions: a badge each, in two rows just under the board (yours, then the opponent's).
+	_ascension_strip = VBoxContainer.new()
+	_ascension_strip.add_theme_constant_override("separation", 3)
+	_ascension_strip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_ascension_strip.offset_left = MatchGame.BOARD_SCREEN_CENTER.x - 576 - 230
+	_ascension_strip.offset_right = MatchGame.BOARD_SCREEN_CENTER.x - 576 + 230
+	_ascension_strip.offset_top = -116
+	_ascension_strip.offset_bottom = -60
+	add_child(_ascension_strip)
 
 
 func _build_popup() -> void:
@@ -536,20 +623,231 @@ func _build_popup() -> void:
 	column.add_child(_popup_buttons)
 
 
+## The Encounter pick: a title and one card per Ascension on offer, over the board.
+func _build_encounter() -> void:
+	_encounter = PanelContainer.new()
+	_encounter.add_theme_stylebox_override("panel", _frame(14))
+	_encounter.visible = false
+	add_child(_encounter)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	_encounter.add_child(column)
+	_encounter_title = _label("", 18)
+	_encounter_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(_encounter_title)
+	var hint := _label("Choose one. It lasts for the rest of the match.", 11, Color(0.7, 0.7, 0.76))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.autowrap_mode = TextServer.AUTOWRAP_OFF   # wrapping at no width would make the panel huge
+	column.add_child(hint)
+	_encounter_cards = HBoxContainer.new()
+	_encounter_cards.add_theme_constant_override("separation", 10)
+	column.add_child(_encounter_cards)
+
+
+const ENCOUNTER_CARD := Vector2(190, 130)
+
+## Shows the Encounter pick for the player's ascension_offers, or hides it when there are none.
+func show_encounter(title: String) -> void:
+	for child in _encounter_cards.get_children():
+		_encounter_cards.remove_child(child)   # now, so the last Encounter's cards don't count toward the size
+		child.queue_free()
+	var offers := game.player.ascension_offers
+	_encounter.visible = not offers.is_empty() and not MatchGame.spectating
+	if not _encounter.visible:
+		return
+	_encounter_title.text = title
+	for slot in offers.size():
+		var ascension := offers[slot]
+		var card := Button.new()
+		card.custom_minimum_size = ENCOUNTER_CARD
+		card.pressed.connect(func(): game.choose_ascension(slot))
+		var text := RichTextLabel.new()
+		text.bbcode_enabled = true
+		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		text.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		text.offset_left = 8
+		text.offset_top = 8
+		text.offset_right = -8
+		text.offset_bottom = -8
+		text.add_theme_font_size_override("normal_font_size", 12)
+		text.add_theme_font_size_override("bold_font_size", 14)
+		var for_text := ""
+		if ascension.is_chosen():
+			for_text = "  [color=#ffd24d]Pick a unit[/color]"
+		elif not ascension.affected_units.is_empty():
+			for_text = "  [color=#c8b46e]For %s[/color]" % ascension.affected_names()
+		var for_units := "[center][color=#9a9aa5]Tier %d[/color]%s[/center]" % [ascension.tier, for_text]
+		text.text = "[center][b]%s[/b][/center]%s\n%s" % [ascension.get_display_name(), for_units, Keyphrases.format(ascension.description)]
+		card.add_child(text)
+		_encounter_cards.add_child(card)
+	_place_encounter.call_deferred()
+
+
+## Centres the Encounter panel on the board once its cards are laid out.
+func _place_encounter() -> void:
+	_encounter.reset_size()
+	_encounter.position = MatchGame.BOARD_SCREEN_CENTER - _encounter.size / 2.0
+
+
+func hide_encounter() -> void:
+	_encounter.visible = false
+
+
+## The banner while picking the unit for a chosen-unit Ascension: what it is, any eligible
+## bench units to click, and Back.
+func _build_unit_pick() -> void:
+	_unit_pick = PanelContainer.new()
+	_unit_pick.add_theme_stylebox_override("panel", _frame(10))
+	_unit_pick.visible = false
+	add_child(_unit_pick)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	_unit_pick.add_child(column)
+	_unit_pick_text = RichTextLabel.new()
+	_unit_pick_text.bbcode_enabled = true
+	_unit_pick_text.fit_content = true
+	_unit_pick_text.scroll_active = false
+	_unit_pick_text.custom_minimum_size = Vector2(420, 0)
+	_unit_pick_text.add_theme_font_size_override("normal_font_size", 13)
+	_unit_pick_text.add_theme_font_size_override("bold_font_size", 13)
+	column.add_child(_unit_pick_text)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	column.add_child(row)
+	_unit_pick_bench = HBoxContainer.new()
+	_unit_pick_bench.add_theme_constant_override("separation", 4)
+	_unit_pick_bench.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_unit_pick_bench)
+	var back := Button.new()
+	back.text = "Back"
+	back.tooltip_text = "Choose a different Ascension (or right-click)."
+	back.size_flags_vertical = Control.SIZE_SHRINK_END
+	back.pressed.connect(func(): game.cancel_unit_pick())
+	row.add_child(back)
+
+
+func show_unit_pick(ascension: Ascension, bench: Array) -> void:
+	var lines := PackedStringArray(["[b]Choose a unit for %s[/b]: click it on the board." % ascension.get_display_name()])
+	lines.append(Keyphrases.format(ascension.description))
+	if not bench.is_empty():
+		lines.append("[color=#9a9aa5]Or one on your bench:[/color]")
+	_unit_pick_text.text = "\n".join(lines)
+	for child in _unit_pick_bench.get_children():
+		_unit_pick_bench.remove_child(child)
+		child.queue_free()
+	for unit in bench:
+		var tile := Button.new()
+		tile.text = "%s\n%s" % [unit.display_name(), RandomTeams.path_label(unit.path)]
+		tile.icon = unit.data.sprite
+		tile.expand_icon = true
+		tile.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tile.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		tile.clip_text = true
+		tile.add_theme_font_size_override("font_size", 9)
+		tile.custom_minimum_size = BENCH_TILE
+		tile.pressed.connect(func(): game.pick_unit(unit))
+		_unit_pick_bench.add_child(tile)
+	_unit_pick.visible = true
+	_place_unit_pick.call_deferred()
+
+
+func _place_unit_pick() -> void:
+	_unit_pick.reset_size()
+	_unit_pick.position = Vector2(MatchGame.BOARD_SCREEN_CENTER.x - _unit_pick.size.x / 2.0, TOP_BAR_HEIGHT + 4.0)
+
+
+func hide_unit_pick() -> void:
+	_unit_pick.visible = false
+
+
+## The Ascension strip: "You" and a badge per Ascension, then the opponent's (as their last
+## army had them). Hover a badge for its name, tier and description.
+func _refresh_ascensions() -> void:
+	for child in _ascension_strip.get_children():
+		_ascension_strip.remove_child(child)
+		child.queue_free()
+	var sides := [[game.player.player_name, game.player.ascensions, Color("#66a6ff")],
+			[game.ai.player_name, game.ai.last_fielded_ascensions, Color("#ff6666")]]
+	for side in sides:
+		var list: Array[Ascension] = side[1]
+		if list.is_empty():
+			continue
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 4)
+		_ascension_strip.add_child(row)
+		var name_label := _label(side[0], 11, side[2])
+		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		name_label.custom_minimum_size = Vector2(70, 0)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(name_label)
+		var army: Array[ArmyUnit] = game.player.units if side[1] == game.player.ascensions else game.ai.last_fielded
+		for ascension in list:
+			row.add_child(_ascension_badge(ascension, MatchRules.holder_of(army, ascension)))
+	_ascension_strip.visible = _ascension_strip.get_child_count() > 0
+
+
+## A small square showing the Ascension's tier, tinted by its main stat; its tooltip has
+## the rest.
+func _ascension_badge(ascension: Ascension, holder: ArmyUnit = null) -> Button:
+	var badge := RichTooltipButton.new()
+	badge.bbcode_tooltip = true
+	badge.focus_mode = Control.FOCUS_NONE
+	badge.custom_minimum_size = BADGE
+	badge.text = Ascension.NUMERALS[clampi(ascension.tier, 0, 4)]
+	badge.add_theme_font_size_override("font_size", 11)
+	var style := StyleBoxFlat.new()
+	style.bg_color = _ascension_tint(ascension).darkened(0.35)
+	style.border_color = Color(1, 1, 1, 0.5) if ascension.family != null or ascension.empowers != null else Color(1, 1, 1, 0.25)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	for state in ["normal", "hover", "pressed"]:
+		badge.add_theme_stylebox_override(state, style)
+	var lines := PackedStringArray(["[b]%s[/b]   [color=#9a9aa5]Tier %d[/color]" % [ascension.get_display_name(), ascension.tier]])
+	if holder != null:
+		lines.append("[color=#ffd24d]On %s[/color]" % holder.label().strip_edges())
+	elif not ascension.affected_units.is_empty():
+		lines.append("[color=#c8b46e]For %s[/color]" % ascension.affected_names())
+	lines.append(Keyphrases.format(ascension.description))
+	badge.tooltip_text = "\n".join(lines)
+	return badge
+
+
+## The colour of the stat an Ascension gives most of (grey if it gives none).
+static func _ascension_tint(ascension: Ascension) -> Color:
+	var best := 0.0
+	var tint := Color(0.5, 0.5, 0.55)
+	var kinds := {Stats.Stat.MIGHT: Shard.Kind.MIGHT, Stats.Stat.MIGHT_WARD: Shard.Kind.MIGHT_WARD,
+			Stats.Stat.CELERITY: Shard.Kind.CELERITY, Stats.Stat.CELERITY_WARD: Shard.Kind.CELERITY_WARD,
+			Stats.Stat.INSIGHT: Shard.Kind.INSIGHT, Stats.Stat.INSIGHT_WARD: Shard.Kind.INSIGHT_WARD}
+	var bonuses := ascension.get_stat_bonuses()
+	for stat in kinds:
+		if bonuses.get(stat, 0.0) > best:
+			best = bonuses[stat]
+			tint = Keyphrases.color_of(kinds[stat])
+	if ascension.health / 10.0 > best:   # Health comes in bigger numbers
+		tint = Keyphrases.color_of(Shard.Kind.HEALTH)
+	return tint
+
+
 ## Shows the pop-up with `text` and one button per [label, callable].
 func _show_popup(text: String, buttons: Array) -> void:
 	_popup_text.text = text
 	for child in _popup_buttons.get_children():
+		_popup_buttons.remove_child(child)   # now, so the old buttons don't count toward the size
 		child.queue_free()
+	var labels: Array = [_popup_text]
 	for entry in buttons:
 		var button := Button.new()
 		button.text = entry[0]
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.pressed.connect(entry[1])
 		_popup_buttons.add_child(button)
+		labels.append(button)
 	_popup.visible = true
-	_popup.reset_size()
-	_popup.position = MatchGame.BOARD_SCREEN_CENTER - _popup.size / 2.0
+	_fit_font(_popup, labels, [14, 13, 12, 11, 10, 9])
+	_popup.position = (MatchGame.BOARD_SCREEN_CENTER - _popup.size / 2.0).clamp(
+			Vector2(8, 8), size - _popup.size - Vector2(8, 8))
 
 
 func hide_result() -> void:
@@ -561,7 +859,8 @@ func show_result(text: String) -> void:
 
 
 func show_game_over(text: String) -> void:
-	_show_popup(text, [["New match", func(): game.new_match()]])
+	_show_popup(text, [["New match", func(): game.new_match()],
+			["Main menu", func(): game.return_to_menu()]])
 
 
 func _show_upgrade_choice(slot: int, unit: ArmyUnit) -> void:
@@ -625,6 +924,8 @@ func refresh() -> void:
 	_hint.visible = planning
 	_spectate_bar.visible = MatchGame.spectating
 	_refresh_top()
+	_refresh_ascensions()
+	refresh_selected()
 	_log.text = "\n".join(game.log_lines)
 	var waiting := game.phase == MatchGame.Phase.WAITING
 	_ready_button.visible = planning or waiting
@@ -640,7 +941,6 @@ func refresh() -> void:
 	_refresh_shop()
 	_refresh_bench()
 	_refresh_items()
-	_refresh_selected()
 	_refresh_table()
 	_refresh_hint()
 
@@ -654,6 +954,8 @@ func refresh_top() -> void:
 func _refresh_top() -> void:
 	var p := game.player
 	var phase_name := "Opening Shop" if game.is_opening() else "Player Combat"
+	if game.phase == MatchGame.Phase.ENCOUNTER:
+		phase_name = "Encounter"
 	var choosing := game.phase in [MatchGame.Phase.PLANNING, MatchGame.Phase.WAITING]
 	if choosing and not game.is_opening():
 		phase_name += " (planning)"
@@ -662,9 +964,9 @@ func _refresh_top() -> void:
 		if game.phase == MatchGame.Phase.PLANNING and MatchGame.PLANNING_TIMER_ON:
 			phase_name += " · [color=#ffd24d]%d s left[/color]" % ceili(maxf(game.planning_left, 0.0))
 		online_bits = "   [color=#7fdc7f]Ready ✓[/color]" if game.ai_ready else "   [color=#9a9aa5]planning…[/color]"
-	_top.text = "[b]Round %d[/b] · %s        [color=#66a6ff][b]%s[/b][/color]  HP %d   Aura %d   Reserve %d   [color=#9a9aa5](Aura given %d / %d)[/color]        [color=#ff6666][b]%s[/b][/color]  HP %d%s" % [
-			game.round_number, phase_name, p.player_name, maxi(p.hp, 0), p.aura, p.reserve, p.aura_received,
-			MatchRules.max_aura_received(), game.ai.player_name, maxi(game.ai.hp, 0), online_bits]
+	_top.text = "[b]Round %d[/b] · %s        [color=#66a6ff][b]%s[/b][/color]  HP %d   %s   %s   [color=#9a9aa5](%s given / %d)[/color]        [color=#ff6666][b]%s[/b][/color]  HP %d%s" % [
+			game.round_number, phase_name, p.player_name, maxi(p.hp, 0), aura_text(p.aura, 14), reserve_text(p.reserve, 14),
+			aura_text(p.aura_received, 12), MatchRules.max_aura_received(), game.ai.player_name, maxi(game.ai.hp, 0), online_bits]
 
 
 func _refresh_shop() -> void:
@@ -674,20 +976,33 @@ func _refresh_shop() -> void:
 	for slot in p.unit_offers.size():
 		var data := p.unit_offers[slot]
 		var info := MatchRules.offer_info(p, data)
+		# A tile: the unit's picture, its name and tier, and what clicking it costs.
 		var button := Button.new()
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.icon = data.sprite
-		button.expand_icon = true
-		button.custom_minimum_size = Vector2(0, 34)
-		var title := "%s  (tier %d)" % [data.display_name.capitalize(), data.tier]
+		button.clip_text = true
+		button.custom_minimum_size = SHOP_TILE
+		var picture := TextureRect.new()
+		picture.texture = data.sprite
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		picture.offset_top = 4
+		picture.offset_bottom = -34
+		button.add_child(picture)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 10)
+		var title := "%s (T%d)" % [data.display_name.capitalize(), data.tier]
+		var cost := ""
 		match info["kind"]:
 			"buy":
-				button.text = "%s\nBuy: %d Aura" % [title, info["aura"]]
+				cost = "Buy " + aura_text(info["aura"])
 			"upgrade":
-				button.text = "%s\nUpgrade: %d Aura" % [title, info["aura"]]
+				cost = "Upgrade " + aura_text(info["aura"])
 			"buff":
-				button.text = "%s\nBuff stats: %d Reserve" % [title, info["reserve"]]
+				cost = "Buff " + reserve_text(info["reserve"])
 		button.disabled = not MatchRules.can_afford(p, info)
+		_set_rich_text(button, "%s\n%s" % [title, cost], 10, 0.0, SHOP_TILE.y - 34.0)
+		picture.modulate.a = 0.45 if button.disabled else 1.0
 		if info["kind"] == "upgrade":
 			var owned := p.find_unit(data)
 			button.pressed.connect(func(): _show_upgrade_choice(slot, owned))
@@ -700,18 +1015,36 @@ func _refresh_shop() -> void:
 		child.queue_free()
 	for slot in p.shard_offers.size():
 		var shard := p.shard_offers[slot]
-		var button := Button.new()
+		var button := RichTooltipButton.new()
 		button.icon = shard.get_icon()
 		button.expand_icon = true
-		button.custom_minimum_size = Vector2(100, 30)
-		button.text = "%s\n%d" % [Shard.NAMES[shard.first_shard], MatchRules.SHARD_COST]
+		button.custom_minimum_size = Vector2(0, 30)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.clip_text = true
+		button.disabled = p.reserve < MatchRules.SHARD_COST
+		_set_rich_text(button, "%s\n%s" % [Shard.NAMES[shard.first_shard], reserve_text(MatchRules.SHARD_COST, 11)], 10, 28.0)
 		button.add_theme_font_size_override("font_size", 10)
 		button.tooltip_text = ItemToolbox.describe(shard)
-		button.disabled = p.reserve < MatchRules.SHARD_COST
 		button.pressed.connect(func(): game.buy_shard(slot))
 		_shop_shards.add_child(button)
-	_reroll.text = "Reroll (%d)" % p.reroll_cost
+	for child in _shop_keepsake.get_children():
+		child.queue_free()
+	if p.keepsake_offer != null:
+		var keepsake := p.keepsake_offer
+		var button := RichTooltipButton.new()
+		button.icon = keepsake.get_icon()
+		button.expand_icon = true
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, 30)
+		button.disabled = p.reserve < MatchRules.KEEPSAKE_COST
+		_set_rich_text(button, "%s   %s [color=#9a9aa5](was %d)[/color]" % [keepsake.get_display_name(),
+				reserve_text(MatchRules.KEEPSAKE_COST, 11), MatchRules.SHARD_COST * 2], 10, 28.0)
+		button.add_theme_font_size_override("font_size", 10)
+		button.tooltip_text = ItemToolbox.describe(keepsake)
+		button.pressed.connect(func(): game.buy_keepsake())
+		_shop_keepsake.add_child(button)
 	_reroll.disabled = p.reserve < p.reroll_cost
+	_set_rich_text(_reroll, "Reroll   " + reserve_text(p.reroll_cost, 15), 16)
 	_lock.set_pressed_no_signal(p.shop_locked)
 	_lock.text = "Locked" if p.shop_locked else "Lock"
 
@@ -743,8 +1076,28 @@ func _refresh_bench() -> void:
 		_bench.add_child(button)
 
 
+## Remembers a click on a Shard (keepsakes can't go on the table, so they're ignored).
+func _note_click(item: Keepsake) -> void:
+	_clicked_item = item if item != null and item.is_shard else null
+	_clicked_at = Time.get_ticks_msec()
+
+
+## A double-click right after clicking a Shard sends that Shard to the ritual table. Runs
+## before the buttons see the second click, which would otherwise undo or redo the first.
+func _input(event: InputEvent) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or not click.double_click or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if _clicked_item == null or Time.get_ticks_msec() - _clicked_at > DOUBLE_CLICK_MS:
+		return
+	var item := _clicked_item
+	_clicked_item = null
+	if game != null and game.send_shard_to_table(item):
+		get_viewport().set_input_as_handled()
+
+
 func _item_button(item: Keepsake) -> Button:
-	var button := Button.new()
+	var button := RichTooltipButton.new()
 	button.icon = item.get_icon()
 	button.expand_icon = true
 	button.custom_minimum_size = ICON
@@ -762,34 +1115,49 @@ func _refresh_items() -> void:
 		var button := _item_button(p.inventory[i])
 		if game.held.get("item", -1) == i:
 			button.modulate = HELD_COLOR
-		button.pressed.connect(func(): game.hold_item(i))
+		var item: Keepsake = p.inventory[i]
+		button.pressed.connect(func(): _note_click(item); game.hold_item(i))
 		_wire_item(button, func(): return {"from": "inventory", "index": i}, func(): return {"to": "inventory"})
 		_inventory.add_child(button)
 	var held_index: int = game.held.get("item", -1)
 	_sell.visible = held_index >= 0
 	if held_index >= 0:
-		_sell.text = "Sell %s (+%d Reserve)" % [p.inventory[held_index].get_display_name(),
-				MatchRules.sell_value(p.inventory[held_index])]
+		_sell.custom_minimum_size.y = 28
+		_set_rich_text(_sell, "Sell %s (+%s)" % [p.inventory[held_index].get_display_name(),
+				reserve_text(MatchRules.sell_value(p.inventory[held_index]))], 12)
 
 
-func _refresh_selected() -> void:
-	for child in _selected_items.get_children():
+## The items of the unit shown in the unit info panel, as buttons in its item row: drag or
+## click a Shard to take it off (Keepsakes stay on), or drop items on the row to equip.
+## Only for your own units while planning.
+func refresh_selected() -> void:
+	var row := game.unit_info.item_row
+	for child in row.get_children():
+		row.remove_child(child)
 		child.queue_free()
-	var unit := game.selected
-	if unit == null or not game.player.units.has(unit):
-		_selected_label.text = "Click one of your units to see its items."
+	var shown := game.unit_info.get_unit()
+	var unit: ArmyUnit = null
+	if shown != null and shown.team == MatchGame.PLAYER_TEAM and game.phase == MatchGame.Phase.PLANNING and not MatchGame.spectating:
+		var index: int = shown.get_meta("army_index", -1)
+		if index >= 0 and index < game.player.units.size():
+			unit = game.player.units[index]
+	row.visible = unit != null
+	if unit == null:
 		return
-	_selected_label.text = "%s's items (drag or click a Shard to take it off; keepsakes stay on):" % unit.label()
-	if unit.buffs > 0:
-		_selected_label.text = "%s, %d buff%s. Items (drag or click a Shard to take it off):" % [unit.label(), unit.buffs, "" if unit.buffs == 1 else "s"]
+	var title := _label("Items", 11, Color(0.6, 0.6, 0.66))
+	title.tooltip_text = "Drag or click a Shard to take it off; Keepsakes stay on.\nDrop items here to equip this unit."
+	title.mouse_filter = Control.MOUSE_FILTER_STOP
+	row.add_child(title)
+	_accept_drops(row, func(): return {"to": "unit", "unit": unit})
 	if unit.items.is_empty():
-		_selected_items.add_child(_label("(none)", 11, Color(0.55, 0.55, 0.6)))
+		row.add_child(_label("(none)", 11, Color(0.55, 0.55, 0.6)))
 	for i in unit.items.size():
 		var button := _item_button(unit.items[i])
 		button.disabled = not unit.items[i].is_shard
-		button.pressed.connect(func(): game.unequip(unit, i))
+		var item: Keepsake = unit.items[i]
+		button.pressed.connect(func(): _note_click(item); game.unequip(unit, i))
 		_wire_item(button, func(): return {"from": "unit", "unit": unit, "index": i}, func(): return {"to": "unit", "unit": unit})
-		_selected_items.add_child(button)
+		row.add_child(button)
 
 
 func _refresh_table() -> void:

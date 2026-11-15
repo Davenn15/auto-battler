@@ -6,5 +6,6 @@
 script = ExtResource("1")
 interval = 1.8
 slot = 0
+portal = Vector2(-30.5, -2.5)
 passive_name = "Beam I"
 description = "A continuous beam at the nearest enemy in range. Deals 60% of a normal attack per attack timer."

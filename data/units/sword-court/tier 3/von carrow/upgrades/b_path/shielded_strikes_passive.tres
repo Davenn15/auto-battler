@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_mpd2p")
-description = "Bonus max-health damage on attacks while shielded."
+description = "While shielded, her attacks gain the Hit Effect: deal bonus max-health damage."
 percent = 0.075
 metadata/_custom_type_script = "uid://c7nybyo0h6ubw"

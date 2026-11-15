@@ -1,7 +1,8 @@
 class_name BurstChargeEffect
 extends Passive
-## Whenever the unit's attacks deal at least a share of one enemy's max health within a
-## short window, it gains charge.
+## Whenever the unit deals at least a share of one enemy's max health within a short
+## window, it gains charge. Counts all direct damage (attacks, Gambits, splashes,
+## projectiles), not damage over time.
 
 @export var share: float = 0.15
 @export var window: float = 1.0
@@ -23,7 +24,7 @@ class Tally extends Status:
 	func tick(_unit: BattleUnit, delta: float) -> void:
 		_time += delta
 
-	func on_attack_hit(unit: BattleUnit, target: BattleUnit, dealt: float) -> void:
+	func on_direct_damage_dealt(unit: BattleUnit, target: BattleUnit, dealt: float) -> void:
 		var id := target.get_instance_id()
 		var recent: Array = _hits.get(id, []).filter(func(h): return _time - h[0] <= effect.window)
 		recent.append([_time, dealt])

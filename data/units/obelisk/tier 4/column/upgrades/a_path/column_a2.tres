@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/siphon.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/weapons/fabricator.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
-upgrade_name = "Siphon"
-description = "New weapon, Siphon: every 7 seconds, a drone drains max health from the nearby enemy with the most health and brings it back to heal COLUMN."
+upgrade_name = "Fabricator"
+description = "New weapon, Fabricator: every 10 seconds, manufactures a random full keepsake and magnetizes it to the nearest ally with an open slot, equipping it for the rest of combat and giving them a 150 Shield."
 passives = Array[ExtResource("2")]([ExtResource("3")])

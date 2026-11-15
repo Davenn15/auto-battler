@@ -43,8 +43,10 @@ func _pick_target(_unit: BattleUnit) -> BattleUnit:
 
 
 ## Override: what the note does when it lands. `strength` is its potency when sent.
-func _arrive(_unit, _target: BattleUnit, _strength: float) -> void:
-	pass
+## Return the status it gave the target (a buff, or a debuff like Silence), and a note in
+## this note's colour lingers around the target for as long as it lasts; null for none.
+func _arrive(_unit, _target: BattleUnit, _strength: float) -> Status:
+	return null
 
 
 ## Living units within range on `team`, for picking targets. Never Prancelot himself: his
@@ -83,4 +85,6 @@ func _send(unit: BattleUnit, target: BattleUnit, strength: float) -> void:
 func _land(note: Label, unit, target, strength: float) -> void:
 	note.queue_free()
 	if is_instance_valid(target) and target.alive:
-		_arrive(unit, target, strength)
+		var buff := _arrive(unit, target, strength)
+		if buff != null:
+			KeepsakeVfx.note_linger(target, buff, color)

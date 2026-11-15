@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "If the linked ally would die, M-PATH dies instead and heals it for a share of his max health."
+description = "Once per link, if the linked ally would die, M-PATH gives up 30% of his max health instead (never dropping below 1) and heals it for the same amount."
 gambit_bonuses = Dictionary[String, float]({
-"sacrifice_heal": 0.75
+"sacrifice_share": 0.3
 })
