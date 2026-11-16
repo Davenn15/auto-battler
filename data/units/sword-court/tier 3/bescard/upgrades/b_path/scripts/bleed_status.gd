@@ -18,7 +18,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		return
 	var step := minf(delta, time_left)
 	time_left -= delta
-	var dealt := unit.take_warded_damage(damage_per_second * step)
+	var dealt := unit.take_warded_damage(BattleUnit.damage_bonus(source_id, unit, damage_per_second * step))
 	unit.add_running_damage("bleed", dealt, Stats.damage_color(Stats.DamageType.MIGHT))
 	unit.get_tree().call_group("damage_tracker", "record_damage", source_id, dealt)
 	if time_left <= 0.0:

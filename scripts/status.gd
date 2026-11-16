@@ -72,6 +72,13 @@ func get_pending_damage(_unit: BattleUnit) -> float:
 
 ## Healing this status will give later (like Quickscar or M-PATH's passive). Shown on the
 ## health bar as a darker stretch after current health.
+## Beams (see Beam): change the Settings of this unit's Beams, e.g. more range, faster
+## delivery or extra ricochets. Called every frame by each Beam; check settings.kind to
+## change only some kinds.
+func modify_beam(_unit: BattleUnit, _settings: Beam.Settings) -> void:
+	pass
+
+
 func get_pending_healing(_unit: BattleUnit) -> float:
 	return 0.0
 
@@ -97,6 +104,36 @@ func modify_dodge_chance(_unit: BattleUnit, chance: float) -> float:
 ## Called as the unit makes an attack. Return a HitEffect to run when that attack lands,
 ## or null for nothing. Use this instead of on_attack_hit when the effect must still
 ## happen if this status ends while a projectile is in the air.
+## This unit's Gambit just affected `target` (shielded or buffed it, e.g. Lunck's Rally
+## Shield on each ally). See BattleUnit.gambit_affected.
+func on_gambit_target(_unit: BattleUnit, _target: BattleUnit) -> void:
+	pass
+
+
+## A summon of this unit (`summon`, e.g. one of Bremes' copies) has just joined the fight.
+## Called after the summon's start_combat, so statuses added here stay on it.
+func on_summoned(_unit: BattleUnit, _summon: BattleUnit) -> void:
+	pass
+
+
+## This unit's Gambit (or something its Gambit made: a missile, a lingering pool...) dealt
+## `amount` damage to `target`. See BattleUnit.gambit_damage_dealt.
+func on_gambit_damage(_unit: BattleUnit, _target: BattleUnit, _amount: float) -> void:
+	pass
+
+
+## A Hit Effect for shots a Gambit made that fire on their own (Trompero's Arcane Blades),
+## so effects on a unit's Gambit damage can ride on them too. null = none.
+func get_gambit_shot_effect(_unit: BattleUnit) -> HitEffect:
+	return null
+
+
+## How many extra times this attack's Hit Effects should trigger (Ghost Strike: one more,
+## every third attack). Asked once per attack, after every status's on_attack.
+func extra_hit_effect_runs(_unit: BattleUnit) -> int:
+	return 0
+
+
 func get_hit_effect(_unit: BattleUnit) -> HitEffect:
 	return null
 
@@ -202,6 +239,12 @@ func modify_healing_received(_unit: BattleUnit, amount: float) -> float:
 ## Lets a status change charge the unit is about to gain.
 func modify_charge_gain(_unit: BattleUnit, amount: float) -> float:
 	return amount
+
+## On the unit dealing damage: changes ANY damage it deals to `target` (attacks, Gambits,
+## Hit Effects, damage over time...). See BattleUnit.damage_bonus.
+func modify_damage_against(_unit: BattleUnit, _target: BattleUnit, amount: float) -> float:
+	return amount
+
 
 ## On the attacker: changes the damage of a hit it deals to `target`, after wards.
 func modify_damage_dealt(_unit: BattleUnit, _target: BattleUnit, amount: float) -> float:

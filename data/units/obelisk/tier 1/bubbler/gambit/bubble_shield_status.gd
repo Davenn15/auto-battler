@@ -67,6 +67,7 @@ func _pop(unit: BattleUnit) -> void:
 				or unit.grid.get_distance(unit.cell, enemy.cell) > pop_radius_cells:
 			continue
 		var dealt := enemy.take_damage(pop_damage, 0, damage_type, false, caster)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		unit.get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)
 		if pop_stun > 0.0 and enemy.alive:
 			enemy.stun(pop_stun, caster)

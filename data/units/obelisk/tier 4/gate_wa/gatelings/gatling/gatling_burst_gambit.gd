@@ -52,5 +52,5 @@ class BurstHit extends HitEffect:
 	func apply(target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
 		if not target.alive:
 			return
-		var dealt := target.take_damage(amount, 0, Stats.DamageType.INSIGHT)
+		var dealt := target.take_damage(BattleUnit.damage_bonus(credit_id, target, amount), 0, Stats.DamageType.INSIGHT)
 		target.get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)

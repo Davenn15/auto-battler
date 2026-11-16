@@ -462,6 +462,19 @@ static func note_swirl(unit: BattleUnit) -> void:
 	unit.add_child(swirl)
 
 
+## Played around a unit on the board when you upgrade it, in its faction's style: Sword
+## Court gets a beam of holy light with two spectral swords crossing; Obelisk a spiral of
+## digital energy that rises and dissipates. Lives in the scene, not on the unit, so it
+## keeps playing when the board is rebuilt.
+static func upgrade_flourish(unit: BattleUnit, faction: String) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	var effect: Node2D = UpgradeDigital.new() if faction == "Obelisk" else UpgradeHoly.new()
+	effect.z_index = 20
+	_spawn(unit, effect, unit.global_position)
+	effect.rotation = BattleUnit.view_rotation   # upright however the board is turned
+
+
 ## Prancelot's notes: once a note's effect lands, a note in its colour circles the unit for
 ## as long as `buff` (a buff, or a debuff like Silence) stays on it, so it's easy to see who
 ## it's on. Several on one unit spread out around it.
@@ -1013,6 +1026,102 @@ class NoteSwirl extends Node2D:
 			var alpha := 0.6 + 0.4 * sin(time * 2.0 + i * 1.7)
 			draw_string_outline(font, pos + Vector2(-5, 6), NOTES[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, 3, Color(0.25, 0.05, 0.15, alpha))
 			draw_string(font, pos + Vector2(-5, 6), NOTES[i], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(color, alpha))
+
+
+## Sword Court's upgrade: a column of holy light falls on the unit, motes drift up in it,
+## and two spectral swords swing in from either side to cross over it, then it all fades.
+class UpgradeHoly extends Node2D:
+	const LIFE := 1.4
+	const BEAM := Color(1.0, 0.93, 0.62)
+	const SWORD := Color(0.78, 0.9, 1.0)
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		if time >= LIFE:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var fade := clampf(time / 0.15, 0.0, 1.0) * clampf((LIFE - time) / 0.45, 0.0, 1.0)
+		var width := 14.0 + 4.0 * sin(time * 9.0)
+		draw_set_transform(Vector2(0, 16), 0.0, Vector2(1.0, 0.35))
+		draw_circle(Vector2.ZERO, 30.0, Color(BEAM, 0.3 * fade))
+		draw_set_transform(Vector2.ZERO)
+		draw_rect(Rect2(-width / 2.0, -150.0, width, 166.0), Color(BEAM, 0.28 * fade))
+		draw_rect(Rect2(-width * 0.2, -150.0, width * 0.4, 166.0), Color(1, 1, 0.92, 0.6 * fade))
+		for i in 9:   # motes rising through the beam
+			var y := 14.0 - fmod(time * 90.0 + i * 17.0, 150.0)
+			var x := sin(i * 2.3 + time * 4.0) * width * 0.45
+			draw_rect(Rect2(x - 1.0, y - 1.0, 2.0, 2.0), Color(1, 1, 0.85, 0.9 * fade))
+		var swing := clampf((time - 0.12) / 0.45, 0.0, 1.0)
+		swing = 1.0 - pow(1.0 - swing, 3.0)   # fast in, settling
+		var angle := lerpf(1.25, 0.55, swing)
+		var sword_fade := clampf((time - 0.12) / 0.12, 0.0, 1.0) * fade
+		for side in [-1.0, 1.0]:
+			draw_set_transform(Vector2(0, -10), side * angle)
+			_sword(sword_fade)
+		draw_set_transform(Vector2.ZERO)
+		if swing >= 1.0:   # a flash where the blades meet
+			var flash := clampf(1.0 - (time - 0.57) / 0.3, 0.0, 1.0)
+			draw_circle(Vector2(0, -10), 3.0 + 7.0 * (1.0 - flash), Color(1, 1, 1, 0.8 * flash * fade))
+
+	## One ghostly sword, crossing at its middle: point up, hilt down.
+	func _sword(alpha: float) -> void:
+		var blade := PackedVector2Array([Vector2(0, -26), Vector2(3, -20), Vector2(3, 12), Vector2(-3, 12), Vector2(-3, -20)])
+		draw_colored_polygon(blade, Color(SWORD, 0.55 * alpha))
+		draw_polyline(blade + PackedVector2Array([blade[0]]), Color(1, 1, 1, 0.85 * alpha), 1.0)
+		draw_line(Vector2(-7, 12), Vector2(7, 12), Color(SWORD, 0.9 * alpha), 2.0)
+		draw_line(Vector2(0, 12), Vector2(0, 19), Color(SWORD, 0.9 * alpha), 2.0)
+
+
+## Obelisk's upgrade: three strands of bright data bits spiral up around the unit from a
+## ring on the ground, then scatter and fade at the top.
+class UpgradeDigital extends Node2D:
+	const LIFE := 1.5
+	const BIT := Color(0.25, 0.95, 1.0)
+	const ALT := Color(0.4, 1.0, 0.75)
+	const STRANDS := 3
+	const PER_STRAND := 7
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		if time >= LIFE:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var ring := clampf(time / 0.4, 0.0, 1.0)   # the ring it starts from, spreading out
+		draw_set_transform(Vector2(0, 16), 0.0, Vector2(1.0, 0.35))
+		draw_arc(Vector2.ZERO, 12.0 + 20.0 * ring, 0.0, TAU, 32, Color(BIT, 0.7 * (1.0 - ring)), 2.0)
+		draw_set_transform(Vector2.ZERO)
+		for strand in STRANDS:
+			for k in PER_STRAND:
+				var u := time - k * 0.07   # each bit follows the one ahead of it
+				if u <= 0.0 or u >= 1.15:
+					continue
+				var color := ALT if (k + strand) % 3 == 0 else BIT
+				var alpha := clampf(u / 0.1, 0.0, 1.0) * clampf((1.15 - u) / 0.3, 0.0, 1.0)
+				var pos := _bit_at(strand, u)
+				draw_line(_bit_at(strand, maxf(u - 0.07, 0.0)), pos, Color(color, 0.35 * alpha), 1.0)
+				var size := 3.0 if u < 0.85 else 3.0 * (1.15 - u) / 0.3
+				draw_rect(Rect2(pos - Vector2(size, size) / 2.0, Vector2(size, size)), Color(color, alpha))
+		if time > 0.95:   # dissipating: bits scatter from the top of the spiral
+			var spread := clampf((time - 0.95) / 0.55, 0.0, 1.0)
+			for i in 12:
+				var dir := Vector2.from_angle(TAU * i / 12.0 + 0.3)
+				var pos := Vector2(0, -84) + dir * Vector2(30, 18) * spread
+				draw_rect(Rect2(pos - Vector2.ONE, Vector2(2, 2)), Color(BIT if i % 2 == 0 else ALT, 1.0 - spread))
+
+	## Where a bit of `strand` is `u` seconds into its climb: round and round, rising,
+	## the spiral tightening as it goes.
+	func _bit_at(strand: int, u: float) -> Vector2:
+		var angle := TAU * strand / STRANDS + u * 7.5
+		var radius := 24.0 * (1.0 - 0.35 * u)
+		return Vector2(cos(angle) * radius, 16.0 - u * 88.0 + sin(angle) * radius * 0.35)
 
 
 ## One note circling a unit while a buff lasts (see note_linger). Goes away with the buff.

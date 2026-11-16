@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/passive_swap_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/lordred.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 2/merribold/merribold.tres" id="4"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="5"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+pair = Array[ExtResource("5")]([ExtResource("3"), ExtResource("4")])
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Brothers in Arms"
+description = "If you have both Lordred and Merribold, they gain each other's passives."
+tier = 3
+affected_units = Array[ExtResource("5")]([ExtResource("3"), ExtResource("4")])
+needs_all_affected = true
+effect = SubResource("Effect")

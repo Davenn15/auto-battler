@@ -37,7 +37,8 @@ func execute(caster: BattleUnit) -> void:
 	hit_damage *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	var hits := 0
 	for enemy in enemies:
-		var dealt := enemy.take_damage(hit_damage, wrack, damage_type)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(caster, enemy, hit_damage), wrack, damage_type)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if dealt <= 0.0:
 			continue   # dodged: no shield, no stun

@@ -27,6 +27,10 @@ enum Target { ARMY, CHOSEN_UNIT }
 ## Affected Units, if set, limits the pick to those units too. An Ascension none of your
 ## units could take is never offered.
 @export var allowed_tiers: Array[int] = []
+## One chosen unit only: only fully upgraded units can be picked.
+@export var requires_max_level := false
+## One chosen unit only: only units that have a Gambit can be picked.
+@export var requires_gambit := false
 ## For a standalone Ascension: the lower-tier one this is an empowered version of (e.g.
 ## Celerity IV empowers Celerity III). Versions form a family: once you own one, the others
 ## are never offered. Not needed inside an AscensionFamily, which links its versions itself.
@@ -36,6 +40,15 @@ enum Target { ARMY, CHOSEN_UNIT }
 ## those who don't; see MatchRules.ascension_weight). For a One chosen unit Ascension,
 ## only these units can be picked.
 @export var affected_units: Array[UnitData] = []
+## For a Beam Ascension: offered more often to players with a unit that has a Beam (see
+## Beam.has_beam), and rarely to those without, like Affected Units does for units.
+@export var favors_beams := false
+## With Affected Units: the Ascension is for having all of them (e.g. a pair). Offered 3x
+## as often when you own all of them, normally when you own some, and rarely with none.
+@export var needs_all_affected := false
+## For a unit-specific one: the first upgrade a unit must take to benefit (0 = A, 1 = B),
+## e.g. Perfect Reflection needs Bremes' B (Mirror Image). -1 = any path.
+@export var required_branch: int = -1
 
 @export_group("Stats for every affected unit")
 @export var might: float = 0.0
@@ -45,10 +58,20 @@ enum Target { ARMY, CHOSEN_UNIT }
 @export var insight: float = 0.0
 @export var insight_ward: float = 0.0
 @export var health: float = 0.0
+## 0.15 = +15% Wrack chance.
+@export var wrack_chance: float = 0.0
+## 0.1 = +10% Wrack Damage (each Wrack level multiplies damage by 1 + Wrack Damage).
+@export var wrack_damage: float = 0.0
+## 0.15 = +15% chance to dodge attacks.
+@export var dodge_chance: float = 0.0
 
 @export_group("Effect")
 ## Run on every affected unit at battle start, like a Keepsake's effect.
 @export var effect: Passive
+## One chosen unit only: the unit also gains the other final upgrade of its path (A1 also
+## gets A2), and its stats grow one level more. Only units with a second final upgrade
+## can be picked.
+@export var grants_other_final_upgrade := false
 
 ## Set when loaded (see MatchRules.ascension_pool), not in the editor:
 ## the AscensionFamily this is a version of, if any.
@@ -58,6 +81,82 @@ var family: AscensionFamily
 var key: String = ""
 
 const NUMERALS := ["", "I", "II", "III", "IV"]
+
+
+## The Encounter tiers this can be offered at. Most: just its Tier. Unit-specific ones
+## (Affected Units) go by their unit's tier instead, the highest one for a pair: tier 1
+## and 2 units at tier 1-2 Encounters, tier 3 units at 2-3, tier 4 units at 3-4.
+func encounter_tiers() -> Array[int]:
+	var result: Array[int] = []
+	if affected_units.is_empty():
+		result.append(tier)
+		return result
+	var unit_tier := 1
+	for data in affected_units:
+		if data != null:
+			unit_tier = maxi(unit_tier, data.tier)
+	if unit_tier <= 2:
+		result.assign([1, 2])
+	else:
+		result.assign([unit_tier - 1, unit_tier])
+	return result
+
+
+func offered_at(encounter_tier: int) -> bool:
+	return encounter_tiers().has(encounter_tier)
+
+
+## "2", or "1-2" for one offered at two tiers. `roman` uses numerals (I-II).
+func tier_text(roman := false) -> String:
+	var tiers := encounter_tiers()
+	var names: Array = tiers.map(func(t): return NUMERALS[clampi(t, 0, 4)] if roman else str(t))
+	return "–".join(names)
+
+
+
+# ---------- Who can benefit (so players aren't offered ones they can't use) ----------
+
+## True if this Ascension only helps certain units (Affected Units, a Beam, a branch).
+func has_unit_requirement() -> bool:
+	return not affected_units.is_empty() or favors_beams or required_branch >= 0
+
+
+## True if a unit of `data` on exactly upgrade `path` gets something from this Ascension.
+func satisfied_by(data: UnitData, path: Array) -> bool:
+	if not affected_units.is_empty() and not affected_units.has(data):
+		return false
+	if required_branch >= 0 and (path.is_empty() or path[0] != required_branch):
+		return false
+	if favors_beams and not Beam.has_beam(data, path):
+		return false
+	return true
+
+
+## The fewest upgrades a unit of `data`, now on `path`, needs in total to benefit (its
+## current level if it already does), or -1 if no path from where it is gets there.
+func level_to_benefit(data: UnitData, path: Array) -> int:
+	if data == null:
+		return -1
+	var levels := RandomTeams.paths_by_level(data)
+	for level in range(path.size(), levels.size()):
+		for candidate in levels[level]:
+			if candidate.slice(0, path.size()) == path and satisfied_by(data, candidate):
+				return level
+	return -1
+
+
+## True if a unit of `data` on upgrade `path` has a Gambit (its own, or one an upgrade gives).
+static func has_gambit(data: UnitData, path: Array) -> bool:
+	if data.gambit != null:
+		return true
+	var choices := data.upgrades
+	for pick in path:
+		if pick < 0 or pick >= choices.size():
+			break
+		if choices[pick].gambit != null:
+			return true
+		choices = choices[pick].next_choices
+	return false
 
 
 ## True if `data`'s units get this Ascension (always, for an army-wide one). A chosen-unit
@@ -76,6 +175,12 @@ func can_pick(unit: ArmyUnit) -> bool:
 	if unit == null or unit.data == null:
 		return false
 	if not allowed_tiers.is_empty() and not allowed_tiers.has(unit.data.tier):
+		return false
+	if (requires_max_level or grants_other_final_upgrade) and not unit.is_maxed():
+		return false
+	if requires_gambit and not Ascension.has_gambit(unit.data, unit.path):
+		return false
+	if grants_other_final_upgrade and BattleUnit.other_final_upgrades(unit.data, unit.path).is_empty():
 		return false
 	return affected_units.is_empty() or affected_units.has(unit.data)
 
@@ -121,6 +226,7 @@ func get_stat_bonuses() -> Dictionary:
 		Stats.Stat.MIGHT: might, Stats.Stat.MIGHT_WARD: might_ward,
 		Stats.Stat.CELERITY: celerity, Stats.Stat.CELERITY_WARD: celerity_ward,
 		Stats.Stat.INSIGHT: insight, Stats.Stat.INSIGHT_WARD: insight_ward,
+		Stats.Stat.WRACK_CHANCE: wrack_chance, Stats.Stat.WRACK_DAMAGE: wrack_damage,
 	}
 
 
@@ -133,3 +239,6 @@ class StatsStatus extends Status:
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 		return value + ascension.get_stat_bonuses().get(stat, 0.0)
+
+	func modify_dodge_chance(_unit: BattleUnit, chance: float) -> float:
+		return chance + ascension.dodge_chance

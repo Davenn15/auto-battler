@@ -4,7 +4,9 @@
 
 [resource]
 script = ExtResource("1")
-ascension_name = "Court Placeholder 2D"
-description = "PLACEHOLDER. All your units gain 30 Might."
-tier = 2
-might = 30.0
+ascension_name = "Neutral Sage"
+description = "PLACEHOLDER. Choose one of your units: it gains 30 Insight and 15% Wrack Chance."
+tier = 1
+target = 1
+insight = 30.0
+wrack_chance = 0.15

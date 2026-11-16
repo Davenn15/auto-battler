@@ -6,4 +6,4 @@
 script = ExtResource("1")
 bonus = 0.3
 passive_name = "Overclocked Beams"
-description = "Its continuous beams trigger on-hit and on-attack effects 30% more often."
+description = "Its continuous Beams trigger on-hit and on-attack effects 30% more often."

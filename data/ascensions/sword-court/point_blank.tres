@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/range_trade_shield_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 2/crommel/crommel.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+range_loss = 2
+shield_share = 0.3
+shield_duration = 4.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Point Blank"
+description = "Crommel loses 2 range, but gains 40 Might, 40 Insight and 30 of each Ward, and a Shield of 30% of his max health for 4 seconds when he casts his Gambit."
+tier = 2
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+might = 40.0
+insight = 40.0
+might_ward = 30.0
+insight_ward = 30.0
+celerity_ward = 30.0
+effect = SubResource("Effect")

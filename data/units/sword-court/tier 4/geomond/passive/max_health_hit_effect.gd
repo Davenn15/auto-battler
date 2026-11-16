@@ -20,5 +20,5 @@ func apply(target: BattleUnit, _dealt: float, wrack_level: int) -> void:
 	if not target.alive:
 		return   # the attack already finished it
 	var amount := percent * target.max_health * pow(wrack_multiplier, wrack_level)
-	var dealt := target.take_damage(amount, wrack_level, damage_type)
+	var dealt := target.take_damage(BattleUnit.damage_bonus(source_id, target, amount), wrack_level, damage_type)
 	target.get_tree().call_group("damage_tracker", "record_damage", source_id, dealt)

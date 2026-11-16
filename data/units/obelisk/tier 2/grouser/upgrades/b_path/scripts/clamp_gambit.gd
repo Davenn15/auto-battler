@@ -35,6 +35,7 @@ func execute(caster: BattleUnit) -> void:
 	hit *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	KeepsakeVfx.claw_snip(target)
 	var dealt := target.take_damage(hit, wrack, damage_type, false, caster)
+	BattleUnit.gambit_damage_dealt(caster, target, dealt)   # Gambit damage (see BattleUnit)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 	for stat in WardShiftStatus.WARDS:
 		WardShiftStatus.shred(caster, target, stat, ward_shred, shred_duration)

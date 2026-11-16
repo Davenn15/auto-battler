@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/gambit_hit_effects_effect.gd" id="2"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+cooldown = 2.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Arcane Edge"
+description = "Your Gambit damage triggers your Hit Effects (once every 2 seconds per enemy)."
+tier = 2
+effect = SubResource("Effect")

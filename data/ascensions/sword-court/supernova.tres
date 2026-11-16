@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/supernova_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/vere/vere.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+duration = 3.5
+burst_share = 0.04
+burst_radius = 1
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Supernova"
+description = "Vere's Starburn lasts 3.5 seconds and keeps ramping up the whole time. Each burn that runs its course bursts, dealing 4% of each nearby enemy's max health as Insight damage."
+tier = 4
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

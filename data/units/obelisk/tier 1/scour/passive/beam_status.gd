@@ -11,6 +11,9 @@ extends Status
 ## from each tick's damage, which comes to the same total.
 ##
 ## Scour's upgrades tune it through the ramp settings (see BeamBoostPassive).
+##
+## A Beam (see Beam): each frame it reads the unit's Beam settings for more range, faster
+## delivery, faster ramps and charge-up, and extra ricochets.
 
 const TICK := 0.1   # seconds between beam ticks
 
@@ -30,15 +33,21 @@ var _progress := 0.0        # share of an attack delivered since the last full o
 var _dealt := 0.0           # damage dealt since the last full attack
 var _best_wrack := 0        # highest Wrack level since the last full attack
 var _visual: BeamLine = null
+var _range_given := 0   # Beam range bonus currently added to the unit's attack range
+var _ricochet_lines := Beam.RicochetLines.new()
 
 
 func _init(p_retarget_delay: float) -> void:
 	retarget_delay = p_retarget_delay
 
 
-func on_removed(_unit: BattleUnit) -> void:
+func on_removed(unit: BattleUnit) -> void:
 	if is_instance_valid(_visual):
 		_visual.queue_free()
+	_ricochet_lines.clear()
+	if is_instance_valid(unit):
+		unit.attack_range -= _range_given
+	_range_given = 0
 
 
 func blocks_attacks(_unit: BattleUnit) -> bool:
@@ -48,9 +57,14 @@ func blocks_attacks(_unit: BattleUnit) -> bool:
 func tick(unit: BattleUnit, delta: float) -> void:
 	# The beam is the only attack: keep the normal attack from ever firing.
 	unit._attack_timer = maxf(unit._attack_timer, 1.0)
+	var beam := Beam.settings(unit, Beam.Kind.ATTACK)
+	if beam.range_bonus != _range_given:   # the Beam's reach is the unit's attack range
+		unit.attack_range += beam.range_bonus - _range_given
+		_range_given = beam.range_bonus
 	var enemy = unit.target
 	if not _can_fire(unit, enemy):
 		_show(unit, null, false)
+		_ricochet_lines.clear()
 		return
 	if enemy != _target:
 		_flush(unit)
@@ -59,15 +73,23 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		_firing_time = 0.0
 		_tick_left = 0.0
 	if _charging > 0.0:
-		_charging -= delta
+		_charging -= delta * beam.charge_up_speed
 		_show(unit, enemy, false)
+		_ricochet_lines.clear()
 		return
 	_show(unit, enemy, true)
-	_firing_time += delta
+	_firing_time += delta * beam.ramp_speed
 	_tick_left -= delta
+	var ricochets: Array = []
+	if beam.extra_ricochets > 0:
+		ricochets = Beam.ricochet_targets(unit, enemy, beam.extra_ricochets, beam.ricochet_range, [enemy])
 	while _tick_left <= 0.0 and _alive(enemy):
 		_tick_left += TICK
-		_fire_tick(unit, enemy, TICK / unit.get_attack_cooldown())
+		var share := TICK / unit.get_attack_cooldown() * beam.rate
+		_fire_tick(unit, enemy, share)
+		if not ricochets.is_empty():
+			_dealt += Beam.hit_ricochets(unit, ricochets, Beam.tick_damage(unit, share) * beam.ricochet_share)
+	_ricochet_lines.show(enemy, ricochets, beam_color(unit))
 	if not _alive(enemy):
 		_flush(unit)
 
@@ -93,6 +115,8 @@ func _fire_tick(unit: BattleUnit, enemy: BattleUnit, share: float) -> void:
 	var dealt := enemy.take_damage(hit, wrack_level, unit.get_attack_damage_type(), unit.ignores_wards(), unit, false)
 	unit.get_tree().call_group("damage_tracker", "record_damage", unit.get_credit_id(), dealt)
 	enemy.add_running_damage("beam_%d" % unit.get_instance_id(), dealt, Stats.damage_color(unit.get_attack_damage_type(), wrack_level), wrack_level)
+	if from_gambit:   # a Gambit's beam (Focus Beam): Gambit damage
+		BattleUnit.gambit_damage_dealt(unit, enemy, dealt)
 	_dealt += dealt
 	_best_wrack = maxi(_best_wrack, wrack_level)
 	_progress += share
@@ -132,6 +156,7 @@ func _flush(unit: BattleUnit) -> void:
 		if effect != null:
 			effects.append(effect)
 		status.on_attack(unit)
+	effects = unit.repeat_hit_effects(effects)
 	if not is_instance_valid(enemy):
 		return
 	if dealt > 0.0:

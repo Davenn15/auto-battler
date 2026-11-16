@@ -6,4 +6,4 @@
 script = ExtResource("1")
 bonus_per_cell = 0.15
 passive_name = "Long Beam"
-description = "Its attack is a continuous beam. Its damage and shielding grow by 15% for every cell its target is past the first."
+description = "Its attack is a continuous Beam. Its damage and shielding grow by 15% for every cell its target is past the first."

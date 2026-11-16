@@ -108,7 +108,8 @@ class ChargeLock extends Status:
 ## the burst shows its own number.
 func _damage(enemy: BattleUnit, amount: float, wrack_level: int, ticking: bool = false) -> float:
 	amount *= pow(wrack_multiplier, wrack_level)
-	var dealt := enemy.take_damage(amount, wrack_level, damage_type, false, null, not ticking)
+	var dealt := enemy.take_damage(BattleUnit.damage_bonus(caster_id, enemy, amount), wrack_level, damage_type, false, null, not ticking)
+	BattleUnit.gambit_damage_dealt(caster_id, enemy, dealt)   # Gambit damage (see BattleUnit)
 	if ticking:
 		enemy.add_running_damage("ring_%d" % get_instance_id(), dealt, Stats.damage_color(damage_type, wrack_level), wrack_level, TICK_INTERVAL + 0.25)
 	get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)

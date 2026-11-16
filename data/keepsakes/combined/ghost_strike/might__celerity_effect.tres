@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_eff")
-every = 5
+every = 3
 metadata/_custom_type_script = "uid://j8j3qu5laof"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/note_tempo_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 2/prancelot/prancelot.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+fewer = 1
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Virtuoso"
+description = "Prancelot's notes come one attack sooner."
+tier = 2
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

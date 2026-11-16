@@ -34,7 +34,8 @@ func execute(caster: BattleUnit) -> void:
 		# 0 right next to her, 1 at the cone's tip.
 		var how_far := clampf(caster.global_position.distance_to(enemy.global_position) / reach, 0.0, 1.0)
 		var amount := hit_damage * lerpf(close_multiplier, far_multiplier, how_far)
-		var dealt := enemy.take_damage(amount, wrack, damage_type)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(caster, enemy, amount), wrack, damage_type)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		total += dealt
 	if lifesteal > 0.0:

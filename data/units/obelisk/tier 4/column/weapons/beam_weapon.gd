@@ -6,6 +6,8 @@ extends ColumnWeapon
 ## from being hit) happen once per Interval's worth of beam, so items don't trigger every
 ## tick. COLUMN's two beams pick different enemies when they can: beam 2 avoids beam 1's
 ## target, and both fire at the same enemy only when it's the only one in range.
+## A Beam (see Beam): reads COLUMN's Beam settings each frame (range, rate, charge-up,
+## extra ricochets).
 
 ## Share of a normal attack's damage each Interval of beam deals.
 @export var damage_share: float = 0.6
@@ -33,6 +35,8 @@ class BeamStatusColumn extends Status:
 	var _dealt := 0.0
 	var _best_wrack := 0
 	var _visual: BeamStatus.BeamLine = null
+	var _ricochet_lines := Beam.RicochetLines.new()
+	var _beam: Beam.Settings
 
 	func _init(p_weapon: ColumnBeamWeapon) -> void:
 		weapon = p_weapon
@@ -43,16 +47,20 @@ class BeamStatusColumn extends Status:
 	func on_removed(_unit: BattleUnit) -> void:
 		if is_instance_valid(_visual):
 			_visual.queue_free()
+		_ricochet_lines.clear()
 
 	func tick(unit: BattleUnit, delta: float) -> void:
+		_beam = Beam.settings(unit, Beam.Kind.WEAPON)
 		if not ColumnWeapon.can_act(unit):
 			_show(unit, null, false)
+			_ricochet_lines.clear()
 			return
 		var enemy := _pick_target(unit)
 		if enemy == null:
 			_flush(unit)
 			target = null
 			_show(unit, null, false)
+			_ricochet_lines.clear()
 			return
 		if enemy != target:
 			_flush(unit)
@@ -60,20 +68,29 @@ class BeamStatusColumn extends Status:
 			_charging = weapon.retarget_delay
 			_tick_left = 0.0
 		if _charging > 0.0:
-			_charging -= delta
+			_charging -= delta * _beam.charge_up_speed
 			_show(unit, enemy, false)
+			_ricochet_lines.clear()
 			return
 		_show(unit, enemy, true)
 		_tick_left -= delta
 		var cooldown := weapon.interval * ColumnWeapon.speed_scale(unit)
+		var ricochets: Array = []
+		if _beam.extra_ricochets > 0:
+			ricochets = Beam.ricochet_targets(unit, enemy, _beam.extra_ricochets, _beam.ricochet_range, [enemy])
 		while _tick_left <= 0.0 and is_instance_valid(enemy) and enemy.alive:
 			_tick_left += TICK
-			_fire_tick(unit, enemy, TICK / cooldown)
+			var share := TICK / cooldown * _beam.rate
+			_fire_tick(unit, enemy, share)
+			if not ricochets.is_empty():
+				_dealt += Beam.hit_ricochets(unit, ricochets,
+						Beam.tick_damage(unit, share) * weapon.damage_share * _beam.ricochet_share)
+		_ricochet_lines.show(enemy, ricochets, ColumnWeapon.COLOR)
 
 	## Keeps its target while it's still valid; otherwise the nearest enemy in range that an
 	## earlier beam isn't firing at (or any, if that's the only one).
 	func _pick_target(unit: BattleUnit) -> BattleUnit:
-		var in_range := ColumnWeapon.enemies_in_range(unit, unit.attack_range)
+		var in_range := ColumnWeapon.enemies_in_range(unit, unit.attack_range + (_beam.range_bonus if _beam != null else 0))
 		if in_range.is_empty():
 			return null
 		var taken := _taken_by_earlier_beams(unit)
@@ -126,6 +143,7 @@ class BeamStatusColumn extends Status:
 			if effect != null:
 				effects.append(effect)
 			status.on_attack(unit)
+		effects = unit.repeat_hit_effects(effects)
 		if not is_instance_valid(enemy):
 			return
 		if dealt > 0.0:

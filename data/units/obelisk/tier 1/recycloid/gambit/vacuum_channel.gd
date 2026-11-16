@@ -35,6 +35,7 @@ func _physics_process(delta: float) -> void:
 		if not is_instance_valid(target) or not target.alive:
 			continue
 		var dealt: float = target.take_damage(target.max_health * damage_per_second * delta, 0, damage_type, false, caster, false)
+		BattleUnit.gambit_damage_dealt(caster, target, dealt)   # Gambit damage (see BattleUnit)
 		get_tree().call_group("damage_tracker", "record_damage", credit, dealt)
 		target.add_running_damage("vacuum_%d" % get_instance_id(), dealt, Stats.damage_color(damage_type))
 		if target.alive and execute_threshold > 0.0 and target.health / target.max_health < execute_threshold:

@@ -40,5 +40,5 @@ class HeftHit extends HitEffect:
 	func apply(target: BattleUnit, _dealt: float, wrack_level: int) -> void:
 		if not target.alive:
 			return   # the attack already finished it
-		var dealt := target.take_damage(damage * pow(wrack_multiplier, wrack_level), wrack_level, damage_type)
+		var dealt := target.take_damage(BattleUnit.damage_bonus(credit_id, target, damage * pow(wrack_multiplier, wrack_level)), wrack_level, damage_type)
 		target.get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)

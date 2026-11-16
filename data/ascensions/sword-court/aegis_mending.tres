@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/shielded_regen_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+regen = 15.0
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+regen = 30.0
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "While shielded, your units have +15 health regen."
+tier = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "While shielded, your units have +30 health regen."
+tier = 2
+effect = SubResource("Effect_tier2")
+
+[resource]
+script = ExtResource("1")
+family_name = "Aegis Mending"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2")])

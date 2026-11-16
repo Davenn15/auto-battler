@@ -39,7 +39,8 @@ func execute(caster: BattleUnit) -> void:
 	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
 	hit_damage *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	KeepsakeVfx.teal_slash(target)
-	var dealt := target.take_damage(hit_damage, wrack, damage_type)
+	var dealt := target.take_damage(BattleUnit.damage_bonus(caster, target, hit_damage), wrack, damage_type)
+	BattleUnit.gambit_damage_dealt(caster, target, dealt)   # Gambit damage (see BattleUnit)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 
 

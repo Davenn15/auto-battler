@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/attack_bleed_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/bescard/bescard.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+percent = 0.03
+duration = 3.0
+flurry_bonus = 3.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Open Wounds"
+description = "Bescard's attacks gain the Hit Effect: the target bleeds for 3% of its max health per second for 3 seconds. His Flurry's bleeds last 3 seconds longer."
+tier = 3
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

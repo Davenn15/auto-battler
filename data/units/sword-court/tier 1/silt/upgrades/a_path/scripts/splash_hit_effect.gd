@@ -28,5 +28,5 @@ func apply(target: BattleUnit, _dealt: float, _wrack_level: int) -> void:
 			continue
 		if grid.get_distance(target.cell, enemy.cell) > radius:
 			continue
-		var dealt := enemy.take_damage(damage, 0, damage_type)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(shooter_id, enemy, damage), 0, damage_type)
 		tree.call_group("damage_tracker", "record_damage", shooter_id, dealt)

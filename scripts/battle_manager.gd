@@ -89,6 +89,10 @@ func add_summon(unit: BattleUnit) -> void:
 	unit.start_combat()
 	if in_overtime:
 		_apply_overtime(unit)   # after start_combat, which clears statuses
+	var summoner = instance_from_id(unit.get_summoner_id()) if unit.get_summoner_id() != 0 else null
+	if is_instance_valid(summoner) and summoner is BattleUnit:
+		for status in summoner.statuses.duplicate():
+			status.on_summoned(summoner, unit)
 
 ## The Ascensions of `team`'s army (every unit of a team has the same ones), read from
 ## any of its other units.

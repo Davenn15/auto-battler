@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/partner_support_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/sumpton/sumpton.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/von carrow/von_carrow.tres" id="4"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="5"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+shielder = ExtResource("3")
+partner = ExtResource("4")
+shield = 300.0
+shield_duration = 4.0
+charge_on_kill = 30.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Partners in Crime"
+description = "If you have both Sumpton and Von Carrow: when Sumpton casts his Gambit, Von Carrow gains a 300 Shield for 4 seconds, and when Von Carrow gets a kill, Sumpton gains 30 Charge."
+tier = 3
+affected_units = Array[ExtResource("5")]([ExtResource("3"), ExtResource("4")])
+needs_all_affected = true
+effect = SubResource("Effect")

@@ -36,6 +36,7 @@ func execute(caster: BattleUnit) -> void:
 	caster.show_float_text("BOOM", HAYWIRE_COLOR)
 	for enemy in _enemies_near(caster, caster.cell):
 		var dealt := enemy.take_damage(hit, 0, damage_type, ignore_wards, caster)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 	caster.kill()
 

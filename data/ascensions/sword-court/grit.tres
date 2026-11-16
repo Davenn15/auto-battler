@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/delayed_share_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+share = 0.2
+duration = 3.5
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+share = 0.3
+duration = 3.5
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+share = 0.4
+duration = 3.5
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+share = 0.5
+duration = 3.5
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "20% of the damage your units take is dealt to them over 3.5 seconds instead of all at once."
+tier = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "30% of the damage your units take is dealt to them over 3.5 seconds instead of all at once."
+tier = 2
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "40% of the damage your units take is dealt to them over 3.5 seconds instead of all at once."
+tier = 3
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "50% of the damage your units take is dealt to them over 3.5 seconds instead of all at once."
+tier = 4
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Grit"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

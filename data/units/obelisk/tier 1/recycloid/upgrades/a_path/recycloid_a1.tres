@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Vacuum deals slightly less damage, but drains the two healthiest enemies at once."
+description = "Vacuum deals slightly less damage, but also drains the healthiest other enemy near him."
 gambit_overrides = Dictionary[String, float]({
 "damage_multiplier": 0.8,
 "targets": 2.0

@@ -40,7 +40,8 @@ func execute(caster: BattleUnit) -> void:
 		if unit.team == caster.team:
 			_apply(unit, BellowedStatus.new(id, ally_might_bonus, regen, duration))
 		else:
-			var dealt := unit.take_damage(hit_damage, wrack, damage_type)
+			var dealt := unit.take_damage(BattleUnit.damage_bonus(caster, unit, hit_damage), wrack, damage_type)
+			BattleUnit.gambit_damage_dealt(caster, unit, dealt)   # Gambit damage (see BattleUnit)
 			caster.get_tree().call_group("damage_tracker", "record_damage", id, dealt)
 			if unit.alive:   # the hit may have killed it
 				_apply(unit, BellowedStatus.new(id, -might_cut, 0.0, duration))

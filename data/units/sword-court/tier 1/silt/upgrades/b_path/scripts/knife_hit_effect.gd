@@ -48,7 +48,7 @@ func strike(target: BattleUnit, wrack_level: int) -> void:
 	if not is_instance_valid(target) or not target.alive:
 		return
 	var amount := damage * pow(wrack_multiplier, wrack_level)
-	var dealt := target.take_damage(amount, wrack_level, damage_type)
+	var dealt := target.take_damage(BattleUnit.damage_bonus(silt_id, target, amount), wrack_level, damage_type)
 	target.get_tree().call_group("damage_tracker", "record_damage", silt_id, dealt)
 
 

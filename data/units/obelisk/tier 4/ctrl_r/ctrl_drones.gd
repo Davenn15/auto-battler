@@ -184,6 +184,7 @@ class BoreDrone extends Node2D:
 		if not _alive(victim):
 			return
 		var dealt: float = victim.take_damage(damage, 0, home.get_attack_damage_type(), false, home, false)
+		BattleUnit.gambit_damage_dealt(home, victim, dealt)   # Gambit damage (see BattleUnit)
 		home.get_tree().call_group("damage_tracker", "record_damage", home.get_credit_id(), dealt)
 		victim.add_running_damage("bore_%d" % get_instance_id(), dealt,
 				Stats.damage_color(home.get_attack_damage_type()), 0)

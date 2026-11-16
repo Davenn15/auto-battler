@@ -521,7 +521,9 @@ func _badge_color(level: int) -> Color:
 	var path_color := PATH_COLORS[upgrade_path[0] % PATH_COLORS.size()]
 	if level == 0:
 		return path_color
-	return path_color.lightened(FOLLOW_UP_SHADE) if upgrade_path[level] == 0 else path_color.darkened(FOLLOW_UP_SHADE)
+	# A level past the path is the other final upgrade (Convergence): the other shade.
+	var pick: int = upgrade_path[level] if level < upgrade_path.size() else 1 - upgrade_path[-1]
+	return path_color.lightened(FOLLOW_UP_SHADE) if pick == 0 else path_color.darkened(FOLLOW_UP_SHADE)
 
 
 var _keepsake_icons: HBoxContainer
@@ -702,7 +704,29 @@ func get_chosen_upgrades() -> Array[Upgrade]:
 		var upgrade := choices[index]
 		chosen.append(upgrade)
 		choices = upgrade.next_choices   # the next level's options come from this pick
+	if ascensions.any(func(a): return a.grants_other_final_upgrade):   # Convergence
+		chosen.append_array(other_final_upgrades(data, upgrade_path))
 	return chosen
+
+
+## The final upgrades on `path`'s last step that weren't picked (e.g. A2 for A1). Empty
+## if the path isn't at a final step, or that step has no other choice.
+static func other_final_upgrades(unit_data: UnitData, path: Array[int]) -> Array[Upgrade]:
+	var others: Array[Upgrade] = []
+	if unit_data == null or path.is_empty():
+		return others
+	var choices := unit_data.upgrades
+	for i in path.size() - 1:
+		if path[i] < 0 or path[i] >= choices.size():
+			return others
+		choices = choices[path[i]].next_choices
+	var last: Upgrade = choices[path[-1]] if path[-1] >= 0 and path[-1] < choices.size() else null
+	if last == null or not last.next_choices.is_empty():
+		return others   # not at the final step
+	for i in choices.size():
+		if i != path[-1]:
+			others.append(choices[i])
+	return others
 
 
 func get_upgrade_level() -> int:
@@ -769,6 +793,21 @@ func unequip(keepsake: Keepsake) -> bool:
 
 ## After equipping or unequipping: recompute max health from the keepsakes' Health,
 ## move current health by the same amount (never below 1), and redraw the bar and icons.
+## Before a fight: rebuilds the unit after its upgrades or Ascensions were changed (the
+## random battle's test panel): stats, health, upgrade pips, the Ascension diamond and
+## the plate. Starts it at full health.
+func refresh_setup() -> void:
+	_keepsakes_changed()
+	health = max_health
+	_update_health_bar()
+	_setup_upgrade_badges()
+	var marker := health_bar.get_node_or_null("AscensionMarker") if health_bar != null else null
+	if marker != null:
+		marker.free()
+	_setup_ascension_marker()
+	_layout_plate()
+
+
 func _keepsakes_changed() -> void:
 	var had := max_health
 	_apply_data()
@@ -1151,7 +1190,7 @@ func get_wrack_damage_against(victim: BattleUnit) -> float:
 func get_aura_value() -> int:
 	if data == null or is_summon:
 		return 0
-	return Economy.unit_aura_value(data.tier, get_upgrade_level())
+	return Economy.unit_aura_value(data.tier, upgrade_path.size())   # upgrades bought, not ones from Ascensions
 
 
 ## Reserve spent on this unit: its keepsakes.
@@ -1190,6 +1229,7 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 			hit_effects.append(effect)
 		status.on_attack(self)
 	hit_effects.append_array(extra_hit_effects)
+	hit_effects = repeat_hit_effects(hit_effects)
 	var hit_damage := base_damage * Stats.wrack_multiplier(wrack_level, get_wrack_damage_against(enemy))
 	if ranged or projectile != null:
 		_fire_projectile(enemy, hit_damage, wrack_level, shot_color, hit_effects, projectile)
@@ -1231,6 +1271,57 @@ func ignores_wards() -> bool:
 	return false
 ## Runs the effects an attack collected when it was made. A dodged hit (nothing dealt)
 ## runs none, the same rule as charge.
+
+## Any damage `source` deals to `target`, after its statuses change it
+## (Status.modify_damage_against). take_damage does this itself when given an attacker;
+## damage dealt without one (Gambits, Hit Effects, damage over time...) passes its amount
+## through this first. `source` may be the unit, its instance id, or a freed unit.
+static func damage_bonus(source, target: BattleUnit, amount: float) -> float:
+	if source is int:
+		source = instance_from_id(source) if source != 0 else null
+	if not is_instance_valid(source) or not source is BattleUnit or not is_instance_valid(target):
+		return amount
+	for status in source.statuses:
+		amount = status.modify_damage_against(source, target, amount)
+	return amount
+
+
+## Gambit damage: every Gambit (and anything a Gambit creates that deals damage: missiles,
+## bolts, rings, boomerangs, pools, waves, drones, Focus Beam's ticks) calls this right
+## after dealing damage, so `caster`'s statuses hear of it (Status.on_gambit_damage).
+## `caster` may be the unit, its instance id, or a freed unit (then nothing happens).
+## New Gambits that deal damage should call it too.
+static func gambit_damage_dealt(caster, target: BattleUnit, dealt: float) -> void:
+	if caster is int:
+		caster = instance_from_id(caster)
+	if dealt <= 0.0 or not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(target):
+		return
+	for status in caster.statuses.duplicate():
+		status.on_gambit_damage(caster, target, dealt)
+
+
+## Gambits that affect units (shields, buffs) call this for each unit they affect, so the
+## caster's statuses hear of it (Status.on_gambit_target). Lunck's Rally Shield and
+## Adoration do; new ally-affecting Gambits should too.
+static func gambit_affected(caster, target: BattleUnit) -> void:
+	if not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(target):
+		return
+	for status in caster.statuses.duplicate():
+		status.on_gambit_target(caster, target)
+
+
+## `effects` with each one listed again for every extra run this unit's statuses ask for
+## (see Status.extra_hit_effect_runs), so they all trigger that many more times on landing.
+## Call once per attack, after on_attack.
+func repeat_hit_effects(effects: Array[HitEffect]) -> Array[HitEffect]:
+	var extra := 0
+	for status in statuses.duplicate():
+		extra += status.extra_hit_effect_runs(self)
+	var result: Array[HitEffect] = effects.duplicate()
+	for i in extra:
+		result.append_array(effects)
+	return result
+
 
 static func run_hit_effects(effects: Array[HitEffect], hit_target: BattleUnit, dealt: float, wrack_level: int) -> void:
 	if dealt <= 0.0:
@@ -1473,6 +1564,7 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	if attacker != null:
 		for status in attacker.statuses:
 			amount = status.modify_damage_dealt(attacker, self, amount)
+		amount = damage_bonus(attacker, self, amount)
 	incoming_attacker = attacker
 	incoming_damage_type = damage_type
 	incoming_is_hit = true

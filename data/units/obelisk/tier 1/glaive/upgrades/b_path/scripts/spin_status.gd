@@ -75,6 +75,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 				or unit.grid.get_distance(unit.cell, enemy.cell) > radius_cells:
 			continue
 		var dealt := enemy.take_damage(damage, 0, damage_type, false, unit)
+		BattleUnit.gambit_damage_dealt(unit, enemy, dealt)   # Gambit damage (see BattleUnit)
 		unit.get_tree().call_group("damage_tracker", "record_damage", id, dealt)
 		if bleed_percent > 0.0 and dealt > 0.0 and enemy.alive:
 			enemy.add_status(BleedStatus.new(id, bleed_percent * enemy.max_health, bleed_duration))

@@ -10,5 +10,5 @@ second_shard = 2
 might = 15.0
 celerity = 10.0
 effect = ExtResource("2_effect")
-description = "Every fifth attack, you attack again immediately."
+description = "Every third attack triggers your Hit Effects an additional time."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

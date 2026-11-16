@@ -62,6 +62,7 @@ func _physics_process(delta: float) -> void:
 func _hit_unit(enemy: BattleUnit) -> void:
 	var extra := max_health_percent * enemy.max_health * pow(wrack_multiplier, wrack_level)
 	var dealt := enemy.take_damage(damage + extra, wrack_level, damage_type, ignore_ward, instance_from_id(shooter_id) as BattleUnit)
+	BattleUnit.gambit_damage_dealt(shooter_id, enemy, dealt)   # Gambit damage (see BattleUnit)
 	get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 	var shooter := instance_from_id(shooter_id) as BattleUnit
 	if shooter != null:

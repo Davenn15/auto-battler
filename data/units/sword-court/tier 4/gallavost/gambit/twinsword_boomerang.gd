@@ -72,7 +72,8 @@ func _hit_along(from: Vector2, to: Vector2) -> void:
 				unit.add_shield(ally_shield, ally_shield_duration, thrower_id)
 			continue
 		_hit_ids[unit.get_instance_id()] = true
-		var dealt := unit.take_damage(damage, wrack_level, damage_type, ignore_ward)
+		var dealt := unit.take_damage(BattleUnit.damage_bonus(thrower_id, unit, damage), wrack_level, damage_type, ignore_ward)
+		BattleUnit.gambit_damage_dealt(thrower_id, unit, dealt)   # Gambit damage (see BattleUnit)
 		get_tree().call_group("damage_tracker", "record_damage", thrower_id, dealt)
 		if dealt > 0.0 and unit.alive:
 			unit.stun(stun_time, instance_from_id(thrower_id) as BattleUnit)

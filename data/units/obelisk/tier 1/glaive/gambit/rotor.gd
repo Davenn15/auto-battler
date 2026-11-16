@@ -58,6 +58,7 @@ func _hit(enemy: BattleUnit) -> void:
 		ignore = true   # the wards were already counted, less the pierce
 	var credit := caster.get_credit_id()   # before the hit, in case it changes anything
 	var dealt := enemy.take_damage(amount, 0, damage_type, ignore, caster)
+	BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 	get_tree().call_group("damage_tracker", "record_damage", credit, dealt)
 
 

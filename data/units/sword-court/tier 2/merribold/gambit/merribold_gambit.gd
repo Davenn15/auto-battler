@@ -41,7 +41,8 @@ func execute(caster: BattleUnit) -> void:
 	for enemy in _enemies_in_cone(caster, enemies, aim):
 		if not enemy.alive:
 			continue
-		var dealt := enemy.take_damage(hit_damage, wrack, damage_type)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(caster, enemy, hit_damage), wrack, damage_type)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if dealt > 0.0:
 			hits += 1   # a dodged swing doesn't count

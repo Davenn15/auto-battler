@@ -87,6 +87,14 @@ var _blue_ready := false
 ## Encounter: who has picked so far (the computer opponents pick with their planners).
 var _player_picked := false
 var _ai_picked := false
+## The computer opponents' Ascension picks for the coming Encounter: "" not started,
+## "running", or "done". They start as soon as the combat before it ends (see
+## _start_early_picks), so they're usually done before you've chosen yours. What each one
+## took waits in its summary until the Encounter, so the log doesn't give it away early.
+var _ai_pick := ""
+var _blue_pick := ""
+var _ai_pick_summary := ""
+var _blue_pick_summary := ""
 ## Encounter: the offer slot of a chosen-unit Ascension whose unit you're picking, or -1.
 var _picking_slot := -1
 var _encounter_heading := ""
@@ -123,6 +131,8 @@ func _ready() -> void:
 	_frame_camera()
 	hud.game = self
 	add_child(EscapeMenu.new(return_to_menu))
+	if DevPanel.available():   # testing tools, from the editor only (F1)
+		hud.add_child(DevPanel.new(self))
 	# In planning the meter shares the left strip with the unit info panel: it steps aside
 	# while a unit is selected.
 	# The damage meter is docked top-left all match; the unit info panel stacks under it.
@@ -234,10 +244,13 @@ func _process(delta: float) -> void:
 
 
 func _on_ai_plan_ready(summary: String) -> void:
-	if phase == Phase.ENCOUNTER:
-		_ai_picked = true
-		add_log(summary + ".")
-		_try_end_encounter()
+	if _ai_pick == "running":
+		_ai_pick = "done"
+		_ai_pick_summary = summary
+		if phase == Phase.ENCOUNTER:
+			_ai_picked = true
+			_log_pick_summaries()
+			_try_end_encounter()
 		return
 	ai_ready = true
 	add_log(summary + ".")
@@ -279,10 +292,24 @@ func buy_unit(slot: int, choice: int = -1) -> void:
 	if phase != Phase.PLANNING:
 		return
 	var data := player.unit_offers[slot]
-	if MatchRules.buy_unit_offer(player, slot, choice):
-		var info := player.find_unit(data)
+	var upgrading: bool = MatchRules.offer_info(player, data)["kind"] == "upgrade"
+	var bought := MatchRules.buy_unit_offer(player, slot, choice)
+	var info := player.find_unit(data)
+	if bought:
 		add_log("Bought %s." % (info.label() if info != null else data.display_name))
 	changed()
+	if bought and upgrading and info != null and info.placed:
+		_play_upgrade_flourish(info)
+
+
+## The faction's upgrade animation around `unit`'s figure on the board (just rebuilt).
+func _play_upgrade_flourish(unit: ArmyUnit) -> void:
+	var index := player.units.find(unit)
+	for node in units_parent.get_children():
+		var shown := node as BattleUnit
+		if shown != null and shown.team == PLAYER_TEAM and shown.get_meta("army_index", -1) == index:
+			KeepsakeVfx.upgrade_flourish(shown, MatchRules.faction_of(unit.data))
+			return
 
 
 func buy_shard(slot: int) -> void:
@@ -709,25 +736,98 @@ func _begin_encounter() -> void:
 	var kind := MatchRules.encounter_kind(number)
 	var tier := MatchRules.encounter_tier(number)
 	var title := "Tier %d %s" % [tier, MatchRules.encounter_title(kind, player.faction)]
-	MatchRules.roll_ascension_offers(player, round_number)
-	_player_picked = player.ascension_offers.is_empty()
+	if spectating and _blue_pick != "":   # Blue's pick already started on the result screen
+		_player_picked = _blue_pick == "done"
+	else:
+		MatchRules.roll_ascension_offers(player, round_number)
+		_player_picked = player.ascension_offers.is_empty()
 	if tier > MatchRules.MAX_ASCENSION_TIER:
 		add_log("No more %s Encounters: skipped." % ("Faction" if kind == MatchRules.EncounterKind.FACTION else "Neutral"))
 	elif _player_picked:
 		add_log("No %ss left to offer: Encounter skipped." % title)
-	_ai_picked = true
-	if not online:   # online, the opponent picks on their own computer
-		MatchRules.roll_ascension_offers(ai, round_number)
-		if not ai.ascension_offers.is_empty():
-			_ai_picked = false
-			ai_planner.pick_ascension(ai, player.last_fielded, player.last_fielded_ascensions)
-	if spectating and not _player_picked:
-		_blue_planner.pick_ascension(player, ai.last_fielded, ai.last_fielded_ascensions)
+	_start_early_picks(round_number)   # if they didn't start on the result screen
+	_ai_picked = online or _ai_pick == "done"   # online, the opponent picks on their own computer
+	if spectating:
+		_player_picked = _blue_pick == "done" or player.ascension_offers.is_empty()
+	_log_pick_summaries()
 	hud.refresh()
 	_picking_slot = -1
+	player.ascension_reroll_cost = MatchRules.ASCENSION_REROLL_START   # resets every Encounter
 	_encounter_heading = "Encounter: choose a %s" % title
 	hud.show_encounter(_encounter_heading)
 	_try_end_encounter()
+
+
+## Starts the computer opponents' Ascension picks for the Encounter on `encounter_round`
+## (offline only), unless they've started already. Called when the combat before it ends,
+## so they think while you read the result, and again when the Encounter begins.
+func _start_early_picks(encounter_round: int) -> void:
+	if online or not MatchRules.is_encounter_round(encounter_round):
+		return
+	if _ai_pick == "":
+		MatchRules.roll_ascension_offers(ai, encounter_round)
+		if ai.ascension_offers.is_empty():
+			_ai_pick = "done"
+		else:
+			_ai_pick = "running"
+			ai_planner.pick_ascension(ai, player.last_fielded, player.last_fielded_ascensions)
+	if spectating and _blue_pick == "":
+		MatchRules.roll_ascension_offers(player, encounter_round)
+		if player.ascension_offers.is_empty():
+			_blue_pick = "done"
+		else:
+			_blue_pick = "running"
+			_blue_planner.pick_ascension(player, ai.last_fielded, ai.last_fielded_ascensions)
+
+
+## Logs what the computer opponents took, once the Encounter is on screen.
+func _log_pick_summaries() -> void:
+	if phase != Phase.ENCOUNTER:
+		return
+	for summary in [_blue_pick_summary, _ai_pick_summary]:
+		if summary != "":
+			add_log(summary + ".")
+	_ai_pick_summary = ""
+	_blue_pick_summary = ""
+	hud.refresh()
+
+
+## The test panel (DevPanel): an Encounter offering just `ascension`, mid-planning. The
+## computer doesn't pick, and the round doesn't move on: once you've taken it you're back
+## in the same planning phase.
+var _dev_encounter := false
+
+func dev_offer_ascension(ascension: Ascension) -> void:
+	if phase != Phase.PLANNING:
+		return
+	_return_table()
+	held = {}
+	_dev_encounter = true
+	phase = Phase.ENCOUNTER
+	player.ascension_offers.assign([ascension])
+	_player_picked = false
+	_ai_picked = true
+	_picking_slot = -1
+	_clear_board()
+	_encounter_heading = "Test Encounter: %s" % ascension.get_display_name()
+	hud.refresh()
+	hud.show_encounter(_encounter_heading)
+
+
+## Rerolls the Encounter's offer for Reserve (not in the test panel's Encounters).
+func reroll_ascensions() -> void:
+	if phase != Phase.ENCOUNTER or _player_picked or _picking_slot >= 0 or _dev_encounter or spectating:
+		return
+	if MatchRules.reroll_ascensions(player, round_number):
+		add_log("Rerolled the Ascensions.")
+		hud.refresh()
+		hud.show_encounter(_encounter_heading)
+
+
+## True if the reroll button should work right now.
+func can_reroll_ascensions() -> bool:
+	return phase == Phase.ENCOUNTER and not _dev_encounter and not spectating \
+			and player.reserve >= player.ascension_reroll_cost and MatchRules.can_reroll_ascensions(player, round_number)
 
 
 ## The player's pick at an Encounter.
@@ -789,6 +889,14 @@ func cancel_unit_pick() -> void:
 func _try_end_encounter() -> void:
 	if phase != Phase.ENCOUNTER or not (_player_picked and _ai_picked):
 		return
+	if _dev_encounter:   # a test Encounter: back to the same planning phase
+		_dev_encounter = false
+		hud.hide_encounter()
+		phase = Phase.PLANNING
+		changed()
+		return
+	_ai_pick = ""
+	_blue_pick = ""
 	hud.hide_encounter()
 	_advance_rounds()
 	_begin_planning()
@@ -930,6 +1038,8 @@ func _apply_result(result: Dictionary) -> void:
 	add_log("Round %d combat: %s" % [round_number, lines[0]])
 	hud.show_result("\n".join(lines))
 	hud.refresh()
+	if player.is_alive() and ai.is_alive():
+		_start_early_picks(round_number + 1)
 
 
 ## The Continue button after a combat: back to your board, or the end of the match.
@@ -982,10 +1092,13 @@ func _setup_spectating() -> void:
 
 
 func _on_blue_plan_ready(summary: String) -> void:
-	if phase == Phase.ENCOUNTER:
-		_player_picked = true
-		add_log(summary + ".")
-		_try_end_encounter()
+	if _blue_pick == "running":
+		_blue_pick = "done"
+		_blue_pick_summary = summary
+		if phase == Phase.ENCOUNTER:
+			_player_picked = true
+			_log_pick_summaries()
+			_try_end_encounter()
 		return
 	_blue_ready = true
 	add_log(summary + ".")
@@ -1033,6 +1146,8 @@ func _apply_spectate_result(result: Dictionary) -> void:
 	for p in [player, ai]:
 		MatchRules.pay_income(p, round_number)
 	combats_done += 1
+	if player.is_alive() and ai.is_alive():
+		_start_early_picks(round_number + 1)
 	add_log("Round %d: %s" % [round_number, lines[0]])
 	_spectate_write("Round %d (%.0fs fight)\n  Blue: %s\n  Red:  %s\n  %s %s" % [round_number, _combat_time,
 			_army_text(player.last_fielded), _army_text(ai.last_fielded), lines[0], lines[1]])

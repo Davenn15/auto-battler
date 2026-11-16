@@ -14,8 +14,10 @@ signal plan_ready(summary: String)
 @export var candidates: int = 12
 ## Battles per plan. More is steadier but slower.
 @export var battles_per_candidate: int = 2
-## Copies of the game simulating at once.
-@export var processes: int = 4
+## Most copies of the game simulating at once. Never more than the computer's cores less
+## one (see _copy_count). A plan's battles can be split over several copies, so even a
+## few plans (an Encounter's 3 Ascensions) use every copy.
+@export var processes: int = 12   # each copy uses about 175 MB
 ## Battles per option when picking an Ascension at an Encounter (only a few options, so
 ## each can get more).
 @export var battles_per_ascension: int = 6
@@ -106,10 +108,31 @@ func _process(_delta: float) -> void:
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(job["out"]))
 		if typeof(parsed) == TYPE_ARRAY:
 			for k in mini(parsed.size(), job["indices"].size()):
-				_results[job["indices"][k]] = parsed[k]
+				_add_result(job["indices"][k], parsed[k])
 		_jobs.erase(job)
 	if _jobs.is_empty():
 		_finish(_best_plan())
+
+
+## Adds one copy's tally for plan `index` to what other copies found for it: wins, draws
+## and losses add up; the margin becomes the average over all its battles.
+func _add_result(index: int, tally: Dictionary) -> void:
+	var before = _results[index]
+	if before == null:
+		_results[index] = tally
+		return
+	var a := float(before["wins"] + before["draws"] + before["losses"])
+	var b := float(tally["wins"] + tally["draws"] + tally["losses"])
+	var merged := {"wins": before["wins"] + tally["wins"], "draws": before["draws"] + tally["draws"],
+			"losses": before["losses"] + tally["losses"],
+			"margin": (before["margin"] * a + tally["margin"] * b) / maxf(a + b, 1.0)}
+	_results[index] = merged
+
+
+## How many copies to run: `processes`, but at most the cores less one (one is left for the
+## game itself), and at least one.
+func _copy_count() -> int:
+	return clampi(mini(processes, OS.get_processor_count() - 1), 1, 64)
 
 
 ## Leaving the match (or starting a new one) mid-plan: stop the background copies so none
@@ -165,16 +188,43 @@ func _start_jobs(opponent: Array[ArmyUnit]) -> void:
 		_finish(0)
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://ai"))
-	var count := clampi(processes, 1, _plans.size())
-	for j in count:
-		var indices: Array = []
-		for i in range(j, _plans.size(), count):
-			indices.append(i)
+	# Every plan's battles, cut into chunks and shared out so each copy fights about the
+	# same number. A plan whose battles land in several copies has its tallies added up
+	# again when they finish (see _process): the same battles, just played side by side.
+	# Every plan faces the same dice: battle k of each plan uses the same combat seed, so
+	# one plan can't look better than another just by getting luckier rolls.
+	var seeds: Array = []
+	for k in _battles:
+		seeds.append(randi() & 0x7fffffff)
+	var copies := _copy_count()
+	var per_chunk := maxi(1, ceili(float(_plans.size() * _battles) / copies))
+	var chunks: Array = []   # [plan index, battles, seeds for those battles]
+	for i in _plans.size():
+		var first := 0
+		while first < _battles:
+			var n := mini(per_chunk, _battles - first)
+			chunks.append([i, n, seeds.slice(first, first + n)])
+			first += n
+	var loads: Array = []    # per copy: [battles so far, [chunks]]
+	for j in mini(copies, chunks.size()):
+		loads.append([0, []])
+	for chunk in chunks:   # each chunk to the copy with the fewest battles so far
+		var lightest: Array = loads[0]
+		for entry in loads:
+			if entry[0] < lightest[0]:
+				lightest = entry
+		lightest[0] += chunk[1]
+		lightest[1].append(chunk)
+	for j in loads.size():
+		var mine: Array = loads[j][1]
+		var indices: Array = mine.map(func(c): return c[0])
 		var job := {
 			"opponent": ArmyUnit.army_to_array(opponent),
 			"opponent_ascensions": ArmyUnit.ascensions_to_array(_opponent_ascensions),
 			"candidates": indices.map(func(i): return ArmyUnit.army_to_array(_plans[i].units)),
 			"candidate_ascensions": indices.map(func(i): return ArmyUnit.ascensions_to_array(_plans[i].ascensions)),
+			"candidate_battles": mine.map(func(c): return c[1]),
+			"candidate_seeds": mine.map(func(c): return c[2]),
 			"battles": _battles, "time_limit": time_limit, "seed": randi(),
 		}
 		var in_path := ProjectSettings.globalize_path("user://ai/%s_%d_in.json" % [job_prefix, j])

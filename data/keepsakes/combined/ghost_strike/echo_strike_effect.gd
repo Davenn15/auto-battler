@@ -1,8 +1,9 @@
 class_name EchoStrikeEffect
 extends Passive
-## Every few attacks, the unit attacks again straight away.
+## Ghost Strike: every few attacks, the attack's Hit Effects trigger an additional time
+## (see Status.extra_hit_effect_runs). A ghostly echo of the swing shows when it happens.
 
-@export var every: int = 4
+@export var every: int = 3
 
 
 func on_battle_start(unit: BattleUnit) -> void:
@@ -12,29 +13,22 @@ func on_battle_start(unit: BattleUnit) -> void:
 class Echo extends Status:
 	var every: int
 	var _count := 0
-	var _pending := false
-	var _echoing := false   # true during the extra attack, so it doesn't count itself
+	var _echo := false   # this attack is the one that echoes
 
 	func _init(p_every: int) -> void:
 		every = p_every
 
 	func on_attack(_unit: BattleUnit) -> void:
-		if _echoing:
-			return
 		_count += 1
-		if _count >= every:
+		_echo = _count >= every
+		if _echo:
 			_count = 0
-			_pending = true
 
-	func tick(unit: BattleUnit, _delta: float) -> void:
-		if not _pending:
-			return
-		_pending = false
-		if unit.active and unit._is_valid_target(unit.target):
-			_echoing = true
-			# The ghost draws this attack's swing instead of the unit.
-			KeepsakeVfx.ghost_strike(unit, unit.target)
-			unit.hide_next_swing = KeepsakeVfx.enabled()
-			unit.bonus_attack(unit.target)
-			unit.hide_next_swing = false
-			_echoing = false
+	func extra_hit_effect_runs(unit: BattleUnit) -> int:
+		if not _echo:
+			return 0
+		_echo = false
+		var target = unit.attack_target if is_instance_valid(unit.attack_target) else unit.target   # Beams don't set attack_target
+		if is_instance_valid(target):
+			KeepsakeVfx.ghost_strike(unit, target)
+		return 1

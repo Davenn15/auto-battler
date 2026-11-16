@@ -64,7 +64,12 @@ var _marker: Line2D   # the ring under the selected unit; a child of that unit
 ## Filled by whoever owns the screen (the match HUD puts the unit's items here). Hidden
 ## when empty.
 var item_row: HBoxContainer
-enum Tab { STATS, ABILITIES }
+## Stats, abilities (passives, Gambit, Ascensions), and the upgrade tree.
+enum Tab { STATS, ABILITIES, UPGRADES }
+const TAB_NAMES := {Tab.STATS: "Stats", Tab.ABILITIES: "Abilities", Tab.UPGRADES: "Upgrades"}
+const OWNED := "#ffd24d"   # upgrades the unit has
+const NOT_OWNED := "#6e6e78"
+
 ## Which tab is showing; kept from unit to unit.
 var tab := Tab.STATS
 var _tab_buttons: Array[Button] = []
@@ -72,7 +77,9 @@ var _shown_text := ""
 ## Index into TEXT_SIZES of the font size in use.
 var _size_index := 0
 ## Font sizes tried, largest first, until the text fits.
-const TEXT_SIZES := [11, 10, 9, 8]
+const TEXT_SIZES := [11, 10, 9, 8, 7]
+## Below this index's size, the panel first takes the space below it (the log's corner).
+const USUAL_SMALLEST := 3
 
 
 func _ready() -> void:
@@ -122,9 +129,9 @@ func _ready() -> void:
 	tabs.add_theme_constant_override("separation", 4)
 	column.add_child(tabs)
 	var group := ButtonGroup.new()
-	for t in [Tab.STATS, Tab.ABILITIES]:
+	for t in [Tab.STATS, Tab.ABILITIES, Tab.UPGRADES]:
 		var button := Button.new()
-		button.text = "Stats" if t == Tab.STATS else "Abilities"
+		button.text = TAB_NAMES[t]
 		button.toggle_mode = true
 		button.button_group = group
 		button.focus_mode = Control.FOCUS_NONE
@@ -287,7 +294,11 @@ func _refresh() -> void:
 		_charge_bar.value = u.charge
 		_charge_text.text = "%d / %d" % [roundi(u.charge), roundi(u.max_charge)]
 
-	var text := _stat_table(u) if tab == Tab.STATS else _abilities_text(u)
+	var text := _stat_table(u)
+	if tab == Tab.ABILITIES:
+		text = _abilities_text(u)
+	elif tab == Tab.UPGRADES:
+		text = _upgrades_text(u)
 	if text != _shown_text:
 		if _shown_text == "":   # a new unit or tab: start large again; _fit steps it down
 			_set_text_size(0)
@@ -323,8 +334,14 @@ func _set_text_size(index: int) -> void:
 ## too tall it steps the font down one size.
 func _fit() -> void:
 	var room := get_viewport_rect().size.y - top_reserve - bottom_reserve
-	if get_combined_minimum_size().y > room and _size_index < TEXT_SIZES.size() - 1:
+	var full := get_viewport_rect().size.y - top_reserve - 8.0   # the space below (the log's corner) too
+	var height := get_combined_minimum_size().y
+	if height > room and _size_index < USUAL_SMALLEST:
 		_set_text_size(_size_index + 1)
+	elif height > full and _size_index < TEXT_SIZES.size() - 1:
+		_set_text_size(_size_index + 1)   # only once it's taken the space below and still doesn't fit
+	if height > room:
+		room = full
 	reset_size()
 	anchor_top = 0.0
 	anchor_bottom = 0.0
@@ -337,13 +354,40 @@ func _abilities_text(u: BattleUnit) -> String:
 		lines.append(_ability_line("Passive", _ability_name(passive, passive.passive_name, "Passive"), passive.description))
 	if u.gambit != null:
 		lines.append(_ability_line("Gambit", _ability_name(u.gambit, u.gambit.gambit_name, "Gambit"), u.gambit.description))
-	for upgrade in u.get_chosen_upgrades():
-		if upgrade.description != "":
-			lines.append(_ability_line("Upgrade", upgrade.upgrade_name, upgrade.description))
 	for ascension in u.ascensions:
 		if ascension.is_chosen():
 			lines.append(_ability_line("Ascension", ascension.get_display_name(), ascension.description))
 	return "\n".join(lines).strip_edges()
+
+
+## The unit's whole upgrade tree, each upgrade with its label (A, A1...), name and what it
+## does: the ones it has in gold with a tick, the rest greyed out.
+func _upgrades_text(u: BattleUnit) -> String:
+	if u.data == null or u.data.upgrades.is_empty():
+		return "[color=%s]No upgrades.[/color]" % DIM
+	var owned := u.get_chosen_upgrades()
+	var lines: PackedStringArray = []
+	for first in u.data.upgrades.size():
+		var upgrade := u.data.upgrades[first]
+		lines.append(_upgrade_line([first], upgrade, owned.has(upgrade), 0))
+		for second in upgrade.next_choices.size():
+			var final := upgrade.next_choices[second]
+			lines.append(_upgrade_line([first, second], final, owned.has(final), 1))
+		lines.append("")
+	return "\n".join(lines).strip_edges()
+
+
+func _upgrade_line(path: Array, upgrade: Upgrade, has: bool, depth: int) -> String:
+	var color := OWNED if has else NOT_OWNED
+	var title := upgrade.upgrade_name if upgrade.upgrade_name != "Upgrade" else ""
+	var head := "[indent]" if depth > 0 else ""
+	var tail := "[/indent]" if depth > 0 else ""
+	var line := "%s[color=%s][b]%s%s[/b]%s[/color]" % [head, color, "✓ " if has else "", RandomTeams.path_label(path),
+			("  " + title) if title != "" else ""]
+	if upgrade.description != "":
+		var text := Keyphrases.format(upgrade.description) if has else upgrade.description
+		line += "\n[color=%s]%s[/color]" % [DESCRIPTION if has else NOT_OWNED, text]
+	return line + tail
 
 
 func _refresh_header(u: BattleUnit) -> void:
@@ -359,7 +403,14 @@ func _refresh_header(u: BattleUnit) -> void:
 	if upgrades.is_empty():
 		details.append("no upgrades")
 	else:
-		details.append("%s: %s" % [RandomTeams.path_label(u.upgrade_path), " → ".join(PackedStringArray(upgrades.map(func(up): return up.upgrade_name)))])
+		var label := RandomTeams.path_label(u.upgrade_path)
+		if upgrades.size() > u.upgrade_path.size():   # Convergence: both final upgrades
+			var other: Array[int] = u.upgrade_path.duplicate()
+			other[-1] = 1 - other[-1]
+			var pair := [label, RandomTeams.path_label(other)]
+			pair.sort()   # "A1 + A2" whichever was bought
+			label = "%s + %s" % pair
+		details.append(label)   # the names and what they do are on the Upgrades tab
 	if u.buffs > 0:
 		details.append("%d buff%s" % [u.buffs, "" if u.buffs == 1 else "s"])
 	line += "\n[color=%s]%s[/color]" % [DIM, "  ·  ".join(details)]
@@ -397,6 +448,10 @@ func _stat_table(u: BattleUnit) -> String:
 	if Stats.insight_charge_regen and u.gambit != null:
 		extra.append(["Charge Regen", "[b]%.1f/s[/b]" % u.get_charge_regen()])
 	var dodge := u.get_dodge_chance()
+	if not u.active:   # Ascensions' dodge only starts working when combat does
+		for ascension in u.ascensions:
+			if ascension.applies_to(u.data):
+				dodge += ascension.dodge_chance
 	if dodge > 0.0:
 		extra.append(["Dodge", "[b]%d%%[/b]" % roundi(dodge * 100.0)])
 	if extra.size() % 2 == 1:
@@ -460,9 +515,12 @@ func _stat_value(u: BattleUnit, stat: Stats.Stat) -> String:
 ## combat (planning) their bonuses are added here.
 func _shown_stat(u: BattleUnit, stat: Stats.Stat) -> float:
 	var value := u.get_stat(stat)
-	if not u.active:
+	if not u.active:   # items and Ascensions only start working when combat does
 		for keepsake in u.keepsakes:
 			value += keepsake.get_stat_bonuses().get(stat, 0.0)
+		for ascension in u.ascensions:
+			if ascension.applies_to(u.data):
+				value += ascension.get_stat_bonuses().get(stat, 0.0)
 	return maxf(value, 0.0)
 
 

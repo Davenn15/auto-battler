@@ -82,6 +82,7 @@ func _explode() -> void:
 			continue
 		if unit.global_position.distance_to(target_point) <= blast_radius:
 			var dealt := unit.take_damage(damage, wrack_level, damage_type, false, attacker)
+			BattleUnit.gambit_damage_dealt(shooter, unit, dealt)   # Gambit damage (see BattleUnit)
 			get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 	KeepsakeVfx.missile_blast(get_parent(), target_point, blast_radius, COLOR)
 	queue_free()

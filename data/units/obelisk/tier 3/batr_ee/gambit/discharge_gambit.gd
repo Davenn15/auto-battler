@@ -52,6 +52,7 @@ func _on_volt_hit(target: BattleUnit, caster_id: int, amount: float, level: int)
 	if not _alive(target):
 		return
 	var dealt := target.take_damage(amount, level, damage_type, false, caster)
+	BattleUnit.gambit_damage_dealt(caster, target, dealt)   # Gambit damage (see BattleUnit)
 	target.get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)
 	if dealt <= 0.0:
 		return   # dodged

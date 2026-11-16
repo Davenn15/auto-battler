@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-ascension_name = "Court Placeholder 4B"
+ascension_name = "Court Finesse"
 description = "PLACEHOLDER. All your units gain 30 Celerity and 30 Might Ward."
 tier = 4
 celerity = 30.0

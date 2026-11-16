@@ -147,7 +147,8 @@ func _twirl_hits(caster: BattleUnit, from: Vector2, to: Vector2, amount: float, 
 			if ally_shield > 0.0:
 				unit.add_shield(ally_shield, ally_shield_duration, caster.get_instance_id())
 			continue
-		var dealt := unit.take_damage(amount, wrack, caster.get_attack_damage_type(), caster.ignores_wards())
+		var dealt := unit.take_damage(BattleUnit.damage_bonus(caster, unit, amount), wrack, caster.get_attack_damage_type(), caster.ignores_wards())
+		BattleUnit.gambit_damage_dealt(caster, unit, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 
 

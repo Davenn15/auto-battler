@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/empowered_echo_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/silt/silt.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+range_bonus = 1
+extra = 1
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Long Knives"
+description = "Silt gains +1 range, and his empowered attacks trigger their Hit Effects an additional time."
+tier = 2
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

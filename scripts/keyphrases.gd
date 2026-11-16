@@ -20,12 +20,19 @@ const PHRASES := [
 	# Capital C only: the mechanic is always written "Charge"; lowercase "charge" is just
 	# the ordinary word (Scour's beam "takes a moment to charge up").
 	["charge", "", "\\bCharge(?: [Rr]egen)?\\b"],
+	# The Beam keyword (see Beam): capital B only, so the ordinary word isn't coloured.
+	["beam", "", "\\bBeams?\\b"],
+	# The Hinder debuff (see HinderStatus).
+	["hinder", "", "\\bHinder(?:s|ed|ing)?\\b"],
 	[Shard.Kind.HEALTH, "health", "\\b(?i:max(?:imum)? health|health)\\b"],
 	["regen", "", "\\b(?i:regen(?:eration)?)\\b"],
 	[Shard.Kind.MIGHT, "might", "\\bMight\\b"],
 	[Shard.Kind.CELERITY, "celerity", "\\bCelerity\\b"],
 	[Shard.Kind.INSIGHT, "insight", "\\bInsight\\b"],
 ]
+
+## The Beam keyword's colour: a bright beam cyan.
+const BEAM_COLOR := Color(0.45, 0.95, 1.0)
 
 static var _regex: RegEx
 
@@ -37,13 +44,17 @@ static func color_of(kind: Shard.Kind) -> Color:
 
 
 ## Colours for keyphrases that aren't Shard stats: Charge is the pink of the casting bar,
-## regen the same green as Health.
+## regen the same green as Health, Beam a bright cyan.
 static func extra_color(key: String) -> Color:
 	match key:
 		"charge":
 			return BattleUnit.CASTING_COLOR
 		"regen":
 			return color_of(Shard.Kind.HEALTH)
+		"beam":
+			return BEAM_COLOR
+		"hinder":
+			return HinderStatus.TINT.lightened(0.25)
 	return Color.WHITE
 
 

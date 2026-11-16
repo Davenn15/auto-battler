@@ -22,6 +22,8 @@ var reroll_cost: int = MatchRules.REROLL_START
 var ascensions: Array[Ascension] = []
 ## The Ascensions on offer at the current Encounter (empty outside one).
 var ascension_offers: Array[Ascension] = []
+## Reserve the next reroll of the Encounter's offer costs (back to the start each Encounter).
+var ascension_reroll_cost: int = MatchRules.ASCENSION_REROLL_START
 ## Keeps this shop for the next planning phase instead of a fresh one (then unlocks).
 var shop_locked := false
 
@@ -88,6 +90,7 @@ func copy() -> PlayerState:
 	other.last_fielded_round = last_fielded_round
 	other.ascensions = ascensions.duplicate()
 	other.ascension_offers = ascension_offers.duplicate()
+	other.ascension_reroll_cost = ascension_reroll_cost
 	other.last_fielded_ascensions = last_fielded_ascensions.duplicate()
 	return other
 

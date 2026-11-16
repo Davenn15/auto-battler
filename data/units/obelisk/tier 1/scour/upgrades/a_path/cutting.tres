@@ -7,4 +7,4 @@ script = ExtResource("1")
 damage_ramp_per_second = 0.125
 max_damage_ramp = 1.25
 passive_name = "Cutting"
-description = "The beam's damage slowly ramps up while it stays on one target, and resets when he switches."
+description = "The Beam's damage slowly ramps up while it stays on one target, and resets when he switches."

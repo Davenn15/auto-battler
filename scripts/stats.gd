@@ -154,8 +154,10 @@ const UPGRADE_STAT_GROWTH := {
 const UPGRADE_HEALTH_GROWTH := 0.2
 ## How many times the growth above each upgrade level gives: [level 1, level 2].
 ## The tier rework (Economy.tier_rework) makes level 2 count double.
-const NEW_LEVEL_GROWTH_STEPS := [1.0, 2.0]
-const OLD_LEVEL_GROWTH_STEPS := [1.0, 1.0]
+## Growth steps per upgrade level. The third only comes from the Convergence Ascension
+## (a unit holding both final upgrades of its path).
+const NEW_LEVEL_GROWTH_STEPS := [1.0, 2.0, 1.0]
+const OLD_LEVEL_GROWTH_STEPS := [1.0, 1.0, 1.0]
 
 
 ## Growth steps a unit has at this upgrade level: 0, then 1, then 3 with the tier rework.

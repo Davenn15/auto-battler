@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/gambit_hinder_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/trompero/trompero.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+share = 0.2
+duration = 4.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Enfeebling Hex"
+description = "Trompero's Gambit damage Hinders enemies for 4 seconds: their Might, Insight and Celerity are 20% lower. His Arcane Blades' shots Hinder too."
+tier = 3
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

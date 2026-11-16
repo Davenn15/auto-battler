@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/regen_shield_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/gallavost/gallavost.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+regen = 25.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Renewal"
+description = "Gallavost gains 25 health regen. While she has a shield, her health regen restores it too, up to the shield she started combat with."
+tier = 4
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

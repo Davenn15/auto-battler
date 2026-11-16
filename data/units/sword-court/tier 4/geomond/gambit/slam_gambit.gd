@@ -76,7 +76,8 @@ func _slam(caster: BattleUnit) -> void:
 		if not enemy.alive or not _is_in_slam(caster, origin, enemy, aim["dir"]):
 			continue
 		var amount := (flat + max_health_percent * enemy.max_health) * wrack_multiplier
-		var dealt := enemy.take_damage(amount, wrack, damage_type)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(caster, enemy, amount), wrack, damage_type)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 	if lava_duration > 0.0:
 		var pool := LavaPool.new()

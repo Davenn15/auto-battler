@@ -104,7 +104,8 @@ func _land(bag, damage_amount: float, wrack: int, stun: float) -> void:
 			continue
 		if bag.grid.get_distance(bag.cell, enemy.cell) > landing_radius_cells:
 			continue
-		var dealt := enemy.take_damage(damage_amount, wrack, Stats.DamageType.MIGHT)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(bag.get_credit_id(), enemy, damage_amount), wrack, Stats.DamageType.MIGHT)
+		BattleUnit.gambit_damage_dealt(bag.get_credit_id(), enemy, dealt)   # Gambit damage, credited to Sumpton (see BattleUnit)
 		bag.get_tree().call_group("damage_tracker", "record_damage", bag.get_credit_id(), dealt)
 		if stun > 0.0 and dealt > 0.0 and enemy.alive:
 			enemy.stun(stun)   # already wracked when thrown

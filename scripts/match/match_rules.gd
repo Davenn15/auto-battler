@@ -244,6 +244,10 @@ static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> 
 enum EncounterKind { FACTION, NEUTRAL }
 ## Ascensions offered at each Encounter.
 const ASCENSION_OFFERS := 3
+## Rerolling an Encounter's offer: costs this much Reserve, going up by the step each
+## time, back to the start at the next Encounter.
+const ASCENSION_REROLL_START := 3
+const ASCENSION_REROLL_STEP := 3
 ## Each type's Encounters offer tier 1, 2, 3, 4 in turn; after that, that type's
 ## Encounters are skipped.
 const MAX_ASCENSION_TIER := 4
@@ -333,13 +337,8 @@ static func ascension_by_key(key: String) -> Ascension:
 ## Up to ASCENSION_OFFERS random Ascensions for the Encounter of `round_number`: that
 ## Encounter's tier only, leaving out any version of one the player already has. Empty
 ## past tier 4 or when that pool has none left (the Encounter is then skipped).
-static func roll_ascension_offers(player: PlayerState, round_number: int) -> void:
-	var number := encounter_number(round_number)
-	var kind := encounter_kind(number)
-	var tier := encounter_tier(number)
-	var pool := ascension_pool(player.faction if kind == EncounterKind.FACTION else "")
-	pool = pool.filter(func(a): return a.tier == tier and not player.ascensions.any(func(owned): return a.same_family(owned)) \
-			and (not a.is_chosen() or player.units.any(func(u): return a.can_pick(u))))
+static func roll_ascension_offers(player: PlayerState, round_number: int, exclude: Array = []) -> void:
+	var pool := _offerable(player, round_number).filter(func(a): return not exclude.has(a))
 	var weights: Array = pool.map(func(a): return ascension_weight(player, a))
 	player.ascension_offers.clear()
 	while player.ascension_offers.size() < ASCENSION_OFFERS and not pool.is_empty():
@@ -358,15 +357,89 @@ static func roll_ascension_offers(player: PlayerState, round_number: int) -> voi
 		weights.remove_at(pick)
 
 
-## How likely `ascension` is to be offered to `player`: 1 for an army-wide one; for a
-## unit-specific one, more if they own one of its units, less if they don't.
+## Every Ascension the Encounter of `round_number` could offer `player`: its tier, none
+## they own a version of, none they can't benefit from or pick a unit for.
+static func _offerable(player: PlayerState, round_number: int) -> Array[Ascension]:
+	var number := encounter_number(round_number)
+	var kind := encounter_kind(number)
+	var tier := encounter_tier(number)
+	var pool := ascension_pool(player.faction if kind == EncounterKind.FACTION else "")
+	pool = pool.filter(func(a): return a.offered_at(tier) and not player.ascensions.any(func(owned): return a.same_family(owned)) \
+			and (not a.is_chosen() or player.units.any(func(u): return a.can_pick(u))))
+	pool = pool.filter(func(a): return ascension_weight(player, a) > 0.0)   # never one they can't use
+	var result: Array[Ascension] = []
+	result.assign(pool)
+	return result
+
+
+## True if rerolling the current offer would show at least one Ascension not in it.
+static func can_reroll_ascensions(player: PlayerState, round_number: int) -> bool:
+	return _offerable(player, round_number).any(func(a): return not player.ascension_offers.has(a))
+
+
+## Rerolls the Encounter's offer for the Reserve price, which then goes up. The new offer
+## leaves out what was just offered. False if they can't pay or nothing new is left.
+static func reroll_ascensions(player: PlayerState, round_number: int) -> bool:
+	if player.reserve < player.ascension_reroll_cost or not can_reroll_ascensions(player, round_number):
+		return false
+	player.reserve -= player.ascension_reroll_cost
+	player.ascension_reroll_cost += ASCENSION_REROLL_STEP
+	roll_ascension_offers(player, round_number, player.ascension_offers.duplicate())
+	return true
+
+
+## How likely `ascension` is to be offered to `player`; 0 = never (they couldn't benefit).
+## Army-wide ones: 1. Unit-specific ones (a unit, a Beam, a branch): 3x if a unit they own
+## benefits or still can on its path (with Aura they'll have for its upgrades), 1/3x if
+## they'd have to buy one they can still afford, 0 if neither. A pair (needs all): 3x
+## with both owned, 1x with one, 1/3x with none, 0 if the missing ones can't be afforded.
 static func ascension_weight(player: PlayerState, ascension: Ascension) -> float:
-	if ascension.affected_units.is_empty():
+	if not ascension.has_unit_requirement():
 		return 1.0
-	for unit in player.units:
-		if ascension.affected_units.has(unit.data):
+	var budget := aura_budget(player)
+	if ascension.needs_all_affected:
+		var owned := 0
+		var cost := 0
+		for data in ascension.affected_units:
+			var unit := player.find_unit(data)
+			var need := _cost_to_benefit(ascension, data, unit)
+			if need < 0:
+				return 0.0
+			cost += need
+			owned += int(unit != null)
+		if cost > budget:
+			return 0.0
+		if owned == ascension.affected_units.size():
 			return OWNED_UNIT_WEIGHT
-	return UNOWNED_UNIT_WEIGHT
+		return 1.0 if owned > 0 else UNOWNED_UNIT_WEIGHT
+	for unit in player.units:
+		var need := _cost_to_benefit(ascension, unit.data, unit)
+		if need >= 0 and need <= budget:
+			return OWNED_UNIT_WEIGHT
+	for data in roster_for(player.faction):
+		if player.find_unit(data) != null:
+			continue   # owned: covered above (and no duplicates)
+		var need := _cost_to_benefit(ascension, data, null)
+		if need >= 0 and need <= budget:
+			return UNOWNED_UNIT_WEIGHT
+	return 0.0
+
+
+## The Aura `player` has or will still be given this match (up to the cap): the most they
+## could spend on new units and upgrades from here.
+static func aura_budget(player: PlayerState) -> int:
+	return player.aura + maxi(max_aura_received() - player.aura_received, 0)
+
+
+## The Aura it would take for a unit of `data` (`owned`, or bought if null) to benefit from
+## `ascension`: buying it and/or the upgrades it still needs. -1 if it never could.
+static func _cost_to_benefit(ascension: Ascension, data: UnitData, owned: ArmyUnit) -> int:
+	var path: Array = owned.path if owned != null else []
+	var level := ascension.level_to_benefit(data, path)
+	if level < 0:
+		return -1
+	var have := Economy.unit_aura_value(data.tier, owned.level()) if owned != null else 0
+	return Economy.unit_aura_value(data.tier, level) - have
 
 
 ## Takes the offered Ascension at `slot`; the rest of the offer goes away. A chosen-unit

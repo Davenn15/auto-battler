@@ -6,6 +6,8 @@ extends Gambit
 ##   A: the beam ricochets from its target to that ally's lowest-health nearby ally.
 ##   A1: allies under the beam are immune to crowd control.
 ##   A2: one more ricochet.
+## A Beam (see Beam): BEAM.NG's Beam settings add range to the first target, speed up the
+## shielding, and add extra ricochets (at their reduced share) after its own.
 
 ## Seconds BEAM.NG channels the beam.
 @export var duration: float = 4.0
@@ -24,13 +26,17 @@ extends Gambit
 
 
 func can_use(caster: BattleUnit) -> bool:
-	return BeamLinks.lowest_ally(caster, caster, range_cells, []) != null
+	return BeamLinks.lowest_ally(caster, caster, _range(caster), []) != null
+
+
+func _range(caster: BattleUnit) -> int:
+	return range_cells + Beam.settings(caster, Beam.Kind.SHIELD).range_bonus
 
 
 func execute(caster: BattleUnit) -> void:
 	if not _alive(caster):
 		return
-	var first := BeamLinks.lowest_ally(caster, caster, range_cells, [])
+	var first := BeamLinks.lowest_ally(caster, caster, _range(caster), [])
 	if first == null:
 		return
 	caster.show_float_text("Shield Beam", BeamngPassive.LIGHT)
@@ -45,21 +51,29 @@ func execute(caster: BattleUnit) -> void:
 			break
 		var delta := caster.get_physics_process_delta_time()
 		elapsed += delta
+		var beam_settings := Beam.settings(caster, Beam.Kind.SHIELD)
 		var chain: Array = [first]
 		for i in bounces:
 			var next := BeamLinks.lowest_ally(caster, chain.back(), bounce_range_cells, chain)
 			if next == null:
 				break
 			chain.append(next)
+		var own := chain.size()   # links past this are the Beam settings' extra ricochets
+		chain.append_array(Beam.ricochet_targets(caster, chain.back(), beam_settings.extra_ricochets,
+				beam_settings.ricochet_range, chain + [caster], true))
 		links.show(chain, BeamngPassive.LIGHT)
-		var per_second := Stats.scaled(shield_per_second, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
-		for ally in chain:
+		var per_second := Stats.scaled(shield_per_second, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT)) \
+				* beam_settings.rate
+		for index in chain.size():
+			var ally = chain[index]
 			var shield: BeamShieldStatus = shields.get(ally.get_instance_id())
 			if shield == null or not ally.statuses.has(shield):
 				shield = BeamShieldStatus.new(0.0, shield_linger)
 				ally.add_status(shield)
 				shields[ally.get_instance_id()] = shield
 			var amount := per_second * BeamngPassive.distance_multiplier(caster, ally) * delta
+			if index >= own:
+				amount *= beam_settings.ricochet_share
 			shield.feed(amount, shield_linger, cc_immune > 0.0)
 			given += amount
 	links.clear()

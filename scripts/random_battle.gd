@@ -42,6 +42,8 @@ func _ready() -> void:
 	reroll_button.pressed.connect(get_tree().reload_current_scene)
 	battle_manager.battle_ended.connect(_on_battle_ended)
 	add_child(EscapeMenu.new())
+	if BattleTestPanel.available():   # testing tools, from the editor only (F1)
+		$CanvasLayer/UI.add_child(BattleTestPanel.new($CanvasLayer/UI/UnitInfoPanel, battle_manager))
 	var used_seed := team_seed if team_seed != 0 else randi()
 	seed(used_seed)
 	_spawn_teams(randi_range(arv_min, arv_max), used_seed)

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/keepsakes/effects/wrack_permission_effect.gd" id="2"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+kind = 0
+gambit_bonus = 0.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Neutral Ruin"
+description = "All your units gain 10% Wrack Chance, and their Gambit damage can Wrack."
+tier = 2
+wrack_chance = 0.1
+effect = SubResource("Effect")

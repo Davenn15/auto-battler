@@ -7,15 +7,23 @@ extends Status
 ## each time one finishes (see StarburnStar).
 
 var source_id: int   # who the damage meter credits
-var total: float
+var total: float      # what it deals over its ramp time (more if it lasts longer)
 var duration: float
+var ramp_time: float  # the ramp's length: dealt so far = total x (time / ramp_time)^2
+## Supernova: on running its full length it bursts for this share of each nearby enemy's
+## max health, as Insight damage, within Burst Radius cells. 0 = no burst.
+var burst_share: float = 0.0
+var burst_radius: int = 1
 var _elapsed: float = 0.0
 
+const BURST_COLOR := Color(0.75, 0.85, 1.0)
 
-func _init(p_source_id: int, p_total: float, p_duration: float) -> void:
+
+func _init(p_source_id: int, p_total: float, p_duration: float, p_ramp_time: float = 0.0) -> void:
 	source_id = p_source_id
 	total = p_total
 	duration = maxf(p_duration, 0.01)
+	ramp_time = p_ramp_time if p_ramp_time > 0.0 else duration
 
 
 ## How far through the burn is: 0 at the start, 1 when it's done.
@@ -38,8 +46,8 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	_elapsed = minf(_elapsed + delta, duration)
 	# Damage dealt so far grows with the square of the time passed, so the rate keeps
 	# climbing: a quarter of the total lands in the first half, three quarters in the second.
-	var amount := total * (_elapsed * _elapsed - before * before) / (duration * duration)
-	var dealt := unit.take_warded_damage(amount)
+	var amount := total * (_elapsed * _elapsed - before * before) / (ramp_time * ramp_time)
+	var dealt := unit.take_warded_damage(BattleUnit.damage_bonus(source_id, unit, amount))
 	unit.add_running_damage("starburn", dealt, StarburnStar.COLOR)
 	unit.get_tree().call_group("damage_tracker", "record_damage", source_id, dealt)
 	if _elapsed >= duration:
@@ -47,6 +55,26 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		var star := unit.get_node_or_null(StarburnStar.KEY) as StarburnStar
 		if star != null:
 			star.pop()
+		if burst_share > 0.0:
+			_burst(unit)
+
+
+## Supernova's burst: max-health damage to every enemy of the burner within the radius,
+## the burning unit included.
+func _burst(unit: BattleUnit) -> void:
+	var source = instance_from_id(source_id) if source_id != 0 else null
+	var attacker: BattleUnit = source if is_instance_valid(source) and source is BattleUnit else null
+	KeepsakeVfx.missile_blast(unit.get_tree().current_scene, unit.global_position,
+			(burst_radius + 0.5) * unit.grid.hex_size * BattleGrid.SQRT3, BURST_COLOR)
+	for node in unit.get_tree().get_nodes_in_group("units"):
+		var other := node as BattleUnit
+		if other == null or not other.alive or other.team != unit.team 				or unit.grid.get_distance(unit.cell, other.cell) > burst_radius:
+			continue
+		var amount := other.max_health * burst_share
+		if attacker == null:   # Vere is gone: still credited, just without her bonuses
+			amount = BattleUnit.damage_bonus(source_id, other, amount)
+		var dealt := other.take_damage(amount, 0, Stats.DamageType.INSIGHT, false, attacker)
+		unit.get_tree().call_group("damage_tracker", "record_damage", source_id, dealt)
 
 
 ## A pale blue four-pointed star around a burning unit. One per unit, however many burns

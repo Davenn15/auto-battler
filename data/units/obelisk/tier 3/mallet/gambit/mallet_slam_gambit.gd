@@ -77,6 +77,7 @@ static func hit_enemy(caster: BattleUnit, enemy: BattleUnit, amount: float, wrac
 		amount *= Stats.ward_multiplier(ward * (1.0 - ignore))
 		skip_wards = true   # already applied, at the lowered value
 	var dealt := enemy.take_damage(amount, wrack, type, skip_wards, caster)
+	BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 	return dealt
 

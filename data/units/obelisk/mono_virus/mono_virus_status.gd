@@ -66,7 +66,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	var amount := per_stack * stacks * delta * unit.debuff_multiplier()
 	if not SETTINGS.ignore_wards:
 		amount *= Stats.ward_multiplier(unit.get_stat(Stats.ward_stat_for(SETTINGS.damage_type)))
-	var dealt := unit.take_warded_damage(amount, false, SETTINGS.damage_type)
+	var dealt := unit.take_warded_damage(BattleUnit.damage_bonus(credit_id, unit, amount), false, SETTINGS.damage_type)
 	unit.get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt, false)   # no Vampirism
 	unit.add_running_damage("virus", dealt, SETTINGS.color)
 

@@ -68,6 +68,10 @@ func on_attack(unit: BattleUnit) -> void:
 	var effects: Array[HitEffect] = []
 	if charge_per_hit > 0.0:
 		effects.append(ChargeHitEffect.new(unit.get_instance_id(), charge_per_hit))
+	for status in unit.statuses:   # e.g. Enfeebling Hex: Gambit shots Hinder
+		var extra: HitEffect = status.get_gambit_shot_effect(unit)
+		if extra != null:
+			effects.append(extra)
 	for blade in _blades:
 		var shot := Projectile.new()
 		shot.setup(unit, target, amount, BLADE_COLOR, 0, Stats.DamageType.INSIGHT, effects)

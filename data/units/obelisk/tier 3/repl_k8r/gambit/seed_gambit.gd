@@ -19,8 +19,8 @@ const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 ## REPLK4NTs per seed.
 @export var hatch_count: int = 1
 ## Share of REPL\K8R's max health the REPLK4NT adds to its own, and of its attributes and wards.
-@export_range(0.0, 1.0, 0.05) var health_share: float = 0.3
-@export_range(0.0, 1.0, 0.05) var stat_share: float = 0.3
+@export_range(0.0, 1.0, 0.05) var health_share: float = 0.2
+@export_range(0.0, 1.0, 0.05) var stat_share: float = 0.2
 ## Share of its max health the REPLK4NT starts with: Min if it hatches at once, rising to
 ## 1 (full) at full gestation.
 @export_range(0.0, 1.0, 0.05) var min_start_health: float = 0.3

@@ -71,6 +71,7 @@ func _physics_process(delta: float) -> void:
 func _hit(unit: BattleUnit) -> void:
 	var attacker := shooter as BattleUnit if is_instance_valid(shooter) else null
 	var dealt := unit.take_damage(damage, wrack_level, damage_type, false, attacker)
+	BattleUnit.gambit_damage_dealt(shooter, unit, dealt)   # Gambit damage (see BattleUnit)
 	get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 	if dealt > 0.0 and unit.alive:   # a dodged missile injects nothing
 		MonoVirusStatus.infect(unit, virus_stacks, credit_id)

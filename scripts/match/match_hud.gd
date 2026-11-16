@@ -17,6 +17,7 @@ const BORDER_COLOR := Color(0.38, 0.38, 0.44)
 var game: MatchGame
 
 var _top: RichTextLabel
+var _round_track: RoundTrack
 var _side: PanelContainer
 var _shop_units: HBoxContainer
 var _shop_shards: HBoxContainer
@@ -50,6 +51,7 @@ var _spectate_bar: HBoxContainer
 var _encounter: PanelContainer
 var _encounter_title: Label
 var _encounter_cards: HBoxContainer
+var _encounter_reroll: Button
 var _unit_pick: PanelContainer
 var _unit_pick_text: RichTextLabel
 var _unit_pick_bench: HBoxContainer
@@ -310,6 +312,15 @@ func _build_top() -> void:
 	_top.add_theme_font_size_override("normal_font_size", 14)
 	_top.add_theme_font_size_override("bold_font_size", 14)
 	bar.add_child(_top)
+	# The round order: last round, this one, the next three. Over the side panel's column.
+	_round_track = RoundTrack.new()
+	_round_track.anchor_left = 1.0
+	_round_track.anchor_right = 1.0
+	_round_track.offset_right = -6 - (SIDE_WIDTH - _round_track.custom_minimum_size.x) / 2.0
+	_round_track.offset_left = _round_track.offset_right - _round_track.custom_minimum_size.x
+	_round_track.offset_top = 0
+	_round_track.offset_bottom = 30
+	add_child(_round_track)
 
 
 func _build_side() -> void:
@@ -642,6 +653,13 @@ func _build_encounter() -> void:
 	_encounter_cards = HBoxContainer.new()
 	_encounter_cards.add_theme_constant_override("separation", 10)
 	column.add_child(_encounter_cards)
+	_encounter_reroll = Button.new()
+	_encounter_reroll.custom_minimum_size = Vector2(170, 30)
+	_encounter_reroll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_encounter_reroll.focus_mode = Control.FOCUS_NONE
+	_encounter_reroll.tooltip_text = "Show different Ascensions. The price goes up each time, and resets at the next Encounter."
+	_encounter_reroll.pressed.connect(func(): game.reroll_ascensions())
+	column.add_child(_encounter_reroll)
 
 
 const ENCOUNTER_CARD := Vector2(190, 130)
@@ -656,6 +674,9 @@ func show_encounter(title: String) -> void:
 	if not _encounter.visible:
 		return
 	_encounter_title.text = title
+	_encounter_reroll.visible = not game._dev_encounter
+	_encounter_reroll.disabled = not game.can_reroll_ascensions()
+	_set_rich_text(_encounter_reroll, "Reroll   " + reserve_text(game.player.ascension_reroll_cost, 14), 14)
 	for slot in offers.size():
 		var ascension := offers[slot]
 		var card := Button.new()
@@ -674,9 +695,11 @@ func show_encounter(title: String) -> void:
 		var for_text := ""
 		if ascension.is_chosen():
 			for_text = "  [color=#ffd24d]Pick a unit[/color]"
+		elif ascension.favors_beams:
+			for_text = "  [color=#c8b46e]For Beams[/color]"
 		elif not ascension.affected_units.is_empty():
 			for_text = "  [color=#c8b46e]For %s[/color]" % ascension.affected_names()
-		var for_units := "[center][color=#9a9aa5]Tier %d[/color]%s[/center]" % [ascension.tier, for_text]
+		var for_units := "[center][color=#9a9aa5]Tier %s[/color]%s[/center]" % [ascension.tier_text(), for_text]
 		text.text = "[center][b]%s[/b][/center]%s\n%s" % [ascension.get_display_name(), for_units, Keyphrases.format(ascension.description)]
 		card.add_child(text)
 		_encounter_cards.add_child(card)
@@ -794,8 +817,8 @@ func _ascension_badge(ascension: Ascension, holder: ArmyUnit = null) -> Button:
 	badge.bbcode_tooltip = true
 	badge.focus_mode = Control.FOCUS_NONE
 	badge.custom_minimum_size = BADGE
-	badge.text = Ascension.NUMERALS[clampi(ascension.tier, 0, 4)]
-	badge.add_theme_font_size_override("font_size", 11)
+	badge.text = ascension.tier_text(true)
+	badge.add_theme_font_size_override("font_size", 11 if badge.text.length() <= 3 else 8)
 	var style := StyleBoxFlat.new()
 	style.bg_color = _ascension_tint(ascension).darkened(0.35)
 	style.border_color = Color(1, 1, 1, 0.5) if ascension.family != null or ascension.empowers != null else Color(1, 1, 1, 0.25)
@@ -803,9 +826,11 @@ func _ascension_badge(ascension: Ascension, holder: ArmyUnit = null) -> Button:
 	style.set_corner_radius_all(4)
 	for state in ["normal", "hover", "pressed"]:
 		badge.add_theme_stylebox_override(state, style)
-	var lines := PackedStringArray(["[b]%s[/b]   [color=#9a9aa5]Tier %d[/color]" % [ascension.get_display_name(), ascension.tier]])
+	var lines := PackedStringArray(["[b]%s[/b]   [color=#9a9aa5]Tier %s[/color]" % [ascension.get_display_name(), ascension.tier_text()]])
 	if holder != null:
 		lines.append("[color=#ffd24d]On %s[/color]" % holder.label().strip_edges())
+	elif ascension.favors_beams:
+		lines.append("[color=#c8b46e]For Beams[/color]")
 	elif not ascension.affected_units.is_empty():
 		lines.append("[color=#c8b46e]For %s[/color]" % ascension.affected_names())
 	lines.append(Keyphrases.format(ascension.description))
@@ -953,6 +978,7 @@ func refresh_top() -> void:
 
 func _refresh_top() -> void:
 	var p := game.player
+	_round_track.show_round(game.round_number, p.faction)
 	var phase_name := "Opening Shop" if game.is_opening() else "Player Combat"
 	if game.phase == MatchGame.Phase.ENCOUNTER:
 		phase_name = "Encounter"

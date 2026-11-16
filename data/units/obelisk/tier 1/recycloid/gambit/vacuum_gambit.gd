@@ -1,10 +1,11 @@
 class_name VacuumGambit
 extends Gambit
-## Recycloid channels a life-draining vacuum on the enemy with the most health near him,
-## dealing a share of its max health every second while it lasts. He can't move, attack or
+## Recycloid channels a life-draining vacuum on his current target (or, if it isn't in
+## range, the enemy with the most health near him), dealing a share of its max health every
+## second while it lasts. He can't move, attack or
 ## gain Charge while channelling.
 ##   Draining (A): if a target dies during the channel, he gets a burst of Charge.
-##   A1: a little less damage, but it drains the two healthiest enemies at once.
+##   A1: a little less damage, but it also drains the healthiest other enemy near him.
 ##   A2: a target pushed below Execute Threshold of its max health dies outright.
 
 ## How close an enemy must be to be drained, in hex cells.
@@ -45,7 +46,8 @@ func execute(caster: BattleUnit) -> void:
 	caster.show_float_text("Vacuum", VacuumChannel.VACUUM_COLOR)
 
 
-## The `targets` enemies within range with the most health right now.
+## Up to `targets` enemies within range: his current target first (when it's in range),
+## then the ones with the most health right now.
 func _targets(caster: BattleUnit) -> Array[BattleUnit]:
 	var result: Array[BattleUnit] = []
 	for node in caster.get_tree().get_nodes_in_group("units"):
@@ -54,4 +56,8 @@ func _targets(caster: BattleUnit) -> Array[BattleUnit]:
 				and caster.grid.get_distance(caster.cell, unit.cell) <= range_cells:
 			result.append(unit)
 	result.sort_custom(func(a, b): return a.health > b.health)
+	var current = caster.target   # his current target goes first when it's in range
+	if is_instance_valid(current) and result.has(current):
+		result.erase(current)
+		result.push_front(current)
 	return result.slice(0, targets)

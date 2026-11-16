@@ -10,20 +10,24 @@ extends Status
 const DELAYED_COLOR := Color(0.75, 0.2, 0.2)   # dark red, so held hits read differently
 
 var duration: float
+## Share of each hit that is held back (1 = all of it; the Grit Ascension holds part).
+var share: float = 1.0
 var _hits: Array = []   # each: {"remaining": damage left to deal, "rate": damage per second}
 var _releasing: bool = false   # true while dealing held damage, so it isn't caught again
 
 
-func _init(p_duration: float) -> void:
+func _init(p_duration: float, p_share: float = 1.0) -> void:
 	duration = maxf(p_duration, 0.01)
+	share = clampf(p_share, 0.0, 1.0)
 
 
 func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:
 	if _releasing or damage <= 0.0:
 		return damage
-	unit._spawn_damage_number(damage, unit.incoming_color)
-	_hits.append({"remaining": damage, "rate": damage / duration})
-	return 0.0
+	var held := damage * share
+	unit._spawn_damage_number(held, unit.incoming_color)
+	_hits.append({"remaining": held, "rate": held / duration})
+	return damage - held
 
 
 func tick(unit: BattleUnit, delta: float) -> void:

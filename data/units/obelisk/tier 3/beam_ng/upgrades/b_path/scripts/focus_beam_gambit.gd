@@ -7,6 +7,8 @@ extends Gambit
 ## Mark Share of its max health.
 ##   B1: if the target dies during the beam, BEAM.NG gains a burst of Charge.
 ##   B2: the beam ricochets to one more nearby enemy.
+## A Beam (see Beam): BEAM.NG's Beam settings add range to the first target, speed up the
+## damage, and add extra ricochets (at their reduced share) after its own.
 
 ## Seconds BEAM.NG channels the beam.
 @export var duration: float = 4.0
@@ -52,24 +54,32 @@ func execute(caster: BattleUnit) -> void:
 			break
 		var delta := caster.get_physics_process_delta_time()
 		elapsed += delta
+		var beam_settings := Beam.settings(caster, Beam.Kind.FOCUS)
 		var chain: Array = [target]
 		for i in bounces:
 			var next := BeamLinks.nearest_enemy(caster, chain.back(), bounce_range_cells, chain)
 			if next == null:
 				break
 			chain.append(next)
+		var own := chain.size()   # links past this are the Beam settings' extra ricochets
+		chain.append_array(Beam.ricochet_targets(caster, chain.back(), beam_settings.extra_ricochets,
+				beam_settings.ricochet_range, chain))
 		links.show(chain, BeamngPassive.COLOR)
 		tick_left -= delta
 		while tick_left <= 0.0:
 			tick_left += TICK
-			var share := TICK / caster.get_attack_cooldown()
-			for enemy in chain:
+			for i in chain.size():
+				var enemy = chain[i]
+				var share := TICK / caster.get_attack_cooldown() * beam_settings.rate
+				if i >= own:
+					share *= beam_settings.ricochet_share
 				if not _alive(enemy):
 					continue
 				var beam: BeamngBeamStatus = beams.get(enemy.get_instance_id())
 				if beam == null:
 					beam = BeamngBeamStatus.new(0.0)
 					beam.scale = damage_share
+					beam.from_gambit = true   # its ticks are Gambit damage
 					beam._target = enemy
 					beams[enemy.get_instance_id()] = beam
 				beam._fire_tick(caster, enemy, share)
@@ -94,7 +104,7 @@ func _pick_target(caster: BattleUnit) -> BattleUnit:
 		if enemy == null or not enemy.alive or enemy.team == caster.team or not enemy.is_targetable():
 			continue
 		var distance := caster.grid.get_distance(caster.cell, enemy.cell)
-		if distance > caster.attack_range:
+		if distance > caster.attack_range + Beam.settings(caster, Beam.Kind.FOCUS).range_bonus:
 			continue
 		var count := 0
 		for other in caster.get_tree().get_nodes_in_group("units"):

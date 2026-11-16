@@ -72,7 +72,8 @@ func _shatter(caster: BattleUnit) -> void:
 	amount *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	var ignore := caster.ignores_wards()   # true if the shatter used up all her shield
 	for enemy in _enemies_in_reach(caster):
-		var dealt := enemy.take_damage(amount, wrack, caster.get_attack_damage_type(), ignore)
+		var dealt := enemy.take_damage(BattleUnit.damage_bonus(caster, enemy, amount), wrack, caster.get_attack_damage_type(), ignore)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if stun_time > 0.0 and dealt > 0.0 and enemy.alive:
 			enemy.stun(stun_time, caster)

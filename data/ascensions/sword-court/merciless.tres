@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Your units gain 10% Wrack Damage."
+tier = 1
+wrack_damage = 0.1
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Your units gain 15% Wrack Damage."
+tier = 2
+wrack_damage = 0.15
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Your units gain 25% Wrack Damage."
+tier = 3
+wrack_damage = 0.25
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Your units gain 35% Wrack Damage."
+tier = 4
+wrack_damage = 0.35
+
+[resource]
+script = ExtResource("1")
+family_name = "Merciless"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

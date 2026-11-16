@@ -35,6 +35,7 @@ func execute(caster: BattleUnit) -> void:
 		if not is_instance_valid(enemy) or not enemy.alive:
 			continue
 		var dealt := enemy.take_damage(enemy.max_health * max_health_share, 0, Stats.DamageType.MIGHT, false, caster)
+		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 		KeepsakeVfx.missile_blast(enemy.get_parent(), enemy.global_position, 26.0, GateRules.COLOR)
 

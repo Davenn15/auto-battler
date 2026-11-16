@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/hit_shield_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/garth/garth.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+share = 0.03
+cap = 0.15
+duration = 3.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Bulwark Strikes"
+description = "Garth's attacks gain the Hit Effect: Garth gains a Shield of 3% of his max health (up to 15%, lasting 3 seconds after the latest hit)."
+tier = 2
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

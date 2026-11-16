@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-ascension_name = "Court Placeholder 2A"
+ascension_name = "Court Valor"
 description = "PLACEHOLDER. All your units gain 15 Might and 75 Health."
 tier = 2
 might = 15.0

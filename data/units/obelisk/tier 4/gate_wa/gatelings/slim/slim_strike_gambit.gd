@@ -24,5 +24,6 @@ func execute(caster: BattleUnit) -> void:
 	var missing := 1.0 - clampf(target.health / target.max_health, 0.0, 1.0)
 	var amount := Stats.scaled(damage, celerity_scaling, caster.get_stat(Stats.Stat.CELERITY)) * (1.0 + execute_bonus * missing)
 	var dealt := target.take_damage(amount, 0, Stats.DamageType.CELERITY, false, caster)
+	BattleUnit.gambit_damage_dealt(caster, target, dealt)   # Gambit damage (see BattleUnit)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 	KeepsakeVfx.cleave_slash(target)

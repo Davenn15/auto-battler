@@ -37,6 +37,7 @@ func execute(caster: BattleUnit) -> void:
 	amount *= caster.effect_wrack_multiplier(level, Stats.EffectKind.GAMBIT_DAMAGE)
 	_beam(caster, target)
 	var dealt := target.take_damage(amount, level, Stats.DamageType.INSIGHT, false, caster)
+	BattleUnit.gambit_damage_dealt(caster, target, dealt)   # Gambit damage (see BattleUnit)
 	caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 	caster.show_float_text("Railgun", COLOR)
 	if execute_threshold > 0.0 and dealt > 0.0 and target.alive \

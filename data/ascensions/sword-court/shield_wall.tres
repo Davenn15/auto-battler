@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/front_rows_shield_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+share = 0.1
+duration = 5.0
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+share = 0.15
+duration = 5.0
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+share = 0.2
+duration = 5.0
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+share = 0.25
+duration = 5.0
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Your units in the front two rows gain a Shield of 10% of their max health for 5 seconds at the start of combat."
+tier = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Your units in the front two rows gain a Shield of 15% of their max health for 5 seconds at the start of combat."
+tier = 2
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Your units in the front two rows gain a Shield of 20% of their max health for 5 seconds at the start of combat."
+tier = 3
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Your units in the front two rows gain a Shield of 25% of their max health for 5 seconds at the start of combat."
+tier = 4
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Shield Wall"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])
