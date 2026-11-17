@@ -8,7 +8,8 @@ extends RefCounted
 ## `bottom` stands as team 1 on its own half; `top` is team 2, mirrored onto the far half,
 ## the same layout as a real combat. A fight still going after `time_limit` seconds is a
 ## draw. Returns {winner: 1, 2 or 0 for a draw, bottom_aura, top_aura, time}: the Aura of
-## each side's surviving units. Each side's Ascensions, if any, go to all its units.
+## each side's surviving units, and gains: what each side gained for the rest of the match
+## (see ArmySpawner.collect_match_gains). Each side's Ascensions, if any, go to all its units.
 static func fight(host: Node, bottom: Array[ArmyUnit], top: Array[ArmyUnit], time_limit: float, combat_seed: int = -1,
 		bottom_ascensions: Array[Ascension] = [], top_ascensions: Array[Ascension] = []) -> Dictionary:
 	clear(host)
@@ -40,7 +41,7 @@ static func fight(host: Node, bottom: Array[ArmyUnit], top: Array[ArmyUnit], tim
 			(node as BattleUnit).stop_combat()
 	var result := {"winner": state["winner"], "time": elapsed,
 			"bottom_aura": ArmySpawner.surviving_aura(tree, 1), "top_aura": ArmySpawner.surviving_aura(tree, 2),
-			"fingerprint": fingerprint(tree, steps)}
+			"fingerprint": fingerprint(tree, steps), "gains": ArmySpawner.collect_match_gains(tree)}
 	clear(host)
 	return result
 

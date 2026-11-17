@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TargetedWardsPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 2/balmede/passive/targeted_wards_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ward_per_targeter = 7.0
+max_targeters = 5
+passive_name = "Bulwark"
+description = "Balmede's Wards rise by 7 for each enemy targeting her (up to 5 enemies, +35)."

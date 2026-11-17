@@ -13,11 +13,11 @@ const ROUND_DAMAGE_BASE := 3
 const NEW_START_AURA := 10
 const OLD_START_AURA := 6
 ## The most Aura a player is ever given in a match, counting the starting Aura.
-const NEW_MAX_AURA_RECEIVED := 88
+const NEW_MAX_AURA_RECEIVED := 90
 const OLD_MAX_AURA_RECEIVED := 48
-## Aura income per round is the paced round times this, rounded down. 1.5 reaches the 88
-## cap at the same point (round 8) and pace the old 1.75 reached its 100.
-const NEW_AURA_INCOME_SCALE := 1.5
+## Aura paid after each player combat (1st, 2nd, ...). With the 10 to start they add up to
+## exactly the 90 cap on the 8th combat; later combats pay none.
+const NEW_AURA_INCOME: Array[int] = [4, 6, 8, 9, 11, 12, 14, 16]
 ## Loss damage from survivors is their Aura divided by this, rounded down.
 const NEW_SURVIVOR_DIVISOR := 5.0
 const OLD_SURVIVOR_DIVISOR := 3.0
@@ -134,10 +134,13 @@ static func combat_income(round_number: int) -> int:
 
 
 ## Aura each player gets after a player combat in round `round_number` (before the cap).
-## With the tier rework it's the paced round x NEW_AURA_INCOME_SCALE, rounded down.
+## With the tier rework it's that combat's entry in NEW_AURA_INCOME (combats are rounds
+## 2, 4, 6, ...); otherwise the paced round.
 static func aura_income(round_number: int) -> int:
-	var paced := paced_round(round_number)
-	return floori(paced * NEW_AURA_INCOME_SCALE) if Economy.tier_rework else paced
+	if not Economy.tier_rework:
+		return paced_round(round_number)
+	var combat := round_number / 2 - 1   # 0 for the first combat (round 2)
+	return NEW_AURA_INCOME[combat] if combat >= 0 and combat < NEW_AURA_INCOME.size() else 0
 
 
 ## Pays both kinds of income. Aura stops once the player has been given max_aura_received().
@@ -193,6 +196,38 @@ static func upgrade_choices(unit: ArmyUnit) -> Array:
 	return choices
 
 
+## TESTING (2026-11-16): the Aura upgrade system, picked on the main menu before a match
+## (online, both players use the host's choice). true = upgrades are bought from an owned
+## unit's upgrade menu for Aura, during planning only, and a shop copy of a unit you own
+## always buys its Reserve stat buff. false = the old system: the shop copy is the upgrade.
+static var aura_upgrades := false
+
+
+## Aura the next upgrade of `unit` costs (the same tier prices the shop used). -1 if maxed.
+static func upgrade_cost(unit: ArmyUnit) -> int:
+	if unit.is_maxed():
+		return -1
+	return Economy.tier_aura_costs(unit.data.tier)[unit.level() + 1]
+
+
+## Whether `player` can buy `unit`'s next upgrade from its upgrade menu right now.
+static func can_buy_upgrade(player: PlayerState, unit: ArmyUnit) -> bool:
+	return aura_upgrades and player.units.has(unit) and not unit.is_maxed() \
+			and player.aura >= upgrade_cost(unit)
+
+
+## Aura upgrade system: buys `unit`'s next upgrade, `choice` picking the path (an index
+## from upgrade_choices). Returns false if it isn't allowed.
+static func buy_upgrade(player: PlayerState, unit: ArmyUnit, choice: int) -> bool:
+	if not can_buy_upgrade(player, unit):
+		return false
+	if choice < 0 or choice >= upgrade_choices(unit).size():
+		return false
+	player.aura -= upgrade_cost(unit)
+	unit.path.append(choice)
+	return true
+
+
 static func buff_cost(tier: int, buffs_bought: int) -> int:
 	return 2 * tier * (buffs_bought + 1)
 
@@ -204,7 +239,7 @@ static func offer_info(player: PlayerState, data: UnitData) -> Dictionary:
 	var costs: Array = Economy.tier_aura_costs(data.tier)
 	if owned == null:
 		return {"kind": "buy", "aura": costs[0], "reserve": 0}
-	if not owned.is_maxed():
+	if not owned.is_maxed() and not aura_upgrades:
 		return {"kind": "upgrade", "aura": costs[owned.level() + 1], "reserve": 0}
 	return {"kind": "buff", "aura": 0, "reserve": owned.next_buff_cost()}
 
@@ -464,6 +499,11 @@ static func take_ascension(player: PlayerState, slot: int, unit_index: int = -1)
 		player.units[unit_index].ascensions.append(ascension)
 	player.ascensions.append(ascension)
 	player.ascension_offers.clear()
+	# Buffs a unit they don't own yet: their next fresh shop is sure to offer it.
+	var roster := roster_for(player.faction)
+	for data in ascension.affected_units:
+		if data != null and player.find_unit(data) == null and roster.has(data) and not player.promised_units.has(data):
+			player.promised_units.append(data)
 	return true
 
 
@@ -497,8 +537,9 @@ static func start_planning(player: PlayerState, combat_number: int) -> void:
 	player.reroll_cost = REROLL_START
 	if player.shop_locked:
 		player.shop_locked = false
-		return
-	roll_unit_offers(player, combat_number)
+		return   # a promised unit waits for the next fresh shop
+	roll_unit_offers(player, combat_number, player.promised_units)
+	player.promised_units.clear()
 	roll_shard_offers(player)
 	roll_keepsake_offer(player, combat_number)
 
@@ -508,10 +549,18 @@ static func tier_unlocked(tier: int, combat_number: int) -> bool:
 
 
 ## Three different units of the player's faction, from the tiers unlocked for `combat_number`.
-static func roll_unit_offers(player: PlayerState, combat_number: int) -> void:
+## Units in `promised` (whose tier is unlocked) are sure to be among them.
+static func roll_unit_offers(player: PlayerState, combat_number: int, promised: Array[UnitData] = []) -> void:
 	var pool := roster_for(player.faction).filter(func(d): return tier_unlocked(d.tier, combat_number))
 	pool.shuffle()
-	player.unit_offers.assign(pool.slice(0, UNIT_OFFERS))
+	var offers: Array[UnitData] = []
+	for data in promised:
+		if pool.has(data) and offers.size() < UNIT_OFFERS:
+			offers.append(data)
+			pool.erase(data)
+	offers.append_array(pool.slice(0, UNIT_OFFERS - offers.size()))
+	offers.shuffle()   # so the promised one isn't always in the first slot
+	player.unit_offers.assign(offers)
 
 
 ## Three different Shards.

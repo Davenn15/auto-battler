@@ -64,6 +64,7 @@ var _marker: Line2D   # the ring under the selected unit; a child of that unit
 ## Filled by whoever owns the screen (the match HUD puts the unit's items here). Hidden
 ## when empty.
 var item_row: HBoxContainer
+var upgrade_row: VBoxContainer   # the match HUD's big Upgrade button, when there is one
 ## Stats, abilities (passives, Gambit, Ascensions), and the upgrade tree.
 enum Tab { STATS, ABILITIES, UPGRADES }
 const TAB_NAMES := {Tab.STATS: "Stats", Tab.ABILITIES: "Abilities", Tab.UPGRADES: "Upgrades"}
@@ -110,6 +111,11 @@ func _ready() -> void:
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(_title)
+
+	# The match's Upgrade button (Aura upgrade system), right under the name. Filled by the HUD.
+	upgrade_row = VBoxContainer.new()
+	upgrade_row.visible = false
+	column.add_child(upgrade_row)
 
 	item_row = HBoxContainer.new()
 	item_row.add_theme_constant_override("separation", 4)
@@ -385,7 +391,7 @@ func _upgrade_line(path: Array, upgrade: Upgrade, has: bool, depth: int) -> Stri
 	var line := "%s[color=%s][b]%s%s[/b]%s[/color]" % [head, color, "✓ " if has else "", RandomTeams.path_label(path),
 			("  " + title) if title != "" else ""]
 	if upgrade.description != "":
-		var text := Keyphrases.format(upgrade.description) if has else upgrade.description
+		var text := Keyphrases.format(upgrade.description) if has else Keyphrases.plain(upgrade.description)
 		line += "\n[color=%s]%s[/color]" % [DESCRIPTION if has else NOT_OWNED, text]
 	return line + tail
 

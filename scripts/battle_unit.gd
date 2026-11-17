@@ -12,6 +12,8 @@ signal wracked(unit: BattleUnit)
 signal status_added(unit: BattleUnit, status: Status)
 ## Emitted when this unit gains permanent stats (see gain_permanent_stats).
 signal permanent_stats_gained(unit: BattleUnit, gains: Dictionary, copied: bool)
+## Emitted when this unit is stunned or silenced (Codger's passive watches for it).
+signal crowd_controlled(unit: BattleUnit)
 ## Emitted when this unit starts its Gambit.
 signal gambit_cast(unit: BattleUnit)
 
@@ -230,6 +232,41 @@ var buffs: int = 0
 ## The army's Ascensions (match Encounters). Set before the unit enters the tree.
 var ascensions: Array[Ascension] = []
 
+# ---------- Gains that last the rest of the match (Codger B) ----------
+## Stats this unit has gained for the rest of the match, {Stats.Stat: amount}, from its
+## ArmyUnit. Added to its base stats. Set before the unit enters the tree.
+var match_stats: Dictionary = {}
+## Stacks of Glory from earlier fights: each raises its base attributes and Wards by
+## GLORY_SHARE. Set before the unit enters the tree.
+var glory: int = 0
+## What this fight added to them, written back to its ArmyUnit afterwards (real fights
+## only; see ArmySpawner.collect_match_gains).
+var match_gains: Dictionary = {}
+var glory_gained: int = 0
+const GLORY_SHARE := 0.05
+const GLORY_STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY,
+		Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]
+## Base stats before Glory, so Glory gained mid-fight adds the same 5% of them.
+var _base_before_glory: Dictionary = {}
+
+
+## Gains `amount` of `stat` for the rest of the match: now (a permanent stat gain, so
+## Lordred A and the like see it) and in every later fight.
+func gain_match_stat(stat: Stats.Stat, amount: float) -> void:
+	match_gains[stat] = match_gains.get(stat, 0.0) + amount
+	add_status(PermanentStatStatus.new(stat, amount))
+
+
+## Gains a stack of Glory for the rest of the match: now and in every later fight.
+func gain_glory() -> void:
+	glory_gained += 1
+	var gains := {}
+	for stat in GLORY_STATS:
+		gains[stat] = _base_before_glory.get(stat, 0.0) * GLORY_SHARE
+	for stat in gains:
+		add_status(PermanentStatStatus.new(stat, gains[stat]))
+	show_float_text("Glory!", Color(1.0, 0.85, 0.35))
+
 ## Copies stats from the UnitData resource, if one is assigned.
 func _apply_data() -> void:
 	if data == null:
@@ -270,6 +307,13 @@ func _apply_data() -> void:
 	for stat in Stats.Stat.values():
 		base_stats[stat] = data.get_base_stat(stat) * Stats.upgrade_multiplier(stat, level) * Stats.tier_multiplier(stat, data.tier) \
 				* Stats.buff_multiplier(stat, buffs)
+	# Gains kept from earlier fights this match: stats first, then Glory on top of them.
+	for stat in match_stats:
+		base_stats[stat] = base_stats.get(stat, 0.0) + match_stats[stat]
+	_base_before_glory = base_stats.duplicate()
+	if glory > 0:
+		for stat in GLORY_STATS:
+			base_stats[stat] *= 1.0 + GLORY_SHARE * glory
 	attack_damage_type = data.attack_damage_type
 	if data.sprite != null and sprite != null:
 		sprite.texture = data.sprite
@@ -945,6 +989,8 @@ func _physics_process(delta: float) -> void:
 		_stunned_time -= delta   # stunned: no winding up an attack
 	elif not _is_channeling():
 		_attack_timer = maxf(_attack_timer - delta, 0.0)
+	if _stun_swirl != null:
+		_stun_swirl.visible = _stunned_time > 0.0
 	for status in statuses.duplicate():
 		status.tick(self, delta)
 	_update_shield_bar()
@@ -1167,6 +1213,16 @@ var base_stats: Dictionary = {
 	Stats.Stat.VAMPIRISM: 0
 }
 var attack_damage_type: int = Stats.DamageType.MIGHT
+
+## Moves the unit to `dest` against its will (pulled, knocked back): drops any step it was
+## taking, then slides there over `time`. Await it to wait for the slide.
+func force_move(dest: Vector2i, time: float) -> void:
+	if _moving:
+		grid.vacate(_dest_cell, self)   # give up the cell it was stepping into
+		_moving = false
+		global_position = grid.cell_to_world(cell)
+	await dash_to(dest, time)
+
 
 ## Moves to `dest` straight away as far as the grid is concerned, and slides there on
 ## screen over `time` seconds. Await it to wait for the slide to finish.
@@ -1518,7 +1574,9 @@ func wrack_effect_multiplier(kind: Stats.EffectKind, already_can: bool = false, 
 
 ## Stops the unit from moving, attacking, or using its Gambit for `duration` seconds.
 ## A step already in progress still finishes, so the unit stays on the grid.
-func stun(duration: float, source: BattleUnit = null) -> void:
+## `source` (the stunner, for its CONTROL wrack) is untyped on purpose: Gambits that wait
+## (a hook's pull, a charge) may pass a caster who died meanwhile, and that's just ignored.
+func stun(duration: float, source = null) -> void:
 	if not alive or duration <= 0.0:
 		return
 	if is_instance_valid(source):
@@ -1532,11 +1590,85 @@ func stun(duration: float, source: BattleUnit = null) -> void:
 	if sprite != null:
 		sprite.modulate = STUN_TINT
 		sprite.create_tween().tween_property(sprite, "modulate", Color.WHITE, duration)
+	_show_stun_swirl()
+	crowd_controlled.emit(self)
+
+var _stun_swirl: StunSwirl
+
+## The swirling yellow stars over a stunned unit's head. Made the first time it's stunned
+## (on screen only), then shown and hidden with the stun.
+func _show_stun_swirl() -> void:
+	if not KeepsakeVfx.enabled() or health_bar == null:
+		return
+	if _stun_swirl == null:
+		_stun_swirl = StunSwirl.new()
+		_stun_swirl.unit = self
+		health_bar.add_child(_stun_swirl)
+	_stun_swirl.visible = true
+
+
+## Little yellow stars circling on a tilted ring above the unit's plate (and above its
+## Keepsake icons and Von Carrow's shot tracker, so they never overlap).
+class StunSwirl extends Control:
+	const COLOR := Color(1.0, 0.88, 0.2)
+	const OUTLINE := Color(0.05, 0.05, 0.07, 0.85)
+	const RADIUS := Vector2(10.0, 3.5)
+	const STARS := 3
+	const SPIN := 7.0   # radians per second
+	var unit: BattleUnit
+	var _time := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		z_index = 25   # over damage numbers (20), which float up through the same spot
+
+	func _process(delta: float) -> void:
+		if visible:
+			_time += delta
+			queue_redraw()
+
+	func _draw() -> void:
+		if not is_instance_valid(unit):
+			return
+		var plate := unit._plate
+		var center_x: float = (plate.position.x + PLATE_WIDTH / 2.0) if is_instance_valid(plate) else unit.health_bar.size.x / 2.0
+		var y := -PLATE_PAD - RADIUS.y - 4.0
+		if unit._keepsake_icons != null and is_instance_valid(unit._keepsake_icons):
+			y -= KEEPSAKE_ICON_SIZE + 1.0
+		for status in unit.statuses:
+			if status is PistolStatus:
+				y -= 8.0   # clear of Von Carrow's shot tracker
+		var center := Vector2(center_x, y)
+		# A faint ring, then the stars on it (the ones at the back smaller and dimmer).
+		var ring := PackedVector2Array()
+		for i in 17:
+			var a := TAU * i / 16.0
+			ring.append(center + Vector2(cos(a) * RADIUS.x, sin(a) * RADIUS.y))
+		draw_polyline(ring, Color(COLOR, 0.35), 1.0, true)
+		for i in STARS:
+			var a := _time * SPIN + TAU * i / STARS
+			var front := (sin(a) + 1.0) / 2.0   # 1 at the front of the ring, 0 at the back
+			var at := center + Vector2(cos(a) * RADIUS.x, sin(a) * RADIUS.y)
+			_star(at, lerpf(2.0, 3.2, front), Color(COLOR, lerpf(0.55, 1.0, front)), a * 1.5)
+
+	func _star(at: Vector2, size: float, color: Color, turn: float) -> void:
+		var points := PackedVector2Array()
+		for i in 8:
+			var r := size if i % 2 == 0 else size * 0.45
+			points.append(at + Vector2.from_angle(turn + TAU * i / 8.0) * r)
+		var outline := PackedVector2Array()
+		for i in 8:
+			var r := (size if i % 2 == 0 else size * 0.45) + 0.8
+			outline.append(at + Vector2.from_angle(turn + TAU * i / 8.0) * r)
+		draw_colored_polygon(outline, OUTLINE)
+		draw_colored_polygon(points, color)
 
 ## Ends any stun or lock right away, for effects like waking up.
 func clear_stun() -> void:
 	_locked_time = 0.0
 	_stunned_time = 0.0
+	if _stun_swirl != null:
+		_stun_swirl.visible = false
 
 ## Makes the unit attack `enemy` right now, ignoring range and attack timing. It's a real
 ## attack: it can wrack, triggers on-attack effects, and resets the attack timer.

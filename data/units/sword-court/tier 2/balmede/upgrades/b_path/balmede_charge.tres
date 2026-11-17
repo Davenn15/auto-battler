@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BalmedeChargeGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 2/balmede/upgrades/b_path/scripts/charge_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Disrupting Charge"
+cast_time = 0.3
+description = "Charges through the farthest enemy within 4 cells. Every enemy she passes takes 60 (+50% Might) damage and is stunned for 0.75 seconds."

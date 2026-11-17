@@ -11,6 +11,7 @@ extends Node
 ##     --battles N       test battles per plan (default: AiPlanner's, 2)
 ##     --pick-battles N  test battles per Ascension option (default: AiPlanner's, 6)
 ##     --seed N
+##     --aura-upgrades   the Aura upgrade system (MatchRules.aura_upgrades); off = the old shop upgrades
 ##
 ## Output: tools/sim_results/real_<time>/matches.jsonl (each worker appends as it goes, so
 ## a cut-short run still leaves its finished matches).
@@ -43,6 +44,7 @@ func _ready() -> void:
 	battles = int(_arg(args, "--battles", str(battles)))
 	pick_battles = int(_arg(args, "--pick-battles", str(pick_battles)))
 	seed_value = int(_arg(args, "--seed", str(randi())))
+	MatchRules.aura_upgrades = args.has("--aura-upgrades")
 	if args.has("--worker"):
 		_worker(args)
 	else:
@@ -63,8 +65,8 @@ func _coordinate() -> void:
 	var out_path := out_dir.path_join("matches.jsonl")
 	FileAccess.open(out_path, FileAccess.WRITE).close()
 	var count := clampi(workers, 1, total_matches)
-	print("Real sim: %d matches on %d workers (%d plans x %d battles, %d battles per Ascension), seed %d -> %s" %
-			[total_matches, count, candidates, battles, pick_battles, seed_value, out_dir])
+	print("Real sim: %d matches on %d workers (%d plans x %d battles, %d battles per Ascension), seed %d, aura upgrades %s -> %s" %
+			[total_matches, count, candidates, battles, pick_battles, seed_value, "on" if MatchRules.aura_upgrades else "off", out_dir])
 	var pids: Array = []
 	for w in count:
 		var mine := total_matches / count + (1 if w < total_matches % count else 0)
@@ -72,7 +74,7 @@ func _coordinate() -> void:
 				"--path", ProjectSettings.globalize_path("res://"), "res://tools/real_sim.tscn", "--",
 				"--worker", "--matches", str(mine), "--seed", str(seed_value * 1000 + w),
 				"--candidates", str(candidates), "--battles", str(battles), "--pick-battles", str(pick_battles),
-				"--out", out_dir.path_join("w%d.jsonl" % w)])
+				"--out", out_dir.path_join("w%d.jsonl" % w)] + (["--aura-upgrades"] if MatchRules.aura_upgrades else []))
 		pids.append(pid)
 	var started := Time.get_ticks_msec()
 	var last_report := 0
@@ -149,6 +151,8 @@ func _play_match(match_seed: int) -> Dictionary:
 			p.last_fielded_ascensions = p.ascensions.duplicate()
 		var r: Dictionary = await BattleArena.fight(self, players[0].units, players[1].units, COMBAT_LIMIT, -1,
 				players[0].ascensions, players[1].ascensions)
+		ArmySpawner.apply_match_gains(players[0].units, r["gains"].get(1, {}))   # Codger B's rest-of-match gains
+		ArmySpawner.apply_match_gains(players[1].units, r["gains"].get(2, {}))
 		var damage := [0, 0]
 		match r["winner"]:
 			1: damage[1] = MatchRules.loss_damage(round_number, r["bottom_aura"])
@@ -183,7 +187,7 @@ func _play_match(match_seed: int) -> Dictionary:
 		result = 1.0
 	elif players[1].is_alive() and not players[0].is_alive():
 		result = 0.0
-	var record := {"seed": match_seed, "rounds": round_number, "combats": combats.size(),
+	var record := {"seed": match_seed, "aura_upgrades": MatchRules.aura_upgrades, "rounds": round_number, "combats": combats.size(),
 			"seconds": (Time.get_ticks_msec() - started) / 1000.0, "players": []}
 	for i in 2:
 		var p := players[i]

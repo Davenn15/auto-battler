@@ -145,6 +145,8 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if not is_instance_valid(grid):
+		return   # the battle (and its board) is gone; this ring is about to be too
 	var r := (radius_cells + 0.5) * grid.cell_spacing()   # reaches the outer edge of the last cell
 	draw_circle(Vector2.ZERO, r, Color(COLOR, 0.15))
 	# A slightly wavy outline that slowly turns.

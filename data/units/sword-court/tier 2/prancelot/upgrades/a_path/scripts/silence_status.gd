@@ -11,6 +11,7 @@ func _init(p_duration: float) -> void:
 
 func on_applied(unit: BattleUnit) -> void:
 	unit.show_float_text("Silenced", Color(0.75, 0.6, 1.0))
+	unit.crowd_controlled.emit(unit)
 
 
 func blocks_charge_gain(_unit: BattleUnit) -> bool:

@@ -1,12 +1,14 @@
 class_name CtrlPassive
 extends Passive
-## CTRL(R)'s passive: its wards rise with every enemy targeting it, and the first time it
-## drops below each health threshold it launches a siphon drone (see CtrlDrones).
+## CTRL(R)'s passive: every time it takes damage it gains Ward of that damage's type for a
+## while, and the first time it drops below each health threshold it launches a siphon
+## drone (see CtrlDrones).
 
-## Added to all three wards per enemy whose target is CTRL(R).
-@export var ward_per_targeter: float = 10.0
-## Most targeting enemies counted (5 = at most +50).
-@export var max_targeters: int = 5
+## Ward of the damage's type gained per hit taken, for Ward Duration seconds each.
+@export var ward_per_hit: float = 5.0
+@export var ward_duration: float = 3.0
+## Most Ward of one type it can have from this at once.
+@export var ward_cap: float = 40.0
 ## Health shares (of max) that each launch one siphon drone the first time it drops below.
 @export var thresholds: PackedFloat32Array = PackedFloat32Array([0.66, 0.33])
 ## Share of the enemy's max health those drones drain.
@@ -21,9 +23,11 @@ func on_battle_start(unit: BattleUnit) -> void:
 
 
 class CtrlStatus extends Status:
+	const WARDS := [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]
 	var passive: CtrlPassive
-	var targeters := 0          # enemies targeting CTRL(R), counted each tick
 	var _next_threshold := 0    # index of the next threshold still to trigger
+	## Per damage type: the time left on each Ward stack it has from hits.
+	var _stacks := [[], [], []]
 
 	func _init(p_passive: CtrlPassive) -> void:
 		passive = p_passive
@@ -31,18 +35,29 @@ class CtrlStatus extends Status:
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false
 
-	func tick(unit: BattleUnit, _delta: float) -> void:
+	## Any damage that reaches it (after wards, so a fully shielded hit still counts) adds a
+	## Ward stack of that damage's type, if it's under the cap.
+	func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:
+		if damage > 0.0 and unit.incoming_is_hit:
+			var stacks: Array = _stacks[clampi(unit.incoming_damage_type, 0, 2)]
+			if (stacks.size() + 1) * passive.ward_per_hit <= passive.ward_cap:
+				stacks.append(passive.ward_duration)
+			else:
+				# At the cap: the oldest stack is refreshed instead.
+				stacks.pop_front()
+				stacks.append(passive.ward_duration)
+		return damage
+
+	func tick(unit: BattleUnit, delta: float) -> void:
 		if not unit.active:
 			return
-		var count := 0
-		for node in unit.get_tree().get_nodes_in_group("units"):
-			var enemy := node as BattleUnit
-			if enemy != null and enemy.alive and enemy.team != unit.team and enemy.target == unit:
-				count += 1
-		targeters = mini(count, passive.max_targeters)
+		for stacks in _stacks:
+			for i in range(stacks.size() - 1, -1, -1):
+				stacks[i] -= delta
+				if stacks[i] <= 0.0:
+					stacks.remove_at(i)
 		# One drone per threshold crossed (a big hit can cross both at once).
-		while _next_threshold < passive.thresholds.size() \
-				and unit.health < unit.max_health * passive.thresholds[_next_threshold]:
+		while _next_threshold < passive.thresholds.size() 				and unit.health < unit.max_health * passive.thresholds[_next_threshold]:
 			_next_threshold += 1
 			_launch(unit)
 
@@ -59,6 +74,7 @@ class CtrlStatus extends Status:
 		return picks[0] if not picks.is_empty() else null
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
-		if stat in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
-			return value + passive.ward_per_targeter * targeters
+		var i := WARDS.find(stat)
+		if i >= 0:
+			return value + minf(_stacks[i].size() * passive.ward_per_hit, passive.ward_cap)
 		return value

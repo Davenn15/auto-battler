@@ -12,6 +12,10 @@ var items: Array[Keepsake] = []   # Shards and keepsakes on the unit
 var buffs := 0                 # Reserve buffs bought once it was fully upgraded
 ## Chosen-unit Ascensions given to this unit (also in its owner's ascensions list).
 var ascensions: Array[Ascension] = []
+## Stats it has gained for the rest of the match ({Stats.Stat: amount}; Codger B's kills).
+var match_stats: Dictionary = {}
+## Stacks of Glory it has gained for the rest of the match (Codger B2).
+var glory: int = 0
 
 
 func _init(p_data: UnitData = null) -> void:
@@ -52,6 +56,8 @@ func copy() -> ArmyUnit:
 	other.items = items.duplicate()
 	other.buffs = buffs
 	other.ascensions = ascensions.duplicate()
+	other.match_stats = match_stats.duplicate()
+	other.glory = glory
 	return other
 
 
@@ -62,6 +68,7 @@ func to_dict() -> Dictionary:
 		"unit": data.resource_path, "path": Array(path), "placed": placed,
 		"cell": [cell.x, cell.y], "items": items.map(func(k): return k.resource_path), "buffs": buffs,
 		"ascensions": ascensions_to_array(ascensions),
+		"match_stats": _stats_to_dict(match_stats), "glory": glory,
 	}
 
 
@@ -75,7 +82,19 @@ static func from_dict(d: Dictionary) -> ArmyUnit:
 		unit.items.append(load(item_path) as Keepsake)
 	unit.buffs = int(d["buffs"])
 	unit.ascensions = ascensions_from_array(d.get("ascensions", []))
+	var stats: Dictionary = d.get("match_stats", {})
+	for key in stats:
+		unit.match_stats[int(key)] = float(stats[key])
+	unit.glory = int(d.get("glory", 0))
 	return unit
+
+
+## Stat keys as text, so the dictionary survives being sent as JSON.
+static func _stats_to_dict(stats: Dictionary) -> Dictionary:
+	var out := {}
+	for stat in stats:
+		out[str(stat)] = stats[stat]
+	return out
 
 
 static func army_to_array(army: Array[ArmyUnit]) -> Array:

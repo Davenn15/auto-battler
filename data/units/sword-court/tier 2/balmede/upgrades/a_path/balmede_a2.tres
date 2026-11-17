@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+description = "If Plant's Shield isn't broken by the time it ends, she gains a stack of Glory: her base attributes and Wards are 5% higher for the rest of the match."
+gambit_overrides = Dictionary[String, float]({
+"glory_if_unbroken": 1.0
+})

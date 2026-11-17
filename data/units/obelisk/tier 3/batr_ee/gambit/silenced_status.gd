@@ -18,6 +18,7 @@ static func silence(target: BattleUnit, duration: float) -> void:
 	for status in target.statuses:
 		if status is SilencedStatus:
 			status.time_left = maxf(status.time_left, duration)
+			target.crowd_controlled.emit(target)   # silenced again: counts as a new silence
 			return
 	var silenced := SilencedStatus.new()
 	silenced.time_left = duration
@@ -26,6 +27,7 @@ static func silence(target: BattleUnit, duration: float) -> void:
 
 func on_applied(unit: BattleUnit) -> void:
 	unit.show_float_text("Silenced", VoltageStatus.LIGHT)
+	unit.crowd_controlled.emit(unit)
 	_label = Label.new()
 	_label.text = "∅"
 	_label.add_theme_font_size_override("font_size", 16)

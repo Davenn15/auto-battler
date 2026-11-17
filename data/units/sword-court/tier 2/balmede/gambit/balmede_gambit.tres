@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PlantGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 2/balmede/gambit/plant_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Plant"
+cast_time = 0.3
+description = "Plants herself where she stands for 4 seconds, gaining a 300 Shield and +40 to all three Wards. She can't move while planted."

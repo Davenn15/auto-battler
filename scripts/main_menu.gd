@@ -69,6 +69,16 @@ func _build() -> void:
 	# Factions: yours (vs the computer and online), the computer's, and both watched sides.
 	_your_faction = _faction_picker("yours")
 	_row([_caption("Your faction"), _your_faction])
+	# TESTING: the Aura upgrade system (MatchRules.aura_upgrades). Online, the host's choice is used.
+	var aura_upgrades := CheckBox.new()
+	aura_upgrades.text = "Aura upgrades: buy upgrades from a unit's menu (new system)"
+	aura_upgrades.tooltip_text = "On: upgrade owned units for Aura from their upgrade menu; a shop copy of a unit you own buys its Reserve stat buff.\nOff: the old system, where the shop copy is the upgrade.\nOnline, both players use the host's setting."
+	aura_upgrades.button_pressed = bool(_setting("options", "aura_upgrades", false))
+	MatchRules.aura_upgrades = aura_upgrades.button_pressed
+	aura_upgrades.toggled.connect(func(on: bool):
+		MatchRules.aura_upgrades = on
+		_save_setting("options", "aura_upgrades", on))
+	_row([aura_upgrades])
 	_computer_faction = _faction_picker("computer")
 	_row([_wide_button("Play vs Computer", _play_computer), _caption("Computer:"), _computer_faction])
 	_button("Host online match", _host)

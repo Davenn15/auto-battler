@@ -1,15 +1,15 @@
 class_name RoundTrack
 extends Control
-## The round order in the top bar: the last round, this one and the next three, as icons
+## The round order in the top bar: the last two rounds, this one and the next four, as icons
 ## along a line. Player Combat is crossed swords, a Neutral Ascension a circle with an
 ## upward arrow, a Faction Ascension that faction's emblem (Sword Court: a crown pierced by
 ## a sword; Obelisk: an eye with circuit nerves). Hover an icon for what it is.
 
 enum Kind { OPENING, COMBAT, NEUTRAL, FACTION, SKIPPED }
 
-const BEFORE := 1   # rounds shown before the current one
-const AFTER := 3    # and after it
-const SPACING := 50.0
+const BEFORE := 2   # rounds shown before the current one
+const AFTER := 4    # and after it
+const SPACING := 46.0   # 7 icons = 322, inside the HUD side column (330)
 const ICON := 20.0
 const CURRENT_SCALE := 1.15
 

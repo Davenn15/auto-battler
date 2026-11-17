@@ -16,7 +16,7 @@ signal message(kind: String, data: Dictionary)
 const PORT := 7777
 ## Bump whenever a change would make two copies play differently. Copies with different
 ## versions refuse to play each other.
-const PROTOCOL_VERSION := "proto-3"
+const PROTOCOL_VERSION := "proto-4"
 
 enum Mode { OFFLINE, HOST, CLIENT }
 
@@ -110,11 +110,12 @@ func _receive(kind: String, data: Dictionary) -> void:
 					return
 				match_seed = randi() & 0x7fffffff
 				opponent_faction = data.get("faction", opponent_faction)
-				send("start", {"seed": match_seed, "faction": local_faction})
+				send("start", {"seed": match_seed, "faction": local_faction, "aura_upgrades": MatchRules.aura_upgrades})
 				match_ready.emit(match_seed)
 		"start":   # host -> joiner
 			match_seed = int(data["seed"])
 			opponent_faction = data.get("faction", opponent_faction)
+			MatchRules.aura_upgrades = bool(data.get("aura_upgrades", false))   # the host's upgrade system
 			match_ready.emit(match_seed)
 		"reject":
 			var reason: String = data.get("reason", "The host refused the connection.")

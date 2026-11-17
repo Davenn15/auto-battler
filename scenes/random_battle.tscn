@@ -12,8 +12,8 @@
 [node name="RandomBattle" type="Node2D" unique_id=1912766257]
 position = Vector2(-71, -22)
 script = ExtResource("1_b1vyt")
-arv_max = 100
-team_1_units = Array[String](["von carrow b"])
+arv_max = 50
+team_1_units = Array[String](["codger", "balmede"])
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=496656011]
 

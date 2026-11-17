@@ -1,18 +1,20 @@
 [gd_resource type="Resource" script_class="Ascension" format=3]
 
 [ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/copies_gain_keepsakes_effect.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/gambit_duplicate_effect.gd" id="2"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 1/bremes/bremes.tres" id="3"]
 [ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
+health_fraction = 0.25
+extra_dodge = 0.2
+duration = 6.0
 
 [resource]
 script = ExtResource("1")
 ascension_name = "Perfect Reflection"
-description = "Bremes' Mirror Image copies gain her Keepsakes."
+description = "Whenever Bremes casts her Gambit, a duplicate of her appears beside her with her Keepsakes. It has 25% of her health, extra dodge and no Gambit, and vanishes after 6 seconds."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
-required_branch = 1
 effect = SubResource("Effect")

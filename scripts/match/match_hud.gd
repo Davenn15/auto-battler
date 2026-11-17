@@ -1,7 +1,7 @@
 class_name MatchHud
 extends Control
-## The match screen's panels: a top bar (round, health and money), the planning panel on
-## the right (shop, bench, items), the ritual table's own window, the Ascension badges, the
+## The match screen's panels: a top bar (round and phase), health bars by the board, the planning panel on
+## the right (shop with your Aura and Reserve, bench, items), the ritual table's own window, the Ascension badges, the
 ## log and the Ready / Fight button under the board, and pop-ups for upgrades, results and
 ## the end. Everything is rebuilt from the MatchGame's state by refresh().
 ##
@@ -18,6 +18,8 @@ var game: MatchGame
 
 var _top: RichTextLabel
 var _round_track: RoundTrack
+var _health_bars: MatchHealthBars   # both players' health, by the board
+var _money: RichTextLabel           # Aura and Reserve, in the shop's header
 var _side: PanelContainer
 var _shop_units: HBoxContainer
 var _shop_shards: HBoxContainer
@@ -50,6 +52,7 @@ const DOUBLE_CLICK_MS := 500
 var _spectate_bar: HBoxContainer
 var _encounter: PanelContainer
 var _encounter_title: Label
+var _encounter_reserve: RichTextLabel   # "You have X Reserve", for the rerolls
 var _encounter_cards: HBoxContainer
 var _unit_pick: PanelContainer
 var _unit_pick_text: RichTextLabel
@@ -157,11 +160,46 @@ func _build_unit_tip() -> void:
 
 ## Shows the unit popup beside the shop, level with `button`.
 func show_unit_tip(button: Control, data: UnitData) -> void:
-	_unit_tip_text.text = describe_shop_unit(data, game.player.find_unit(data))
+	_show_tip(button, describe_shop_unit(data, game.player.find_unit(data)))
+
+
+## Shows an item's info in the same popup, at once (no tooltip delay), level with `button`.
+## `prefix` goes above it (the ritual table's "Makes").
+func show_item_tip(button: Control, item: Keepsake, prefix: String = "") -> void:
+	if item == null:
+		return
+	var lines := ItemToolbox.describe(item).split("\n")
+	var text := prefix + "[b]%s[/b]" % lines[0]
+	if lines.size() > 1:
+		text += "\n" + Keyphrases.format("\n".join(lines.slice(1)))
+	_show_tip(button, text)
+
+
+## The popup beside the shop, level with `button`, showing `bbcode`. It hides when the
+## mouse leaves `button` or `button` goes away (the HUD rebuilds its buttons often).
+var _tip_owner: Control
+
+func _show_tip(button: Control, bbcode: String) -> void:
+	_unit_tip_text.text = bbcode
 	_unit_tip.visible = true
+	_tip_owner = button
+	if not button.tree_exiting.is_connected(_on_tip_owner_gone.bind(button)):
+		button.tree_exiting.connect(_on_tip_owner_gone.bind(button))
 	_fit_font(_unit_tip, [_unit_tip_text], [13, 12, 11, 10, 9])
 	var top := clampf(button.global_position.y, 40.0, size.y - _unit_tip.size.y - 8.0)
 	_unit_tip.position = Vector2(_side.global_position.x - _unit_tip.size.x - 8.0, top)
+
+
+func _on_tip_owner_gone(button: Control) -> void:
+	if _tip_owner == button:
+		hide_unit_tip()
+
+
+## Hovering `button` shows `item`'s info in the popup (see show_item_tip).
+func _item_hover(button: Control, item: Keepsake, prefix: String = "") -> void:
+	button.tooltip_text = ""
+	button.mouse_entered.connect(func(): show_item_tip(button, item, prefix))
+	button.mouse_exited.connect(hide_unit_tip)
 
 
 ## Steps the font of `labels` (Labels, Buttons, RichTextLabels) down through `sizes` until
@@ -183,6 +221,7 @@ func _fit_font(panel: Control, labels: Array, sizes: Array) -> void:
 
 func hide_unit_tip() -> void:
 	_unit_tip.visible = false
+	_tip_owner = null
 
 
 ## What a shop unit does: its passives and Gambit (as you have it, if you own it), and
@@ -211,7 +250,10 @@ static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
 		lines.append(_ability_text("Passive", UnitInfoPanel._ability_name(passive, passive.passive_name, "Passive"), passive.description))
 	if gambit != null:
 		lines.append(_ability_text("Gambit", UnitInfoPanel._ability_name(gambit, gambit.gambit_name, "Gambit"), gambit.description))
-	if owned != null and not owned.is_maxed():
+	if owned != null and MatchRules.aura_upgrades:
+		lines.append("")
+		lines.append("[b]You own it:[/b] buying it buffs its stats (upgrade it from its own menu).")
+	elif owned != null and not owned.is_maxed():
 		lines.append("")
 		lines.append("[b]Buying it upgrades yours. Choose one:[/b]")
 		for choice in MatchRules.upgrade_choices(owned):
@@ -320,6 +362,9 @@ func _build_top() -> void:
 	_round_track.offset_top = 0
 	_round_track.offset_bottom = 30
 	add_child(_round_track)
+	# Health bars: the opponent's above the board, yours below (with the damage animation).
+	_health_bars = MatchHealthBars.new()
+	add_child(_health_bars)
 
 
 func _build_side() -> void:
@@ -342,7 +387,21 @@ func _build_side() -> void:
 	_side.add_child(column)
 
 	# Shop: unit tiles side by side (hover one for what it does), then Shards, Keepsake.
-	column.add_child(_header("Shop"))
+	# The header line also holds your Aura and Reserve, next to what spends them.
+	var shop_head := HBoxContainer.new()
+	column.add_child(shop_head)
+	var shop_title := _header("Shop")
+	shop_head.add_child(shop_title)
+	_money = RichTextLabel.new()
+	_money.bbcode_enabled = true
+	_money.fit_content = true
+	_money.scroll_active = false
+	_money.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_money.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_money.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_money.add_theme_font_size_override("normal_font_size", 14)
+	_money.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shop_head.add_child(_money)
 	_shop_units = HBoxContainer.new()
 	_shop_units.add_theme_constant_override("separation", 4)
 	column.add_child(_shop_units)
@@ -419,6 +478,8 @@ func _build_table_window() -> void:
 		button.expand_icon = true
 		button.pressed.connect(func(): game.table_clicked(slot))
 		_wire_item(button, func(): return {"from": "table", "slot": slot}, func(): return {"to": "table", "slot": slot})
+		button.mouse_entered.connect(func(): show_item_tip(button, game.table[slot]))
+		button.mouse_exited.connect(hide_unit_tip)
 		column.add_child(button)
 		_table_slots.append(button)
 	column.add_child(_centered_label("="))
@@ -427,6 +488,8 @@ func _build_table_window() -> void:
 	_table_result.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_table_result.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_table_result.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_table_result.mouse_entered.connect(func(): show_item_tip(_table_result, game.table_preview(), "Makes "))
+	_table_result.mouse_exited.connect(hide_unit_tip)
 	column.add_child(_table_result)
 	_combine = Button.new()
 	_combine.text = "Combine"
@@ -612,8 +675,8 @@ func _build_bottom() -> void:
 	_ascension_strip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	_ascension_strip.offset_left = MatchGame.BOARD_SCREEN_CENTER.x - 576 - 230
 	_ascension_strip.offset_right = MatchGame.BOARD_SCREEN_CENTER.x - 576 + 230
-	_ascension_strip.offset_top = -116
-	_ascension_strip.offset_bottom = -60
+	_ascension_strip.offset_top = -96   # under your health bar (MatchHealthBars.BOTTOM_Y)
+	_ascension_strip.offset_bottom = -49
 	add_child(_ascension_strip)
 
 
@@ -649,6 +712,15 @@ func _build_encounter() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF   # wrapping at no width would make the panel huge
 	column.add_child(hint)
+	# Your Reserve, for the rerolls (the shop, where it usually shows, is hidden here).
+	_encounter_reserve = RichTextLabel.new()
+	_encounter_reserve.bbcode_enabled = true
+	_encounter_reserve.fit_content = true
+	_encounter_reserve.scroll_active = false
+	_encounter_reserve.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_encounter_reserve.add_theme_font_size_override("normal_font_size", 13)
+	_encounter_reserve.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(_encounter_reserve)
 	_encounter_cards = HBoxContainer.new()
 	_encounter_cards.add_theme_constant_override("separation", 10)
 	column.add_child(_encounter_cards)
@@ -666,6 +738,7 @@ func show_encounter(title: String) -> void:
 	if not _encounter.visible:
 		return
 	_encounter_title.text = title
+	_encounter_reserve.text = "[center]You have %s[/center]" % reserve_text(game.player.reserve, 13)
 	var can_reroll := game.can_reroll_ascensions()
 	for slot in offers.size():
 		var ascension := offers[slot]
@@ -870,6 +943,7 @@ func _show_popup(text: String, buttons: Array) -> void:
 		button.text = entry[0]
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.pressed.connect(entry[1])
+		button.disabled = entry.size() > 2 and entry[2]
 		_popup_buttons.add_child(button)
 		labels.append(button)
 	_popup.visible = true
@@ -880,6 +954,16 @@ func _show_popup(text: String, buttons: Array) -> void:
 
 func hide_result() -> void:
 	_popup.visible = false
+
+
+## Keeps the health bars at these values (true = yours) until play_damage moves them.
+func hold_health(hp: Dictionary) -> void:
+	_health_bars.hold(hp)
+
+
+## The post-fight damage animation (see MatchHealthBars.play_damage). Await it.
+func play_damage(hits: Array) -> void:
+	await _health_bars.play_damage(hits)
 
 
 func show_result(text: String) -> void:
@@ -901,6 +985,132 @@ func _show_upgrade_choice(slot: int, unit: ArmyUnit) -> void:
 				_pick_upgrade.bind(slot, choice["index"])])
 	buttons.append(["Cancel", func(): hide_result()])
 	_show_popup("Choose %s's upgrade:" % unit.display_name(), buttons)
+
+
+## Aura upgrade system (MatchRules.aura_upgrades): `unit`'s upgrade choices, as two small
+## cards beside the unit info panel. Click one to buy it; click anywhere else (or the
+## Upgrade button again) to close. Planning only.
+func show_upgrade_menu(unit: ArmyUnit) -> void:
+	if not MatchRules.aura_upgrades or unit.is_maxed() or game.phase != MatchGame.Phase.PLANNING or MatchGame.spectating:
+		return
+	if _upgrade_menu == null:
+		_build_upgrade_menu()
+	if _upgrade_menu.visible and _upgrade_menu_unit == unit:
+		hide_upgrade_menu()   # the button again: close
+		return
+	_upgrade_menu_unit = unit
+	var short := not MatchRules.can_buy_upgrade(game.player, unit)
+	_upgrade_short.visible = short
+	_upgrade_short.text = "Needs %d Aura (you have %d)" % [MatchRules.upgrade_cost(unit), game.player.aura]
+	for child in _upgrade_cards.get_children():
+		_upgrade_cards.remove_child(child)
+		child.queue_free()
+	for choice in MatchRules.upgrade_choices(unit):
+		_upgrade_cards.add_child(_upgrade_card(unit, choice, short))
+	_upgrade_menu.visible = true
+	_place_upgrade_menu()
+	_place_upgrade_menu.call_deferred()   # again once the cards' text has laid out
+
+
+## Beside the unit info panel, level with the Upgrade button, shrunk to fit its cards.
+func _place_upgrade_menu() -> void:
+	if _upgrade_menu == null or not _upgrade_menu.visible:
+		return
+	_upgrade_menu.reset_size()
+	var panel := game.unit_info.get_global_rect()
+	var top := game.unit_info.upgrade_row.get_global_rect().position.y
+	_upgrade_menu.position = Vector2(panel.end.x + 6, top).clamp(Vector2(8, 8), size - _upgrade_menu.size - Vector2(8, 8))
+
+
+## One path's card: its letter and name, then what it does. Highlights on hover; a click
+## buys it (unless you can't afford it).
+func _upgrade_card(unit: ArmyUnit, choice: Dictionary, short: bool) -> PanelContainer:
+	var upgrade: Upgrade = choice["upgrade"]
+	var path := unit.path.duplicate()
+	path.append(choice["index"])
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(UPGRADE_CARD_WIDTH, 0)
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.12, 0.12, 0.15)
+	style.border_color = UPGRADE_CYAN if not short else UPGRADE_CYAN.darkened(0.5)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(5)
+	style.set_content_margin_all(7)
+	card.add_theme_stylebox_override("panel", style)
+	var text := RichTextLabel.new()
+	text.bbcode_enabled = true
+	text.fit_content = true
+	text.scroll_active = false
+	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text.custom_minimum_size = Vector2(UPGRADE_CARD_WIDTH - 14, 0)   # wraps at this width, not at 0
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_theme_font_size_override("normal_font_size", 11)
+	text.add_theme_font_size_override("bold_font_size", 12)
+	var label := RandomTeams.path_label(path)
+	var name_part := " " + upgrade.upgrade_name if upgrade.upgrade_name not in ["", "Upgrade"] else ""
+	var body := Keyphrases.format(upgrade.description) if upgrade.description != "" else describe_upgrade(upgrade)
+	text.text = "[b][color=#%s]%s[/color]%s[/b]
+%s" % [UPGRADE_CYAN.lightened(0.3).to_html(false), label, name_part, body]
+	if short:
+		text.modulate.a = 0.55
+	card.add_child(text)
+	if not short:
+		card.mouse_entered.connect(func(): style.bg_color = Color(0.13, 0.25, 0.29))
+		card.mouse_exited.connect(func(): style.bg_color = Color(0.12, 0.12, 0.15))
+		card.gui_input.connect(func(event: InputEvent):
+			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+				_pick_aura_upgrade(unit, choice["index"]))
+	return card
+
+
+const UPGRADE_CARD_WIDTH := 175.0
+var _upgrade_menu: PanelContainer
+var _upgrade_menu_unit: ArmyUnit   # whose choices are showing
+var _upgrade_short: Label          # "Needs X Aura", when you can't afford it
+var _upgrade_cards: HBoxContainer
+
+## The upgrade cards' small frame. Built on first use.
+func _build_upgrade_menu() -> void:
+	_upgrade_menu = PanelContainer.new()
+	var style := _frame(5)
+	style.border_color = UPGRADE_CYAN.darkened(0.3)
+	_upgrade_menu.add_theme_stylebox_override("panel", style)
+	_upgrade_menu.visible = false
+	add_child(_upgrade_menu)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 4)
+	_upgrade_menu.add_child(column)
+	_upgrade_short = _label("", 11, Color(1.0, 0.5, 0.5))
+	column.add_child(_upgrade_short)
+	_upgrade_cards = HBoxContainer.new()
+	_upgrade_cards.add_theme_constant_override("separation", 5)
+	column.add_child(_upgrade_cards)
+
+
+func hide_upgrade_menu() -> void:
+	if _upgrade_menu != null:
+		_upgrade_menu.visible = false
+
+
+## Closes the upgrade cards on a click anywhere outside them (the Upgrade button toggles
+## them itself). Doesn't take the click: whatever was under it still gets it.
+func _close_upgrade_menu_on_outside_click(event: InputEvent) -> void:
+	if _upgrade_menu == null or not _upgrade_menu.visible:
+		return
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed:
+		return
+	if _upgrade_menu.get_global_rect().has_point(click.position):
+		return
+	if game.unit_info.upgrade_row.visible and game.unit_info.upgrade_row.get_global_rect().has_point(click.position):
+		return
+	hide_upgrade_menu()
+
+
+func _pick_aura_upgrade(unit: ArmyUnit, choice: int) -> void:
+	hide_upgrade_menu()
+	game.buy_upgrade(unit, choice)
 
 
 ## An upgrade's name and description if it has them; otherwise what it changes, read from
@@ -948,6 +1158,8 @@ func refresh() -> void:
 	hide_unit_tip()   # the shop buttons are about to be rebuilt
 	var planning := game.phase == MatchGame.Phase.PLANNING and not MatchGame.spectating
 	_side.visible = planning
+	if not planning:
+		hide_upgrade_menu()   # upgrades are bought in planning only
 	_table_window.visible = planning
 	_hint.visible = planning
 	_spectate_bar.visible = MatchGame.spectating
@@ -993,9 +1205,11 @@ func _refresh_top() -> void:
 		if game.phase == MatchGame.Phase.PLANNING and MatchGame.PLANNING_TIMER_ON:
 			phase_name += " · [color=#ffd24d]%d s left[/color]" % ceili(maxf(game.planning_left, 0.0))
 		online_bits = "   [color=#7fdc7f]Ready ✓[/color]" if game.ai_ready else "   [color=#9a9aa5]planning…[/color]"
-	_top.text = "[b]Round %d[/b] · %s        [color=#66a6ff][b]%s[/b][/color]  HP %d   %s   %s   [color=#9a9aa5](%s given / %d)[/color]        [color=#ff6666][b]%s[/b][/color]  HP %d%s" % [
-			game.round_number, phase_name, p.player_name, maxi(p.hp, 0), aura_text(p.aura, 14), reserve_text(p.reserve, 14),
-			aura_text(p.aura_received, 12), MatchRules.max_aura_received(), game.ai.player_name, maxi(game.ai.hp, 0), online_bits]
+	# Health is on the bars by the board, money in the shop.
+	_top.text = "[b]Round %d[/b] · %s%s" % [game.round_number, phase_name, online_bits]
+	_money.text = "%s   %s   [color=#9a9aa5](%s given / %d)[/color]" % [aura_text(p.aura, 14), reserve_text(p.reserve, 14),
+			aura_text(p.aura_received, 12), MatchRules.max_aura_received()]
+	_health_bars.show_players(p, game.ai)
 
 
 func _refresh_shop() -> void:
@@ -1053,7 +1267,7 @@ func _refresh_shop() -> void:
 		button.disabled = p.reserve < MatchRules.SHARD_COST
 		_set_rich_text(button, "%s\n%s" % [Shard.NAMES[shard.first_shard], reserve_text(MatchRules.SHARD_COST, 11)], 10, 28.0)
 		button.add_theme_font_size_override("font_size", 10)
-		button.tooltip_text = ItemToolbox.describe(shard)
+		_item_hover(button, shard)
 		button.pressed.connect(func(): game.buy_shard(slot))
 		_shop_shards.add_child(button)
 	for child in _shop_keepsake.get_children():
@@ -1069,7 +1283,7 @@ func _refresh_shop() -> void:
 		_set_rich_text(button, "%s   %s [color=#9a9aa5](was %d)[/color]" % [keepsake.get_display_name(),
 				reserve_text(MatchRules.KEEPSAKE_COST, 11), MatchRules.SHARD_COST * 2], 10, 28.0)
 		button.add_theme_font_size_override("font_size", 10)
-		button.tooltip_text = ItemToolbox.describe(keepsake)
+		_item_hover(button, keepsake)
 		button.pressed.connect(func(): game.buy_keepsake())
 		_shop_keepsake.add_child(button)
 	_reroll.disabled = p.reserve < p.reroll_cost
@@ -1100,6 +1314,11 @@ func _refresh_bench() -> void:
 		if game.held.get("bench") == unit:
 			button.modulate = HELD_COLOR
 		button.pressed.connect(func(): game.bench_clicked(unit))
+		if MatchRules.aura_upgrades and not unit.is_maxed():
+			button.tooltip_text += "\nRight-click to upgrade (%d Aura)." % MatchRules.upgrade_cost(unit)
+			button.gui_input.connect(func(event: InputEvent):
+				if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+					show_upgrade_menu(unit))
 		button.set_drag_forwarding(_bench_drag.bind(unit), _can_drop_at.bind(_unit_dest.bind(unit)),
 				_drop_at.bind(_unit_dest.bind(unit)))
 		_bench.add_child(button)
@@ -1114,6 +1333,7 @@ func _note_click(item: Keepsake) -> void:
 ## A double-click right after clicking a Shard sends that Shard to the ritual table. Runs
 ## before the buttons see the second click, which would otherwise undo or redo the first.
 func _input(event: InputEvent) -> void:
+	_close_upgrade_menu_on_outside_click(event)
 	var click := event as InputEventMouseButton
 	if click == null or not click.pressed or not click.double_click or click.button_index != MOUSE_BUTTON_LEFT:
 		return
@@ -1130,7 +1350,7 @@ func _item_button(item: Keepsake) -> Button:
 	button.icon = item.get_icon()
 	button.expand_icon = true
 	button.custom_minimum_size = ICON
-	button.tooltip_text = ItemToolbox.describe(item)
+	_item_hover(button, item)
 	return button
 
 
@@ -1159,6 +1379,43 @@ func _refresh_items() -> void:
 ## The items of the unit shown in the unit info panel, as buttons in its item row: drag or
 ## click a Shard to take it off (Keepsakes stay on), or drop items on the row to equip.
 ## Only for your own units while planning.
+const UPGRADE_CYAN := Color(0.17, 0.71, 0.81)
+const UPGRADE_INK := Color(0.02, 0.16, 0.2)   # text on the cyan
+const UPGRADE_BUTTON_HEIGHT := 30.0
+
+## Aura upgrade system: the solid cyan "UPGRADE (Aura) cost" button at the top of the unit
+## info panel, for one of your units in planning that can still upgrade. Opens the two
+## small upgrade cards beside the panel. Greyed (but still opens them, to read) when you
+## can't afford it. Hidden otherwise.
+func _refresh_upgrade_button(unit: ArmyUnit) -> void:
+	var slot := game.unit_info.upgrade_row
+	if _upgrade_menu != null and _upgrade_menu_unit != unit:
+		hide_upgrade_menu()   # another unit (or none) is shown now
+	for child in slot.get_children():
+		slot.remove_child(child)
+		child.queue_free()
+	slot.visible = unit != null and MatchRules.aura_upgrades and not unit.is_maxed()
+	if not slot.visible:
+		return
+	var cost := MatchRules.upgrade_cost(unit)
+	var affordable := MatchRules.can_buy_upgrade(game.player, unit)
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(0, UPGRADE_BUTTON_HEIGHT)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.tooltip_text = "Choose this unit's next upgrade." if affordable \
+			else "Choose this unit's next upgrade. You have %d Aura." % game.player.aura
+	var base := UPGRADE_CYAN if affordable else UPGRADE_CYAN.lerp(Color(0.35, 0.37, 0.4), 0.7)
+	for state in ["normal", "hover", "pressed", "focus"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = {"normal": base, "hover": base.lightened(0.15), "pressed": base.darkened(0.15), "focus": base}[state]
+		style.set_corner_radius_all(5)
+		button.add_theme_stylebox_override(state, style)
+	button.pressed.connect(show_upgrade_menu.bind(unit))
+	slot.add_child(button)
+	_set_rich_text(button, "[b][color=#%s]UPGRADE[/color][/b]  %s" % [UPGRADE_INK.to_html(false),
+			aura_text(cost, 14).replace("[/img] ", "[/img] [color=#%s]" % UPGRADE_INK.to_html(false)) + "[/color]"], 14)
+
+
 func refresh_selected() -> void:
 	var row := game.unit_info.item_row
 	for child in row.get_children():
@@ -1171,6 +1428,7 @@ func refresh_selected() -> void:
 		if index >= 0 and index < game.player.units.size():
 			unit = game.player.units[index]
 	row.visible = unit != null
+	_refresh_upgrade_button(unit)
 	if unit == null:
 		return
 	var title := _label("Items", 11, Color(0.6, 0.6, 0.66))
@@ -1194,11 +1452,11 @@ func _refresh_table() -> void:
 		var item: Keepsake = game.table[slot]
 		_table_slots[slot].icon = item.get_icon() if item != null else null
 		_table_slots[slot].text = "" if item != null else "+"
-		_table_slots[slot].tooltip_text = ItemToolbox.describe(item) if item != null else "Drag a Shard here"
+		_table_slots[slot].tooltip_text = "" if item != null else "Drag a Shard here"
 	var result := game.table_preview()
 	_combine.disabled = result == null
 	_table_result.texture = result.get_icon() if result != null else null
-	_table_result.tooltip_text = ("Makes " + ItemToolbox.describe(result)) if result != null \
+	_table_result.tooltip_text = "" if result != null \
 			else "Drag two Shards onto the table to see what they make."
 	_place_table_window.call_deferred()   # once the side panel has laid itself out
 
@@ -1209,5 +1467,7 @@ func _refresh_hint() -> void:
 				game.player.inventory[game.held["item"]].get_display_name()
 	elif game.held.has("bench"):
 		_hint.text = "Placing %s: click a cell on your half (right-click to cancel)." % game.held["bench"].label()
+	elif MatchRules.aura_upgrades:
+		_hint.text = "Drag your units to rearrange them. Click a unit (or right-click it on the bench) to upgrade it."
 	else:
 		_hint.text = "Drag your units to rearrange them."

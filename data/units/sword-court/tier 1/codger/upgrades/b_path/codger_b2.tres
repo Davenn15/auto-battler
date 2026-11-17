@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://ca202y1sjdnh6"]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_6fcrx"]
+
+[resource]
+script = ExtResource("1")
+description = "While Rend's bleed is ticking, shields and healing on the target are 40% less effective."
+gambit_overrides = Dictionary[String, float]({
+"heal_cut": 0.4
+})

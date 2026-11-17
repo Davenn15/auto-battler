@@ -142,6 +142,8 @@ func _ready() -> void:
 	unit_info.unit_selected.connect(_on_unit_info_selected)
 	_layout_left.call_deferred()
 	add_log("Round 1: Opening Shop. Spend your starting Aura and Reserve.")
+	if MatchRules.aura_upgrades:
+		add_log("Aura upgrades are on: upgrade a unit from its menu; a shop copy of a unit you own buys a Reserve stat buff.")
 	_begin_planning()
 
 
@@ -300,6 +302,18 @@ func buy_unit(slot: int, choice: int = -1) -> void:
 	changed()
 	if bought and upgrading and info != null and info.placed:
 		_play_upgrade_flourish(info)
+
+
+## Aura upgrade system: buys `unit`'s next upgrade from its upgrade menu (planning only).
+func buy_upgrade(unit: ArmyUnit, choice: int) -> void:
+	if phase != Phase.PLANNING:
+		return
+	var bought := MatchRules.buy_upgrade(player, unit, choice)
+	if bought:
+		add_log("Upgraded %s." % unit.label())
+	changed()
+	if bought and unit.placed:
+		_play_upgrade_flourish(unit)
 
 
 ## The faction's upgrade animation around `unit`'s figure on the board (just rebuilt).
@@ -973,6 +987,7 @@ func _on_battle_ended(winner: int) -> void:
 	if phase != Phase.COMBAT or _fight_over:
 		return
 	_fight_over = true
+	_keep_match_gains()
 	var result := {"round": round_number, "winner": winner,
 			"aura_1": ArmySpawner.surviving_aura(get_tree(), PLAYER_TEAM),
 			"aura_2": ArmySpawner.surviving_aura(get_tree(), ENEMY_TEAM),
@@ -992,6 +1007,22 @@ func _on_battle_ended(winner: int) -> void:
 			add_log("Fight over. Waiting for the host's result...")
 			hud.refresh()
 		_try_finish_as_joiner()
+
+
+## Writes what units gained for the rest of the match this fight (Codger B) back to the
+## armies they came from. Offline both armies were spawned from player.units and ai.units.
+## Online only our own side is ours to change: it was spawned from the army we sent (our
+## board units, in order); the other player keeps theirs and sends it with their next army.
+func _keep_match_gains() -> void:
+	var gains := ArmySpawner.collect_match_gains(get_tree())
+	if gains.is_empty():
+		return
+	if not online:
+		ArmySpawner.apply_match_gains(player.units, gains.get(PLAYER_TEAM, {}))
+		ArmySpawner.apply_match_gains(ai.units, gains.get(ENEMY_TEAM, {}))
+		return
+	var mine := PLAYER_TEAM if Net.is_host() else ENEMY_TEAM
+	ArmySpawner.apply_match_gains(player.board_units(), gains.get(mine, {}))
 
 
 func _try_finish_as_joiner() -> void:
@@ -1015,19 +1046,26 @@ func _apply_result(result: Dictionary) -> void:
 	var mine := int(result["aura_%d" % my_team])
 	var theirs := int(result["aura_%d" % other_team])
 	var lines: PackedStringArray = []
+	# For the damage animation: health before, and each side's orb (true = yours).
+	var hp_before := {true: player.hp, false: ai.hp}
+	var hits: Array = []
 	if winner == my_team:
 		var damage := MatchRules.loss_damage(round_number, mine)
+		hits.append(_damage_hit(true, my_team, damage, ai.hp - damage))
 		ai.hp -= damage
 		lines.append("You won! %d Aura of your units survived." % mine)
 		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, MatchRules.survivor_damage(mine)])
 	elif winner == other_team:
 		var damage := MatchRules.loss_damage(round_number, theirs)
+		hits.append(_damage_hit(false, other_team, damage, player.hp - damage))
 		player.hp -= damage
 		lines.append("You lost. %d Aura of their units survived." % theirs)
 		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, MatchRules.survivor_damage(theirs)])
 	else:
 		var to_player := MatchRules.draw_damage(round_number, theirs)
 		var to_ai := MatchRules.draw_damage(round_number, mine)
+		hits.append(_damage_hit(true, my_team, to_ai, ai.hp - to_ai))
+		hits.append(_damage_hit(false, other_team, to_player, player.hp - to_player))
 		player.hp -= to_player
 		ai.hp -= to_ai
 		lines.append("Draw. You take %d damage, the opponent takes %d." % [to_player, to_ai])
@@ -1037,10 +1075,28 @@ func _apply_result(result: Dictionary) -> void:
 			lines.append("Income: +%d Aura, +%d Reserve." % [paid["aura"], paid["reserve"]])
 	combats_done += 1
 	add_log("Round %d combat: %s" % [round_number, lines[0]])
-	hud.show_result("\n".join(lines))
-	hud.refresh()
 	if player.is_alive() and ai.is_alive():
 		_start_early_picks(round_number + 1)
+	# The pips and orb first (the health bars hold their old values until it hits), then
+	# the result. The Continue button only appears with the result, so nothing moves on.
+	hud.hold_health(hp_before)
+	hud.refresh()
+	await hud.play_damage(hits)
+	hud.show_result("\n".join(lines))
+	hud.refresh()
+
+
+## One side's damage orb for the HUD: `from_mine` says whose it is, `team` their battle
+## team (for the surviving units' pips), `damage` the total it deals, `hp_after` the
+## target's health once it lands.
+func _damage_hit(from_mine: bool, team: int, damage: int, hp_after: int) -> Dictionary:
+	var survivors := []
+	for node in get_tree().get_nodes_in_group("units"):
+		var unit := node as BattleUnit
+		if unit != null and unit.alive and unit.team == team and not unit.is_summon and unit.get_aura_value() > 0:
+			survivors.append({"at": unit.get_global_transform_with_canvas().origin, "aura": unit.get_aura_value()})
+	return {"from_mine": from_mine, "round_damage": MatchRules.round_damage(round_number),
+			"survivors": survivors, "damage": damage, "hp_after": hp_after}
 
 
 ## The Continue button after a combat: back to your board, or the end of the match.

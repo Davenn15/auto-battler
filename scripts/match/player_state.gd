@@ -26,6 +26,9 @@ var ascension_offers: Array[Ascension] = []
 var ascension_reroll_cost: int = MatchRules.ASCENSION_REROLL_START
 ## Keeps this shop for the next planning phase instead of a fresh one (then unlocks).
 var shop_locked := false
+## Units the next fresh shop is sure to offer: ones an Ascension they took buffs but they
+## don't own yet (see MatchRules.take_ascension). Used up by that shop.
+var promised_units: Array[UnitData] = []
 
 ## The army as it was when this player last fought: what the other player gets to see
 ## (and what the computer opponent plans against). Empty before the first combat.
@@ -86,6 +89,7 @@ func copy() -> PlayerState:
 	other.keepsake_offer = keepsake_offer
 	other.reroll_cost = reroll_cost
 	other.shop_locked = shop_locked
+	other.promised_units = promised_units.duplicate()
 	other.last_fielded = ArmyUnit.copy_army(last_fielded)
 	other.last_fielded_round = last_fielded_round
 	other.ascensions = ascensions.duplicate()
@@ -107,3 +111,4 @@ func adopt(other: PlayerState) -> void:
 	ascensions = other.ascensions
 	ascension_offers = other.ascension_offers
 	reroll_cost = other.reroll_cost
+	promised_units = other.promised_units

@@ -20,6 +20,8 @@ const PHRASES := [
 	# Capital C only: the mechanic is always written "Charge"; lowercase "charge" is just
 	# the ordinary word (Scour's beam "takes a moment to charge up").
 	["charge", "", "\\bCharge(?: [Rr]egen)?\\b"],
+	# Gambit, in the same pink as Charge: capital G only, like Charge.
+	["gambit", "", "\\bGambits?\\b"],
 	# The Beam keyword (see Beam): capital B only, so the ordinary word isn't coloured.
 	["beam", "", "\\bBeams?\\b"],
 	# The Hinder debuff (see HinderStatus).
@@ -35,6 +37,9 @@ const PHRASES := [
 const BEAM_COLOR := Color(0.45, 0.95, 1.0)
 
 static var _regex: RegEx
+static var _new_gambit: RegEx
+## Font size of the NEW GAMBIT tag over a new Gambit's name.
+const NEW_GAMBIT_TAG_SIZE := 10
 
 
 ## The colour a stat's name is shown in: its Shard's colour, lightened to read on the dark
@@ -43,11 +48,11 @@ static func color_of(kind: Shard.Kind) -> Color:
 	return (Shard.COLORS[kind] as Color).lightened(0.3)
 
 
-## Colours for keyphrases that aren't Shard stats: Charge is the pink of the casting bar,
-## regen the same green as Health, Beam a bright cyan.
+## Colours for keyphrases that aren't Shard stats: Charge and Gambit are the pink of the
+## casting bar, regen the same green as Health, Beam a bright cyan.
 static func extra_color(key: String) -> Color:
 	match key:
-		"charge":
+		"charge", "gambit":
 			return BattleUnit.CASTING_COLOR
 		"regen":
 			return color_of(Shard.Kind.HEALTH)
@@ -85,9 +90,28 @@ static func _tag(color: Color, icon: String, text: String) -> String:
 
 ## `text` with every keyphrase highlighted. Square brackets in it are escaped, so plain
 ## text can't be read as BBCode by accident.
+## `text` uncoloured (for upgrades not taken yet), but with a new Gambit still laid out as
+## a small NEW GAMBIT tag, the name as a title, then the rest. Square brackets escaped.
+static func plain(text: String) -> String:
+	if _new_gambit == null:
+		_new_gambit = RegEx.create_from_string("^New Gambit: ([^.]+)\\.\\s*")
+	var found := _new_gambit.search(text)
+	if found == null:
+		return _escape(text)
+	return "NEW GAMBIT\n[b]%s[/b]\n%s" % [_escape(found.get_string(1)), _escape(text.substr(found.get_end()))]
+
+
 static func format(text: String) -> String:
 	if text == "":
 		return text
+	# "New Gambit: Name. The rest." (B upgrades) reads as a small pink NEW GAMBIT tag, the
+	# Gambit's name as a title, then the rest.
+	if _new_gambit == null:
+		_new_gambit = RegEx.create_from_string("^New Gambit: ([^.]+)\\.\\s*")
+	var found := _new_gambit.search(text)
+	if found != null:
+		return "[font_size=%d][color=%s]NEW GAMBIT[/color][/font_size]\n[b]%s[/b]\n%s" % [NEW_GAMBIT_TAG_SIZE,
+				extra_color("gambit").to_html(false), _escape(found.get_string(1)), format(text.substr(found.get_end()))]
 	if _regex == null:
 		var parts: PackedStringArray = []
 		for phrase in PHRASES:

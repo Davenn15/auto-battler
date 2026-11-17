@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RendGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 1/codger/upgrades/b_path/scripts/rend_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+gambit_name = "Rend"
+cast_time = 0.4
+description = "Rends his target with his bladehook for 120 (+100% Might) damage, leaving it bleeding for 160 damage over 4 seconds. Bleeding skips Wards."
