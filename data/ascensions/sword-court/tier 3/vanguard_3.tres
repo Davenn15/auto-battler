@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="Ascension" format=3]
+[gd_resource type="Resource" script_class="Ascension" format=3 uid="uid://cmt4yv1lrfol0"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_wr3qo"]
 
 [resource]
 script = ExtResource("1")

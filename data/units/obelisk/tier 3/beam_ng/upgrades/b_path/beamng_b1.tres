@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Gains 40 Charge if the Focus Beam's target dies during the Beam."
+description = "Gains 40 Charge for each Focus Beam target that dies during the Beam."
 gambit_overrides = Dictionary[String, float]({
 "charge_on_kill": 40.0
 })

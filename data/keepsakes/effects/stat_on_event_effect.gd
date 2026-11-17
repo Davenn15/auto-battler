@@ -48,6 +48,7 @@ class Tracker extends Status:
 			unit.add_status(TimedStatStatus.new(effect.stat, effect.amount, effect.duration))
 		else:
 			stacked += effect.amount
+			unit.gain_permanent_stats({effect.stat: effect.amount})
 		_count += 1
 		_show(unit)
 

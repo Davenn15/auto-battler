@@ -8,7 +8,7 @@
 
 [resource]
 script = ExtResource("1_gdpk0")
-description = "Whenever an ally gains permanent stats, Lordred gains most of them too."
+description = "Whenever an ally gains permanent stats, Lordred gains 120% of them too."
 passives = Array[ExtResource("2_i8coe")]([ExtResource("5_k2fum")])
 next_choices = Array[ExtResource("1_gdpk0")]([ExtResource("2_sht3d"), ExtResource("3_b2wfp")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

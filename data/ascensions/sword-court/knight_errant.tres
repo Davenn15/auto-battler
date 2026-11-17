@@ -1,34 +1,21 @@
-[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+[gd_resource type="Resource" script_class="AscensionFamily" format=3 uid="uid://chm5kpyf6u5vh"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
-[ext_resource type="Script" path="res://data/ascensions/effects/lone_start_stat_effect.gd" id="3"]
+[ext_resource type="Script" uid="uid://civb8w40bfnkx" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" uid="uid://dsg2d3pnux5fo" path="res://data/ascensions/effects/lone_start_stat_effect.gd" id="3"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="3_0wg7x"]
 
 [sub_resource type="Resource" id="Effect_tier1"]
 script = ExtResource("3")
-stat = 2
-amount = 20.0
-
-[sub_resource type="Resource" id="Effect_tier2"]
-script = ExtResource("3")
-stat = 2
-amount = 30.0
-
-[sub_resource type="Resource" id="Effect_tier3"]
-script = ExtResource("3")
-stat = 2
-amount = 45.0
-
-[sub_resource type="Resource" id="Effect_tier4"]
-script = ExtResource("3")
-stat = 2
-amount = 60.0
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
 description = "Your units that start combat with no adjacent allies gain 20 Celerity."
-tier = 1
 effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+amount = 30.0
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
@@ -36,11 +23,19 @@ description = "Your units that start combat with no adjacent allies gain 30 Cele
 tier = 2
 effect = SubResource("Effect_tier2")
 
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+amount = 45.0
+
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
 description = "Your units that start combat with no adjacent allies gain 45 Celerity."
 tier = 3
 effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+amount = 60.0
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")

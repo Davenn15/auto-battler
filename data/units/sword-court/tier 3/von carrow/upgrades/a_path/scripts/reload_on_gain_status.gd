@@ -5,9 +5,7 @@ extends Status
 const RELOAD_COLOR := Color(1.0, 0.85, 0.4)
 
 
-func on_status_added(unit: BattleUnit, added: Status) -> void:
-	if not added.is_permanent_stat_gain():
-		return
+func on_permanent_stats_gained(unit: BattleUnit, _gains: Dictionary) -> void:
 	for status in unit.statuses:
 		if status is PistolStatus:
 			status.load_shot(unit)

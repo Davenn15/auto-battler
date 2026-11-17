@@ -244,10 +244,11 @@ static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> 
 enum EncounterKind { FACTION, NEUTRAL }
 ## Ascensions offered at each Encounter.
 const ASCENSION_OFFERS := 3
-## Rerolling an Encounter's offer: costs this much Reserve, going up by the step each
-## time, back to the start at the next Encounter.
-const ASCENSION_REROLL_START := 3
-const ASCENSION_REROLL_STEP := 3
+## Rerolling one of an Encounter's Ascensions: costs this much Reserve. Each card has its
+## own reroll button, but they share the price: any reroll raises it by the step for all
+## of them. Back to the start at the next Encounter.
+const ASCENSION_REROLL_START := 2
+const ASCENSION_REROLL_STEP := 1
 ## Each type's Encounters offer tier 1, 2, 3, 4 in turn; after that, that type's
 ## Encounters are skipped.
 const MAX_ASCENSION_TIER := 4
@@ -342,19 +343,23 @@ static func roll_ascension_offers(player: PlayerState, round_number: int, exclud
 	var weights: Array = pool.map(func(a): return ascension_weight(player, a))
 	player.ascension_offers.clear()
 	while player.ascension_offers.size() < ASCENSION_OFFERS and not pool.is_empty():
-		var total := 0.0
-		for w in weights:
-			total += w
-		var roll := randf() * total
-		var pick := pool.size() - 1
-		for i in pool.size():
-			roll -= weights[i]
-			if roll < 0.0:
-				pick = i
-				break
+		var pick := _weighted_pick(weights)
 		player.ascension_offers.append(pool[pick])
 		pool.remove_at(pick)
 		weights.remove_at(pick)
+
+
+## A random index into `weights`, each as likely as its weight.
+static func _weighted_pick(weights: Array) -> int:
+	var total := 0.0
+	for w in weights:
+		total += w
+	var roll := randf() * total
+	for i in weights.size():
+		roll -= weights[i]
+		if roll < 0.0:
+			return i
+	return weights.size() - 1
 
 
 ## Every Ascension the Encounter of `round_number` could offer `player`: its tier, none
@@ -372,19 +377,24 @@ static func _offerable(player: PlayerState, round_number: int) -> Array[Ascensio
 	return result
 
 
-## True if rerolling the current offer would show at least one Ascension not in it.
+## True if rerolling a card would show an Ascension not already on offer.
 static func can_reroll_ascensions(player: PlayerState, round_number: int) -> bool:
 	return _offerable(player, round_number).any(func(a): return not player.ascension_offers.has(a))
 
 
-## Rerolls the Encounter's offer for the Reserve price, which then goes up. The new offer
-## leaves out what was just offered. False if they can't pay or nothing new is left.
-static func reroll_ascensions(player: PlayerState, round_number: int) -> bool:
+## Rerolls the Ascension in `slot` for the Reserve price, which then goes up by the step
+## for every card. The new one is none of those on offer (nor the one it replaces); the
+## other cards stay. False if they can't pay or nothing new is left.
+static func reroll_ascension(player: PlayerState, round_number: int, slot: int) -> bool:
+	if slot < 0 or slot >= player.ascension_offers.size():
+		return false
 	if player.reserve < player.ascension_reroll_cost or not can_reroll_ascensions(player, round_number):
 		return false
+	var pool := _offerable(player, round_number).filter(func(a): return not player.ascension_offers.has(a))
+	var weights: Array = pool.map(func(a): return ascension_weight(player, a))
 	player.reserve -= player.ascension_reroll_cost
 	player.ascension_reroll_cost += ASCENSION_REROLL_STEP
-	roll_ascension_offers(player, round_number, player.ascension_offers.duplicate())
+	player.ascension_offers[slot] = pool[_weighted_pick(weights)]
 	return true
 
 

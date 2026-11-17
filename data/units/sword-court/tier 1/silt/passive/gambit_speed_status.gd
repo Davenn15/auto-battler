@@ -11,8 +11,9 @@ func _init(p_celerity_per_gambit: float) -> void:
 	celerity_per_gambit = p_celerity_per_gambit
 
 
-func on_gambit(_unit: BattleUnit) -> void:
+func on_gambit(unit: BattleUnit) -> void:
 	stacks += 1
+	unit.gain_permanent_stats({Stats.Stat.CELERITY: celerity_per_gambit})
 
 
 func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:

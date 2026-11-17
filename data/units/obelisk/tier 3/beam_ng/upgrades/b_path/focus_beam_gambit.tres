@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Focus Beam"
 cast_time = 0.2
-description = "Channels a damaging Beam for 4 seconds at the enemy in range that the most allies are attacking, dealing 150% of a normal attack per attack interval. While the Beam is on it, allied attacks on it deal 2% of its max health on top."
+description = "Channels a damaging Beam for 4 seconds at the enemy in range that the most allies are attacking, dealing 150% of a normal attack per attack interval. While the Beam is on it, allied attacks on it deal 2% of its max health on top. If the target dies, the Beam moves on to the next one for the time left."

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_5aqm1")
-description = "Marks the nearby enemy who has dealt the most damage, cutting its Wards, and goes after it. If it dies while marked, she gains a big shield."
+description = "Marks the nearby enemy who has dealt the most damage, cutting its Wards, and goes after it. If it dies while marked, she gains a big shield. Cast while her mark is still up, she loads a pistol shot instead."
 ward_cut = 0.5
 cast_time = 0.3
 metadata/_custom_type_script = "uid://c6av0hs4uaqsr"

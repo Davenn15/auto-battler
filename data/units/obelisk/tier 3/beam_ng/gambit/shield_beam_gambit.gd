@@ -2,7 +2,8 @@ class_name ShieldBeamGambit
 extends Gambit
 ## BEAM.NG channels a beam at the ally with the lowest share of its health (not itself),
 ## shielding it continuously: Shield Per Second + Insight Scaling x Insight, more the farther
-## away it is (its passive). The shield lingers a little after the beam ends.
+## away it is (its passive). The shield lingers a little after the beam ends. If the target
+## dies before the beam ends, it moves on to the next lowest-health ally for the time left.
 ##   A: the beam ricochets from its target to that ally's lowest-health nearby ally.
 ##   A1: allies under the beam are immune to crowd control.
 ##   A2: one more ricochet.
@@ -47,8 +48,13 @@ func execute(caster: BattleUnit) -> void:
 	while elapsed < duration:
 		caster.lock_for(0.1)   # channelling: a frame at a time, so it ends cleanly
 		await caster.get_tree().physics_frame
-		if not _alive(caster) or not caster.is_inside_tree() or not caster.active or not _alive(first):
+		if not _alive(caster) or not caster.is_inside_tree() or not caster.active \
+				or caster._stunned_time > 0.0:   # a stun ends the Beam
 			break
+		if not _alive(first):
+			first = BeamLinks.lowest_ally(caster, caster, _range(caster), [])   # moved on
+			if first == null:
+				break
 		var delta := caster.get_physics_process_delta_time()
 		elapsed += delta
 		var beam_settings := Beam.settings(caster, Beam.Kind.SHIELD)

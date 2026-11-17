@@ -814,12 +814,13 @@ func dev_offer_ascension(ascension: Ascension) -> void:
 	hud.show_encounter(_encounter_heading)
 
 
-## Rerolls the Encounter's offer for Reserve (not in the test panel's Encounters).
-func reroll_ascensions() -> void:
+## Rerolls one of the Encounter's Ascensions for Reserve (not in the test panel's Encounters).
+func reroll_ascension(slot: int) -> void:
 	if phase != Phase.ENCOUNTER or _player_picked or _picking_slot >= 0 or _dev_encounter or spectating:
 		return
-	if MatchRules.reroll_ascensions(player, round_number):
-		add_log("Rerolled the Ascensions.")
+	var old := player.ascension_offers[slot].get_display_name() if slot >= 0 and slot < player.ascension_offers.size() else ""
+	if MatchRules.reroll_ascension(player, round_number, slot):
+		add_log("Rerolled %s into %s." % [old, player.ascension_offers[slot].get_display_name()])
 		hud.refresh()
 		hud.show_encounter(_encounter_heading)
 

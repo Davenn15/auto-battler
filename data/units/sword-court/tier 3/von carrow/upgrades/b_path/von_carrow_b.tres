@@ -8,7 +8,7 @@
 
 [resource]
 script = ExtResource("1_djcql")
-description = "New Gambit: Mark. Marks the enemy who has dealt the most damage; if it dies, she gains a big shield."
+description = "New Gambit: Mark. Marks the enemy who has dealt the most damage; if it dies, she gains a big shield. Recast while it's up, it loads a pistol shot."
 gambit = ExtResource("1_cx48c")
 next_choices = Array[ExtResource("1_djcql")]([ExtResource("3_12snq"), ExtResource("4_yy23g")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

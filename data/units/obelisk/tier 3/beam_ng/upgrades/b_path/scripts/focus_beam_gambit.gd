@@ -4,8 +4,9 @@ extends Gambit
 ## attacking (ties go to the nearest). Over each attack interval the beam deals Damage Share
 ## of a normal attack, with its passive's distance bonus, and triggers on-hit effects like
 ## its normal beam does. While the beam is on it, allied attacks on that enemy also deal
-## Mark Share of its max health.
-##   B1: if the target dies during the beam, BEAM.NG gains a burst of Charge.
+## Mark Share of its max health. If the target dies before the beam ends, it moves on to the
+## next best target (picked the same way) for the time left, taking the mark with it.
+##   B1: each target that dies during the beam gives BEAM.NG a burst of Charge.
 ##   B2: the beam ricochets to one more nearby enemy.
 ## A Beam (see Beam): BEAM.NG's Beam settings add range to the first target, speed up the
 ## damage, and add extra ricochets (at their reduced share) after its own.
@@ -41,17 +42,24 @@ func execute(caster: BattleUnit) -> void:
 	target.add_status(mark)
 	var links := BeamLinks.new(caster)
 	var beams := {}   # enemy instance id -> its BeamngBeamStatus (used as a damage helper)
-	var killed := false
+	var kills := 0
 	var elapsed := 0.0
 	var tick_left := 0.0
 	while elapsed < duration:
 		caster.lock_for(0.1)   # channelling: a frame at a time, so it ends cleanly
 		await caster.get_tree().physics_frame
-		if not _alive(caster) or not caster.is_inside_tree() or not caster.active:
+		if not _alive(caster) or not caster.is_inside_tree() or not caster.active or caster._stunned_time > 0.0:   # a stun ends the Beam
 			break
 		if not _alive(target):
-			killed = true
-			break
+			# Moved on: the next best target takes the rest of the beam, and the mark.
+			kills += 1
+			if is_instance_valid(target) and target.statuses.has(mark):
+				target.remove_status(mark)
+			target = _pick_target(caster)
+			if target == null:
+				break
+			mark = FocusMarkStatus.new(caster, mark_share)
+			target.add_status(mark)
 		var delta := caster.get_physics_process_delta_time()
 		elapsed += delta
 		var beam_settings := Beam.settings(caster, Beam.Kind.FOCUS)
@@ -89,10 +97,11 @@ func execute(caster: BattleUnit) -> void:
 	links.clear()
 	if is_instance_valid(target) and target.statuses.has(mark):
 		target.remove_status(mark)
-	if killed and charge_on_kill > 0.0 and _alive(caster):
-		caster.charge = minf(caster.charge + charge_on_kill, caster.max_charge)
+	if kills > 0 and charge_on_kill > 0.0 and _alive(caster):
+		var gained := charge_on_kill * kills
+		caster.charge = minf(caster.charge + gained, caster.max_charge)
 		caster._update_charge_bar()
-		caster.show_float_text("+%d Charge" % roundi(charge_on_kill), BeamngPassive.LIGHT)
+		caster.show_float_text("+%d Charge" % roundi(gained), BeamngPassive.LIGHT)
 
 
 ## The enemy in attack range that the most allies are attacking; ties go to the nearest.

@@ -27,6 +27,7 @@ class GiverStatus extends Status:
 			stack = StackStatus.new(unit.get_instance_id(), effect.stat)
 			target.add_status(stack)
 		stack.total += effect.amount
+		target.gain_permanent_stats({effect.stat: effect.amount})
 		target.show_float_text("+%d %s" % [roundi(effect.amount), Stats.STAT_NAMES[effect.stat]], Color(1.0, 0.85, 0.35))
 
 

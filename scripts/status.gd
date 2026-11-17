@@ -198,6 +198,14 @@ func on_status_added(_unit: BattleUnit, _added: Status) -> void:
 func is_permanent_stat_gain() -> bool:
 	return false
 
+
+## Called on each of the unit's statuses whenever it gains permanent stats, from any
+## source: a permanent-gain status being added, or a stacking gain (Keepsakes, Silt's
+## passive, Sap, Rallying Cry...) going up. `gains` is {Stats.Stat: amount gained now}.
+## See BattleUnit.gain_permanent_stats.
+func on_permanent_stats_gained(_unit: BattleUnit, _gains: Dictionary) -> void:
+	pass
+
 ## Lets a status change the unit's wrack damage against a particular target, like
 ## modify_wrack_chance does for wrack chance.
 func modify_wrack_damage(_unit: BattleUnit, _target: BattleUnit, value: float) -> float:

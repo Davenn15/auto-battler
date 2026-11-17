@@ -9,6 +9,8 @@ extends RefCounted
 static func stat(thief: BattleUnit, victim: BattleUnit, which: Stats.Stat, amount: float) -> void:
 	_ledger(victim).add(which, -amount)
 	_ledger(thief).add(which, amount)
+	if amount > 0.0:
+		thief.gain_permanent_stats({which: amount})   # what's stolen is kept all combat
 
 
 static func _ledger(unit: BattleUnit) -> SappedStatus:

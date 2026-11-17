@@ -4,11 +4,14 @@ extends Status
 
 var stat: Stats.Stat
 var amount: float
+## True for a gain copied from an ally (Lordred A): it isn't copied again.
+var copied := false
 
 
-func _init(p_stat: Stats.Stat, p_amount: float) -> void:
+func _init(p_stat: Stats.Stat, p_amount: float, p_copied := false) -> void:
 	stat = p_stat
 	amount = p_amount
+	copied = p_copied
 
 
 func is_permanent_stat_gain() -> bool:

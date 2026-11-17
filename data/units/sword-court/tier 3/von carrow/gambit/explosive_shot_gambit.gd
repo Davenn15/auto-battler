@@ -2,7 +2,8 @@ class_name ExplosiveShotGambit
 extends MerriboldGambit
 ## Fires an explosive shot that bursts in a thin cone in front of the caster. Closer
 ## enemies take more: Close Multiplier right next to her, falling to Far Multiplier at
-## the cone's tip. Uses MerriboldGambit's cone, aiming, and damage settings.
+## the cone's tip. Aimed at her current target (the most enemies only if she has none).
+## Uses MerriboldGambit's cone and damage settings.
 
 ## Damage multiplier for an enemy right next to her.
 @export var close_multiplier: float = 1.5
@@ -20,7 +21,7 @@ func execute(caster: BattleUnit) -> void:
 	var enemies := _enemies_in_range(caster)
 	if enemies.is_empty():
 		return
-	var aim := _best_direction(caster, enemies)
+	var aim := _aim(caster, enemies)
 	_play_swing_visual(caster, aim)
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
 	# Gambit damage can wrack if an item lets it: one roll for the whole blast.
@@ -42,3 +43,13 @@ func execute(caster: BattleUnit) -> void:
 		caster.heal(total * lifesteal, caster.get_instance_id())
 	if might_per_cast > 0.0:
 		caster.add_status(PermanentStatStatus.new(Stats.Stat.MIGHT, might_per_cast))
+
+
+## Straight at her current target; if she has no living one, wherever catches the most.
+func _aim(caster: BattleUnit, enemies: Array[BattleUnit]) -> Vector2:
+	var target := caster.target
+	if is_instance_valid(target) and target.alive and target.team != caster.team:
+		var dir := target.global_position - caster.global_position
+		if dir.length_squared() > 1.0:
+			return dir.normalized()
+	return _best_direction(caster, enemies)

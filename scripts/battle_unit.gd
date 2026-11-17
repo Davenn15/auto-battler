@@ -10,6 +10,8 @@ signal died(unit: BattleUnit)
 signal wracked(unit: BattleUnit)
 ## Emitted when any status is added to this unit.
 signal status_added(unit: BattleUnit, status: Status)
+## Emitted when this unit gains permanent stats (see gain_permanent_stats).
+signal permanent_stats_gained(unit: BattleUnit, gains: Dictionary, copied: bool)
 ## Emitted when this unit starts its Gambit.
 signal gambit_cast(unit: BattleUnit)
 
@@ -1030,6 +1032,22 @@ func _enemy_in_range() -> BattleUnit:
 			best = unit
 	return best
 
+## True if the unit could attack `enemy` right now: everything that stops a normal attack
+## (inactive, stunned, casting or held by a Gambit, mid-step, an invalid or out-of-range
+## target, a status that blocks attacks) stops it. Attack Beams are attacks, so they use
+## this too; `except` is the Beam's own status, which blocks the normal attack itself.
+func can_attack_now(enemy, except: Status = null) -> bool:
+	if not active or not alive or _stunned_time > 0.0 or _is_channeling() or _moving:
+		return false
+	if not is_instance_valid(enemy) or not _is_valid_target(enemy):
+		return false
+	if grid.get_distance(cell, enemy.cell) > attack_range:
+		return false
+	for status in statuses:
+		if status != except and status.blocks_attacks(self):
+			return false
+	return true
+
 ## True while the unit is busy with its Gambit: casting it, or held in place by one
 ## (dashes, channels, flurries, tosses). Its attack timer doesn't wind up meanwhile.
 func _is_channeling() -> bool:
@@ -1773,6 +1791,19 @@ func add_status(status: Status) -> void:
 		if other != status:
 			other.on_status_added(self, status)
 	status_added.emit(self, status)
+	if status.is_permanent_stat_gain():
+		gain_permanent_stats(status.get_permanent_stat_gains(), status is PermanentStatStatus and status.copied)
+
+
+## Announces that this unit just gained permanent stats ({Stats.Stat: amount}), so effects
+## that react to "gaining permanent stats" (Lordred A, Von Carrow A) see it. Statuses that
+## stack a gain up themselves call this each time it grows; adding a permanent-gain status
+## calls it automatically. `copied` marks a gain copied from an ally (Lordred), which isn't
+## copied again, so two Lordreds can't copy each other forever.
+func gain_permanent_stats(gains: Dictionary, copied := false) -> void:
+	for status in statuses.duplicate():
+		status.on_permanent_stats_gained(self, gains)
+	permanent_stats_gained.emit(self, gains, copied)
 
 
 func remove_status(status: Status) -> void:

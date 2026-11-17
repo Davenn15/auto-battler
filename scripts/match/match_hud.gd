@@ -51,7 +51,6 @@ var _spectate_bar: HBoxContainer
 var _encounter: PanelContainer
 var _encounter_title: Label
 var _encounter_cards: HBoxContainer
-var _encounter_reroll: Button
 var _unit_pick: PanelContainer
 var _unit_pick_text: RichTextLabel
 var _unit_pick_bench: HBoxContainer
@@ -653,13 +652,6 @@ func _build_encounter() -> void:
 	_encounter_cards = HBoxContainer.new()
 	_encounter_cards.add_theme_constant_override("separation", 10)
 	column.add_child(_encounter_cards)
-	_encounter_reroll = Button.new()
-	_encounter_reroll.custom_minimum_size = Vector2(170, 30)
-	_encounter_reroll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_encounter_reroll.focus_mode = Control.FOCUS_NONE
-	_encounter_reroll.tooltip_text = "Show different Ascensions. The price goes up each time, and resets at the next Encounter."
-	_encounter_reroll.pressed.connect(func(): game.reroll_ascensions())
-	column.add_child(_encounter_reroll)
 
 
 const ENCOUNTER_CARD := Vector2(190, 130)
@@ -674,9 +666,7 @@ func show_encounter(title: String) -> void:
 	if not _encounter.visible:
 		return
 	_encounter_title.text = title
-	_encounter_reroll.visible = not game._dev_encounter
-	_encounter_reroll.disabled = not game.can_reroll_ascensions()
-	_set_rich_text(_encounter_reroll, "Reroll   " + reserve_text(game.player.ascension_reroll_cost, 14), 14)
+	var can_reroll := game.can_reroll_ascensions()
 	for slot in offers.size():
 		var ascension := offers[slot]
 		var card := Button.new()
@@ -702,7 +692,20 @@ func show_encounter(title: String) -> void:
 		var for_units := "[center][color=#9a9aa5]Tier %s[/color]%s[/center]" % [ascension.tier_text(), for_text]
 		text.text = "[center][b]%s[/b][/center]%s\n%s" % [ascension.get_display_name(), for_units, Keyphrases.format(ascension.description)]
 		card.add_child(text)
-		_encounter_cards.add_child(card)
+		# The card, with its own reroll button under it (all share one rising price).
+		var stack := VBoxContainer.new()
+		stack.add_theme_constant_override("separation", 4)
+		stack.add_child(card)
+		if not game._dev_encounter:
+			var reroll := Button.new()
+			reroll.custom_minimum_size = Vector2(0, 28)
+			reroll.focus_mode = Control.FOCUS_NONE
+			reroll.tooltip_text = "Swap this Ascension for a different one. Every reroll raises the price of all of them by 1; it resets at the next Encounter."
+			reroll.disabled = not can_reroll
+			reroll.pressed.connect(func(): game.reroll_ascension(slot))
+			_set_rich_text(reroll, "Reroll   " + reserve_text(game.player.ascension_reroll_cost, 13), 13)
+			stack.add_child(reroll)
+		_encounter_cards.add_child(stack)
 	_place_encounter.call_deferred()
 
 

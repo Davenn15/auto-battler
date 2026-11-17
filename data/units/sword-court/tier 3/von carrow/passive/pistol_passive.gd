@@ -1,15 +1,16 @@
 class_name PistolPassive
 extends Passive
-## Every few attacks, the unit fires a longer-range pistol shot with extra wrack chance.
+## Every few attacks load a shot into the unit's pistol; its next attack uses it: a
+## longer-range pistol shot with extra damage and wrack chance.
 
-## 3 = every third attack is a pistol shot.
+## 3 = every third attack loads a shot.
 @export var every: int = 3
 ## The shot's attack range, in hex cells.
 @export var pistol_range: int = 4
 ## Added to wrack chance for the shot (0.25 = +25%).
 @export var wrack_bonus: float = 0.25
 ## Most shots she can have loaded at once.
-@export var max_shots: int = 6
+@export var max_shots: int = 3
 ## Extra damage per point of Might on pistol shots, on top of the normal 1 per point.
 ## 0.5 = shots deal 1.5x Might.
 @export var extra_might_scaling: float = 0.5

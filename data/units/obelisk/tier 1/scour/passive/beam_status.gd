@@ -94,10 +94,10 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		_flush(unit)
 
 
+## The beam is the unit's attack, so whatever would stop an attack stops it (see
+## BattleUnit.can_attack_now): stuns, casting, moving, an invalid or out-of-range target...
 func _can_fire(unit: BattleUnit, enemy) -> bool:
-	return unit.active and unit.alive and _alive(enemy) and unit._stunned_time <= 0.0 \
-			and not unit._is_channeling() and not unit._moving and unit._is_valid_target(enemy) \
-			and unit.grid.get_distance(unit.cell, enemy.cell) <= unit.attack_range
+	return _alive(enemy) and unit.can_attack_now(enemy, self)
 
 
 func _fire_tick(unit: BattleUnit, enemy: BattleUnit, share: float) -> void:

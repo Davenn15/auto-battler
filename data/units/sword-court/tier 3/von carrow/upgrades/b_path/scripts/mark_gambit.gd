@@ -2,6 +2,8 @@ class_name MarkGambit
 extends Gambit
 ## Draws an X over the nearby enemy who has dealt the most damage this combat and goes
 ## after it. If that enemy dies before the X wears off, the caster gains a big shield.
+## Cast while her X is still up on a living enemy, it keeps that X and loads a pistol shot
+## instead.
 
 ## How close an enemy must be to be marked, in hex cells.
 @export var mark_range_cells: int = 4
@@ -16,11 +18,23 @@ extends Gambit
 @export var shots_on_cast: int = 0
 
 func can_use(caster: BattleUnit) -> bool:
-	return _find_mark(caster) != null
+	return active_mark(caster) != null or _find_mark(caster) != null
+
+
+## Her X that's still up on a living enemy, or null.
+static func active_mark(caster: BattleUnit) -> MarkHunterStatus:
+	for status in caster.statuses:
+		if status is MarkHunterStatus and is_instance_valid(status.marked) and status.marked.alive 				and status.marked.statuses.has(status.mark):
+			return status
+	return null
 
 
 func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive:
+		return
+	if active_mark(caster) != null:
+		# Her X is still up: keep it, and load a pistol shot instead (plus B2's shots).
+		_load_shots(caster, 1 + shots_on_cast)
 		return
 	var target := _find_mark(caster)
 	if target == null:
@@ -35,11 +49,17 @@ func execute(caster: BattleUnit) -> void:
 	target.add_status(mark)
 	caster.add_status(MarkHunterStatus.new(target, mark, mark_duration, kill_shield, kill_shield_duration))
 	caster.target = target
-	if shots_on_cast > 0:
-		for status in caster.statuses:
-			if status is PistolStatus:
-				status.load_shot(caster, shots_on_cast)
-				break
+	_load_shots(caster, shots_on_cast)
+
+
+func _load_shots(caster: BattleUnit, count: int) -> void:
+	if count <= 0:
+		return
+	for status in caster.statuses:
+		if status is PistolStatus:
+			status.load_shot(caster, count)
+			caster.show_float_text("Reload", ReloadOnGainStatus.RELOAD_COLOR)
+			return
 
 
 ## The targetable enemy in range who has dealt the most damage. Ties, like everyone at

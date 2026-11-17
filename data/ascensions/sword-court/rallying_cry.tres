@@ -1,19 +1,18 @@
-[gd_resource type="Resource" script_class="Ascension" format=3]
+[gd_resource type="Resource" script_class="Ascension" format=3 uid="uid://deybi03kwull6"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/gambit_target_stat_effect.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/lunck/lunck.tres" id="3"]
-[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://bia4x70pem1ig" path="res://data/ascensions/effects/gambit_target_stat_effect.gd" id="2"]
+[ext_resource type="Resource" uid="uid://bpnxufpm5ys0j" path="res://data/units/sword-court/tier 1/lunck/lunck.tres" id="3"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
-stat = 2
-amount = 5.0
+amount = 15.0
 
 [resource]
 script = ExtResource("1")
 ascension_name = "Rallying Cry"
-description = "Units affected by Lunck's Gambit gain 5 Celerity for the rest of combat. Stacks."
+description = "Units affected by Lunck's Gambit gain 15 Celerity for the rest of combat. Stacks."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

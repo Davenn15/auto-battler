@@ -22,6 +22,10 @@ func blocks_charge_gain(_unit: BattleUnit) -> bool:
 	return false
 
 
+## How big the seed mark is drawn (1 = its original size, which was too loud).
+const SEED_MARK_SCALE := 0.5
+
+
 func on_applied(unit: BattleUnit) -> void:
 	unit.died.connect(_on_host_died)
 	if KeepsakeVfx.enabled():
@@ -29,7 +33,8 @@ func on_applied(unit: BattleUnit) -> void:
 		_mark.source = self
 		_mark.z_index = 13
 		unit.add_child(_mark)
-		_mark.position = Vector2(20, 14)   # beside the host, clear of icons over its head
+		_mark.scale = Vector2.ONE * SEED_MARK_SCALE
+		_mark.position = Vector2(15, 11)   # beside the host, clear of icons over its head
 
 
 func on_removed(unit: BattleUnit) -> void:

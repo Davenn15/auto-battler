@@ -16,20 +16,22 @@ func on_applied(unit: BattleUnit) -> void:
 	for node in unit.get_tree().get_nodes_in_group("units"):
 		var ally := node as BattleUnit
 		if ally != null and ally != unit and ally.team == unit.team:
-			ally.status_added.connect(_on_ally_status)
+			ally.permanent_stats_gained.connect(_on_ally_gain)
 			_listening.append(ally)
 
 
 func on_removed(_unit_removed: BattleUnit) -> void:
 	for ally in _listening:
-		if is_instance_valid(ally) and ally.status_added.is_connected(_on_ally_status):
-			ally.status_added.disconnect(_on_ally_status)
+		if is_instance_valid(ally) and ally.permanent_stats_gained.is_connected(_on_ally_gain):
+			ally.permanent_stats_gained.disconnect(_on_ally_gain)
 	_listening.clear()
 
 
-func _on_ally_status(_ally: BattleUnit, added: Status) -> void:
-	if not is_instance_valid(_unit) or not _unit.alive:
+## Any permanent gain an ally makes (see BattleUnit.gain_permanent_stats), except gains
+## that were themselves copied from someone (so two Lordreds don't copy each other forever).
+func _on_ally_gain(_ally: BattleUnit, gains: Dictionary, copied: bool) -> void:
+	if copied or not is_instance_valid(_unit) or not _unit.alive:
 		return
-	var gains := added.get_permanent_stat_gains()
 	for stat in gains:
-		_unit.add_status(PermanentStatStatus.new(stat, gains[stat] * share))
+		if gains[stat] > 0.0:
+			_unit.add_status(PermanentStatStatus.new(stat, gains[stat] * share, true))
