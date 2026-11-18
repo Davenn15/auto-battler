@@ -21,7 +21,7 @@ func refresh() -> void:
 
 func modify_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	if stat == Stats.Stat.INSIGHT:
-		return value - amount * unit.debuff_multiplier()
+		return value - amount * unit.debuff_strength()
 	return value
 
 

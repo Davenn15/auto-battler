@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BiggestStrikePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/scripts/biggest_strike_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+share = 0.03
+passive_name = "Bigger They Are"
+description = "His attacks against the enemy with the most max health gain Hit Effect: deal 3% of its max health as bonus Might damage."

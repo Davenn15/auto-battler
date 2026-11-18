@@ -1,14 +1,11 @@
-[gd_resource type="Resource" script_class="BladehookGambit" format=3]
+[gd_resource type="Resource" script_class="BladehookGambit" format=3 uid="uid://dapdd07s3itku"]
 
-[ext_resource type="Script" path="res://data/units/sword-court/tier 1/codger/gambit/bladehook_gambit.gd" id="1"]
+[ext_resource type="Script" uid="uid://c7us4xsgb4x26" path="res://data/units/sword-court/tier 1/codger/gambit/bladehook_gambit.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
+damage = 120.0
+might_scaling = 0.6
 gambit_name = "Bladehook"
-damage = 140.0
-might_scaling = 1.0
-range_cells = 4
-pull_cells = 2
-stun_duration = 1.25
-cast_time = 0.4
+cast_time = 0.5
 description = "Throws his bladehook at the farthest enemy within 4 cells, dealing damage, dragging it 2 cells closer and stunning it briefly."

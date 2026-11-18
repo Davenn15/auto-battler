@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AllyHealSharePassive" format=3 uid="uid://bg85rud6gkkyu"]
+
+[ext_resource type="Script" uid="uid://burmpghsjrve3" path="res://data/units/sword-court/tier 4/cerceval/upgrades/b_path/scripts/ally_heal_share_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+share = 0.8
+passive_name = "Blood Bond"
+description = "Whenever an ally within 2 cells is healed, Cerceval is healed for 40% of it."

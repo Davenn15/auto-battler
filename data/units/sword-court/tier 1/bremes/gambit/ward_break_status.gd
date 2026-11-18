@@ -25,7 +25,7 @@ func on_applied(unit: BattleUnit) -> void:
 ## Called when the Gambit hits a unit that's already sundered: keeps the stronger values.
 func refresh(p_reduction: float, p_duration: float) -> void:
 	reduction = maxf(reduction, p_reduction)
-	var multiplier: float = _holder.debuff_multiplier() if is_instance_valid(_holder) else 1.0
+	var multiplier: float = _holder.debuff_strength() if is_instance_valid(_holder) else 1.0
 	time_left = maxf(time_left, p_duration * multiplier)
 
 

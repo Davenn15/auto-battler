@@ -40,6 +40,7 @@ func start_battle() -> void:
 	if phase != Phase.PREP:
 		return
 	phase = Phase.COMBAT
+	ArmySpawner.reset_fallen()
 	CombatRng.start(combat_seed if combat_seed >= 0 else randi())
 	combat_time = 0.0
 	in_overtime = false

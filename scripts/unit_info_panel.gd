@@ -447,6 +447,8 @@ func _stat_table(u: BattleUnit) -> String:
 	var extra: Array = []   # [name, value] pairs, two to a row
 	if _shown_stat(u, Stats.Stat.VAMPIRISM) > 0.0:
 		extra.append([Stats.STAT_NAMES[Stats.Stat.VAMPIRISM], _stat_value(u, Stats.Stat.VAMPIRISM)])
+	if _shown_stat(u, Stats.Stat.IMMOVABILITY) > 0.0:
+		extra.append([Stats.STAT_NAMES[Stats.Stat.IMMOVABILITY], _stat_value(u, Stats.Stat.IMMOVABILITY)])
 	extra.append(["Damage", _attack_type_text(u)])
 	extra.append(["Range", "[b]%d[/b]" % u.attack_range])
 	extra.append(["Attack every", "[b]%.2fs[/b]" % u.get_attack_cooldown()])
@@ -521,7 +523,7 @@ func _stat_value(u: BattleUnit, stat: Stats.Stat) -> String:
 ## combat (planning) their bonuses are added here.
 func _shown_stat(u: BattleUnit, stat: Stats.Stat) -> float:
 	var value := u.get_stat(stat)
-	if not u.active:   # items and Ascensions only start working when combat does
+	if not u.active and not u.previewing:   # not previewed: items and Ascensions only start working when combat does
 		for keepsake in u.keepsakes:
 			value += keepsake.get_stat_bonuses().get(stat, 0.0)
 		for ascension in u.ascensions:

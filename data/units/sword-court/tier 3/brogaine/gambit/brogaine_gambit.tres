@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FlexGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 3/brogaine/gambit/flex_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+duration = 3.0
+regen_share = 0.06
+ward_bonus = 40.0
+damage = 120.0
+might_scaling = 0.8
+knockback_cells = 1
+stun_duration = 1.25
+gambit_name = "Flex"
+cast_time = 0.3
+description = "Flexes for 3 seconds, gaining Regeneration equal to 6% of his max health per second and +40 to each Ward, but he can't attack meanwhile. Then he uppercuts his target for 120 (+80% Might) Might damage, knocking it back 1 cell and stunning it for 1.25 seconds."

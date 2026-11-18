@@ -22,4 +22,12 @@ static func make_tooltip(for_text: String, is_bbcode: bool = false) -> Control:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(260, 0)
 	label.text = for_text if is_bbcode else Keyphrases.format(for_text)
+	# Measure its height now: a fit-content label only knows it once it's in the tree, and
+	# Godot places the tooltip by its size when it opens, so an unmeasured one is kept on
+	# screen as if it were one line tall and runs off the bottom (badges low on the screen).
+	var root := (Engine.get_main_loop() as SceneTree).root
+	label.size = Vector2(label.custom_minimum_size.x, 0)
+	root.add_child(label)
+	label.custom_minimum_size.y = label.get_content_height()
+	root.remove_child(label)
 	return label

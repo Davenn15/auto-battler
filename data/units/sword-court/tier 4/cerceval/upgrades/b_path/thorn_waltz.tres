@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ThornWaltzGambit" format=3 uid="uid://cm1amuyriut44"]
+
+[ext_resource type="Script" uid="uid://bmrjbtedeyvfx" path="res://data/units/sword-court/tier 4/cerceval/upgrades/b_path/scripts/thorn_waltz_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+radius_cells = 2
+gambit_name = "Thorn Waltz"
+cast_time = 0.3
+description = "Twirls his barbed blades around him, dealing 150 (+60% Celerity) Celerity damage to every enemy within 1 cell."

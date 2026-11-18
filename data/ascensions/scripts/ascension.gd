@@ -170,6 +170,19 @@ func is_chosen() -> bool:
 	return target == Target.CHOSEN_UNIT
 
 
+## True for an Ascension from the Neutral pool (otherwise it's from a faction's).
+func is_neutral() -> bool:
+	return (key if key != "" else resource_path).contains("/neutral/")
+
+
+## The faction whose pool this comes from ("Sword Court"), or "" for a Neutral one.
+func faction_name() -> String:
+	if is_neutral():
+		return ""
+	var path := (key if key != "" else resource_path).trim_prefix(MatchRules.ASCENSIONS_DIR + "/")
+	return MatchRules.faction_name(path.get_slice("/", 0))
+
+
 ## True if `unit` may be picked for this (chosen-unit) Ascension.
 func can_pick(unit: ArmyUnit) -> bool:
 	if unit == null or unit.data == null:

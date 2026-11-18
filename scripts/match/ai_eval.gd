@@ -13,6 +13,7 @@ extends Node2D
 
 
 func _ready() -> void:
+	SimMode.active = true   # lean battles: no bars, numbers or effects, same fights
 	var args := OS.get_cmdline_user_args()
 	var in_path := ""
 	var out_path := ""

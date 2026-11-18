@@ -98,7 +98,8 @@ func _twirl(caster: BattleUnit, dir: Vector2) -> void:
 				break
 			# Units run on physics frames, so the twirl does too (and gets a real delta).
 			await caster.get_tree().physics_frame
-			if not _alive(caster) or not caster.active:
+			# The battle may have been cleared during the wait, taking her off the board.
+			if not _alive(caster) or not caster.active or not caster.is_inside_tree():
 				break
 			var delta := caster.get_physics_process_delta_time()
 			var next := pos.move_toward(leg[1], twirl_speed * delta)

@@ -5,7 +5,7 @@ extends Gambit
 ## away it is (its passive). The shield lingers a little after the beam ends. If the target
 ## dies before the beam ends, it moves on to the next lowest-health ally for the time left.
 ##   A: the beam ricochets from its target to that ally's lowest-health nearby ally.
-##   A1: allies under the beam are immune to crowd control.
+##   A1: allies under the beam gain Immovability.
 ##   A2: one more ricochet.
 ## A Beam (see Beam): BEAM.NG's Beam settings add range to the first target, speed up the
 ## shielding, and add extra ricochets (at their reduced share) after its own.
@@ -22,8 +22,8 @@ extends Gambit
 @export var bounces: int = 0
 ## How close the next ally must be to ricochet to, in hex cells.
 @export var bounce_range_cells: int = 2
-## A1: 1 = allies under the beam are immune to crowd control.
-@export var cc_immune: float = 0.0
+## A1: Immovability allies have while the beam feeds them (0 = none).
+@export var immovability: float = 0.0
 
 
 func can_use(caster: BattleUnit) -> bool:
@@ -80,7 +80,7 @@ func execute(caster: BattleUnit) -> void:
 			var amount := per_second * BeamngPassive.distance_multiplier(caster, ally) * delta
 			if index >= own:
 				amount *= beam_settings.ricochet_share
-			shield.feed(amount, shield_linger, cc_immune > 0.0)
+			shield.feed(amount, shield_linger, immovability)
 			given += amount
 	links.clear()
 	if is_instance_valid(caster) and caster.is_inside_tree():
@@ -92,21 +92,23 @@ func _alive(unit) -> bool:
 	return is_instance_valid(unit) and unit.alive
 
 
-## A shield the beam keeps topping up. With A1 the ally can't be crowd controlled while
+## A shield the beam keeps topping up. With A1 the ally has Immovability while
 ## the beam is on it.
 class BeamShieldStatus extends ShieldStatus:
-	var _cc_immune := false
+	var _immovability := 0.0
 	var _fed := 0.0   # seconds since the beam last fed it, counted down
 
-	func feed(amount: float, linger: float, immune: bool) -> void:
+	func feed(amount: float, linger: float, immovability: float) -> void:
 		shield += amount
 		time_left = linger
-		_cc_immune = immune
+		_immovability = immovability
 		_fed = 0.15
 
 	func tick(unit: BattleUnit, delta: float) -> void:
 		_fed -= delta
 		super.tick(unit, delta)
 
-	func blocks_crowd_control(_unit: BattleUnit) -> bool:
-		return _cc_immune and _fed > 0.0
+	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
+		if stat == Stats.Stat.IMMOVABILITY and _fed > 0.0:
+			return value + _immovability
+		return value

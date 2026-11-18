@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Allies under the Shield Beam are immune to crowd control."
+description = "Allies under the Shield Beam have 75 Immovability."
 gambit_overrides = Dictionary[String, float]({
-"cc_immune": 1.0
+"immovability": 75.0
 })

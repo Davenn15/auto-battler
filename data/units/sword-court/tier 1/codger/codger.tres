@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 1/codger/passive/codger_passive.tres" id="4"]
-[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/codger/gambit/codger_gambit.tres" id="5"]
+[ext_resource type="Resource" uid="uid://dapdd07s3itku" path="res://data/units/sword-court/tier 1/codger/gambit/codger_gambit.tres" id="5"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 1/codger/upgrades/a_path/codger_a.tres" id="6"]
 [ext_resource type="Resource" uid="uid://cmdc5d0co88d7" path="res://data/units/sword-court/tier 1/codger/upgrades/b_path/codger_b.tres" id="7"]
 [ext_resource type="Texture2D" uid="uid://c2700smwj27iy" path="res://assets/codger.png" id="8"]
@@ -21,7 +21,6 @@ gambit = ExtResource("5")
 max_charge = 75.0
 starting_charge = 20.0
 sprite = ExtResource("8")
-might = 110.0
 insight = 90.0
 celerity = 90.0
 might_ward = 35.0

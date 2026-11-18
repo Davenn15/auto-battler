@@ -13,5 +13,5 @@ func add(more: float, cap: float) -> void:
 func modify_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	match stat:
 		Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD:
-			return value - amount * unit.debuff_multiplier()
+			return value - amount * unit.debuff_strength()
 	return value

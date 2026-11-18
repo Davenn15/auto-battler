@@ -147,9 +147,9 @@ func _exit_tree() -> void:
 
 # ---------- Making plans ----------
 
-## The strategy that decides which plans get tried. The default is the game's plain one;
-## the match simulator evolves others.
-var policy := AiPolicy.new()
+## The strategy that decides which plans get tried: the one the match simulator trained
+## (data/ai/trained_policy.json) if there is one, otherwise the game's plain default.
+var policy := AiPolicy.load_trained()
 
 
 func _random_plan(p: PlayerState, combat_number: int, variant: int) -> void:

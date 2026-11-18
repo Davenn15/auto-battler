@@ -59,7 +59,7 @@ class ConeHit extends HitEffect:
 			if by == null:
 				amount = BattleUnit.damage_bonus(credit, other, amount)
 			var type: int = by.get_attack_damage_type() if by != null else Stats.DamageType.MIGHT
-			var hurt := other.take_damage(amount, wrack_level, type, true, by)
+			var hurt := other.take_damage(amount, wrack_level, type, true, by, true, true)   # passed on, not Pure
 			target.get_tree().call_group("damage_tracker", "record_damage", credit, hurt)
 		_show_cone(target, aim)
 

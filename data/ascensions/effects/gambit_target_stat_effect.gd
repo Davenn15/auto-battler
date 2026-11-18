@@ -43,3 +43,8 @@ class StackStatus extends Status:
 
 	func modify_stat(_unit: BattleUnit, which: Stats.Stat, value: float) -> float:
 		return value + total if which == stat else value
+
+	## It lasts all combat, so it never blocks Charge, even on the caster itself (Lunck's
+	## Gambit affects him too; a status gained from your own Gambit otherwise would, forever).
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return false

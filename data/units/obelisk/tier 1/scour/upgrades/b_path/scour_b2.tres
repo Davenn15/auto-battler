@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The explosion ignores Wards."
+description = "The explosion deals Pure Damage."
 gambit_overrides = Dictionary[String, float]({
 "ignore_wards": 1.0
 })

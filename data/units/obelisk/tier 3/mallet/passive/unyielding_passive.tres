@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-crowd_control_reduction = 0.4
-debuff_reduction = 0.4
+immovability = 40.0
 passive_name = "Unyielding"
-description = "Crowd control on MALLET lasts 40% shorter. Debuffs on it wear off 40% sooner, and ones that last all combat (Sapped stats, ward shred, Mono-Virus) are 40% weaker."
+description = "MALLET has 40 Immovability."

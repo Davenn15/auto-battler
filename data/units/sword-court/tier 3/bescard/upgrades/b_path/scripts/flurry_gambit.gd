@@ -8,11 +8,9 @@ extends Gambit
 @export var strike_interval: float = 0.15
 ## Each strike that wracks adds one more strike, up to this many extra. 0 = off.
 @export var max_wrack_extra_strikes: int = 0
-## Each strike leaves a bleed dealing this share of the target's max health per second
-## (0.01 = 1%). Bleeds stack. 0 = none.
-@export_range(0.0, 0.1, 0.0025) var bleed_percent: float = 0.0
-## Seconds each bleed lasts.
-@export var bleed_duration: float = 4.0
+## B2: each strike gains the Hit Effect: Bleed for this share of the target's max health
+## (0.06 = 6%; see Bleed). 0 = none.
+@export_range(0.0, 0.5, 0.005) var bleed_percent: float = 0.0
 
 
 ## Only fires once the current target is in reach, so the flurry isn't wasted walking.
@@ -31,7 +29,7 @@ func execute(caster: BattleUnit) -> void:
 	var wracks := WrackCountHitEffect.new()
 	var effects: Array[HitEffect] = [wracks]
 	if bleed_percent > 0.0:
-		effects.append(BleedHitEffect.new(caster.get_instance_id(), bleed_percent, bleed_duration))
+		effects.append(Bleed.BleedHit.new(caster.get_instance_id(), 0.0, bleed_percent))
 	var done := 0
 	while done < _total_strikes(wracks):
 		# Either unit may have died, or the battle ended, while we were waiting.

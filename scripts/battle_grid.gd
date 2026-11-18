@@ -20,6 +20,8 @@ extends Node2D
 	set(value):
 		show_debug = value
 		queue_redraw()
+		if is_instance_valid(_backing):
+			_backing.queue_redraw()
 
 ## Faint colour over each half of the board: blue for the bottom (your) half, red for the top.
 @export var tint_halves: bool = true:
@@ -51,6 +53,10 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_ensure_built()
 	queue_redraw()
+	_backing = Backing.new()
+	_backing.grid = self
+	_backing.z_index = BACKING_Z
+	add_child(_backing)
 
 
 # Throws away the built grid so it regenerates with the new settings.
@@ -64,6 +70,8 @@ func _rebuild() -> void:
 	if is_inside_tree():   # setters also fire while the scene is loading, before we're ready
 		_ensure_built()
 		queue_redraw()
+		if is_instance_valid(_backing):
+			_backing.queue_redraw()
 
 
 # Units call into the grid during their own _ready(), which may run before ours,
@@ -245,6 +253,36 @@ func _hex_points(cell: Vector2i, count: int) -> PackedVector2Array:
 	return points
 
 
+## The dark rounded backing behind the board, filling the gaps the hexes leave at its
+## edges: its colour, how far it reaches past the outer hexes, and its corner radius.
+const BACKING_COLOR := Color(0.17, 0.17, 0.19)
+const BACKING_MARGIN := 6.0
+const BACKING_CORNER := 12
+
+
+## The backing's own layer, well below the board, so effects drawn on the ground (under
+## the units, at z -1) stay above it, as they were before it existed.
+const BACKING_Z := -10
+var _backing: Node2D
+
+
+class Backing extends Node2D:
+	var grid: BattleGrid
+
+	func _draw() -> void:
+		if not is_instance_valid(grid) or not grid.show_debug or grid._ids.is_empty():
+			return
+		var box := Rect2(grid.cell_to_local(grid._ids.keys()[0]), Vector2.ZERO)
+		for cell in grid._ids:
+			for point in grid._hex_points(cell, 6):
+				box = box.expand(point)
+		var backing := StyleBoxFlat.new()
+		backing.bg_color = BattleGrid.BACKING_COLOR
+		backing.set_corner_radius_all(BattleGrid.BACKING_CORNER)
+		backing.anti_aliasing = true
+		draw_style_box(backing, box.grow(BattleGrid.BACKING_MARGIN))
+
+
 func _draw() -> void:
 	if show_debug and tint_halves:
 		# Team 1's half (the bottom rows) blue, team 2's red; swapped while the battle is
@@ -255,7 +293,7 @@ func _draw() -> void:
 			draw_colored_polygon(_hex_points(cell, 6), BOTTOM_TINT if bottom != swap else TOP_TINT)
 	if show_debug:
 		for cell in _ids:
-			draw_polyline(_hex_points(cell, 7), Color(1, 1, 1, 0.25), 1.0)   # 7 points closes it
+			draw_polyline(_hex_points(cell, 7), Color(1, 1, 1, 0.25), 1.0, true)   # 7 points closes it; smoothed, so every border looks the same width at any window scale
 	if _ids.has(_hover_cell):
 		draw_colored_polygon(_hex_points(_hover_cell, 6), Color(0.3, 0.6, 1.0, 0.35))
 

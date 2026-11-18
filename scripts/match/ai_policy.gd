@@ -49,10 +49,41 @@ func _init() -> void:
 		genome["shards"][Shard.NAMES[kind]] = 1.0
 
 
+## The strategy the match simulator trained (tools/match_sim.gd --install). The computer
+## opponent and real_sim use it when it's there; without it they use the default.
+const TRAINED_PATH := "res://data/ai/trained_policy.json"
+
+
+static func has_trained() -> bool:
+	return FileAccess.file_exists(TRAINED_PATH)
+
+
+## The trained strategy, or the default one if there's none (or it can't be read). Genes
+## it doesn't mention (units added since it was trained) keep their defaults.
+static func load_trained() -> AiPolicy:
+	if not has_trained():
+		return AiPolicy.new()
+	var d = JSON.parse_string(FileAccess.get_file_as_string(TRAINED_PATH))
+	if typeof(d) != TYPE_DICTIONARY:
+		push_warning("AiPolicy: couldn't read %s; using the default strategy." % TRAINED_PATH)
+		return AiPolicy.new()
+	return from_dict(d)
+
+
+## Saves `genome` as the trained strategy the game uses from now on.
+static func save_trained(genome: Dictionary) -> void:
+	var file := FileAccess.open(TRAINED_PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify(genome, "  "))
+	file.close()
+
+
 static func from_dict(d: Dictionary) -> AiPolicy:
 	var policy := AiPolicy.new()
 	for key in d:
-		policy.genome[key] = d[key]
+		if d[key] is Dictionary and policy.genome.get(key) is Dictionary:
+			policy.genome[key].merge(d[key], true)   # units/paths/shards: keep defaults for ones it doesn't list
+		else:
+			policy.genome[key] = d[key]
 	return policy
 
 

@@ -110,7 +110,7 @@ static var _glow_texture: Texture2D
 
 
 static func enabled() -> bool:
-	return DisplayServer.get_name() != "headless"
+	return not SimMode.active and DisplayServer.get_name() != "headless"
 
 
 # ---------- Shared pieces ----------
@@ -334,6 +334,28 @@ static func gate_glow(unit: BattleUnit, boosts: int, color: Color) -> void:
 
 
 ## Manadrinker and Quickscar: a quick green outline when the item heals.
+## Taking a hit: the unit's sprite flashes white for a moment and fades back. A new hit
+## restarts the flash.
+const HIT_FLASH_ALPHA := 0.85
+const HIT_FLASH_TIME := 0.12
+
+static func hit_flash(unit: BattleUnit) -> void:
+	if not enabled() or unit.sprite == null or not unit.is_inside_tree():
+		return
+	var node := _sprite_copy(unit, "VfxHitFlash", "silhouette")
+	node.texture = unit.sprite.texture   # follow the sprite if it turned or changed
+	node.flip_h = unit.sprite.flip_h
+	node.offset = unit.sprite.offset
+	(node.material as ShaderMaterial).set_shader_parameter("tint", Color.WHITE)
+	var old = node.get_meta("tween") if node.has_meta("tween") else null
+	if old is Tween and old.is_valid():
+		old.kill()
+	node.modulate.a = HIT_FLASH_ALPHA
+	var tween := node.create_tween()
+	tween.tween_property(node, "modulate:a", 0.0, HIT_FLASH_TIME).set_ease(Tween.EASE_IN)
+	node.set_meta("tween", tween)
+
+
 static func heal_flash(unit: BattleUnit) -> void:
 	if not enabled() or unit.sprite == null:
 		return
@@ -588,6 +610,55 @@ static func virus_badge(unit: BattleUnit, key: String, stacks: int) -> void:
 		badge.count = stacks
 		badge.pop = 0.0   # a little bounce each time it changes
 	badge.queue_redraw()
+
+
+## Glory: a small gold laurel with the unit's Glory stacks, by the top-right of its sprite.
+## `capped` dims it: the unit can't gain more Glory this combat. 0 stacks removes it.
+static func glory_badge(unit: BattleUnit, stacks: int, capped: bool) -> void:
+	if not enabled() or not is_instance_valid(unit) or unit.sprite == null:
+		return
+	var badge := unit.get_node_or_null("VfxGloryBadge") as GloryBadge
+	if stacks <= 0:
+		if badge != null:
+			badge.queue_free()
+		return
+	if badge == null or badge.is_queued_for_deletion():
+		badge = GloryBadge.new()
+		badge.name = "VfxGloryBadge"
+		badge.z_index = 13
+		var size := _sprite_size(unit)
+		badge.position = Vector2(size.x * 0.5 + 1.0, -size.y * 0.5 + 6.0)
+		unit.add_child(badge)
+	if badge.count != stacks and badge.count > 0:
+		badge.pop = 0.0   # a little bounce for a new stack
+	badge.count = stacks
+	badge.modulate = Color(1, 1, 1, 0.45) if capped else Color.WHITE
+	badge.queue_redraw()
+
+
+## Bleed: a blood drop at the bottom-left of the sprite showing how much Bleed is left in
+## the unit's pool (see Bleed). `pop` bounces it, for Bleed just added. 0 removes it.
+static func bleed_badge(unit: BattleUnit, amount: float, pop: bool = false) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	var badge := unit.get_node_or_null("VfxBleedBadge") as BloodDropBadge
+	var count := ceili(amount) if amount >= 0.5 else 0
+	if count <= 0:
+		if badge != null:
+			badge.queue_free()
+		return
+	if badge == null or badge.is_queued_for_deletion():
+		badge = BloodDropBadge.new()
+		badge.name = "VfxBleedBadge"
+		badge.z_index = 13
+		var size := _sprite_size(unit)
+		badge.position = Vector2(-size.x * 0.5 + 2.0, size.y * 0.5 - 8.0)
+		unit.add_child(badge)
+	if badge.count != count:
+		badge.count = count
+		badge.queue_redraw()
+	if pop:
+		badge.pop = 0.0
 
 
 ## BAR.RAJ's missiles: a round explosion, bright in the middle and fading outwards, that
@@ -1466,6 +1537,87 @@ class StackBadge extends Node2D:
 		var at := Vector2(-text_size.x / 2.0, font.get_ascent(FONT_SIZE) / 2.0 - 1.0)
 		draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, 3, Color(0.08, 0.02, 0.12))
 		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, Color.WHITE)
+
+
+## The Glory counter: two gold laurel branches curving up around a small gold-rimmed disc
+## with the stack count.
+class GloryBadge extends Node2D:
+	const POP_TIME := 0.18
+	const FONT_SIZE := 8
+	const GOLD := Color(0.91, 0.75, 0.31)
+	const DARK := Color(0.35, 0.26, 0.06)
+	var count := 0
+	var pop := POP_TIME
+
+	func _process(delta: float) -> void:
+		if pop < POP_TIME:
+			pop += delta
+			scale = Vector2.ONE * (1.0 + 0.35 * (1.0 - minf(pop / POP_TIME, 1.0)))
+			queue_redraw()
+
+	func _draw() -> void:
+		var text := str(count)
+		var font := ThemeDB.fallback_font
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, FONT_SIZE)
+		var r := maxf(5.0, text_size.x / 2.0 + 2.0)
+		# The branches: an arc each side, with leaves along it.
+		for side in [-1.0, 1.0]:
+			var points := PackedVector2Array()
+			for i in 7:
+				var a := lerpf(0.35, 2.2, float(i) / 6.0)   # from the bottom round to the top
+				points.append(Vector2(side * sin(a) * (r + 3.0), cos(a) * (r + 2.0) + 1.0))
+			draw_polyline(points, GOLD, 1.2, true)
+			for i in [1, 3, 5]:
+				var leaf := points[i]
+				var out := Vector2(side, 0.0).rotated(-side * 0.5) * 2.4
+				draw_colored_polygon(PackedVector2Array([leaf, leaf + out + Vector2(0, -1.5), leaf + out * 1.6]), GOLD)
+		draw_circle(Vector2.ZERO, r + 1.0, GOLD)
+		draw_circle(Vector2.ZERO, r, DARK)
+		var at := Vector2(-text_size.x / 2.0, font.get_ascent(FONT_SIZE) / 2.0 - 1.0)
+		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, Color(1.0, 0.95, 0.77))
+
+
+## The Bleed counter: a small blood drop (a smooth teardrop: rounded bottom, sides
+## tapering into a point at the top) with the amount in its round part. It widens a little
+## for longer numbers.
+class BloodDropBadge extends Node2D:
+	const POP_TIME := 0.15
+	const FONT_SIZE := 8
+	const RIM := Color(0.12, 0.01, 0.02, 0.95)
+	const POINTS := 40
+	var count := 0
+	var pop := POP_TIME   # time since Bleed was last added
+
+	func _process(delta: float) -> void:
+		if pop < POP_TIME:
+			pop += delta
+			scale = Vector2.ONE * (1.0 + 0.3 * (1.0 - minf(pop / POP_TIME, 1.0)))
+			queue_redraw()
+
+	func _draw() -> void:
+		var text := str(count)
+		var font := ThemeDB.fallback_font
+		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, FONT_SIZE)
+		# Half the drop's height; its widest point is 0.75 of this either side.
+		var half := maxf(7.0, text_size.x / 1.35 + 1.5)
+		var outline := _drop(half)
+		draw_colored_polygon(outline, Bleed.COLOR)
+		outline.append(outline[0])
+		draw_polyline(outline, RIM, 1.2, true)
+		draw_circle(Vector2(-half * 0.3, half * 0.05), half * 0.12, Color(1, 1, 1, 0.35))   # a glint
+		# The number sits in the round lower part.
+		var at := Vector2(-text_size.x / 2.0, half * 0.32 + font.get_ascent(FONT_SIZE) / 2.0 - 1.0)
+		draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, 2, RIM)
+		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, Color.WHITE)
+
+	## The teardrop curve x = sin(t) sin(t/2), y = -cos(t), scaled by `half`: the point at
+	## the top (t = 0), the round bottom at t = PI.
+	func _drop(half: float) -> PackedVector2Array:
+		var points := PackedVector2Array()
+		for i in POINTS:
+			var t := TAU * i / POINTS
+			points.append(Vector2(sin(t) * sin(t / 2.0), -cos(t)) * half)
+		return points
 
 
 class RadialBlast extends Node2D:

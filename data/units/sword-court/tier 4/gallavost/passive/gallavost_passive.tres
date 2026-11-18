@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_qrobe")
 shield_share = 0.65
-description = "Gallavost starts combat with part of her health as a lasting shield. While she has no shield, her damage ignores Wards."
+description = "Gallavost starts combat with part of her health as a lasting shield. While she has no shield, all her damage is Pure Damage."
 metadata/_custom_type_script = "uid://ddje5f44jmeow"

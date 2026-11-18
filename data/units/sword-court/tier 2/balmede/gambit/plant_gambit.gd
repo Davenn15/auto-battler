@@ -2,14 +2,14 @@ class_name PlantGambit
 extends Gambit
 ## Balmede plants herself where she stands for Duration: a Shield, all three Wards up by
 ## Ward Bonus, and she can't move (she still attacks whatever is in reach).
-##   A: immune to crowd control while planted.  A1: a chance to send projectiles back.
+##   A: Immovability while planted.  A1: a chance to send projectiles back.
 ##   A2: if the Shield is still up when the Gambit ends, she gains a stack of Glory.
 
 @export var shield: float = 300.0
 @export var ward_bonus: float = 40.0
 @export var duration: float = 4.0
-## A: 1 = immune to crowd control while planted.
-@export var cc_immune: float = 0.0
+## A: Immovability while planted (0 = none).
+@export var immovability: float = 0.0
 ## A1: chance to reflect each incoming projectile while planted (0.35 = 35%).
 @export var reflect_chance: float = 0.0
 ## A2: 1 = a Glory stack if the Shield outlasts the Gambit.
@@ -80,13 +80,12 @@ class PlantStatus extends Status:
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 		if stat in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
 			return value + gambit.ward_bonus
+		if stat == Stats.Stat.IMMOVABILITY:
+			return value + gambit.immovability   # A
 		return value
 
 	func blocks_movement(_unit: BattleUnit) -> bool:
 		return true
-
-	func blocks_crowd_control(_unit: BattleUnit) -> bool:
-		return gambit.cc_immune > 0.0
 
 	func try_reflect(unit: BattleUnit, projectile: Projectile) -> bool:
 		if gambit.reflect_chance <= 0.0 or CombatRng.randf() >= gambit.reflect_chance:

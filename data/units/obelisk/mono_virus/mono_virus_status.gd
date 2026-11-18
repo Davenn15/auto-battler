@@ -63,10 +63,11 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	if not unit.active or not unit.alive or stacks <= 0:
 		return
 	var per_stack := maxf(unit.max_health * SETTINGS.damage_per_stack, SETTINGS.min_damage_per_stack)
-	var amount := per_stack * stacks * delta * unit.debuff_multiplier()
+	var amount := per_stack * stacks * delta * unit.debuff_strength()
 	if not SETTINGS.ignore_wards:
 		amount *= Stats.ward_multiplier(unit.get_stat(Stats.ward_stat_for(SETTINGS.damage_type)))
-	var dealt := unit.take_warded_damage(BattleUnit.damage_bonus(credit_id, unit, amount), false, SETTINGS.damage_type)
+	var dealt := unit.take_warded_damage(BattleUnit.damage_bonus(credit_id, unit, amount), false,
+			Stats.DamageType.PURE if SETTINGS.ignore_wards else SETTINGS.damage_type)   # ignoring Wards: Pure
 	unit.get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt, false)   # no Vampirism
 	unit.add_running_damage("virus", dealt, SETTINGS.color)
 

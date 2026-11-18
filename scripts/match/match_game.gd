@@ -21,7 +21,14 @@ const ENEMY_TEAM := 2
 ## Safety net: a combat still running after this many seconds ends as a draw.
 ## Overtime is meant to make sure this never happens.
 const COMBAT_HARD_LIMIT := 180.0
-const BOARD_SCREEN_CENTER := Vector2(555, 330)   # where the board's centre sits on screen
+## Where the board's centre sits on screen (HUD coordinates): centred across the screen,
+## at BOARD_SCREEN_Y down. Set by _frame_camera from the visible width, which changes with
+## the window's shape.
+const BOARD_SCREEN_Y := 330.0
+static var board_screen_center := Vector2(576, BOARD_SCREEN_Y)
+## The board's top and bottom edges on screen (outer edges of its end rows of hexes).
+const BOARD_TOP := 130.0
+const BOARD_BOTTOM := 530.0
 ## Online only: seconds to plan before you're readied with the board as it stands.
 const PLANNING_TIME := 60.0
 ## Off for now, so players have time to read everything: planning lasts until both are ready.
@@ -129,6 +136,7 @@ func _ready() -> void:
 	_fog.z_index = 30
 	add_child(_fog)
 	_frame_camera()
+	get_viewport().size_changed.connect(_on_viewport_resized)
 	hud.game = self
 	add_child(EscapeMenu.new(return_to_menu))
 	if DevPanel.available():   # testing tools, from the editor only (F1)
@@ -154,13 +162,20 @@ func _frame_camera(turned: bool = false) -> void:
 	for cell in MatchRules.own_cells():
 		box = box.expand(grid.cell_to_world(cell)).expand(grid.cell_to_world(MatchRules.mirror_cell(cell)))
 	var screen_center := get_viewport_rect().size / 2.0
-	var shift := (screen_center - BOARD_SCREEN_CENTER) / camera.zoom
+	board_screen_center = Vector2(screen_center.x, BOARD_SCREEN_Y)
+	var shift := (screen_center - board_screen_center) / camera.zoom
 	camera.ignore_rotation = false
 	camera.rotation = PI if turned else 0.0
 	camera.position = box.get_center() + (-shift if turned else shift)
 	BattleUnit.view_rotation = PI if turned else 0.0
 	BattleUnit.swap_team_colors = my_team != PLAYER_TEAM and turned
 	grid.queue_redraw()   # the board tint follows the colour swap
+
+
+## The window changed shape: re-centre the board and everything placed around it.
+func _on_viewport_resized() -> void:
+	_frame_camera(BattleUnit.view_rotation != 0.0)
+	hud.refresh()
 
 
 func combat_number() -> int:
@@ -264,15 +279,14 @@ func _on_ai_plan_ready(summary: String) -> void:
 ## Your army on your half; the opponent's last fielded army under the fog on theirs.
 func _show_planning_board() -> void:
 	_clear_board()
-	for unit in ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent, player.ascensions):
-		var rally := RallyPassive.aura_range(unit)   # Lunck's aura reach, to plan around
-		if rally >= 0:
-			KeepsakeVfx.rally_aura(unit, rally, RallyPassive.aura_gives_insight(unit))
-		var grid_reach := GridPassive.aura_range(unit)   # BATR.EE's Power Grid reach
-		if grid_reach >= 0:
-			KeepsakeVfx.grid_aura(unit, grid_reach, VoltageStatus.COLOR)
+	var units := ArmySpawner.spawn(player.units, PLAYER_TEAM, false, units_parent, player.ascensions)
 	for unit in ArmySpawner.spawn(ai.last_fielded, ENEMY_TEAM, true, units_parent, ai.last_fielded_ascensions):
 		unit.modulate.a = 0.6
+		units.append(unit)
+	# Everything that starts with combat shows while planning too: stats, shields, auras
+	# (Lunck's, BATR.EE's, Keepsakes'), other visuals. Once all are on the board.
+	for unit in units:
+		unit.preview_combat_start()
 	_fog.show_fog(grid, ai.faction, ai.last_fielded_round)
 
 
@@ -1082,6 +1096,9 @@ func _apply_result(result: Dictionary) -> void:
 	hud.hold_health(hp_before)
 	hud.refresh()
 	await hud.play_damage(hits)
+	if not player.is_alive() or not ai.is_alive():
+		continue_after_result()   # the killing orb shattered a bar: straight to victory or defeat
+		return
 	hud.show_result("\n".join(lines))
 	hud.refresh()
 
@@ -1188,14 +1205,20 @@ func _apply_spectate_result(result: Dictionary) -> void:
 	var aura := {PLAYER_TEAM: int(result["aura_1"]), ENEMY_TEAM: int(result["aura_2"])}
 	var sides := {PLAYER_TEAM: player, ENEMY_TEAM: ai}
 	var lines: PackedStringArray = []
+	# For the damage animation, as in a played match (blue's bar is the bottom one).
+	var hp_before := {true: player.hp, false: ai.hp}
+	var hits: Array = []
 	if winner == PLAYER_TEAM or winner == ENEMY_TEAM:
 		var loser: PlayerState = sides[3 - winner]
 		var damage := MatchRules.loss_damage(round_number, aura[winner])
+		hits.append(_damage_hit(winner == PLAYER_TEAM, winner, damage, loser.hp - damage))
 		loser.hp -= damage
 		lines.append("%s won with %d Aura surviving. %s takes %d damage." % [sides[winner].player_name, aura[winner], loser.player_name, damage])
 	else:
 		var to_blue := MatchRules.draw_damage(round_number, aura[ENEMY_TEAM])
 		var to_red := MatchRules.draw_damage(round_number, aura[PLAYER_TEAM])
+		hits.append(_damage_hit(true, PLAYER_TEAM, to_red, ai.hp - to_red))
+		hits.append(_damage_hit(false, ENEMY_TEAM, to_blue, player.hp - to_blue))
 		player.hp -= to_blue
 		ai.hp -= to_red
 		lines.append("Draw. Blue takes %d damage, Red takes %d." % [to_blue, to_red])
@@ -1208,6 +1231,15 @@ func _apply_spectate_result(result: Dictionary) -> void:
 	add_log("Round %d: %s" % [round_number, lines[0]])
 	_spectate_write("Round %d (%.0fs fight)\n  Blue: %s\n  Red:  %s\n  %s %s" % [round_number, _combat_time,
 			_army_text(player.last_fielded), _army_text(ai.last_fielded), lines[0], lines[1]])
+	# The pips and orb first (the bars hold their old values until it hits), then the result.
+	hud.hold_health(hp_before)
+	hud.refresh()
+	await hud.play_damage(hits)
+	if not is_inside_tree():
+		return
+	if not player.is_alive() or not ai.is_alive():
+		continue_after_result()   # a killing orb shattered a bar: straight to the end
+		return
 	hud.show_result("\n".join(lines))
 	hud.refresh()
 	await get_tree().create_timer(SPECTATE_RESULT_PAUSE).timeout

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RowdyGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/scripts/rowdy_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+duration = 5.0
+reduction = 0.75
+celerity_bonus = 40.0
+gambit_name = "Called Out"
+cast_time = 0.3
+description = "Singles out the enemy with the most max health and charges at it. For 5 seconds, Brogaine and that enemy can only attack each other, can't gain Charge, and take 75% less damage from anyone else. Brogaine gains +40 Celerity for the duel. Immovability shortens it."

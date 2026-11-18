@@ -7,6 +7,26 @@ extends RefCounted
 ## Set automatically by the unit when an Action attaches this status.
 var from_gambit: bool = false
 
+## Script -> {method name: true} for the hooks that script (or a parent below Status)
+## overrides. See BattleUnit._with.
+static var _overridden := {}
+
+
+## True if `status`'s class overrides `method` instead of using the base version here.
+static func overrides(status: Status, method: StringName) -> bool:
+	var script: Script = status.get_script()
+	var found = _overridden.get(script)
+	if found == null:
+		found = {}
+		var seen := {}
+		for m in script.get_script_method_list():
+			var name: StringName = m["name"]
+			if seen.has(name):
+				found[name] = true   # listed again below the base: overridden
+			seen[name] = true
+		_overridden[script] = found
+	return found.has(method)
+
 ## Called once when the status is attached to the unit.
 func on_applied(_unit: BattleUnit) -> void:
 	pass
@@ -85,6 +105,11 @@ func get_pending_healing(_unit: BattleUnit) -> float:
 func modify_health_regen(_unit: BattleUnit, regen: float) -> float:
 	return regen
 
+## Runs after every status's modify_health_regen, for multipliers on Regeneration from all
+## sources (Brogaine B2).
+func modify_final_health_regen(_unit: BattleUnit, regen: float) -> float:
+	return regen
+
 ## Adjust one of the unit's stats. Items, powerups, and buffs will use this.
 func modify_stat(_unit: BattleUnit, _stat: Stats.Stat, value: float) -> float:
 	return value
@@ -158,6 +183,26 @@ func modify_crowd_control(_unit: BattleUnit, multiplier: float) -> float:
 ## sooner, ones that last all combat are that much weaker. MALLET's passive lowers it.
 func modify_debuff_strength(_unit: BattleUnit, multiplier: float) -> float:
 	return multiplier
+
+## Called when healing on the unit goes past its max health: `excess` is the part that
+## didn't fit (Cerceval B turns it into Shield).
+func on_overheal(_unit: BattleUnit, _excess: float) -> void:
+	pass
+
+## Called when an ally is healed, for units registered with
+## BattleUnit.listen_for_ally_heals (Cerceval B1). `amount` is what it actually gained.
+func on_ally_healed(_unit: BattleUnit, _ally: BattleUnit, _amount: float) -> void:
+	pass
+
+## Called when an enemy of the unit takes Bleed damage (see Bleed): `victim` and how much
+## it took. Cerceval's passive heals from it.
+func on_enemy_bleed(_unit: BattleUnit, _victim: BattleUnit, _dealt: float) -> void:
+	pass
+
+## How many Glory stacks the unit can gain per combat (BattleUnit.GLORY_CAP by default).
+## Ascensions and upgrades raise it. Pass the value on, changed or not.
+func modify_glory_cap(_unit: BattleUnit, cap: int) -> int:
+	return cap
 
 ## Called when the unit dodges a hit.
 func on_dodge(_unit: BattleUnit) -> void:

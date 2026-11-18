@@ -26,6 +26,12 @@ const PHRASES := [
 	["beam", "", "\\bBeams?\\b"],
 	# The Hinder debuff (see HinderStatus).
 	["hinder", "", "\\bHinder(?:s|ed|ing)?\\b"],
+	# The Bleed keyword (see Bleed): capital B only, like the other keywords.
+	["bleed", "", "\\bBleed(?:s|ing)?\\b"],
+	# Pure Damage: damage that ignores every Ward (Stats.DamageType.PURE).
+	["pure", "", "\\bPure [Dd]amage\\b"],
+	# Immovability (Stats.Stat.IMMOVABILITY): shorter crowd control and debuffs.
+	["immovability", "", "\\bImmovability\\b"],
 	[Shard.Kind.HEALTH, "health", "\\b(?i:max(?:imum)? health|health)\\b"],
 	["regen", "", "\\b(?i:regen(?:eration)?)\\b"],
 	[Shard.Kind.MIGHT, "might", "\\bMight\\b"],
@@ -35,6 +41,8 @@ const PHRASES := [
 
 ## The Beam keyword's colour: a bright beam cyan.
 const BEAM_COLOR := Color(0.45, 0.95, 1.0)
+## Immovability's colour: a sandy stone.
+const IMMOVABILITY_COLOR := Color(0.85, 0.74, 0.55)
 
 static var _regex: RegEx
 static var _new_gambit: RegEx
@@ -60,6 +68,12 @@ static func extra_color(key: String) -> Color:
 			return BEAM_COLOR
 		"hinder":
 			return HinderStatus.TINT.lightened(0.25)
+		"bleed":
+			return Bleed.COLOR.lightened(0.25)
+		"pure":
+			return Stats.DAMAGE_TYPE_COLORS[Stats.DamageType.PURE]
+		"immovability":
+			return IMMOVABILITY_COLOR
 	return Color.WHITE
 
 

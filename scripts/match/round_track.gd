@@ -202,12 +202,13 @@ static func _draw_crown(canvas: CanvasItem, c: Vector2, s: float, color: Color) 
 static func _draw_eye(canvas: CanvasItem, c: Vector2, s: float, color: Color) -> void:
 	var h := s / 2.0
 	var width := maxf(s * 0.07, 1.2)
-	# Nerves: right-angled traces ending in little pads.
+	# Nerves: traces ending in little pads, mirrored left to right (the sides bend up, two
+	# drop straight down), never turning the same way round like a pinwheel.
 	var traces := [
 		[Vector2(-0.82, 0.0), Vector2(-1.0, 0.0), Vector2(-1.0, -0.55)],
-		[Vector2(0.82, 0.0), Vector2(1.0, 0.0), Vector2(1.0, 0.55)],
-		[Vector2(0.0, -0.42), Vector2(0.0, -0.8), Vector2(0.4, -0.8)],
-		[Vector2(0.0, 0.42), Vector2(0.0, 0.8), Vector2(-0.4, 0.8)],
+		[Vector2(0.82, 0.0), Vector2(1.0, 0.0), Vector2(1.0, -0.55)],
+		[Vector2(-0.27, 0.36), Vector2(-0.27, 0.8)],
+		[Vector2(0.27, 0.36), Vector2(0.27, 0.8)],
 	]
 	for trace in traces:
 		var points := PackedVector2Array()

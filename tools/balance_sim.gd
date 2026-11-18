@@ -84,6 +84,7 @@ var _last_victim: int = 0         # instance id of the unit that was just hit (s
 
 
 func _ready() -> void:
+	SimMode.active = true   # lean battles: no bars, numbers or effects, same fights
 	add_to_group("damage_tracker")   # units report damage, healing, and shielding to this group
 	_parse_args()
 	seed(seed_value)

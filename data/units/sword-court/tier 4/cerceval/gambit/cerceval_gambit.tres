@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BarbedFrenzyGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/cerceval/gambit/barbed_frenzy_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+duration = 5.0
+celerity = 50.0
+vampirism = 0.2
+pierce_share = 0.6
+gambit_name = "Barbed Frenzy"
+cast_time = 0.3
+description = "For 5 seconds, gains +50 Celerity and 20% Vampirism, and his attacks become blades that fly twice his attack range, piercing every enemy in their path and dealing 60% damage after the first enemy hit."

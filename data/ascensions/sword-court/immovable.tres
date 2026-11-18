@@ -13,7 +13,7 @@ radius_cells = 2
 
 [resource]
 script = ExtResource("1")
-ascension_name = "Immovable"
+ascension_name = "Unshakable"
 description = "Enemies within 2 cells of Balmede have 20 less Celerity."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])

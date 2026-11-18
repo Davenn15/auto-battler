@@ -2,37 +2,48 @@ extends Node
 ## Computer-vs-computer match simulator, with strategy evolution.
 ##
 ## Coordinator (default): evolves a population of AI strategies (AiPolicy genomes). Each
-## generation every strategy plays a few full prototype matches against others; the best
-## survive and breed. Matches run in parallel worker copies of the game. At the end the
-## best strategy plays the default one, and everything is written to tools/sim_results/.
+## generation every strategy plays a few full matches against others under the game's real
+## rules (SimMatch: random factions, Encounters, Ascensions, the real shop and income); the
+## best survive and breed. Matches run in parallel worker copies of the game, with lean
+## battles (SimMode) and successive-halving plan testing. At the end the best strategy
+## plays the one the game uses now (the trained one if there is one, else the default),
+## and everything is written to tools/sim_results/.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/match_sim.tscn -- [options]
 ##     --generations N    (default 12)    --population N (default 16)
 ##     --matches N        matches per strategy per generation (default 4)
 ##     --workers N        parallel copies of the game (default 12)
 ##     --candidates N     plans tried per planning phase (default 8)
-##     --battles N        test battles per plan (default 2)
-##     --final N          best-vs-default matches at the end (default 24)
+##     --rungs 1,3,6      successive halving for plans (see SimMatch)
+##     --pick-rungs 2,6   the same for Ascension options
+##     --final N          champion vs current strategy matches at the end (default 24)
+##     --aura-upgrades    the Aura upgrade system (MatchRules.aura_upgrades)
+##     --install          if the champion beats the current strategy in the final matches,
+##                        save it to data/ai/trained_policy.json: the computer opponent and
+##                        real_sim use it from then on
 ##     --seed N
+##   ... -- --ablate <champion.json> --final 24   which parts of a strategy matter
+##
+## Factions are random each match, so a strategy is judged across both. Matches are long;
+## a generation of 16 strategies x 4 matches is 32 matches.
 ##
 ## Worker (started by the coordinator): --worker --in <job.json> --out <result.json>
-
-const COMBAT_LIMIT := 180.0     # same safety net as the match screen
-const PLAN_BATTLE_LIMIT := 90.0
-const MAX_COMBATS := 40
 
 var generations := 12
 var population := 16
 var matches_per := 4
 var workers := 12
 var candidates := 8
-var battles := 2
+var rungs := "1,3,6"
+var pick_rungs := "2,6"
 var final_matches := 24
+var install := false
 var seed_value := 1
 var out_dir := ""
 
 
 func _ready() -> void:
+	SimMode.active = true   # lean battles: no bars, numbers or effects, same fights
 	var args := OS.get_cmdline_user_args()
 	if args.has("--worker"):
 		_worker(args)
@@ -112,7 +123,10 @@ func _parse(args: PackedStringArray) -> void:
 	matches_per = int(_arg(args, "--matches", str(matches_per)))
 	workers = int(_arg(args, "--workers", str(workers)))
 	candidates = int(_arg(args, "--candidates", str(candidates)))
-	battles = int(_arg(args, "--battles", str(battles)))
+	rungs = _arg(args, "--rungs", rungs)
+	pick_rungs = _arg(args, "--pick-rungs", pick_rungs)
+	install = args.has("--install")
+	MatchRules.aura_upgrades = args.has("--aura-upgrades")
 	final_matches = int(_arg(args, "--final", str(final_matches)))
 	seed_value = int(_arg(args, "--seed", str(seed_value)))
 
@@ -125,12 +139,15 @@ func _coordinate() -> void:
 	var stamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
 	out_dir = ProjectSettings.globalize_path("res://tools/sim_results/match_sim_%s" % stamp)
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	print("Match sim: %d generations x %d strategies x %d matches, %d workers, %d plans x %d battles per phase, seed %d" %
-			[generations, population, matches_per, workers, candidates, battles, seed_value])
+	print("Match sim (real rules): %d generations x %d strategies x %d matches, %d workers, %d plans, halving %s / %s, aura upgrades %s, seed %d" %
+			[generations, population, matches_per, workers, candidates, rungs, pick_rungs, "on" if MatchRules.aura_upgrades else "off", seed_value])
 	print("  results: %s" % out_dir)
 	var started := Time.get_ticks_msec()
 
-	var pop: Array = [AiPolicy.new().to_dict()]   # the game's default strategy, plus random ones
+	var current := AiPolicy.load_trained().to_dict()   # what the game uses now
+	var pop: Array = [current]   # the game's current strategy, plus random ones
+	if AiPolicy.has_trained():
+		pop.append(AiPolicy.new().to_dict())   # and the plain default
 	while pop.size() < population:
 		pop.append(AiPolicy.random().to_dict())
 	var history: Array = []
@@ -164,12 +181,12 @@ func _coordinate() -> void:
 			pop = _next_generation(pop, ranked)
 	log_file.close()
 
-	# Final check: the best strategy against the game's default one.
+	# Final check: the best strategy against the one the game uses now.
 	var champion: Dictionary = history[history.size() - 1]["best"]
 	var finals: Array = []
 	for i in final_matches:
 		var champ_first := i % 2 == 0
-		finals.append({"a": champion if champ_first else AiPolicy.new().to_dict(), "b": AiPolicy.new().to_dict() if champ_first else champion,
+		finals.append({"a": champion if champ_first else current, "b": current if champ_first else champion,
 				"a_id": 0 if champ_first else 1, "b_id": 1 if champ_first else 0, "gen": -1, "seed": randi()})
 	var final_records: Array = await _run_matches(finals)
 	var final_file := FileAccess.open(out_dir.path_join("final_matches.jsonl"), FileAccess.WRITE)
@@ -178,9 +195,15 @@ func _coordinate() -> void:
 		final_file.store_line(JSON.stringify(r))
 		champ_score += r["a"]["result"] if r["a_id"] == 0 else r["b"]["result"]
 	final_file.close()
-	print("Final: evolved strategy vs default: %.1f / %d" % [champ_score, final_records.size()])
+	print("Final: evolved strategy vs current (%s): %.1f / %d" % ["trained" if AiPolicy.has_trained() else "default", champ_score, final_records.size()])
 	_write_json("history.json", history)
 	_write_json("champion.json", champion)
+	if install:
+		if final_records.size() > 0 and champ_score > final_records.size() / 2.0:
+			AiPolicy.save_trained(champion)
+			print("Installed: the computer opponent now uses this strategy (%s)." % AiPolicy.TRAINED_PATH)
+		else:
+			print("Not installed: the champion didn't beat the current strategy.")
 	print("Done in %.0f min." % ((Time.get_ticks_msec() - started) / 60000.0))
 	get_tree().quit()
 
@@ -225,7 +248,8 @@ func _run_matches(jobs: Array) -> Array:
 		var in_path := tmp.path_join("w%d_in.json" % w)
 		var out_path := tmp.path_join("w%d_out.json" % w)
 		var file := FileAccess.open(in_path, FileAccess.WRITE)
-		file.store_string(JSON.stringify({"matches": mine, "candidates": candidates, "battles": battles}))
+		file.store_string(JSON.stringify({"matches": mine, "candidates": candidates, "rungs": rungs,
+				"pick_rungs": pick_rungs, "aura_upgrades": MatchRules.aura_upgrades}))
 		file.close()
 		DirAccess.remove_absolute(out_path)
 		var pid := OS.create_process(OS.get_executable_path(), ["--headless", "--fixed-fps", "60",
@@ -259,12 +283,16 @@ func _write_json(file: String, data) -> void:
 
 func _worker(args: PackedStringArray) -> void:
 	var job = JSON.parse_string(FileAccess.get_file_as_string(_arg(args, "--in", "")))
-	candidates = int(job["candidates"])
-	battles = int(job["battles"])
+	MatchRules.aura_upgrades = bool(job.get("aura_upgrades", false))
+	var sim := SimMatch.new(self)
+	sim.candidates = int(job["candidates"])
+	sim.plan_rungs = SimMatch.parse_rungs(str(job.get("rungs", rungs)))
+	sim.pick_rungs = SimMatch.parse_rungs(str(job.get("pick_rungs", pick_rungs)))
 	var results: Array = []
 	for m in job["matches"]:
-		seed(int(m["seed"]))
-		var record: Dictionary = await _play_match(AiPolicy.from_dict(m["a"]), AiPolicy.from_dict(m["b"]))
+		var record: Dictionary = await sim.play(int(m["seed"]), [AiPolicy.from_dict(m["a"]), AiPolicy.from_dict(m["b"])])
+		record["a"] = record["players"][0]   # the coordinator reads each side's result and HP
+		record["b"] = record["players"][1]
 		record["a_id"] = m["a_id"]
 		record["b_id"] = m["b_id"]
 		record["gen"] = m["gen"]
@@ -274,108 +302,3 @@ func _worker(args: PackedStringArray) -> void:
 	file.close()
 	await get_tree().process_frame
 	get_tree().quit()
-
-
-## One full match between two strategies, following the prototype's rules. Player A
-## stands at the bottom in combat, B on the far side.
-func _play_match(policy_a: AiPolicy, policy_b: AiPolicy) -> Dictionary:
-	var players: Array[PlayerState] = [PlayerState.new(), PlayerState.new()]
-	var policies := [policy_a, policy_b]
-	var totals := [{}, {}]
-	var combats: Array = []
-	var round_number := 1
-	var combats_done := 0
-	while true:
-		# Planning: both plan against the other's last fielded army.
-		for i in 2:
-			MatchRules.start_planning(players[i], combats_done + 1)
-		for i in 2:
-			var stats: Dictionary = await _plan(players[i], policies[i], players[1 - i].last_fielded, combats_done + 1)
-			for key in stats:
-				totals[i][key] = totals[i].get(key, 0) + stats[key]
-		if round_number == 1:
-			round_number += 1   # Opening Shop done: round 2 is the first combat
-			continue
-		# Combat
-		for p in players:
-			MatchRules.auto_place_bench(p)
-			p.last_fielded = ArmyUnit.copy_army(p.board_units())
-			p.last_fielded_round = round_number
-		var r: Dictionary = await BattleArena.fight(self, players[0].units, players[1].units, COMBAT_LIMIT)
-		var damage := [0, 0]
-		match r["winner"]:
-			1: damage[1] = MatchRules.loss_damage(round_number, r["bottom_aura"])
-			2: damage[0] = MatchRules.loss_damage(round_number, r["top_aura"])
-			_:
-				damage[0] = MatchRules.draw_damage(round_number, r["top_aura"])
-				damage[1] = MatchRules.draw_damage(round_number, r["bottom_aura"])
-		for i in 2:
-			players[i].hp -= damage[i]
-			MatchRules.pay_income(players[i], round_number)
-		combats.append({"round": round_number, "winner": r["winner"], "time": snappedf(r["time"], 0.1),
-				"a_army": _army_text(players[0].last_fielded), "b_army": _army_text(players[1].last_fielded),
-				"a_aura": players[0].army_aura(), "b_aura": players[1].army_aura(),
-				"a_left": r["bottom_aura"], "b_left": r["top_aura"], "damage": damage})
-		combats_done += 1
-		if not players[0].is_alive() or not players[1].is_alive() or combats_done >= MAX_COMBATS:
-			break
-		round_number += 2   # the Encounter round in between is skipped here (no Ascensions yet)
-	var result_a := 0.5
-	if players[0].is_alive() and not players[1].is_alive():
-		result_a = 1.0
-	elif players[1].is_alive() and not players[0].is_alive():
-		result_a = 0.0
-	return {"rounds": round_number, "combats": combats,
-			"a": _player_record(players[0], totals[0], result_a),
-			"b": _player_record(players[1], totals[1], 1.0 - result_a)}
-
-
-## Tries the strategy's candidate plans against `opponent` and keeps the best, like
-## AiPlanner, but in this process. Returns the chosen plan's shop counts.
-func _plan(p: PlayerState, policy: AiPolicy, opponent_army: Array[ArmyUnit], combat_number: int) -> Dictionary:
-	var opponent := ArmyUnit.copy_army(opponent_army)
-	if opponent.is_empty():
-		opponent = _stand_in(p.aura_received)
-	var best: PlayerState = null
-	var best_stats := {}
-	var best_score := -INF
-	for c in candidates:
-		var trial := p.copy()
-		var stats := policy.make_plan(trial, combat_number, c)
-		var score := 0.0
-		for b in battles:
-			var r: Dictionary = await BattleArena.fight(self, opponent, trial.units, PLAN_BATTLE_LIMIT)
-			score += 1.0 if r["winner"] == 2 else (0.5 if r["winner"] == 0 else 0.0)
-			score += (r["top_aura"] - r["bottom_aura"]) / 1000.0
-		if score > best_score:
-			best_score = score
-			best = trial
-			best_stats = stats
-	p.adopt(best)
-	return best_stats
-
-
-## Before the first combat there's nothing to plan against: a random army of the same Aura
-## (the same placeholder the game uses).
-func _stand_in(aura: int) -> Array[ArmyUnit]:
-	var army: Array[ArmyUnit] = []
-	for pick in RandomTeams.make_team(MatchRules.roster(), aura, 8, false, true):
-		var unit := ArmyUnit.new(pick["data"])
-		unit.path.assign(pick["path"])
-		army.append(unit)
-	var holder := PlayerState.new()
-	holder.units = army
-	AiPolicy.lay_out(holder)
-	return army
-
-
-## "Garth|A1|0|row 7|Crusher+Might Shard" per unit: name, path, buffs, row, items.
-func _army_text(army: Array[ArmyUnit]) -> Array:
-	return army.map(func(u): return "%s|%s|%d|%d|%s" % [u.data.display_name, RandomTeams.path_label(u.path),
-			u.buffs, u.cell.y, "+".join(u.items.map(func(k): return k.get_display_name()))])
-
-
-func _player_record(p: PlayerState, totals: Dictionary, result: float) -> Dictionary:
-	return {"result": result, "hp": p.hp, "aura_left": p.aura, "reserve_left": p.reserve,
-			"loose_items": p.inventory.size(), "army": _army_text(p.units), "army_aura": p.army_aura(),
-			"shop": totals}

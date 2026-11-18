@@ -8,7 +8,9 @@ extends Control
 ## Nothing here scrolls: every panel fits on screen, and anything longer is in a hover tip
 ## or a pop-up. The selected unit's items are shown in the unit info panel (item_row).
 
-const SIDE_WIDTH := 330.0
+## The side panel's width: with the ritual table hanging off it, the right column is as wide
+## as the left one, so the centred board has the same gap on both sides.
+const SIDE_WIDTH := 244.0
 const ICON := Vector2(26, 26)
 const HELD_COLOR := Color(1.0, 0.85, 0.3)
 const FRAME_COLOR := Color(0.09, 0.09, 0.11, 0.92)
@@ -57,7 +59,9 @@ var _encounter_cards: HBoxContainer
 var _unit_pick: PanelContainer
 var _unit_pick_text: RichTextLabel
 var _unit_pick_bench: HBoxContainer
-var _ascension_strip: VBoxContainer
+var _ascension_strip: HBoxContainer
+## The opponent's Ascensions: one row just under their health bar.
+var _enemy_ascension_strip: HBoxContainer
 var _speed_button: Button
 
 const SPEEDS := [1.0, 2.0, 4.0]
@@ -80,7 +84,9 @@ const TABLE_SLOT := 36.0
 ## Size of a unit's picture on the bench.
 const BENCH_TILE := Vector2(50, 60)
 ## Size of a unit tile in the shop.
-const SHOP_TILE := Vector2(100, 92)
+const SHOP_TILE := Vector2(74, 92)   # three across the side panel
+## Where a Shard button's text starts, past its icon.
+const SHARD_TEXT_LEFT := 20.0
 
 
 func _ready() -> void:
@@ -357,7 +363,7 @@ func _build_top() -> void:
 	_round_track = RoundTrack.new()
 	_round_track.anchor_left = 1.0
 	_round_track.anchor_right = 1.0
-	_round_track.offset_right = -6 - (SIDE_WIDTH - _round_track.custom_minimum_size.x) / 2.0
+	_round_track.offset_right = -6 - maxf(SIDE_WIDTH - _round_track.custom_minimum_size.x, 0.0) / 2.0
 	_round_track.offset_left = _round_track.offset_right - _round_track.custom_minimum_size.x
 	_round_track.offset_top = 0
 	_round_track.offset_bottom = 30
@@ -399,7 +405,7 @@ func _build_side() -> void:
 	_money.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_money.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_money.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_money.add_theme_font_size_override("normal_font_size", 14)
+	_money.add_theme_font_size_override("normal_font_size", 13)
 	_money.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shop_head.add_child(_money)
 	_shop_units = HBoxContainer.new()
@@ -417,7 +423,7 @@ func _build_side() -> void:
 	rerolls.add_child(_reroll)
 	_lock = Button.new()
 	_lock.toggle_mode = true
-	_lock.custom_minimum_size = Vector2(90, 0)
+	_lock.custom_minimum_size = Vector2(64, 0)
 	_lock.tooltip_text = "Keep this shop for your next planning phase instead of a fresh one.\nUnlocks itself once that phase starts."
 	_lock.pressed.connect(func(): game.toggle_shop_lock())
 	rerolls.add_child(_lock)
@@ -641,8 +647,8 @@ func _build_bottom() -> void:
 	_hint = _label("", 12, HELD_COLOR)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_hint.offset_left = 330 - 576
-	_hint.offset_right = 780 - 576
+	_hint.offset_left = -225   # centred over the board
+	_hint.offset_right = 225
 	_hint.offset_top = 36
 	_hint.offset_bottom = 56
 	add_child(_hint)
@@ -662,22 +668,46 @@ func _build_bottom() -> void:
 	_ready_button = Button.new()
 	_ready_button.add_theme_font_size_override("font_size", 18)
 	_ready_button.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	_ready_button.offset_left = 480 - 576
-	_ready_button.offset_right = 630 - 576
+	_ready_button.offset_left = -75   # centred under the board
+	_ready_button.offset_right = 75
 	_ready_button.offset_top = -50
 	_ready_button.offset_bottom = -10
 	_ready_button.pressed.connect(func(): game.press_ready())
 	add_child(_ready_button)
 
-	# Ascensions: a badge each, in two rows just under the board (yours, then the opponent's).
-	_ascension_strip = VBoxContainer.new()
-	_ascension_strip.add_theme_constant_override("separation", 3)
-	_ascension_strip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	_ascension_strip.offset_left = MatchGame.BOARD_SCREEN_CENTER.x - 576 - 230
-	_ascension_strip.offset_right = MatchGame.BOARD_SCREEN_CENTER.x - 576 + 230
-	_ascension_strip.offset_top = -96   # under your health bar (MatchHealthBars.BOTTOM_Y)
-	_ascension_strip.offset_bottom = -49
-	add_child(_ascension_strip)
+	# Ascensions: a row of badges on the far side of each health bar from the board (yours
+	# under yours, the opponent's above theirs), the same distance from each. Placed by
+	# _layout_center.
+	_ascension_strip = _ascension_row()
+	_enemy_ascension_strip = _ascension_row()
+
+
+func _ascension_row() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 4)
+	row.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	add_child(row)
+	return row
+
+
+## Gap between a health bar's edge and its Ascension row.
+const ASCENSION_GAP := 6.0
+
+
+## Places what sits around the board, which is centred across the screen (its centre
+## moves when the window changes shape).
+func _layout_center() -> void:
+	var center_x := MatchGame.board_screen_center.x
+	var bar_half := MatchHealthBars.BAR_SIZE.y / 2.0 + 2.0   # with its frame
+	for row in [_ascension_strip, _enemy_ascension_strip]:
+		row.offset_left = center_x - 230
+		row.offset_right = center_x + 230
+	_ascension_strip.offset_top = MatchHealthBars.BOTTOM_Y + bar_half + ASCENSION_GAP
+	_ascension_strip.offset_bottom = _ascension_strip.offset_top + BADGE.y
+	_enemy_ascension_strip.offset_bottom = MatchHealthBars.TOP_Y - bar_half - ASCENSION_GAP
+	_enemy_ascension_strip.offset_top = _enemy_ascension_strip.offset_bottom - BADGE.y
+	_health_bars.queue_redraw()
 
 
 func _build_popup() -> void:
@@ -782,10 +812,29 @@ func show_encounter(title: String) -> void:
 	_place_encounter.call_deferred()
 
 
+## Size of the faction emblem peeking over a faction Ascension's badge, in pixels, and how
+## far above the badge's top edge its centre sits.
+const EMBLEM_SIZE := 10.0
+const EMBLEM_RISE := 1.0
+
+
+## A faction's emblem (the round track's: Sword Court's pierced crown, Obelisk's eye), in
+## the faction's colour.
+class FactionEmblem extends Control:
+	var faction := ""
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var color: Color = RoundTrack.FACTION_COLORS.get(faction, RoundTrack.NEUTRAL_COLOR)
+		RoundTrack.draw_icon(self, RoundTrack.Kind.FACTION, faction, size / 2.0, size.x, color)
+
+
 ## Centres the Encounter panel on the board once its cards are laid out.
 func _place_encounter() -> void:
 	_encounter.reset_size()
-	_encounter.position = MatchGame.BOARD_SCREEN_CENTER - _encounter.size / 2.0
+	_encounter.position = MatchGame.board_screen_center - _encounter.size / 2.0
 
 
 func hide_encounter() -> void:
@@ -852,49 +901,50 @@ func show_unit_pick(ascension: Ascension, bench: Array) -> void:
 
 func _place_unit_pick() -> void:
 	_unit_pick.reset_size()
-	_unit_pick.position = Vector2(MatchGame.BOARD_SCREEN_CENTER.x - _unit_pick.size.x / 2.0, TOP_BAR_HEIGHT + 4.0)
+	_unit_pick.position = Vector2(MatchGame.board_screen_center.x - _unit_pick.size.x / 2.0, TOP_BAR_HEIGHT + 4.0)
 
 
 func hide_unit_pick() -> void:
 	_unit_pick.visible = false
 
 
-## The Ascension strip: "You" and a badge per Ascension, then the opponent's (as their last
-## army had them). Hover a badge for its name, tier and description.
+## The Ascension rows: a badge per Ascension under your health bar; the opponent's (as
+## their last army had them) above theirs. Hover a badge for its name, tier
+## and description.
 func _refresh_ascensions() -> void:
-	for child in _ascension_strip.get_children():
-		_ascension_strip.remove_child(child)
-		child.queue_free()
-	var sides := [[game.player.player_name, game.player.ascensions, Color("#66a6ff")],
-			[game.ai.player_name, game.ai.last_fielded_ascensions, Color("#ff6666")]]
-	for side in sides:
-		var list: Array[Ascension] = side[1]
-		if list.is_empty():
-			continue
-		var row := HBoxContainer.new()
-		row.alignment = BoxContainer.ALIGNMENT_CENTER
-		row.add_theme_constant_override("separation", 4)
-		_ascension_strip.add_child(row)
-		var name_label := _label(side[0], 11, side[2])
-		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		name_label.custom_minimum_size = Vector2(70, 0)
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		row.add_child(name_label)
-		var army: Array[ArmyUnit] = game.player.units if side[1] == game.player.ascensions else game.ai.last_fielded
-		for ascension in list:
-			row.add_child(_ascension_badge(ascension, MatchRules.holder_of(army, ascension)))
+	_layout_center()
+	for strip in [_ascension_strip, _enemy_ascension_strip]:
+		for child in strip.get_children():
+			strip.remove_child(child)
+			child.queue_free()
+	var mine := game.player.ascensions
+	for i in mine.size():
+		_ascension_strip.add_child(_ascension_badge(mine[i], i, MatchRules.holder_of(game.player.units, mine[i])))
+	var theirs := game.ai.last_fielded_ascensions
+	for i in theirs.size():
+		_enemy_ascension_strip.add_child(_ascension_badge(theirs[i], i, MatchRules.holder_of(game.ai.last_fielded, theirs[i])))
 	_ascension_strip.visible = _ascension_strip.get_child_count() > 0
+	_enemy_ascension_strip.visible = _enemy_ascension_strip.get_child_count() > 0
+
+
+## The tier an Ascension was picked at. A player takes one per Encounter, in order, so the
+## `index`-th in their list came from Encounter index + 1; kept within the tiers the
+## Ascension can be offered at (a unit Ascension spans two).
+static func _picked_tier(ascension: Ascension, index: int) -> int:
+	var tiers := ascension.encounter_tiers()
+	return clampi(MatchRules.encounter_tier(index + 1), int(tiers.min()), int(tiers.max()))
 
 
 ## A small square showing the Ascension's tier, tinted by its main stat; its tooltip has
 ## the rest.
-func _ascension_badge(ascension: Ascension, holder: ArmyUnit = null) -> Button:
+func _ascension_badge(ascension: Ascension, index: int, holder: ArmyUnit = null) -> Button:
+	var tier := _picked_tier(ascension, index)
 	var badge := RichTooltipButton.new()
 	badge.bbcode_tooltip = true
 	badge.focus_mode = Control.FOCUS_NONE
 	badge.custom_minimum_size = BADGE
-	badge.text = ascension.tier_text(true)
-	badge.add_theme_font_size_override("font_size", 11 if badge.text.length() <= 3 else 8)
+	badge.text = Ascension.NUMERALS[clampi(tier, 0, 4)]
+	badge.add_theme_font_size_override("font_size", 11)
 	var style := StyleBoxFlat.new()
 	style.bg_color = _ascension_tint(ascension).darkened(0.35)
 	style.border_color = Color(1, 1, 1, 0.5) if ascension.family != null or ascension.empowers != null else Color(1, 1, 1, 0.25)
@@ -902,7 +952,7 @@ func _ascension_badge(ascension: Ascension, holder: ArmyUnit = null) -> Button:
 	style.set_corner_radius_all(4)
 	for state in ["normal", "hover", "pressed"]:
 		badge.add_theme_stylebox_override(state, style)
-	var lines := PackedStringArray(["[b]%s[/b]   [color=#9a9aa5]Tier %s[/color]" % [ascension.get_display_name(), ascension.tier_text()]])
+	var lines := PackedStringArray(["[b]%s[/b]   [color=#9a9aa5]Tier %d[/color]" % [ascension.get_display_name(), tier]])
 	if holder != null:
 		lines.append("[color=#ffd24d]On %s[/color]" % holder.label().strip_edges())
 	elif ascension.favors_beams:
@@ -911,6 +961,14 @@ func _ascension_badge(ascension: Ascension, holder: ArmyUnit = null) -> Button:
 		lines.append("[color=#c8b46e]For %s[/color]" % ascension.affected_names())
 	lines.append(Keyphrases.format(ascension.description))
 	badge.tooltip_text = "\n".join(lines)
+	# A faction's Ascension: its emblem peeking over the badge's top edge.
+	var faction := ascension.faction_name()
+	if faction != "":
+		var emblem := FactionEmblem.new()
+		emblem.faction = faction
+		emblem.size = Vector2(EMBLEM_SIZE, EMBLEM_SIZE)
+		emblem.position = Vector2((BADGE.x - EMBLEM_SIZE) / 2.0, -EMBLEM_SIZE / 2.0 - EMBLEM_RISE)
+		badge.add_child(emblem)
 	return badge
 
 
@@ -948,7 +1006,7 @@ func _show_popup(text: String, buttons: Array) -> void:
 		labels.append(button)
 	_popup.visible = true
 	_fit_font(_popup, labels, [14, 13, 12, 11, 10, 9])
-	_popup.position = (MatchGame.BOARD_SCREEN_CENTER - _popup.size / 2.0).clamp(
+	_popup.position = (MatchGame.board_screen_center - _popup.size / 2.0).clamp(
 			Vector2(8, 8), size - _popup.size - Vector2(8, 8))
 
 
@@ -957,6 +1015,15 @@ func hide_result() -> void:
 
 
 ## Keeps the health bars at these values (true = yours) until play_damage moves them.
+## The round of the next combat (combats are on even rounds): this one while planning a
+## combat round, otherwise the next even round after it.
+func _next_combat_round() -> int:
+	var r := game.round_number
+	if r % 2 == 1:
+		return r + 1
+	return r if game.phase == MatchGame.Phase.PLANNING else r + 2
+
+
 func hold_health(hp: Dictionary) -> void:
 	_health_bars.hold(hp)
 
@@ -1207,9 +1274,9 @@ func _refresh_top() -> void:
 		online_bits = "   [color=#7fdc7f]Ready ✓[/color]" if game.ai_ready else "   [color=#9a9aa5]planning…[/color]"
 	# Health is on the bars by the board, money in the shop.
 	_top.text = "[b]Round %d[/b] · %s%s" % [game.round_number, phase_name, online_bits]
-	_money.text = "%s   %s   [color=#9a9aa5](%s given / %d)[/color]" % [aura_text(p.aura, 14), reserve_text(p.reserve, 14),
-			aura_text(p.aura_received, 12), MatchRules.max_aura_received()]
-	_health_bars.show_players(p, game.ai)
+	_money.text = "%s  %s  [font_size=10][color=#9a9aa5](%s given / %d)[/color][/font_size]" % [aura_text(p.aura, 13), reserve_text(p.reserve, 13),
+			aura_text(p.aura_received, 10), MatchRules.max_aura_received()]
+	_health_bars.show_players(p, game.ai, _next_combat_round())
 
 
 func _refresh_shop() -> void:
@@ -1265,8 +1332,16 @@ func _refresh_shop() -> void:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.clip_text = true
 		button.disabled = p.reserve < MatchRules.SHARD_COST
-		_set_rich_text(button, "%s\n%s" % [Shard.NAMES[shard.first_shard], reserve_text(MatchRules.SHARD_COST, 11)], 10, 28.0)
-		button.add_theme_font_size_override("font_size", 10)
+		# The name steps down a size or two if it wouldn't fit beside the icon (a centred
+		# line that's too wide spills out of the button and gets cut off at both ends).
+		var shard_name: String = Shard.NAMES[shard.first_shard]
+		var name_size := 9
+		var room := (SIDE_WIDTH - 12.0) / maxf(p.shard_offers.size(), 1.0) - SHARD_TEXT_LEFT - 6.0
+		while name_size > 7 and get_theme_default_font().get_string_size(shard_name, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size).x > room:
+			name_size -= 1
+		_set_rich_text(button, "[font_size=%d]%s[/font_size]\n%s" % [name_size, shard_name, reserve_text(MatchRules.SHARD_COST, 10)], 9, SHARD_TEXT_LEFT)
+		button.add_theme_font_size_override("font_size", 9)
+		button.add_theme_constant_override("icon_max_width", 14)
 		_item_hover(button, shard)
 		button.pressed.connect(func(): game.buy_shard(slot))
 		_shop_shards.add_child(button)
@@ -1287,7 +1362,7 @@ func _refresh_shop() -> void:
 		button.pressed.connect(func(): game.buy_keepsake())
 		_shop_keepsake.add_child(button)
 	_reroll.disabled = p.reserve < p.reroll_cost
-	_set_rich_text(_reroll, "Reroll   " + reserve_text(p.reroll_cost, 15), 16)
+	_set_rich_text(_reroll, "Reroll   " + reserve_text(p.reroll_cost, 14), 15)
 	_lock.set_pressed_no_signal(p.shop_locked)
 	_lock.text = "Locked" if p.shop_locked else "Lock"
 

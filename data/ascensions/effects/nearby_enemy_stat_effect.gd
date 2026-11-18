@@ -60,7 +60,7 @@ class AuraDebuff extends Status:
 		enemy.add_status(debuff)
 
 	func on_applied(unit: BattleUnit) -> void:
-		_strength = unit.debuff_multiplier()
+		_strength = unit.debuff_strength()
 
 	func tick(unit: BattleUnit, delta: float) -> void:
 		_left -= delta

@@ -48,6 +48,11 @@ static func surviving_aura(tree: SceneTree, team: int) -> int:
 ## index: {"stats": {Stats.Stat: amount}, "glory": stacks}}}. Only units that gained some.
 static func collect_match_gains(tree: SceneTree) -> Dictionary:
 	var gains := {}
+	for entry in _fallen:   # units that died this fight: what they'd earned still counts
+		if not gains.has(entry["team"]):
+			gains[entry["team"]] = {}
+		gains[entry["team"]][entry["index"]] = {"stats": entry["stats"], "glory": entry["glory"]}
+	_fallen.clear()
 	for node in tree.get_nodes_in_group("units"):
 		var unit := node as BattleUnit
 		if unit == null or unit.is_summon or not unit.has_meta("army_index"):
@@ -58,6 +63,26 @@ static func collect_match_gains(tree: SceneTree) -> Dictionary:
 			gains[unit.team] = {}
 		gains[unit.team][unit.get_meta("army_index")] = {"stats": unit.match_gains.duplicate(), "glory": unit.glory_gained}
 	return gains
+
+
+## Gains of army units that died during the current fight (see bank_fallen).
+static var _fallen: Array = []
+
+
+## A unit is dying: keeps what it earned this fight for the rest of the match (Glory,
+## permanent stats), so dying later in the fight doesn't lose it.
+static func bank_fallen(unit: BattleUnit) -> void:
+	if unit.is_summon or not unit.has_meta("army_index"):
+		return
+	if unit.match_gains.is_empty() and unit.glory_gained == 0:
+		return
+	_fallen.append({"team": unit.team, "index": unit.get_meta("army_index"),
+			"stats": unit.match_gains.duplicate(), "glory": unit.glory_gained})
+
+
+## A new fight: forget the last one's fallen (test battles never collect theirs).
+static func reset_fallen() -> void:
+	_fallen.clear()
 
 
 ## Adds one team's gains (from collect_match_gains) to the army they were spawned from.

@@ -4,11 +4,18 @@ extends RefCounted
 ## use them. Tweaking balance or renaming things should only need edits in this file.
 
 ## Every stat a unit has. Add new ones here (and in UnitData.get_base_stat).
-enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM }
+## IMMOVABILITY: crowd control and debuffs on the unit last that many percent shorter (see
+## BattleUnit.crowd_control_multiplier); at 100 it's immune to them, and each point over 100
+## gives IMMOVABILITY_HEALTH max health and IMMOVABILITY_WARDS to every Ward.
+enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM, IMMOVABILITY }
+const IMMOVABILITY_HEALTH := 5.0   # max health per point over 100
+const IMMOVABILITY_WARDS := 0.5    # to each Ward per point over 100
 
 ## The three kinds of damage. The order matches the "Might / Insight / Celerity" dropdown
 ## on UnitData and Gambits, so keep them in sync if you reorder or rename.
-enum DamageType { MIGHT, INSIGHT, CELERITY }
+## PURE: damage that always ignores every Ward (Bleed, Mono-Virus, self-burns, anything
+## that "ignores Wards"). Shields and other effects still apply. White on the meter.
+enum DamageType { MIGHT, INSIGHT, CELERITY, PURE }
 
 ## Kinds of non-attack effect that items can let wrack.
 enum EffectKind { GAMBIT_DAMAGE, CONTROL, HEALING }
@@ -24,6 +31,7 @@ const STAT_NAMES := {
 	Stat.WRACK_CHANCE: "Wrack Chance",
 	Stat.WRACK_DAMAGE: "Wrack Damage",
 	Stat.VAMPIRISM: "Vampirism",
+	Stat.IMMOVABILITY: "Immovability",
 }
 
 ## Highest wrack level a hit can reach: 1 = wrack, 2 = Hyper-Wrack, 3 = Uber-Wrack.
@@ -50,6 +58,7 @@ const DAMAGE_TYPE_NAMES := {
 	DamageType.MIGHT: "Might",
 	DamageType.INSIGHT: "Insight",
 	DamageType.CELERITY: "Celerity",
+	DamageType.PURE: "Pure",
 }
 
 ## Damage number color for each damage type. Kept a little below full brightness so
@@ -58,6 +67,7 @@ const DAMAGE_TYPE_COLORS := {
 	DamageType.MIGHT: Color(0.9, 0.2, 0.2),       # red
 	DamageType.INSIGHT: Color(0.3, 0.5, 1.0),     # blue
 	DamageType.CELERITY: Color(0.95, 0.8, 0.15),  # yellow
+	DamageType.PURE: Color(0.92, 0.92, 0.95),     # white
 }
 ## How far a wrack's number is lightened toward white (0 = no change, 1 = pure white).
 const WRACK_BRIGHTEN := 0.45

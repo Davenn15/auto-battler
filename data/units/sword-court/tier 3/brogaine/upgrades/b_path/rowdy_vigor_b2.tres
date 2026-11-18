@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="RowdyVigorPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/scripts/rowdy_vigor_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+health_share = 0.25
+regen_share = 0.25
+passive_name = "Barroom Constitution"
+description = "+25% max health, and +25% Regeneration from all sources."

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BloodletterPassive" format=3 uid="uid://dtda37dik6skw"]
+
+[ext_resource type="Script" uid="uid://3ykn80uqb2br" path="res://data/units/sword-court/tier 4/cerceval/passive/bloodletter_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+bleed_share = 0.5
+heal_share = 1.0
+passive_name = "Bloodletter"
+description = "Cerceval's attack and Gambit damage also inflict Bleed for 50% of the damage dealt. He heals for 100% of all Bleed damage taken by enemies within his attack range."

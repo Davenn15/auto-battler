@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+description = "The first time Brogaine uses Flex each combat, he also grants Glory to the ally within 1 cell with the least Glory (skipping any that already gained Glory this combat)."
+gambit_overrides = Dictionary[String, float]({
+"share_glory": 1.0
+})

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "While Rend's bleed is ticking, shields and healing on the target are 40% less effective."
+description = "Shields and healing on Rend's targets are 40% less effective while they're Bleeding."
 gambit_overrides = Dictionary[String, float]({
 "heal_cut": 0.4
 })

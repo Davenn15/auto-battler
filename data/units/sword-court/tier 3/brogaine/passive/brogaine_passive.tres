@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="HeartyAuraPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 3/brogaine/passive/hearty_aura_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+radius_cells = 1
+ally_share = 0.015
+self_share = 0.4
+passive_name = "Hearty"
+description = "Allies within 1 cell gain Regeneration equal to 1.5% of their max health per second. Brogaine gains 40% of the total Regeneration of those allies."

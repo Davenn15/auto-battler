@@ -38,7 +38,7 @@ class CtrlStatus extends Status:
 	## Any damage that reaches it (after wards, so a fully shielded hit still counts) adds a
 	## Ward stack of that damage's type, if it's under the cap.
 	func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:
-		if damage > 0.0 and unit.incoming_is_hit:
+		if damage > 0.0 and unit.incoming_is_hit and unit.incoming_damage_type != Stats.DamageType.PURE:   # Pure has no Ward
 			var stacks: Array = _stacks[clampi(unit.incoming_damage_type, 0, 2)]
 			if (stacks.size() + 1) * passive.ward_per_hit <= passive.ward_cap:
 				stacks.append(passive.ward_duration)

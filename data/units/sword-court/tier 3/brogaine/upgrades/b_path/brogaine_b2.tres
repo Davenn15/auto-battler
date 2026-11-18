@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/rowdy_vigor_b2.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "+25% max health, and +25% Regeneration from all sources."
+passives = Array[ExtResource("2")]([ExtResource("3")])

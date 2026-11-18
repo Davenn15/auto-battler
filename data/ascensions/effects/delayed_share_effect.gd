@@ -14,5 +14,4 @@ func on_battle_start(unit: BattleUnit) -> void:
 	var status := DelayedDamageStatus.new(duration, share)
 	unit.add_status(status)
 	# First in the list, so it holds its share before any Shield can absorb it.
-	unit.statuses.erase(status)
-	unit.statuses.push_front(status)
+	unit.move_status_to_front(status)

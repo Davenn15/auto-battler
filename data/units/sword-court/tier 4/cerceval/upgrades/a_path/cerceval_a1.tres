@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/cerceval/upgrades/a_path/bleed_wrack_a1.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "+1% Wrack Chance for every 50 Bleed on enemies within his attack range (up to +30%)."
+passives = Array[ExtResource("2")]([ExtResource("3")])

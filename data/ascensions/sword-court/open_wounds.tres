@@ -7,14 +7,12 @@
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
-percent = 0.03
-duration = 3.0
-flurry_bonus = 3.0
+percent = 0.06
 
 [resource]
 script = ExtResource("1")
 ascension_name = "Open Wounds"
-description = "Bescard's attacks gain the Hit Effect: the target bleeds for 3% of its max health per second for 3 seconds. His Flurry's bleeds last 3 seconds longer."
+description = "Bescard's attacks gain the Hit Effect: Bleed for 6% of the target's max health."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

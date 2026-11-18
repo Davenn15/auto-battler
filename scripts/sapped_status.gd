@@ -17,5 +17,5 @@ func blocks_charge_gain(_unit: BattleUnit) -> bool:
 func modify_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 	var change: float = changes.get(stat, 0.0)
 	if change < 0.0:
-		change *= unit.debuff_multiplier()   # losses hurt less on units that resist debuffs
+		change *= unit.debuff_strength()   # losses hurt less on units that resist debuffs
 	return value + change
