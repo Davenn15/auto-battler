@@ -1,12 +1,18 @@
-[gd_resource type="Resource" script_class="AscensionFamily" format=3 uid="uid://cy2opx8jkyv6e"]
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
 
-[ext_resource type="Script" uid="uid://civb8w40bfnkx" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
-[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="2"]
-[ext_resource type="Script" uid="uid://b3qnoacb060q5" path="res://data/ascensions/effects/beam_ricochet_effect.gd" id="3"]
-[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="3_0ywde"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/beam_ricochet_effect.gd" id="3"]
 
 [sub_resource type="Resource" id="Effect_tier2"]
 script = ExtResource("3")
+extra_ricochets = 1
+ricochet_share = 0.5
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+extra_ricochets = 2
+ricochet_share = 0.5
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
@@ -14,10 +20,6 @@ description = "Your Beams ricochet to 1 more target, at 50% strength."
 tier = 2
 favors_beams = true
 effect = SubResource("Effect_tier2")
-
-[sub_resource type="Resource" id="Effect_tier4"]
-script = ExtResource("3")
-extra_ricochets = 2
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
