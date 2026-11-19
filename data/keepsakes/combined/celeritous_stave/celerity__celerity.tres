@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3]
+[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://bus64bqban0na"]
 
 [ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/celeritous_stave/celerity__celerity_effect.tres" id="2_effect"]
@@ -8,7 +8,7 @@ script = ExtResource("1_keep")
 keepsake_name = "Celeritous Stave"
 first_shard = 2
 second_shard = 2
+celerity = 25.0
 effect = ExtResource("2_effect")
-celerity = 35.0
 description = "Hit Effect: Gain 1 Celerity."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

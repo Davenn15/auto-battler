@@ -4,9 +4,11 @@ extends Node
 ## 1. Makes several random but legal plans: what to buy, reroll, combine and equip, and
 ##    where to stand.
 ## 2. Fights each plan against the other player's last fielded army, a few battles each,
-##    in separate headless copies of the game (scenes/ai_eval.tscn), so the game doesn't
-##    freeze while it thinks.
+##    in background copies of the game that stay running all match (AiPool), so the game
+##    doesn't freeze while it thinks and never waits for copies to start.
 ## 3. Keeps the plan that did best.
+## Testing uses successive halving (`plan_rungs`): every plan fights a battle, only the best
+## share fight more, and so on, so the battles go to the plans that might be best.
 
 signal plan_ready(summary: String)
 
@@ -21,25 +23,35 @@ signal plan_ready(summary: String)
 ## Battles per option when picking an Ascension at an Encounter (only a few options, so
 ## each can get more).
 @export var battles_per_ascension: int = 6
+## Successive halving: the total battles a plan has fought after each rung. Every plan
+## fights the first rung; the best `keep_share` (at least 2) go on to the next. Off, every
+## plan fights Battles Per Candidate (or Battles Per Ascension) battles, as before.
+@export var halving: bool = true
+@export var plan_rungs: Array[int] = [1, 3, 6]
+## The same for Encounter picks (only a few options).
+@export var pick_rungs: Array[int] = [2, 6]
+@export_range(0.1, 1.0, 0.05) var keep_share: float = 1.0 / 3.0
 ## Seconds a simulated battle may run before it counts as a draw.
 @export var time_limit: float = 90.0
-## Give up on a copy of the game that takes longer than this (seconds).
-@export var process_timeout: float = 120.0
 
-## Names this planner's files and its log line, so two planners can run at once (watching
-## two computers play).
-var job_prefix := "job"
+## Names this planner in its log line (watching two computers play).
 var label := "Opponent"
 
 var busy := false
 var _player: PlayerState
 var _plans: Array[PlayerState] = []
-var _jobs: Array[Dictionary] = []   # {pid, out, indices}
+var _jobs: Array[Dictionary] = []   # {ticket (AiPool), indices}
 var _results: Array = []             # per plan: a result dictionary, or null
 var _started_ms := 0
 var _used_stand_in := false
 var _opponent_ascensions: Array[Ascension] = []
-var _battles := 2          # per plan, for the job running now
+var _battles := 2          # most battles any plan fights this phase (the last rung)
+var _rungs: Array[int] = []
+var _rung := 0
+var _alive: Array = []     # plan indices still being tested
+var _seeds: Array = []     # battle k of every plan uses seed k (the same dice for all)
+var _opponent: Array[ArmyUnit] = []
+var _battles_run := 0
 var _picking_ascension := false
 
 
@@ -80,8 +92,13 @@ func _begin(player: PlayerState, opponent_ascensions: Array[Ascension], battles:
 	_plans.clear()
 	_results.clear()
 	_opponent_ascensions = opponent_ascensions.duplicate()
-	_battles = battles
 	_picking_ascension = picking
+	var rungs: Array[int] = pick_rungs if picking else plan_rungs
+	var even: Array[int] = [battles]
+	_rungs = rungs.duplicate() if halving and not rungs.is_empty() else even
+	_battles = _rungs[_rungs.size() - 1]
+	_rung = 0
+	_battles_run = 0
 
 
 func _test_plans(opponent_army: Array[ArmyUnit]) -> void:
@@ -93,25 +110,59 @@ func _test_plans(opponent_army: Array[ArmyUnit]) -> void:
 	if opponent.is_empty() or _plans.size() == 1:
 		_finish(0)
 		return
+	_opponent = opponent
+	_results.clear()
+	_results.resize(_plans.size())
+	_alive = range(_plans.size())
+	_seeds.clear()
+	for k in _battles:
+		_seeds.append(randi() & 0x7fffffff)
 	_start_jobs(opponent)
 
 
 func _process(_delta: float) -> void:
 	if not busy or _jobs.is_empty():
 		return
-	var timed_out := (Time.get_ticks_msec() - _started_ms) / 1000.0 > process_timeout
+	AiPool.pump()
 	for job in _jobs.duplicate():
-		if OS.is_process_running(job["pid"]) and not timed_out:
-			continue
-		if timed_out and OS.is_process_running(job["pid"]):
-			OS.kill(job["pid"])
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(job["out"]))
+		var entry = AiPool.take(job["ticket"])
+		if entry == null:
+			continue   # still running (AiPool gives up on it after AiPool.TIMEOUT)
+		var parsed = entry["result"]
 		if typeof(parsed) == TYPE_ARRAY:
 			for k in mini(parsed.size(), job["indices"].size()):
 				_add_result(job["indices"][k], parsed[k])
 		_jobs.erase(job)
 	if _jobs.is_empty():
-		_finish(_best_plan())
+		_next_rung()
+
+
+## After a rung: keep the best share and test them more, or finish after the last rung.
+func _next_rung() -> void:
+	_alive.sort_custom(func(a, b):
+		var sa := _score(a)
+		var sb := _score(b)
+		return sa > sb or (sa == sb and a < b))   # ties: the earlier plan
+	if _rung >= _rungs.size() - 1 or _alive.size() <= 1 or not busy:
+		_finish(_alive[0] if not _alive.is_empty() else 0)
+		return
+	_alive = _alive.slice(0, maxi(2, ceili(_alive.size() * keep_share)))
+	_rung += 1
+	_start_jobs(_opponent)
+
+
+## Battles plan `index` has fought so far.
+func _fought(index: int) -> int:
+	var r = _results[index]
+	return 0 if r == null else int(r["wins"] + r["draws"] + r["losses"])
+
+
+## Wins (a draw half a win) per battle, then surviving-Aura margin; -INF if untested.
+func _score(index: int) -> float:
+	var r = _results[index]
+	if r == null:
+		return -INF
+	return (r["wins"] + 0.5 * r["draws"]) / maxf(float(_fought(index)), 1.0) + r["margin"] / 1000.0
 
 
 ## Adds one copy's tally for plan `index` to what other copies found for it: wins, draws
@@ -135,12 +186,11 @@ func _copy_count() -> int:
 	return clampi(mini(processes, OS.get_processor_count() - 1), 1, 64)
 
 
-## Leaving the match (or starting a new one) mid-plan: stop the background copies so none
-## are left running.
+## Closed mid-plan: drop its jobs. The copies themselves belong to AiPool, which the match
+## closes when it ends.
 func _exit_tree() -> void:
 	for job in _jobs:
-		if OS.is_process_running(job["pid"]):
-			OS.kill(job["pid"])
+		AiPool.cancel(job["ticket"])
 	_jobs.clear()
 	busy = false
 
@@ -179,32 +229,32 @@ static func is_eval_copy() -> bool:
 	return OS.get_cmdline_user_args().has("--ai-eval")
 
 
+## Starts this rung's battles: each plan still in the running fights up to the rung's total.
 func _start_jobs(opponent: Array[ArmyUnit]) -> void:
-	_results.clear()
-	_results.resize(_plans.size())
 	_jobs.clear()
 	if is_eval_copy():
 		push_error("AiPlanner: a background test copy tried to plan; refusing to start more copies.")
 		_finish(0)
 		return
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://ai"))
 	# Every plan's battles, cut into chunks and shared out so each copy fights about the
 	# same number. A plan whose battles land in several copies has its tallies added up
 	# again when they finish (see _process): the same battles, just played side by side.
 	# Every plan faces the same dice: battle k of each plan uses the same combat seed, so
 	# one plan can't look better than another just by getting luckier rolls.
-	var seeds: Array = []
-	for k in _battles:
-		seeds.append(randi() & 0x7fffffff)
+	var target: int = _rungs[_rung]
+	var wanted := 0
+	for i in _alive:
+		wanted += maxi(target - _fought(i), 0)
 	var copies := _copy_count()
-	var per_chunk := maxi(1, ceili(float(_plans.size() * _battles) / copies))
+	var per_chunk := maxi(1, ceili(float(wanted) / copies))
 	var chunks: Array = []   # [plan index, battles, seeds for those battles]
-	for i in _plans.size():
-		var first := 0
-		while first < _battles:
-			var n := mini(per_chunk, _battles - first)
-			chunks.append([i, n, seeds.slice(first, first + n)])
+	for i in _alive:
+		var first := _fought(i)
+		while first < target:
+			var n := mini(per_chunk, target - first)
+			chunks.append([i, n, _seeds.slice(first, first + n)])
 			first += n
+	_battles_run += wanted
 	var loads: Array = []    # per copy: [battles so far, [chunks]]
 	for j in mini(copies, chunks.size()):
 		loads.append([0, []])
@@ -227,39 +277,19 @@ func _start_jobs(opponent: Array[ArmyUnit]) -> void:
 			"candidate_seeds": mine.map(func(c): return c[2]),
 			"battles": _battles, "time_limit": time_limit, "seed": randi(),
 		}
-		var in_path := ProjectSettings.globalize_path("user://ai/%s_%d_in.json" % [job_prefix, j])
-		var out_path := ProjectSettings.globalize_path("user://ai/%s_%d_out.json" % [job_prefix, j])
-		var file := FileAccess.open(in_path, FileAccess.WRITE)
-		file.store_string(JSON.stringify(job))
-		file.close()
-		DirAccess.remove_absolute(out_path)
-		# The copy starts at the main menu, which sends it straight to the evaluation scene
-		# when it sees --ai-eval (an exported game can't be told which scene to open). From
-		# the editor it also needs to be told where the project is.
-		var args := PackedStringArray(["--headless", "--fixed-fps", "60"])
-		if not OS.has_feature("template"):
-			args.append_array(["--path", ProjectSettings.globalize_path("res://")])
-		args.append_array(["--", "--ai-eval", "--in", in_path, "--out", out_path])
-		var pid := OS.create_process(OS.get_executable_path(), args)
-		if pid <= 0:
-			push_warning("AiPlanner: couldn't start a simulation; using an untested plan.")
-			continue
-		_jobs.append({"pid": pid, "out": out_path, "indices": indices})
+		_jobs.append({"ticket": AiPool.submit(job, copies), "indices": indices})
 	if _jobs.is_empty():
-		_finish(0)
+		_finish(_best_plan())   # nothing started: the best tested so far (plan 0 if none)
 
 
-## Most wins (a draw is half a win); ties go to the bigger surviving-Aura margin.
+## The plan still in the running that did best (most wins, a draw half a win; ties go to
+## the bigger surviving-Aura margin, then the earlier plan). Plan 0 if none was tested.
 func _best_plan() -> int:
 	var best := 0
 	var best_score := -INF
-	for i in _results.size():
-		var r = _results[i]
-		if r == null:
-			continue
-		var battles := float(r["wins"] + r["draws"] + r["losses"])
-		var score: float = (r["wins"] + 0.5 * r["draws"]) / maxf(battles, 1.0) + r["margin"] / 1000.0
-		if score > best_score:
+	for i in _alive:
+		var score := _score(i)
+		if score > best_score or (score == best_score and i < best):
 			best_score = score
 			best = i
 	return best
@@ -270,15 +300,16 @@ func _finish(index: int) -> void:
 	busy = false
 	var seconds := (Time.get_ticks_msec() - _started_ms) / 1000.0
 	var tested := _results.filter(func(result): return result != null).size()
-	var summary := "%s planned in %.1fs (%d plans tested, %d battles each%s)" % [
-			label, seconds, tested, _battles, ", against a stand-in army" if _used_stand_in else ""]
+	var testing := "%d battles, halving %s" % [_battles_run, ",".join(PackedStringArray(_rungs.map(func(r): return str(r))))] if _rungs.size() > 1 			else "%d battles each" % _battles
+	var summary := "%s planned in %.1fs (%d plans tested, %s%s)" % [
+			label, seconds, tested, testing, ", against a stand-in army" if _used_stand_in else ""]
 	if _picking_ascension:
 		var taken := _player.ascensions[-1].get_display_name() if not _player.ascensions.is_empty() else "nothing"
 		var holder := MatchRules.holder_of(_player.units, _player.ascensions[-1]) if not _player.ascensions.is_empty() else null
 		if holder != null:
 			taken += " for " + holder.label().strip_edges()
-		summary = "%s took %s (%d options tested, %d battles each%s)" % [
-				label, taken, tested, _battles, ", against a stand-in army" if _used_stand_in else ""]
+		summary = "%s took %s (%d options tested, %s%s)" % [
+				label, taken, tested, testing, ", against a stand-in army" if _used_stand_in else ""]
 	var r = _results[index] if index < _results.size() else null
 	if r != null:
 		summary += "; its pick won %d of %d" % [r["wins"], r["wins"] + r["draws"] + r["losses"]]

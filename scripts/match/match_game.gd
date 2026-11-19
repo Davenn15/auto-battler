@@ -132,6 +132,10 @@ func _ready() -> void:
 	else:
 		ai.is_ai = true
 		ai_planner.plan_ready.connect(_on_ai_plan_ready)
+	if not online:
+		# The computer's background copies, started now so they're ready by its first plan
+		# and kept running all match (closed in _exit_tree).
+		AiPool.start(ai_planner._copy_count())
 	_fog = MatchFog.new()
 	_fog.z_index = 30
 	add_child(_fog)
@@ -1157,7 +1161,6 @@ func _setup_spectating() -> void:
 	ai_planner.label = "Red"
 	ai_planner.plan_ready.connect(_on_ai_plan_ready)
 	_blue_planner = AiPlanner.new()
-	_blue_planner.job_prefix = "blue_job"
 	_blue_planner.label = "Blue"
 	add_child(_blue_planner)
 	_blue_planner.plan_ready.connect(_on_blue_plan_ready)
@@ -1290,3 +1293,8 @@ func new_match() -> void:
 		get_tree().change_scene_to_file(MENU_SCENE)
 	else:
 		get_tree().reload_current_scene()
+
+
+## Leaving the match, however it ends: close the computer's background copies.
+func _exit_tree() -> void:
+	AiPool.stop()

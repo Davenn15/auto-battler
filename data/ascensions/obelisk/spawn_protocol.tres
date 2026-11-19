@@ -1,27 +1,26 @@
-[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+[gd_resource type="Resource" script_class="AscensionFamily" format=3 uid="uid://gqmjhfr5q1sq"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
-[ext_resource type="Script" path="res://data/ascensions/effects/replicant_on_gambit_effect.gd" id="3"]
+[ext_resource type="Script" uid="uid://civb8w40bfnkx" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" uid="uid://d066i5p6bdgay" path="res://data/ascensions/effects/replicant_on_gambit_effect.gd" id="3"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="3_bk4bd"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 3/repl_k8r/replk4nt/replk4nt.tres" id="4"]
 
 [sub_resource type="Resource" id="Effect_tier1"]
 script = ExtResource("3")
 profile = ExtResource("4")
-count = 1
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Choose a unit: whenever it casts its Gambit, a REPLK4NT appears beside it."
+target = 1
+requires_gambit = true
+effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Effect_tier3"]
 script = ExtResource("3")
 profile = ExtResource("4")
 count = 2
-
-[sub_resource type="Resource" id="Ascension_tier1"]
-script = ExtResource("2")
-description = "Choose a unit: whenever it casts its Gambit, a REPLK4NT appears beside it."
-tier = 1
-target = 1
-requires_gambit = true
-effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")

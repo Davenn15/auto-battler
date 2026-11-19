@@ -30,6 +30,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file.call_deferred("res://tools/net_test.tscn")
 		return
 	# Back to plain offline play, whatever state the last match left things in.
+	AiPool.stop()   # no background copies outlive a match
 	Net.leave()
 	BattleUnit.view_rotation = 0.0
 	BattleUnit.swap_team_colors = false

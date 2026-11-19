@@ -1,13 +1,13 @@
-[gd_resource type="Resource" script_class="Ascension" format=3]
+[gd_resource type="Resource" script_class="Ascension" format=3 uid="uid://c728jlgctch6k"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/own_health_damage_effect.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/sword-court/tier 2/merribold/merribold.tres" id="3"]
-[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://dr36g76ffgy53" path="res://data/ascensions/effects/own_health_damage_effect.gd" id="2"]
+[ext_resource type="Resource" uid="uid://ds85af620srdl" path="res://data/units/sword-court/tier 2/merribold/merribold.tres" id="3"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
-share = 0.03
+share = 0.02
 
 [resource]
 script = ExtResource("1")

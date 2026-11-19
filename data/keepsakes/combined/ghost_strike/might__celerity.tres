@@ -10,6 +10,6 @@ second_shard = 2
 might = 15.0
 celerity = 10.0
 effect = ExtResource("2_effect")
-description = "Hit Effect: A ghostly bolt flies at the target, dealing 20 + 0.2x Insight as Insight damage.
+description = "Hit Effect: A ghostly bolt flies at the target, dealing 10 + 0.15x Insight as Insight damage.
 Every third attack triggers your Hit Effects an additional time."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"
