@@ -45,6 +45,8 @@ func execute(caster: BattleUnit) -> void:
 	var shields := {}   # ally instance id -> its BeamShieldStatus
 	var given := 0.0
 	var elapsed := 0.0
+	var tick_left := 0.0
+	var charging := 0.0   # a new ally: the Beam charges up first (Beam.retarget_time)
 	while elapsed < duration:
 		caster.lock_for(0.1)   # channelling: a frame at a time, so it ends cleanly
 		await caster.get_tree().physics_frame
@@ -55,6 +57,8 @@ func execute(caster: BattleUnit) -> void:
 			first = BeamLinks.lowest_ally(caster, caster, _range(caster), [])   # moved on
 			if first == null:
 				break
+			charging = Beam.retarget_time(caster.get_attack_cooldown())
+			tick_left = 0.0
 		var delta := caster.get_physics_process_delta_time()
 		elapsed += delta
 		var beam_settings := Beam.settings(caster, Beam.Kind.SHIELD)
@@ -68,6 +72,16 @@ func execute(caster: BattleUnit) -> void:
 		chain.append_array(Beam.ricochet_targets(caster, chain.back(), beam_settings.extra_ricochets,
 				beam_settings.ricochet_range, chain + [caster], true))
 		links.show(chain, BeamngPassive.LIGHT)
+		if charging > 0.0:
+			charging -= delta * beam_settings.charge_up_speed
+			continue
+		tick_left -= delta
+		if tick_left > 0.0:
+			continue
+		# A tick: the shielding for one tick interval, all at once (the same per second).
+		var interval := Beam.tick_interval(caster.get_attack_cooldown())
+		tick_left += interval
+		links.pulse()
 		var per_second := Stats.scaled(shield_per_second, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT)) \
 				* beam_settings.rate
 		for index in chain.size():
@@ -77,7 +91,7 @@ func execute(caster: BattleUnit) -> void:
 				shield = BeamShieldStatus.new(0.0, shield_linger)
 				ally.add_status(shield)
 				shields[ally.get_instance_id()] = shield
-			var amount := per_second * BeamngPassive.distance_multiplier(caster, ally) * delta
+			var amount := per_second * BeamngPassive.distance_multiplier(caster, ally) * interval
 			if index >= own:
 				amount *= beam_settings.ricochet_share
 			shield.feed(amount, shield_linger, immovability)

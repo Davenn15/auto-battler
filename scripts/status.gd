@@ -47,6 +47,30 @@ func modify_outgoing_damage(_unit: BattleUnit, damage: float) -> float:
 func on_attack(_unit: BattleUnit) -> void:
 	pass
 
+## Adjust what the unit's attack bar shows (0 to 1; `value` is how far the current attack
+## has wound up). Display only. SHRED's bar fills across all three of its attacks.
+func modify_attack_bar(_unit: BattleUnit, value: float) -> float:
+	return value
+
+## Adjust the Charge the unit gains when one of its own attacks hits (SHRED's three
+## attacks each give a third).
+func modify_own_attack_charge(_unit: BattleUnit, amount: float) -> float:
+	return amount
+
+## Called whenever the unit is healed, Regeneration included, with the health it actually
+## gained (healing past max health doesn't count; see on_overheal for that). BYTE A.
+func on_healed(_unit: BattleUnit, _gained: float) -> void:
+	pass
+
+## Called on every tick of the unit's attack Beam (Beam.TICKS_PER_ATTACK ticks make one
+## attack's worth), with the enemy it hit. on_attack still runs once per attack's worth.
+func on_beam_tick(_unit: BattleUnit, _enemy: BattleUnit) -> void:
+	pass
+
+## True for the Status that IS the unit's attack Beam (BeamStatus, COLUMN's beam weapons).
+func is_attack_beam() -> bool:
+	return false
+
 ## Called when the unit deals direct damage (any damage that shows a number: attacks,
 ## Gambit hits, splashes, projectiles; not damage over time) to `target`. `target` may
 ## have just died from it.
@@ -63,6 +87,41 @@ func on_attack_hit(_unit: BattleUnit, _target: BattleUnit, _dealt: float) -> voi
 ## Adjust damage the unit is about to take (shields, damage reduction).
 func modify_incoming_damage(_unit: BattleUnit, damage: float) -> float:
 	return damage
+
+## Called when damage would kill the unit. Return true to save it (it's left at 1 health,
+## or more if this raised it). SEG.FAULT A1: its duplicate dies instead.
+func prevents_death(_unit: BattleUnit) -> bool:
+	return false
+
+## True for statuses whose modify_incoming_damage reduces, caps or holds back damage
+## (Stopgap, damage caps, Grit...). Pure Damage skips them: it can't be reduced in any way.
+## Shields are not reducers (they still soak Pure Damage), nor are statuses that only watch
+## damage, pass some of it on, or add to it.
+func reduces_damage(_unit: BattleUnit) -> bool:
+	return false
+
+## Called right after the unit gains a stack of Glory (BattleUnit.gain_glory).
+func on_glory_gained(_unit: BattleUnit) -> void:
+	pass
+
+## Called once the unit finishes casting its Gambit: its Act time is over and the Gambit
+## has gone off (whatever path's Gambit it is).
+func on_gambit_finished(_unit: BattleUnit) -> void:
+	pass
+
+## Called on each of a unit's statuses as it dies, before it leaves the board.
+func on_death(_unit: BattleUnit) -> void:
+	pass
+
+## Called when an enemy of the unit dies with Bleed still in its pool: `bleed_left` is how
+## much (Cerceval's hero Ascension passes some of it on).
+func on_enemy_bleed_death(_unit: BattleUnit, _victim: BattleUnit, _bleed_left: float) -> void:
+	pass
+
+## True for a shield the unit gave itself. A unit's own shields absorb damage before shields
+## from anyone else (see BattleUnit.place_own_shield).
+func is_own_shield(_unit: BattleUnit) -> bool:
+	return false
 
 ## True stops the unit from gaining charge. By default, any status an Action
 ## created blocks charge until it ends. Override to change that for a specific status.

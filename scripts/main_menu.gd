@@ -125,30 +125,34 @@ func _button(text: String, action: Callable) -> void:
 ## Computer vs computer, match after match, to watch for balance problems.
 func _watch() -> void:
 	MatchGame.spectating = true
-	MatchGame.player_faction = _picked(_blue_faction)
-	MatchGame.opponent_faction = _picked(_red_faction)
+	MatchGame.player_faction_choice = _picked(_blue_faction)   # Random re-rolls every match
+	MatchGame.opponent_faction_choice = _picked(_red_faction)
 	get_tree().change_scene_to_file(MATCH_SCENE)
 
 
 func _play_computer() -> void:
-	MatchGame.player_faction = _picked(_your_faction)
-	MatchGame.opponent_faction = _picked(_computer_faction)
+	MatchGame.player_faction_choice = _picked(_your_faction)
+	MatchGame.opponent_faction_choice = _picked(_computer_faction)
 	get_tree().change_scene_to_file(MATCH_SCENE)
 
 
 ## Online: your faction goes to the other player when you connect (see Net).
 func _use_your_faction_online() -> void:
-	MatchGame.player_faction = _picked(_your_faction)
+	# Random is settled here, once: the other player is told a real faction.
+	MatchGame.player_faction = MatchRules.resolve_faction(_picked(_your_faction))
 	Net.local_faction = MatchGame.player_faction
 
 
 # ---------- Faction pickers ----------
 
-## A drop-down of every faction that has units, remembering its last choice under `key`.
+## A drop-down of every faction that has units, then Random, remembering its last choice
+## under `key`.
 func _faction_picker(key: String) -> OptionButton:
 	var picker := OptionButton.new()
 	var saved: String = _setting("factions", key, MatchRules.DEFAULT_FACTION)
-	for faction in MatchRules.factions():
+	var choices := MatchRules.factions()
+	choices.append(MatchRules.RANDOM_FACTION)
+	for faction in choices:
 		picker.add_item(faction)
 		if faction == saved:
 			picker.select(picker.item_count - 1)

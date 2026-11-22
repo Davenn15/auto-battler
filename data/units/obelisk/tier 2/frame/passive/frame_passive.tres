@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FrameSurgePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/frame/passive/surge_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+celerity = 40.0
+ward_bonus = 25.0
+duration = 4.0
+passive_name = "Overclocked Frame"
+description = "After casting its Gambit, FRAME gains 40 Celerity and 25 to each Ward for 4 seconds."

@@ -1,11 +1,12 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c1ir1luygnsjt"]
+[gd_resource type="Resource" script_class="Upgrade" format=3]
 
-[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
 
 [resource]
 script = ExtResource("1")
-description = "Volts give 1 stack of Mono-Virus."
+description = "Each Volt hit takes 5 Insight Ward from the enemy for 4 seconds. Hits stack."
 gambit_overrides = Dictionary[String, float]({
-"virus_stacks": 1.0
+"insight_ward_shred": 5.0,
+"shred_duration": 4.0
 })

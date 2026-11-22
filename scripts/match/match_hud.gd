@@ -46,11 +46,6 @@ var _popup_text: Label
 var _popup_buttons: VBoxContainer
 var _unit_tip: PanelContainer
 var _unit_tip_text: RichTextLabel
-## The Shard the last click was on, and when (ms), so a double-click can send that same
-## Shard to the ritual table even though the first click already moved or rebuilt it.
-var _clicked_item: Keepsake = null
-var _clicked_at := 0
-const DOUBLE_CLICK_MS := 500
 var _spectate_bar: HBoxContainer
 var _encounter: PanelContainer
 var _encounter_title: Label
@@ -369,8 +364,13 @@ func _build_top() -> void:
 	_round_track.offset_bottom = 30
 	add_child(_round_track)
 	# Health bars: the opponent's above the board, yours below (with the damage animation).
+	# On a layer behind the board, so the Keepsake icons of units on the top row draw over
+	# the opponent's bar instead of under it.
+	var bars_layer := CanvasLayer.new()
+	bars_layer.layer = -1
+	add_child(bars_layer)
 	_health_bars = MatchHealthBars.new()
-	add_child(_health_bars)
+	bars_layer.add_child(_health_bars)
 
 
 func _build_side() -> void:
@@ -451,7 +451,7 @@ func _build_side() -> void:
 	column.add_child(_items_box)
 	var items_column := VBoxContainer.new()
 	_items_box.add_child(items_column)
-	items_column.add_child(_header_with_tip("Items", "Drag items between here, your units and the ritual table, or click one to hold it.\nDouble-click a Shard to send it to the ritual table.\nClick one of your units to see (and take off) its items."))
+	items_column.add_child(_header_with_tip("Items", "Drag items between here, your units and the ritual table, or click one to hold it.\nRight-click a Shard (anywhere) to send it to the ritual table; left-click a Shard on a unit or the table to bring it back here.\nDrag a shop item or the ritual's result out to buy or make it.\nClick one of your units to see its items."))
 	_inventory = HFlowContainer.new()
 	items_column.add_child(_inventory)
 	_sell = Button.new()
@@ -494,6 +494,8 @@ func _build_table_window() -> void:
 	_table_result.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_table_result.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_table_result.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_table_result.mouse_filter = Control.MOUSE_FILTER_STOP
+	_wire_item(_table_result, func(): return {"from": "table_result"}, Callable())   # drag it out to combine
 	_table_result.mouse_entered.connect(func(): show_item_tip(_table_result, game.table_preview(), "Makes "))
 	_table_result.mouse_exited.connect(hide_unit_tip)
 	column.add_child(_table_result)
@@ -1236,13 +1238,18 @@ func refresh() -> void:
 	_log.text = "\n".join(game.log_lines)
 	var waiting := game.phase == MatchGame.Phase.WAITING
 	_ready_button.visible = planning or waiting
-	if game.online:
-		# Online you can ready up any time; then you wait for the opponent.
-		_ready_button.disabled = waiting
-		_ready_button.text = "Waiting for opponent..." if waiting else ("Done" if game.is_opening() else "Fight!")
+	# You can ready up any time; the round starts once both players are. While waiting, the
+	# button un-readies you (back to planning) until then.
+	var go_text := "Done" if game.is_opening() else "Fight!"
+	if waiting and game._unready_pending:
+		_ready_button.disabled = true
+		_ready_button.text = "Un-readying..."
+	elif waiting:
+		_ready_button.disabled = false
+		_ready_button.text = "Un-ready (waiting for opponent)"
 	else:
-		_ready_button.disabled = not game.ai_ready
-		_ready_button.text = ("Done" if game.is_opening() else "Fight!") if game.ai_ready else "Opponent planning..."
+		_ready_button.disabled = false
+		_ready_button.text = go_text if game.ai_ready else "Ready"
 	if not planning:
 		return
 	_refresh_shop()
@@ -1344,6 +1351,8 @@ func _refresh_shop() -> void:
 		button.add_theme_constant_override("icon_max_width", 14)
 		_item_hover(button, shard)
 		button.pressed.connect(func(): game.buy_shard(slot))
+		_on_right_click(button, func(): game.shard_to_table({"from": "shop_shard", "slot": slot}))
+		_wire_item(button, func(): return {"from": "shop_shard", "slot": slot}, Callable())
 		_shop_shards.add_child(button)
 	for child in _shop_keepsake.get_children():
 		child.queue_free()
@@ -1355,11 +1364,12 @@ func _refresh_shop() -> void:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.custom_minimum_size = Vector2(0, 30)
 		button.disabled = p.reserve < MatchRules.KEEPSAKE_COST
-		_set_rich_text(button, "%s   %s [color=#9a9aa5](was %d)[/color]" % [keepsake.get_display_name(),
+		_set_rich_text(button, "%s   %s [color=#9a9aa5](was %d, once a round)[/color]" % [keepsake.get_display_name(),
 				reserve_text(MatchRules.KEEPSAKE_COST, 11), MatchRules.SHARD_COST * 2], 10, 28.0)
 		button.add_theme_font_size_override("font_size", 10)
 		_item_hover(button, keepsake)
 		button.pressed.connect(func(): game.buy_keepsake())
+		_wire_item(button, func(): return {"from": "shop_keepsake"}, Callable())
 		_shop_keepsake.add_child(button)
 	_reroll.disabled = p.reserve < p.reroll_cost
 	_set_rich_text(_reroll, "Reroll   " + reserve_text(p.reroll_cost, 14), 15)
@@ -1396,28 +1406,155 @@ func _refresh_bench() -> void:
 					show_upgrade_menu(unit))
 		button.set_drag_forwarding(_bench_drag.bind(unit), _can_drop_at.bind(_unit_dest.bind(unit)),
 				_drop_at.bind(_unit_dest.bind(unit)))
+		button.set_meta("army_unit", unit)   # so flash_refusal can find it
+		if game.phase == MatchGame.Phase.PLANNING and MatchRules.upgrade_affordable(game.player, unit):
+			_mark_upgrade_ready(button)
 		_bench.add_child(button)
 
 
-## Remembers a click on a Shard (keepsakes can't go on the table, so they're ignored).
-func _note_click(item: Keepsake) -> void:
-	_clicked_item = item if item != null and item.is_shard else null
-	_clicked_at = Time.get_ticks_msec()
+# ---------- The countdown before a fight ----------
+
+var _intro: Control = null
+
+## Over the board before a fight: a big countdown (3, 2, 1, Fight!) and, when either player
+## picked an Ascension at the Encounter just before, a panel with each side's picks.
+func show_combat_intro(left_name: String, left_picks: Array[Ascension], right_name: String,
+		right_picks: Array[Ascension], seconds: float) -> void:
+	hide_combat_intro()
+	_intro = Control.new()
+	_intro.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_intro.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_intro)
+	var column := VBoxContainer.new()
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_theme_constant_override("separation", 10)
+	_intro.add_child(column)
+	if not left_picks.is_empty() or not right_picks.is_empty():
+		var panel := PanelContainer.new()
+		panel.add_theme_stylebox_override("panel", _frame(12))
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var inside := VBoxContainer.new()
+		inside.add_theme_constant_override("separation", 6)
+		var title := _label("Ascensions picked", 16, Color(0.85, 0.85, 0.9))
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		inside.add_child(title)
+		var sides := HBoxContainer.new()
+		sides.add_theme_constant_override("separation", 24)
+		var mine := BattleUnit.team_color(game.my_team)
+		var theirs := BattleUnit.team_color(3 - game.my_team)
+		sides.add_child(_intro_side(left_name, left_picks, mine))
+		sides.add_child(_intro_side(right_name, right_picks, theirs))
+		inside.add_child(sides)
+		panel.add_child(inside)
+		column.add_child(panel)
+	var count := Label.new()
+	count.add_theme_font_size_override("font_size", 72)
+	count.add_theme_color_override("font_color", Color.WHITE)
+	count.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08))
+	count.add_theme_constant_override("outline_size", 10)
+	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(count)
+	# Centred on the board once it has its size.
+	column.reset_size()
+	column.position = MatchGame.board_screen_center - column.get_combined_minimum_size() / 2.0
+	# 3, 2, 1 one second apart (scaled to `seconds`), each popping in and fading.
+	var steps := int(round(seconds))
+	var step_time := seconds / maxi(steps, 1)
+	var tween := count.create_tween()
+	for i in steps:
+		var n := steps - i
+		tween.tween_callback(func():
+			count.text = str(n)
+			count.pivot_offset = count.size / 2.0
+			count.scale = Vector2.ONE * 1.4
+			count.modulate.a = 1.0)
+		tween.tween_property(count, "scale", Vector2.ONE, step_time * 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(count, "modulate:a", 0.35, step_time * 0.65)
 
 
-## A double-click right after clicking a Shard sends that Shard to the ritual table. Runs
-## before the buttons see the second click, which would otherwise undo or redo the first.
+## One side's column in the countdown panel: the player's name in their colour, then each
+## Ascension they picked with its description (or "No pick" if they picked none).
+func _intro_side(player_name: String, picks: Array[Ascension], color: Color) -> Control:
+	var side := VBoxContainer.new()
+	side.custom_minimum_size = Vector2(230, 0)
+	side.add_theme_constant_override("separation", 3)
+	side.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	side.add_child(_label(player_name, 15, color))
+	if picks.is_empty():
+		side.add_child(_label("No pick", 12, Color(0.55, 0.55, 0.6)))
+	for ascension in picks:
+		var faction := ascension.faction_name()
+		var tint: Color = RoundTrack.FACTION_COLORS.get(faction, RoundTrack.NEUTRAL_COLOR)
+		side.add_child(_label(ascension.get_display_name(), 14, tint))
+		var text := RichTextLabel.new()
+		text.bbcode_enabled = true
+		text.fit_content = true
+		text.scroll_active = false
+		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		text.custom_minimum_size = Vector2(230, 0)
+		text.add_theme_font_size_override("normal_font_size", 11)
+		text.text = Keyphrases.format(ascension.description)
+		side.add_child(text)
+	return side
+
+
+## Takes the countdown away (the fight is starting).
+func hide_combat_intro() -> void:
+	if is_instance_valid(_intro):
+		_intro.queue_free()
+	_intro = null
+
+
+## A benched unit you can afford to upgrade: the bench's version of the board's cyan glow
+## and arrow, cyan text and a cyan up-arrow in the tile's corner.
+func _mark_upgrade_ready(button: Button) -> void:
+	button.add_theme_color_override("font_color", KeepsakeVfx.UPGRADE_READY_COLOR)
+	var arrow := Label.new()
+	arrow.text = "▲"
+	arrow.add_theme_color_override("font_color", KeepsakeVfx.UPGRADE_READY_COLOR)
+	arrow.add_theme_color_override("font_outline_color", Color(0.02, 0.12, 0.18))
+	arrow.add_theme_constant_override("outline_size", 3)
+	arrow.add_theme_font_size_override("font_size", 12)
+	arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	arrow.anchor_left = 1.0
+	arrow.anchor_right = 1.0
+	arrow.offset_left = -14
+	arrow.offset_top = 1
+	button.add_child(arrow)
+	button.tooltip_text += "
+You can afford an upgrade."
+
+
+## A benched unit refusing an item (a Keepsake it already has a copy of): its tile flashes
+## red and wobbles, the bench's version of the board's red outline and shake.
+func flash_refusal(unit: ArmyUnit) -> void:
+	for child in _bench.get_children():
+		if not child.has_meta("army_unit") or child.get_meta("army_unit") != unit or child.is_queued_for_deletion():
+			continue
+		var tile := child as Control
+		tile.pivot_offset = tile.size / 2.0
+		tile.modulate = KeepsakeVfx.REFUSE_COLOR
+		var tween := tile.create_tween()
+		for angle in [0.12, -0.12, 0.08, -0.08, 0.0]:   # radians: a quick "no" wobble
+			tween.tween_property(tile, "rotation", angle, KeepsakeVfx.REFUSE_SHAKE_STEP)
+		tween.parallel().tween_property(tile, "modulate", Color.WHITE, KeepsakeVfx.REFUSE_TIME)
+		return
+
+
+## Closes the upgrade menu on a click outside it.
 func _input(event: InputEvent) -> void:
 	_close_upgrade_menu_on_outside_click(event)
-	var click := event as InputEventMouseButton
-	if click == null or not click.pressed or not click.double_click or click.button_index != MOUSE_BUTTON_LEFT:
-		return
-	if _clicked_item == null or Time.get_ticks_msec() - _clicked_at > DOUBLE_CLICK_MS:
-		return
-	var item := _clicked_item
-	_clicked_item = null
-	if game != null and game.send_shard_to_table(item):
-		get_viewport().set_input_as_handled()
+
+
+## Runs `action` when `control` is right-clicked (Shards: off to the ritual table).
+func _on_right_click(control: Control, action: Callable) -> void:
+	control.gui_input.connect(func(event: InputEvent):
+		var click := event as InputEventMouseButton
+		if click != null and click.pressed and click.button_index == MOUSE_BUTTON_RIGHT:
+			action.call()
+			control.accept_event())
 
 
 func _item_button(item: Keepsake) -> Button:
@@ -1440,7 +1577,8 @@ func _refresh_items() -> void:
 		if game.held.get("item", -1) == i:
 			button.modulate = HELD_COLOR
 		var item: Keepsake = p.inventory[i]
-		button.pressed.connect(func(): _note_click(item); game.hold_item(i))
+		button.pressed.connect(func(): game.hold_item(i))
+		_on_right_click(button, func(): game.shard_to_table({"from": "inventory", "index": i}))
 		_wire_item(button, func(): return {"from": "inventory", "index": i}, func(): return {"to": "inventory"})
 		_inventory.add_child(button)
 	var held_index: int = game.held.get("item", -1)
@@ -1517,7 +1655,8 @@ func refresh_selected() -> void:
 		var button := _item_button(unit.items[i])
 		button.disabled = not unit.items[i].is_shard
 		var item: Keepsake = unit.items[i]
-		button.pressed.connect(func(): _note_click(item); game.unequip(unit, i))
+		button.pressed.connect(func(): game.shard_to_inventory({"from": "unit", "unit": unit, "index": i}))
+		_on_right_click(button, func(): game.shard_to_table({"from": "unit", "unit": unit, "index": i}))
 		_wire_item(button, func(): return {"from": "unit", "unit": unit, "index": i}, func(): return {"to": "unit", "unit": unit})
 		row.add_child(button)
 

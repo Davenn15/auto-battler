@@ -110,6 +110,10 @@ class DuelStatus extends Status:
 			return damage
 		return damage * (1.0 - reduction)
 
+	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
+	func reduces_damage(_unit: BattleUnit) -> bool:
+		return true
+
 	func tick(unit: BattleUnit, delta: float) -> void:
 		time_left -= delta
 		if time_left <= 0.0 or not _foe_alive():

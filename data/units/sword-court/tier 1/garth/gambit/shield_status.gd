@@ -8,6 +8,10 @@ const TINT := Color(0.6, 0.8, 1.0)   # sprite tint while active
 
 var shield: float
 var time_left: float
+## Instance id of whoever gave it (BattleUnit.add_shield sets it).
+var source_id := 0
+## True for a shield a unit's own Gambit gave it: no Charge while it holds.
+var locks_charge := false
 
 
 func _init(p_shield: float, p_duration: float) -> void:
@@ -40,5 +44,11 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	if time_left <= 0.0:
 		unit.remove_status(self)
 
+## A shield from the unit's own Gambit blocks Charge until it breaks or runs out; any
+## other shield never does.
 func blocks_charge_gain(_unit: BattleUnit) -> bool:
-	return false
+	return locks_charge and shield > 0.0
+
+
+func is_own_shield(unit: BattleUnit) -> bool:
+	return source_id != 0 and (source_id == unit.get_instance_id() or source_id == unit.get_credit_id())

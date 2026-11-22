@@ -43,8 +43,9 @@ func _physics_process(delta: float) -> void:
 		return
 	var to: Vector2 = target.global_position - global_position
 	var step := SPEED * delta
-	if to.length() <= step:
-		global_position = target.global_position
+	var hit_at: Variant = SpriteEdge.homing_hit(target, global_position, step)   # stops at the sprite's edge
+	if hit_at != null:
+		global_position = hit_at
 		if on_hit.is_valid():
 			on_hit.call(target)
 		queue_free()

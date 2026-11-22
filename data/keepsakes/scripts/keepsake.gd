@@ -36,6 +36,30 @@ var _icon: ImageTexture   # made the first time it's asked for
 const ICON_BORDER_WIDTH := 3
 
 
+## True if `other` is the same completed Keepsake (by file, or by name for ones made in
+## code). Shards never count: a unit may carry two of the same Shard.
+func same_keepsake(other: Keepsake) -> bool:
+	if other == null or is_shard or other.is_shard:
+		return false
+	if other == self:
+		return true
+	if resource_path != "" and other.resource_path != "":
+		return resource_path == other.resource_path
+	return get_display_name() == other.get_display_name()
+
+
+## The universal Keepsake rule: a unit can't carry two of the same completed Keepsake.
+## True if `item` may join `items` (a unit's Keepsakes) under that rule; it says nothing
+## about free slots.
+static func allowed_with(item: Keepsake, items: Array) -> bool:
+	if item == null or item.is_shard:
+		return true
+	for other in items:
+		if other != null and item.same_keepsake(other):
+			return false
+	return true
+
+
 func get_reserve_value() -> int:
 	return Shard.RESERVE_VALUE * (1 if is_shard else 2)
 

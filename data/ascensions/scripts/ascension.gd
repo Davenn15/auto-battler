@@ -65,6 +65,11 @@ enum Target { ARMY, CHOSEN_UNIT }
 ## 0.15 = +15% chance to dodge attacks.
 @export var dodge_chance: float = 0.0
 
+## Extra Keepsake slots every affected unit gets (a chosen-unit one: its chosen unit).
+@export var keepsake_slots: int = 0
+## Random Shards the player gets in their inventory when they take this Ascension.
+@export var random_shards: int = 0
+
 @export_group("Effect")
 ## Run on every affected unit at battle start, like a Keepsake's effect.
 @export var effect: Passive

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EmpowerTuning" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 1/silt/passive/empower_tuning.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+splash_radius = 1
+description = "Empowered attacks' Insight damage hits every enemy within 1 hex of the target."

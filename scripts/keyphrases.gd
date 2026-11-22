@@ -30,6 +30,14 @@ const PHRASES := [
 	["bleed", "", "\\bBleed(?:s|ing)?\\b"],
 	# Pure Damage: damage that ignores every Ward (Stats.DamageType.PURE).
 	["pure", "", "\\bPure [Dd]amage\\b"],
+	# The Silence keyword (see Silence): no Gambit, no Charge.
+	["silence", "", "\\bSilenc(?:e|es|ed|ing)\\b"],
+	# The Grit keyword (see Grit): part of each hit spread over a few seconds.
+	["grit", "", "\\bGrit\\b"],
+	# The Voltage keyword (see VoltageStatus): stacks of Insight and Celerity. Capital V only.
+	["voltage", "", "\\bVoltage\\b"],
+	# The Knock-up keyword (see KnockUp): thrown into the air, stunned.
+	["knockup", "", "\\b(?:Knock-ups?|Knock(?:s|ed|ing)? up|knock(?:s|ed|ing)? up)\\b"],
 	# Immovability (Stats.Stat.IMMOVABILITY): shorter crowd control and debuffs.
 	["immovability", "", "\\bImmovability\\b"],
 	[Shard.Kind.HEALTH, "health", "\\b(?i:max(?:imum)? health|health)\\b"],
@@ -74,6 +82,14 @@ static func extra_color(key: String) -> Color:
 			return Stats.DAMAGE_TYPE_COLORS[Stats.DamageType.PURE]
 		"immovability":
 			return IMMOVABILITY_COLOR
+		"silence":
+			return Silence.COLOR
+		"grit":
+			return Grit.COLOR
+		"knockup":
+			return KnockUp.COLOR
+		"voltage":
+			return VoltageStatus.LIGHT
 	return Color.WHITE
 
 

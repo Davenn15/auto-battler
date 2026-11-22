@@ -17,6 +17,7 @@ var inventory: Array[Keepsake] = []   # Shards and keepsakes not on a unit
 var unit_offers: Array[UnitData] = []   # the shop; a bought slot is removed
 var shard_offers: Array[Keepsake] = []
 var keepsake_offer: Keepsake   # the discounted full Keepsake; null before it unlocks or once bought
+var keepsake_bought := false   # bought the discounted Keepsake this round (once a round)
 var reroll_cost: int = MatchRules.REROLL_START
 ## Ascensions taken at Encounters, for the whole match.
 var ascensions: Array[Ascension] = []
@@ -87,6 +88,7 @@ func copy() -> PlayerState:
 	other.unit_offers = unit_offers.duplicate()
 	other.shard_offers = shard_offers.duplicate()
 	other.keepsake_offer = keepsake_offer
+	other.keepsake_bought = keepsake_bought
 	other.reroll_cost = reroll_cost
 	other.shop_locked = shop_locked
 	other.promised_units = promised_units.duplicate()
@@ -108,6 +110,7 @@ func adopt(other: PlayerState) -> void:
 	unit_offers = other.unit_offers
 	shard_offers = other.shard_offers
 	keepsake_offer = other.keepsake_offer
+	keepsake_bought = other.keepsake_bought
 	ascensions = other.ascensions
 	ascension_offers = other.ascension_offers
 	reroll_cost = other.reroll_cost

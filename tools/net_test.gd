@@ -6,6 +6,8 @@ extends Node
 ## or alone against the computer with --offline.
 ## Options: --idle-round N   don't press Ready in round N (lets the planning timer run out)
 ##          --quit-round N   close the game when round N's planning starts (tests forfeits)
+##          --unready-round N   in round N: Ready, then un-ready while waiting, then Ready again
+##          --ready-delay S   wait S seconds after planning before pressing Ready
 ##          --shot <file.png> save a screenshot 6 s into the first fight (needs a window)
 ## Each copy plans with the computer strategy and prints what happens.
 
@@ -16,6 +18,8 @@ func _ready() -> void:
 	var driver := Driver.new()
 	driver.idle_round = _int_arg(args, "--idle-round")
 	driver.quit_round = _int_arg(args, "--quit-round")
+	driver.unready_round = _int_arg(args, "--unready-round")
+	driver.ready_delay = maxf(_int_arg(args, "--ready-delay"), 0.0)
 	var shot := args.find("--shot")
 	driver.shot_path = args[shot + 1] if shot >= 0 and shot + 1 < args.size() else ""
 	driver.label = "HOST" if args.has("--host") else "JOIN"
@@ -44,6 +48,9 @@ class Driver extends Node:
 	var label := ""
 	var idle_round := -1
 	var quit_round := -1
+	var unready_round := -1
+	var ready_delay := 0.0
+	var _unready_stage := 0   # 0 not yet, 1 readied once, 2 un-readied
 	var policy := AiPolicy.new()
 	var _done_round := -1
 	var _wait := 0.0
@@ -65,6 +72,9 @@ class Driver extends Node:
 		match game.phase:
 			MatchGame.Phase.PLANNING:
 				if _done_round == game.round_number:
+					if _unready_stage == 2 and game.round_number == unready_round:
+						_unready_stage = 3
+						print("[%s] round %d: back in planning after un-readying, readying again" % [label, game.round_number])
 					if game.round_number != idle_round:
 						game.press_ready()   # offline it waits until the computer has planned
 					return
@@ -78,8 +88,19 @@ class Driver extends Node:
 				if game.round_number == idle_round:
 					print("[%s] round %d: not pressing Ready" % [label, game.round_number])
 					return
+				if ready_delay > 0.0:
+					_wait = ready_delay   # Ready comes on a later frame (the branch above)
+					return
 				game.press_ready()
 				_wait = randf_range(0.1, 1.0)
+			MatchGame.Phase.WAITING:
+				if game.round_number == unready_round and _unready_stage == 0:
+					_unready_stage = 1
+					_wait = 0.3
+				elif game.round_number == unready_round and _unready_stage == 1:
+					_unready_stage = 2
+					print("[%s] round %d: un-readying" % [label, game.round_number])
+					game.press_ready()
 			MatchGame.Phase.RESULT:
 				if game.combats_done > _results_seen:
 					_results_seen = game.combats_done

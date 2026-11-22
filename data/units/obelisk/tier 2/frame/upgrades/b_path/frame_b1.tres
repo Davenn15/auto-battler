@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+description = "The followed ally has 50 Immovability while FRAME follows it."
+gambit_overrides = Dictionary[String, float]({
+"immovability": 50.0
+})

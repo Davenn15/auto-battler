@@ -6,4 +6,4 @@
 script = ExtResource("1")
 passive_name = "Exploit"
 cooldown = 2.0
-description = "Whenever an enemy within his attack range is stunned or silenced, Codger attacks it. At most once every 2 seconds."
+description = "Whenever an enemy within his attack range is stunned or Silenced, Codger attacks it. At most once every 2 seconds."

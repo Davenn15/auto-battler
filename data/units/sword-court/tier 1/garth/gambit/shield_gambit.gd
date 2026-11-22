@@ -11,4 +11,4 @@ extends Gambit
 func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive:
 		return
-	caster.add_shield(shield_amount, duration, caster.get_instance_id())
+	caster.add_shield(shield_amount, duration, caster.get_instance_id(), true)

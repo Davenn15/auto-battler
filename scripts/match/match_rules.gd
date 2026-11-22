@@ -37,7 +37,7 @@ const SHARD_SELL := 2
 ## From this combat on (4th combat = round 5), the shop also offers one random full
 ## Keepsake at a discount. It rerolls and locks with the rest of the shop.
 const KEEPSAKE_FIRST_COMBAT := 4
-const KEEPSAKE_COST := 5
+const KEEPSAKE_COST := 4
 ## A loose keepsake sells for this share of what it cost.
 const KEEPSAKE_SELL_SHARE := 2.0 / 3.0
 const REROLL_START := 1
@@ -70,6 +70,17 @@ static func roster() -> Array[UnitData]:
 # A unit's faction is the folder it lives in: data/units/<faction>/<tier>/<unit>/.
 
 const DEFAULT_FACTION := "Sword Court"
+## The faction pickers' "Random" choice: a random faction (with units), picked anew each
+## time a match starts (see resolve_faction).
+const RANDOM_FACTION := "Random"
+
+
+## `choice` as a real faction: itself, or a random faction when it's RANDOM_FACTION.
+static func resolve_faction(choice: String) -> String:
+	if choice != RANDOM_FACTION:
+		return choice
+	var names := factions()
+	return names[randi() % names.size()] if not names.is_empty() else DEFAULT_FACTION
 
 
 ## "Sword Court" for res://data/units/sword-court/tier 1/garth/garth.tres.
@@ -246,6 +257,23 @@ static func offer_info(player: PlayerState, data: UnitData) -> Dictionary:
 
 static func can_afford(player: PlayerState, info: Dictionary) -> bool:
 	return player.aura >= info["aura"] and player.reserve >= info["reserve"]
+
+
+## True if `player` could upgrade `unit` right now: with Aura upgrades, its next upgrade
+## from its menu; otherwise, a shop offer of the same unit that would upgrade it and that
+## they can pay for. Planning shows these units with a cyan glow and arrow.
+static func upgrade_affordable(player: PlayerState, unit: ArmyUnit) -> bool:
+	if unit == null or unit.is_maxed() or not player.units.has(unit):
+		return false
+	if aura_upgrades:
+		return can_buy_upgrade(player, unit)
+	for data in player.unit_offers:
+		if data != unit.data:
+			continue
+		var info := offer_info(player, data)
+		if info["kind"] == "upgrade" and can_afford(player, info):
+			return true
+	return false
 
 
 ## Buys shop slot `slot`. For an upgrade, `choice` picks the path (an index from
@@ -498,6 +526,10 @@ static func take_ascension(player: PlayerState, slot: int, unit_index: int = -1)
 			return false
 		player.units[unit_index].ascensions.append(ascension)
 	player.ascensions.append(ascension)
+	for i in ascension.random_shards:   # e.g. a tier III or IV Keepsake slot Ascension
+		var pool := shards()
+		if not pool.is_empty():
+			player.inventory.append(pool[randi() % pool.size()])
 	player.ascension_offers.clear()
 	# Buffs a unit they don't own yet: their next fresh shop is sure to offer it.
 	var roster := roster_for(player.faction)
@@ -535,6 +567,7 @@ static func holder_of(army: Array[ArmyUnit], ascension: Ascension) -> ArmyUnit:
 ## kept as it was left (bought slots stay empty) instead, and the lock comes off.
 static func start_planning(player: PlayerState, combat_number: int) -> void:
 	player.reroll_cost = REROLL_START
+	player.keepsake_bought = false   # the discounted Keepsake can be bought once a round
 	if player.shop_locked:
 		player.shop_locked = false
 		return   # a promised unit waits for the next fresh shop
@@ -571,8 +604,10 @@ static func roll_shard_offers(player: PlayerState) -> void:
 
 
 ## One random Keepsake once they're unlocked for `combat_number`, else none.
+## Once it's been bought this round, rerolls don't bring another until the next round.
 static func roll_keepsake_offer(player: PlayerState, combat_number: int) -> void:
-	player.keepsake_offer = keepsakes().pick_random() if keepsake_unlocked(combat_number) else null
+	player.keepsake_offer = keepsakes().pick_random() \
+			if keepsake_unlocked(combat_number) and not player.keepsake_bought else null
 
 
 static func keepsake_unlocked(combat_number: int) -> bool:
@@ -606,6 +641,7 @@ static func buy_keepsake_offer(player: PlayerState) -> bool:
 	player.reserve -= KEEPSAKE_COST
 	player.inventory.append(player.keepsake_offer)
 	player.keepsake_offer = null
+	player.keepsake_bought = true
 	return true
 
 
@@ -652,8 +688,10 @@ static func combine(player: PlayerState, index_a: int, index_b: int) -> bool:
 
 ## Moves an item from the inventory onto a unit. Keepsakes stay on for good.
 static func equip(player: PlayerState, unit: ArmyUnit, index: int) -> bool:
-	if index < 0 or index >= player.inventory.size() or unit.items.size() >= BattleUnit.MAX_KEEPSAKES:
+	if index < 0 or index >= player.inventory.size() or unit.items.size() >= unit.keepsake_slots():
 		return false
+	if not Keepsake.allowed_with(player.inventory[index], unit.items):
+		return false   # never two of the same completed Keepsake on one unit
 	unit.items.append(player.inventory[index])
 	player.inventory.remove_at(index)
 	return true

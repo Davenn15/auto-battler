@@ -372,6 +372,7 @@ static func buy_keepsakes(pools: Dictionary, budget: int, unit_count: int, per_u
 	for i in unit_count:
 		loadouts.append([])
 	var keepsake_cost := Shard.RESERVE_VALUE * 2
+	var tries := 0
 	while budget >= Shard.RESERVE_VALUE:
 		var open: Array[int] = []
 		for i in unit_count:
@@ -383,6 +384,12 @@ static func buy_keepsakes(pools: Dictionary, budget: int, unit_count: int, per_u
 		if pool.is_empty():
 			break
 		var item: Keepsake = pool.pick_random()
-		loadouts[open.pick_random()].append(item)
+		var can_take := open.filter(func(i): return Keepsake.allowed_with(item, loadouts[i]))   # no second copy
+		if can_take.is_empty():
+			tries += 1
+			if tries > 20:
+				break
+			continue
+		loadouts[can_take.pick_random()].append(item)
 		budget -= item.get_reserve_value()
 	return loadouts

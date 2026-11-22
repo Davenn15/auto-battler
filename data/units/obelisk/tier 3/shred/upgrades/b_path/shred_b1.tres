@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/shred/upgrades/b_path/shrapnel_b1.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "Attacks gain Hit Effect: fire a shrapnel blast at a random other enemy within 2 cells of the target, dealing 20 (+20% Might) Might damage."
+passives = Array[ExtResource("2")]([ExtResource("3")])

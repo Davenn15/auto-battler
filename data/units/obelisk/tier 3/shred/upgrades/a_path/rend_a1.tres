@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShredRendAuraPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/shred/upgrades/a_path/scripts/rend_aura_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+cut = 0.3
+radius = 1
+passive_name = "Rending Field"
+description = "Enemies within 1 hex of SHRED receive 30% less healing and Shield."

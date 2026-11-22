@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-full_charge_regen = 5.0
+range_cells = 2
+voltage_per_second = 2.0
+description = "BATR.EE and allies within 2 cells build 2 Voltage per second. Each Voltage gives 2 Insight and 2 Celerity. A unit keeps its Voltage when it leaves, until it casts its Gambit, which clears it all."
 passive_name = "Power Grid"
-description = "Allies within 2 cells gain 25 Insight. Whenever one of them casts its Gambit, BATR.EE gains Voltage equal to that ally's max Charge. Holds at most 300 Voltage; while full, it gains 5 extra Charge per second."

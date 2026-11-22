@@ -78,6 +78,8 @@ func play(match_seed: int, policies: Array) -> Dictionary:
 				players[0].ascensions, players[1].ascensions)
 		ArmySpawner.apply_match_gains(players[0].units, r["gains"].get(1, {}))   # Codger B's rest-of-match gains
 		ArmySpawner.apply_match_gains(players[1].units, r["gains"].get(2, {}))
+		players[0].reserve += ArmySpawner.reserve_from(r["gains"], 1)   # Von Carrow's bounty
+		players[1].reserve += ArmySpawner.reserve_from(r["gains"], 2)
 		var damage := [0, 0]
 		match r["winner"]:
 			1: damage[1] = MatchRules.loss_damage(round_number, r["bottom_aura"])

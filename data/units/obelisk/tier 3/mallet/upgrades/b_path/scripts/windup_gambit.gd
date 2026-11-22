@@ -32,7 +32,7 @@ func can_use(caster: BattleUnit) -> bool:
 func execute(caster: BattleUnit) -> void:
 	if not _alive(caster):
 		return
-	caster.add_shield(caster.max_health * shield_share, max_windup + 1.0, caster.get_instance_id())
+	caster.add_shield(caster.max_health * shield_share, max_windup + 1.0, caster.get_instance_id(), true)
 	var shield: ShieldStatus = null
 	if not caster.statuses.is_empty() and caster.statuses.back() is ShieldStatus:
 		shield = caster.statuses.back()
@@ -47,9 +47,13 @@ func execute(caster: BattleUnit) -> void:
 		if not _alive(caster) or not caster.is_inside_tree() or not caster.active:
 			if is_instance_valid(spin):
 				spin.queue_free()
+			if is_instance_valid(caster) and caster.melee_motion != null:
+				caster.melee_motion.rotation = 0.0
 			return
-		wound += caster.get_physics_process_delta_time()
+		var delta := caster.get_physics_process_delta_time()
+		wound += delta
 		spin.progress = wound / max_windup
+		_spin_body(caster, spin.progress, delta)
 		if shield != null and (shield.shield <= 0.0 or not caster.statuses.has(shield)):
 			break   # the shield broke: launch now
 	spin.queue_free()
@@ -61,9 +65,11 @@ func execute(caster: BattleUnit) -> void:
 func _launch(caster: BattleUnit, wound: float) -> void:
 	var target := _pick_target(caster)
 	if target == null:
+		if caster.melee_motion != null:
+			caster.melee_motion.rotation = 0.0
 		return
 	caster.target = target
-	await MalletFx.leap(caster, _landing_cell(caster, target), flight_time, leap_height)
+	await MalletFx.rocket(caster, _landing_cell(caster, target), target, flight_time)
 	if not _alive(caster) or not caster.active or not caster.is_inside_tree() or not _alive(target):
 		return
 	var hit := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
@@ -110,6 +116,19 @@ func _landing_cell(caster: BattleUnit, target: BattleUnit) -> Vector2i:
 		return caster.cell
 	cells.sort_custom(func(a, b): return grid.get_distance(caster.cell, a) < grid.get_distance(caster.cell, b))
 	return cells[0]
+
+
+## MALLET's whole body spinning, faster and faster as it winds up (SPIN_START to SPIN_END
+## radians a second). It turns the unit's MeleeMotion node, which nothing else turns, so
+## it never fights other animations; shots still hit it as it stands (SpriteEdge).
+const SPIN_START := 3.0
+const SPIN_END := 45.0
+
+func _spin_body(caster: BattleUnit, progress: float, delta: float) -> void:
+	if not KeepsakeVfx.enabled() or caster.melee_motion == null:
+		return
+	var speed := lerpf(SPIN_START, SPIN_END, progress * progress)
+	caster.melee_motion.rotation = wrapf(caster.melee_motion.rotation + speed * delta, -PI, PI)
 
 
 ## Untyped on purpose: the unit may have been freed by the time this is called.

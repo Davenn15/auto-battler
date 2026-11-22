@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ShredShrapnelPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/shred/upgrades/b_path/scripts/shrapnel_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 20.0
+might_scaling = 0.2
+radius = 2
+passive_name = "Shrapnel"
+description = "Hit Effect: fire a shrapnel blast at a random other enemy within 2 cells of the target, dealing 20 (+20% Might) Might damage."

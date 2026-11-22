@@ -147,9 +147,13 @@ class ChipOrbit extends Node2D:
 		for i in status.chips:
 			var at := (status.chip_offset(i, unit)).rotated(-unit.global_rotation)
 			if beam_target != null:
-				var to := to_local(beam_target.global_position)
-				draw_line(at, to, Color(ChipPassive.COLOR, 0.35), 3.0, true)
-				draw_line(at, to, Color(ChipPassive.LIGHT, 0.8), 1.0, true)
+				var to := to_local(SpriteEdge.edge_point(beam_target, to_global(at)))   # stops at the sprite
+				draw_line(at, to, Color(ChipPassive.COLOR, 0.25), 3.0, true)
+				draw_line(at, to, Color(ChipPassive.LIGHT, 0.55), 1.0, true)
+				if beam.pulse_age < Beam.PULSE_TRAVEL:   # her tick: a bead down each chip's beam
+					var bead := at.lerp(to, beam.pulse_age / Beam.PULSE_TRAVEL)
+					draw_circle(bead, 3.0, Color(1, 1, 1, 0.9))
+					draw_circle(bead, 5.0, Color(ChipPassive.LIGHT, 0.4))
 			draw_rect(Rect2(at - Vector2(3.5, 3.5), Vector2(7, 7)), Color(0.12, 0.1, 0.3))
 			draw_rect(Rect2(at - Vector2(3.5, 3.5), Vector2(7, 7)), ChipPassive.LIGHT, false, 1.0)
 			draw_line(at + Vector2(-2, 0), at + Vector2(2, 0), Color(ChipPassive.LIGHT, 0.8), 1.0)

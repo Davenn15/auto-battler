@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_s0box")
-description = "Adds a Silencing Note: stops the nearby enemy with the most Charge from gaining Charge or casting."
+description = "Adds a Silencing Note: Silences the nearby enemy with the most Charge, so it can't gain Charge or cast its Gambit."
 passives = Array[ExtResource("2_32qod")]([ExtResource("3_32qod")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

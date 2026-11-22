@@ -20,3 +20,7 @@ class Frame extends Status:
 		if damage > most:
 			KeepsakeVfx.pop_icon(unit, "💪")
 		return minf(damage, most)
+
+	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
+	func reduces_damage(_unit: BattleUnit) -> bool:
+		return true

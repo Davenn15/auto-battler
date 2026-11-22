@@ -25,8 +25,6 @@ func make_status() -> Status:
 
 
 class BeamStatusColumn extends Status:
-	const TICK := 0.1
-
 	var weapon: ColumnBeamWeapon
 	var target = null   # untyped: may be freed
 	var _charging := 0.0
@@ -65,7 +63,7 @@ class BeamStatusColumn extends Status:
 		if enemy != target:
 			_flush(unit)
 			target = enemy
-			_charging = weapon.retarget_delay
+			_charging = Beam.retarget_time(weapon.interval * ColumnWeapon.speed_scale(unit))
 			_tick_left = 0.0
 		if _charging > 0.0:
 			_charging -= delta * _beam.charge_up_speed
@@ -78,14 +76,18 @@ class BeamStatusColumn extends Status:
 		var ricochets: Array = []
 		if _beam.extra_ricochets > 0:
 			ricochets = Beam.ricochet_targets(unit, enemy, _beam.extra_ricochets, _beam.ricochet_range, [enemy])
+		_ricochet_lines.show(enemy, ricochets, ColumnWeapon.COLOR)
 		while _tick_left <= 0.0 and is_instance_valid(enemy) and enemy.alive:
-			_tick_left += TICK
-			var share := TICK / cooldown * _beam.rate
+			_tick_left += Beam.tick_interval(cooldown)
+			var share := Beam.tick_share(_beam)
 			_fire_tick(unit, enemy, share)
+			Beam.notify_tick(unit, enemy)
 			if not ricochets.is_empty():
 				_dealt += Beam.hit_ricochets(unit, ricochets,
 						Beam.tick_damage(unit, share) * weapon.damage_share * _beam.ricochet_share)
-		_ricochet_lines.show(enemy, ricochets, ColumnWeapon.COLOR)
+			if is_instance_valid(_visual):
+				_visual.pulse()
+			_ricochet_lines.pulse()
 
 	## Keeps its target while it's still valid; otherwise the nearest enemy in range that an
 	## earlier beam isn't firing at (or any, if that's the only one).
@@ -127,6 +129,9 @@ class BeamStatusColumn extends Status:
 		if _progress >= 1.0 or not enemy.alive:
 			_flush(unit)
 
+	func is_attack_beam() -> bool:
+		return true
+
 	## One attack's worth of beam has landed: the once-per-attack effects.
 	func _flush(unit: BattleUnit) -> void:
 		if _progress <= 0.0:
@@ -138,11 +143,13 @@ class BeamStatusColumn extends Status:
 		_dealt = 0.0
 		_best_wrack = 0
 		var effects: Array[HitEffect] = []
+		Beam.flushing = true   # on_attack here is the Beam's attack's worth, not a tick
 		for status in unit.statuses.duplicate():
 			var effect: HitEffect = status.get_hit_effect(unit)
 			if effect != null:
 				effects.append(effect)
 			status.on_attack(unit)
+		Beam.flushing = false
 		effects = unit.repeat_hit_effects(effects)
 		if not is_instance_valid(enemy):
 			return

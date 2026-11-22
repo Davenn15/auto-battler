@@ -3,7 +3,7 @@ extends Gambit
 ## Codger B: rends his target with his bladehook for Damage + Might Scaling x Might, and
 ## gives it Bleed for Bleed Damage + Bleed Might Scaling x Might (see Bleed).
 ##   B1: if the target dies to the hit, or at any point while it's Bleeding (from anyone),
-##       Codger gains a stack of Glory (base attributes and Wards +5% for the rest of the match).
+##       Codger gains a stack of Glory (base max health, attributes and Wards +5% for the rest of the match).
 ##   B2: shields and healing on the target are Heal Cut less effective while it's Bleeding.
 
 @export var damage: float = 120.0

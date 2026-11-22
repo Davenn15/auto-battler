@@ -113,6 +113,16 @@ class Pool extends Status:
 		if is_instance_valid(_carrier):
 			KeepsakeVfx.bleed_badge(_carrier, total, true)   # with a bounce: Bleed just added
 
+	## Dying with Bleed left: tells the carrier's enemies how much (Status.on_enemy_bleed_death).
+	func on_death(unit: BattleUnit) -> void:
+		if total <= 0.0 or not unit.is_inside_tree():
+			return
+		for node in unit.get_tree().get_nodes_in_group("units"):
+			var enemy := node as BattleUnit
+			if enemy != null and enemy.alive and enemy.team != unit.team:
+				for status in enemy.statuses.duplicate():
+					status.on_enemy_bleed_death(enemy, unit, total)
+
 	## Someone else's debuff: never stops the carrier gaining Charge.
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false

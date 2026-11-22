@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DodgeShieldPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/frame/upgrades/a_path/scripts/dodge_shield_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+share = 0.5
+duration = 4.0
+passive_name = "Deflecting Stride"
+description = "Whenever FRAME dodges, it gains a Shield of 50% of the damage it would have taken, for 4 seconds."

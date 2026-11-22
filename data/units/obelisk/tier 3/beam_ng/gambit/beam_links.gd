@@ -33,6 +33,13 @@ func show(chain: Array, color: Color) -> void:
 			line.color = color
 
 
+## A tick: a pulse down every link that's showing.
+func pulse() -> void:
+	for line in _lines:
+		if is_instance_valid(line) and line.visible:
+			line.pulse()
+
+
 func clear() -> void:
 	for line in _lines:
 		if is_instance_valid(line):

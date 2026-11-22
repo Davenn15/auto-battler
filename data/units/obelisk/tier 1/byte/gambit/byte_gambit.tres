@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ByteRippleGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/byte/gambit/ripple_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 90.0
+insight_scaling = 0.5
+damage_type = 1
+knock_up = 0.75
+heal_share = 0.08
+gambit_name = "Concussive Ripple"
+cast_time = 0.5
+description = "Creates a concussive ripple under its current target, dealing 90 (+50% Insight) Insight damage and knocking it up for 0.75 seconds. BYTE heals itself for 8% of its max health."

@@ -44,7 +44,9 @@ class ShieldHit extends HitEffect:
 				break
 		if shield == null:
 			shield = BulwarkShield.new(0.0, effect.duration)
+			shield.source_id = attacker.get_instance_id()   # his own: soaks damage first
 			attacker.add_status(shield)
+			attacker.place_own_shield(shield)
 		var gained := minf(amount, maxf(limit - shield.shield, 0.0))
 		shield.shield += gained
 		shield.time_left = effect.duration

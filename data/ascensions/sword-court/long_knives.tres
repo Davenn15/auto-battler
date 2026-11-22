@@ -14,6 +14,6 @@ extra = 1
 script = ExtResource("1")
 ascension_name = "Long Knives"
 description = "Silt gains +1 range, and his empowered attacks trigger their Hit Effects an additional time."
-tier = 2
+tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

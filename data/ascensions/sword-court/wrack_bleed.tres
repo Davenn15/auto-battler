@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/wrack_bleed_effect.gd" id="2"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+share = 0.3
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Serrated Wracks"
+description = "Whenever one of your units' attacks or Gambit damage Wracks, it also inflicts Bleed for 30% of the damage dealt."
+tier = 1
+effect = SubResource("Effect")

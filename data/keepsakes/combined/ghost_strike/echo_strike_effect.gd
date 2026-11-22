@@ -89,7 +89,7 @@ class GhostBolt extends Node2D:
 			return
 		var to: Vector2 = target.global_position
 		var step := SPEED * delta
-		if global_position.distance_to(to) <= step:
+		if SpriteEdge.homing_hit(target, global_position, step) != null:   # stops at the sprite's edge
 			var dealt: float = target.take_damage(BattleUnit.damage_bonus(credit_id, target, damage), 0, Stats.DamageType.INSIGHT)
 			target.get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 			queue_free()

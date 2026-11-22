@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="DelayedDamagePassive" format=3 uid="uid://k3cqnv13q1al"]
+[gd_resource type="Resource" script_class="GritPassive" format=3 uid="uid://k3cqnv13q1al"]
 
-[ext_resource type="Script" uid="uid://7fbt7gpd34oh" path="res://data/units/sword-court/tier 3/bescard/passive/delayed_damage_passive.gd" id="1_bpass"]
+[ext_resource type="Script" path="res://scripts/grit_passive.gd" id="1_bpass"]
 
 [resource]
 script = ExtResource("1_bpass")
-duration = 3.5
+amount = 60.0
 passive_name = "Unruly"
-description = "Damage Bescard takes is dealt to him over a few seconds instead of all at once."
+description = "Bescard has 60 Grit."

@@ -14,6 +14,49 @@ extends RefCounted
 
 enum Kind { ATTACK, WEAPON, FOCUS, SHIELD }
 
+## Every Beam's rhythm. A Beam ticks TICKS_PER_ATTACK times per attack interval (its unit's,
+## or a COLUMN weapon's own), each tick dealing or shielding its share all at once: so it
+## delivers exactly as much per second as before, and Celerity makes the ticks come faster.
+## After switching to a new target it charges up for RETARGET_SHARE of an attack interval
+## first (also faster with Celerity). Each tick sends a bright pulse down the beam.
+const TICKS_PER_ATTACK := 4
+const RETARGET_SHARE := 1.0 / 3.0
+
+## True while an attack Beam runs its once-per-attack effects (its on_attack calls), so an
+## effect that counts Beam ticks itself (FRAME's Compassing) can skip those.
+static var flushing := false
+
+## An attack Beam tick landed on `enemy`: tells every Status on the unit (on_beam_tick).
+static func notify_tick(unit: BattleUnit, enemy: BattleUnit) -> void:
+	for status in unit.statuses.duplicate():
+		status.on_beam_tick(unit, enemy)
+
+## True if any of the unit's attacks are Beams.
+static func has_attack_beam(unit: BattleUnit) -> bool:
+	for status in unit.statuses:
+		if status.is_attack_beam():
+			return true
+	return false
+
+## Seconds a tick's pulse takes to travel down the beam, and to flare where it lands.
+const PULSE_TRAVEL := 0.16
+const PULSE_FLARE := 0.14
+
+
+## Seconds between ticks for a Beam whose attack interval is `attack_interval`.
+static func tick_interval(attack_interval: float) -> float:
+	return maxf(attack_interval / TICKS_PER_ATTACK, 0.02)
+
+
+## The share of an attack (or of a second's shielding, see tick_interval) one tick delivers.
+static func tick_share(beam: Settings) -> float:
+	return beam.rate / TICKS_PER_ATTACK
+
+
+## Seconds a Beam charges up after switching to a new target.
+static func retarget_time(attack_interval: float) -> float:
+	return attack_interval * RETARGET_SHARE
+
 
 ## What a unit's Beams are like right now. Every Beam starts from these defaults; Statuses
 ## change them in modify_beam().
@@ -133,6 +176,11 @@ class RicochetLines extends RefCounted:
 			_links = BeamLinks.new(from)
 			_from = from
 		_links.show(targets, color)
+
+	## A tick: a pulse down each ricochet line.
+	func pulse() -> void:
+		if _links != null:
+			_links.pulse()
 
 	func clear() -> void:
 		if _links != null:

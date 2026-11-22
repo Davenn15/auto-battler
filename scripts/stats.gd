@@ -6,10 +6,13 @@ extends RefCounted
 ## Every stat a unit has. Add new ones here (and in UnitData.get_base_stat).
 ## IMMOVABILITY: crowd control and debuffs on the unit last that many percent shorter (see
 ## BattleUnit.crowd_control_multiplier); at 100 it's immune to them, and each point over 100
-## gives IMMOVABILITY_HEALTH max health and IMMOVABILITY_WARDS to every Ward.
-enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM, IMMOVABILITY }
-const IMMOVABILITY_HEALTH := 5.0   # max health per point over 100
+## gives IMMOVABILITY_WARDS to every Ward.
+## GRIT: that many percent of each hit (at most 100) is spread over GRIT_DURATION seconds
+## (see Grit); each point over 100 gives GRIT_HEALTH max health.
+enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM, IMMOVABILITY, GRIT }
 const IMMOVABILITY_WARDS := 0.5    # to each Ward per point over 100
+const GRIT_DURATION := 4.0         # seconds a held hit is spread over
+const GRIT_HEALTH := 10.0          # max health per point over 100
 
 ## The three kinds of damage. The order matches the "Might / Insight / Celerity" dropdown
 ## on UnitData and Gambits, so keep them in sync if you reorder or rename.
@@ -32,6 +35,7 @@ const STAT_NAMES := {
 	Stat.WRACK_DAMAGE: "Wrack Damage",
 	Stat.VAMPIRISM: "Vampirism",
 	Stat.IMMOVABILITY: "Immovability",
+	Stat.GRIT: "Grit",
 }
 
 ## Highest wrack level a hit can reach: 1 = wrack, 2 = Hyper-Wrack, 3 = Uber-Wrack.

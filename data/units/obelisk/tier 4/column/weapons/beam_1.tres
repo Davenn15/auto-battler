@@ -8,4 +8,4 @@ interval = 1.8
 slot = 0
 portal = Vector2(-30.5, -2.5)
 passive_name = "Beam I"
-description = "A continuous Beam at the nearest enemy in range. Deals 60% of a normal attack per attack timer."
+description = "A Beam at the nearest enemy in range, dealing 60% of a normal attack."

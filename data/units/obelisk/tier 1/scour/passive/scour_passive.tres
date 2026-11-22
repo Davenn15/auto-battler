@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Beam"
-description = "Scour's attack is a continuous Beam that deals his attack damage steadily. When he switches targets, the Beam takes a moment to charge up."
+description = "Scour's attack is a Beam."

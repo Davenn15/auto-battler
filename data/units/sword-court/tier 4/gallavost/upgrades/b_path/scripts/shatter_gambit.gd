@@ -105,7 +105,9 @@ func _rebuild(caster: BattleUnit) -> void:
 	if target <= 0.0:
 		return
 	var shield := ShieldStatus.new(0.0, INF)   # grows from nothing as she rebuilds
+	shield.source_id = caster.get_instance_id()   # her own: soaks damage first
 	caster.add_status(shield)
+	caster.place_own_shield(shield)
 	var airborne := UntargetableStatus.new(INF)   # removed by hand when she lands
 	caster.add_status(airborne)
 	caster.lock_for(rebuild_time + 0.1)

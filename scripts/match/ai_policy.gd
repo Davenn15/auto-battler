@@ -249,11 +249,15 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 	order.sort_custom(func(a, b): return item_scores[a] > item_scores[b])
 	var placed: Array[int] = []
 	for i in order:
-		var open: Array = p.units.filter(func(u): return u.items.size() < BattleUnit.MAX_KEEPSAKES)
+		var open: Array = p.units.filter(func(u): return u.items.size() < u.keepsake_slots())
 		if open.is_empty():
 			break
 		if handling == ShardHandling.HOLD and p.inventory[i].is_shard:
 			continue   # a lone Shard waits loose for a partner
+		var item: Keepsake = p.inventory[i]
+		open = open.filter(func(u): return Keepsake.allowed_with(item, u.items))   # no second copy
+		if open.is_empty():
+			continue
 		if randf() < g["equip_rate"]:
 			var fits: Array = open.map(func(u): return KeepsakeSense.score_for(p.inventory[i], u))
 			var unit: ArmyUnit = open[KeepsakeSense.weighted_pick(open, fits, sense)]

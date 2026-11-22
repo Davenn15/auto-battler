@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/glory_boon_effect.gd" id="2"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+extra_cap = 1
+shield_share = 0.25
+shield_duration = 4.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Gilded Aegis"
+description = "Units in your army can gain one more Glory each combat. Whenever a unit in your army gains Glory, it gains a Shield of 25% of its max health for 4 seconds."
+tier = 3
+effect = SubResource("Effect")

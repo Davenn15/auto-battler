@@ -21,7 +21,9 @@ class OverhealStatus extends Status:
 		var cap := unit.max_health * passive.cap_share
 		if _shield == null or not unit.statuses.has(_shield):
 			_shield = OverhealShield.new(0.0, INF)
+			_shield.source_id = unit.get_instance_id()   # his own: soaks damage first
 			unit.add_status(_shield)
+			unit.place_own_shield(_shield)
 		var added := minf(excess, maxf(cap - _shield.shield, 0.0))
 		if added <= 0.0:
 			return

@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/regen_pool_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+regen_bonus = 3.0
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+regen_bonus = 5.0
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+regen_bonus = 8.0
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+regen_bonus = 12.0
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Your units gain 3 Regeneration. All Regeneration in your army goes to the ally with the lowest health %."
+tier = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Your units gain 5 Regeneration. All Regeneration in your army goes to the ally with the lowest health %."
+tier = 2
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Your units gain 8 Regeneration. All Regeneration in your army goes to the ally with the lowest health %."
+tier = 3
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Your units gain 12 Regeneration. All Regeneration in your army goes to the ally with the lowest health %."
+tier = 4
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Shared Current"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

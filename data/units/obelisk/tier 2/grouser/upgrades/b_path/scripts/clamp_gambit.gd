@@ -29,7 +29,7 @@ func execute(caster: BattleUnit) -> void:
 	if target == null:
 		return
 	if shield_share > 0.0:
-		caster.add_shield(caster.max_health * shield_share, shield_duration, caster.get_instance_id())
+		caster.add_shield(caster.max_health * shield_share, shield_duration, caster.get_instance_id(), true)
 	var hit := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
 	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
 	hit *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)

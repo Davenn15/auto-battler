@@ -1,11 +1,10 @@
-[gd_resource type="Resource" script_class="EmpowerGambit" format=3 uid="uid://bj0tygqyhv86b"]
+[gd_resource type="Resource" script_class="StrideGambit" format=3]
 
-[ext_resource type="Script" uid="uid://dxglvhoc4rfg2" path="res://data/units/sword-court/tier 1/silt/gambit/empower_gambit.gd" id="1_e86aa"]
+[ext_resource type="Script" path="res://data/units/sword-court/tier 1/silt/gambit/stride_gambit.gd" id="1"]
 
 [resource]
-script = ExtResource("1_e86aa")
-bonus_damage = 40.0
-insight_scaling = 0.2
+script = ExtResource("1")
+celerity = 25.0
+gambit_name = "Gambit"
 cast_time = 0.5
-description = "His next few attacks gain the Hit Effect: deal bonus damage."
-metadata/_custom_type_script = "uid://dxglvhoc4rfg2"
+description = "Gains 25 Celerity for the rest of combat."

@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-range_bonus = 1
-insight_bonus = 10.0
+cast_voltage_share = 0.1
 passive_name = "Charged Grid"
-description = "Its passive reaches 1 cell further and gives 10 more Insight."
+description = "Whenever a unit in its aura casts its Gambit, BATR.EE gains Voltage equal to 10% of that unit's max Charge."

@@ -1,6 +1,7 @@
 class_name MerriboldGambit
 extends Gambit
-## Swings in a cone toward whichever direction hits the most enemies.
+## Swings in a cone toward his current target (or, if it is out of reach, toward whichever
+## direction hits the most enemies).
 ## Action damage doesn't wrack and doesn't build charge.
 
 @export var damage: float = 150.0
@@ -29,7 +30,7 @@ func execute(caster: BattleUnit) -> void:
 	if enemies.is_empty():
 		return
 
-	var aim := _best_direction(caster, enemies)
+	var aim := _aim_at_target(caster, enemies, func(): return _best_direction(caster, enemies))
 	_play_swing_visual(caster, aim)
 
 	var hit_damage := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
@@ -111,3 +112,14 @@ func _play_swing_visual(caster: BattleUnit, dir: Vector2) -> void:
 	var tween := wedge.create_tween()
 	tween.tween_property(wedge, "modulate:a", 0.0, 0.25)
 	tween.tween_callback(wedge.queue_free)
+
+
+## Aims at the caster's current target when it's in reach; otherwise at whatever line
+## catches the most enemies.
+func _aim_at_target(caster: BattleUnit, enemies: Array[BattleUnit], fallback: Callable) -> Vector2:
+	var t := caster.target
+	if caster._is_valid_target(t) and enemies.has(t):
+		var dir := (t.global_position - caster.global_position).normalized()
+		if dir != Vector2.ZERO:
+			return dir
+	return fallback.call()

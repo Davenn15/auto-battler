@@ -22,6 +22,16 @@ func _init(p_data: UnitData = null) -> void:
 	data = p_data
 
 
+## How many items it can carry: the usual BattleUnit.MAX_KEEPSAKES, plus any extra slots
+## its Ascensions give (a chosen-unit one given to it).
+func keepsake_slots() -> int:
+	var slots := BattleUnit.MAX_KEEPSAKES
+	for ascension in ascensions:
+		if ascension != null:
+			slots += ascension.keepsake_slots
+	return slots
+
+
 func level() -> int:
 	return path.size()
 

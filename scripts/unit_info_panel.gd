@@ -64,6 +64,14 @@ var _marker: Line2D   # the ring under the selected unit; a child of that unit
 ## Filled by whoever owns the screen (the match HUD puts the unit's items here). Hidden
 ## when empty.
 var item_row: HBoxContainer
+## The unit's equipped Keepsakes and Shards, to read (hover one for its effect). Shown
+## whenever the match HUD's interactive item_row isn't (enemies, combat, random battles).
+var _keepsake_row: HBoxContainer
+var _keepsake_row_ids := []   # what the row shows, so it's only rebuilt when that changes
+## The tip shown while hovering one of the selected unit's big overhead Keepsake icons.
+var _hover_tip: PanelContainer
+var _hover_text: RichTextLabel
+var _hover_index := -1
 var upgrade_row: VBoxContainer   # the match HUD's big Upgrade button, when there is one
 ## Stats, abilities (passives, Gambit, Ascensions), and the upgrade tree.
 enum Tab { STATS, ABILITIES, UPGRADES }
@@ -122,8 +130,14 @@ func _ready() -> void:
 	item_row.visible = false
 	column.add_child(item_row)
 
+	_keepsake_row = HBoxContainer.new()
+	_keepsake_row.add_theme_constant_override("separation", 4)
+	_keepsake_row.visible = false
+	column.add_child(_keepsake_row)
+	_build_hover_tip()
+
 	# Health and charge as bars with numbers.
-	var bars := _bar_row(column, "Health", HEALTH_COLOR)
+	var bars := _bar_row(column, "Health", HEALTH_COLOR, Keyphrases.icon_path(Shard.Kind.HEALTH))
 	_health_bar = bars[0]
 	_health_text = bars[1]
 	bars = _bar_row(column, "Charge", CHARGE_COLOR)
@@ -165,16 +179,27 @@ func _rich(font_size: int) -> RichTextLabel:
 
 
 ## A label, a coloured bar, and the numbers on top of the bar. Returns [bar, numbers].
-func _bar_row(parent: Container, label_text: String, color: Color) -> Array:
+## A labelled bar. With `icon`, the label is that icon (the name shows on hover).
+func _bar_row(parent: Container, label_text: String, color: Color, icon: String = "") -> Array:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	parent.add_child(row)
-	var label := Label.new()
-	label.text = label_text
-	label.custom_minimum_size = Vector2(52, 0)
-	label.add_theme_font_size_override("font_size", 12)
-	label.add_theme_color_override("font_color", Color(DIM))
-	row.add_child(label)
+	if icon != "":
+		var picture := TextureRect.new()
+		picture.texture = load(icon)
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT   # at the left, lined up with "Charge" below
+		picture.custom_minimum_size = Vector2(52, 16)
+		picture.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		picture.tooltip_text = label_text
+		row.add_child(picture)
+	else:
+		var label := Label.new()
+		label.text = label_text
+		label.custom_minimum_size = Vector2(52, 0)
+		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_color_override("font_color", Color(DIM))
+		row.add_child(label)
 	var bar := ProgressBar.new()
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(0, 16)
@@ -206,6 +231,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	# The click is in screen pixels; the units are in the world, under the camera.
 	var world := get_viewport().get_canvas_transform().affine_inverse() * click.position
+	# A click on the selected unit's (enlarged) Keepsake icons is for the icons (the board
+	# handles it), not a click on empty ground: keep the unit selected.
+	if is_instance_valid(_unit) and _unit.keepsakes_focused and _unit.keepsake_index_at(world, 1.0) >= 0:
+		return
 	_select(_unit_at(world))
 
 
@@ -219,6 +248,7 @@ func _process(_delta: float) -> void:
 		_select(null)
 		return
 	_refresh()
+	_update_hover_tip()
 
 
 ## Shows `unit` in the panel and rings it, or closes the panel when it's null.
@@ -226,7 +256,13 @@ func _select(unit: BattleUnit) -> void:
 	if is_instance_valid(_marker):
 		_marker.queue_free()   # off the previous unit
 	_marker = null
+	if is_instance_valid(_unit) and _unit != unit:
+		_unit.set_keepsakes_focused(false)
+	_hide_hover_tip()
+	_keepsake_row_ids = [null]   # rebuild the row for the new unit
 	_unit = unit
+	if unit != null:
+		unit.set_keepsakes_focused(true)
 	visible = unit != null
 	unit_selected.emit(unit)
 	if unit == null:
@@ -300,6 +336,7 @@ func _refresh() -> void:
 		_charge_bar.value = u.charge
 		_charge_text.text = "%d / %d" % [roundi(u.charge), roundi(u.max_charge)]
 
+	_refresh_keepsake_row(u)
 	var text := _stat_table(u)
 	if tab == Tab.ABILITIES:
 		text = _abilities_text(u)
@@ -311,6 +348,95 @@ func _refresh() -> void:
 		_shown_text = text
 		_text.text = text
 	_fit()
+
+
+## The read-only Keepsakes row: an icon per equipped item, each with its effect on hover.
+## Hidden while the HUD's own item row (planning, your unit) is showing, or with nothing on.
+func _refresh_keepsake_row(u: BattleUnit) -> void:
+	var show_row := not item_row.visible and not u.keepsakes.is_empty()
+	var ids := u.keepsakes.map(func(k): return k.get_instance_id()) if show_row else []
+	if ids == _keepsake_row_ids and _keepsake_row.visible == show_row:
+		return
+	_keepsake_row_ids = ids
+	for child in _keepsake_row.get_children():
+		child.queue_free()
+	_keepsake_row.visible = show_row
+	if not show_row:
+		return
+	var title := Label.new()
+	title.text = "Keepsakes"
+	title.add_theme_font_size_override("font_size", 11)
+	title.add_theme_color_override("font_color", Color(DIM))
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_keepsake_row.add_child(title)
+	for keepsake in u.keepsakes:
+		var icon := RichTooltipRect.new()
+		icon.texture = keepsake.get_icon()
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.custom_minimum_size = Vector2(22, 22)
+		icon.mouse_filter = Control.MOUSE_FILTER_STOP
+		icon.tooltip_text = ItemToolbox.describe(keepsake)
+		_keepsake_row.add_child(icon)
+
+
+func _build_hover_tip() -> void:
+	_hover_tip = PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = FRAME_COLOR
+	style.border_color = BORDER_COLOR
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(6)
+	_hover_tip.add_theme_stylebox_override("panel", style)
+	_hover_tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hover_tip.top_level = true   # placed by the mouse, not inside the panel
+	_hover_tip.z_index = 100
+	_hover_text = RichTextLabel.new()
+	_hover_text.bbcode_enabled = true
+	_hover_text.fit_content = true
+	_hover_text.scroll_active = false
+	_hover_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hover_text.custom_minimum_size = Vector2(230, 0)
+	_hover_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hover_text.add_theme_font_size_override("normal_font_size", 11)
+	_hover_text.add_theme_font_size_override("bold_font_size", 11)
+	_hover_tip.add_child(_hover_text)
+	_hover_tip.hide()
+	add_child(_hover_tip)
+
+
+## While the mouse is over one of the selected unit's big overhead Keepsake icons, shows that
+## Keepsake's effect beside the mouse. Read from the mouse position each frame rather than
+## from the icons themselves, so the board still gets every click (dragging a Shard off).
+func _update_hover_tip() -> void:
+	var index := -1
+	if is_instance_valid(_unit) and _unit.keepsakes_focused:
+		index = _unit.keepsake_index_at(_unit.get_global_mouse_position(), 1.0)
+	if index < 0 or index >= _unit.keepsakes.size():
+		_hide_hover_tip()
+		return
+	if index != _hover_index:
+		_hover_index = index
+		var lines := ItemToolbox.describe(_unit.keepsakes[index]).split("\n")
+		var text := "[b]%s[/b]" % lines[0]
+		if lines.size() > 1:
+			text += "\n" + Keyphrases.format("\n".join(lines.slice(1)))
+		_hover_text.text = text
+		_hover_tip.size = Vector2.ZERO   # shrink to the new text
+	_hover_tip.show()
+	var mouse := get_global_mouse_position()
+	var screen := get_viewport_rect().size / get_canvas_transform().get_scale()
+	var at := mouse + Vector2(14, 14)
+	at.x = minf(at.x, screen.x - _hover_tip.size.x - 4.0)
+	at.y = minf(at.y, screen.y - _hover_tip.size.y - 4.0)
+	_hover_tip.global_position = at
+
+
+func _hide_hover_tip() -> void:
+	_hover_index = -1
+	if _hover_tip != null:
+		_hover_tip.hide()
 
 
 ## Fits the panel again from the largest font, after top_reserve or bottom_reserve change.
@@ -435,9 +561,9 @@ func _stat_table(u: BattleUnit) -> String:
 		var ward: Stats.Stat = row[1]
 		if attribute == Stats.Stat.WRACK_CHANCE:
 			grid += _heading_row("Chance", "Damage")
-			grid += _grid_cell(_stat_color(attribute), "Wrack")
+			grid += _icon_cell(Shard.Kind.WRACK, "Wrack")
 		else:
-			grid += _grid_cell(_stat_color(attribute), Stats.STAT_NAMES[attribute])
+			grid += _icon_cell(STAT_SHARDS[attribute], Stats.STAT_NAMES[attribute])
 		grid += "[cell padding=0,1,12,1]%s[/cell]" % _stat_value(u, attribute)
 		grid += "[cell padding=0,1,0,1][color=%s]%s[/color][/cell]" % [
 				_stat_color(ward).to_html(false), _ward_value(u, ward)]
@@ -449,6 +575,8 @@ func _stat_table(u: BattleUnit) -> String:
 		extra.append([Stats.STAT_NAMES[Stats.Stat.VAMPIRISM], _stat_value(u, Stats.Stat.VAMPIRISM)])
 	if _shown_stat(u, Stats.Stat.IMMOVABILITY) > 0.0:
 		extra.append([Stats.STAT_NAMES[Stats.Stat.IMMOVABILITY], _stat_value(u, Stats.Stat.IMMOVABILITY)])
+	if _shown_stat(u, Stats.Stat.GRIT) > 0.0:
+		extra.append([Stats.STAT_NAMES[Stats.Stat.GRIT], _stat_value(u, Stats.Stat.GRIT)])
 	extra.append(["Damage", _attack_type_text(u)])
 	extra.append(["Range", "[b]%d[/b]" % u.attack_range])
 	extra.append(["Attack every", "[b]%.2fs[/b]" % u.get_attack_cooldown()])
@@ -475,12 +603,28 @@ func _attack_type_text(u: BattleUnit) -> String:
 	if u.data != null and u.data.passives.any(func(p): return p is GatePassive):
 		return "[b]None[/b]"
 	var damage_type := u.get_attack_damage_type()
+	var kinds := {Stats.DamageType.MIGHT: Shard.Kind.MIGHT, Stats.DamageType.INSIGHT: Shard.Kind.INSIGHT,
+			Stats.DamageType.CELERITY: Shard.Kind.CELERITY}
+	if kinds.has(damage_type):   # Might, Insight or Celerity: its icon
+		return stat_icon(kinds[damage_type], Stats.DAMAGE_TYPE_NAMES[damage_type])
 	return "[b][color=%s]%s[/color][/b]" % [Stats.DAMAGE_TYPE_COLORS[damage_type].to_html(false), Stats.DAMAGE_TYPE_NAMES[damage_type]]
 
 
 func _heading_row(first: String, second: String) -> String:
 	return "[cell][/cell][cell padding=0,3,12,0][color=%s][font_size=10]%s[/font_size][/color][/cell][cell padding=0,3,0,0][color=%s][font_size=10]%s[/font_size][/color][/cell]" % [
 			DIM, first.to_upper(), DIM, second.to_upper()]
+
+
+## A stat's icon in place of its name (the name shows on hover).
+const ICON_SIZE := 14
+
+
+static func stat_icon(kind: Shard.Kind, stat_name: String, size: int = ICON_SIZE) -> String:
+	return "[hint=%s][img=%dx%d]%s[/img][/hint]" % [stat_name, size, size, Keyphrases.icon_path(kind)]
+
+
+func _icon_cell(kind: Shard.Kind, stat_name: String) -> String:
+	return "[cell padding=0,1,12,1]%s[/cell]" % stat_icon(kind, stat_name)
 
 
 func _grid_cell(color: Color, label: String) -> String:

@@ -1,7 +1,7 @@
 class_name PierceBoltGambit
 extends Gambit
-## Fires a large bolt in a line that pierces every enemy in its path, aimed to hit as
-## many enemies as possible. Damage per enemy:
+## Fires a large bolt in a line that pierces every enemy in its path, aimed at his current
+## target (or, if it is out of reach, along the line that hits the most enemies). Damage per enemy:
 ##   Damage + Might Scaling x Might + Insight Scaling x Insight + Max Health Percent x enemy max health
 ## Gambit damage doesn't build charge.
 
@@ -32,7 +32,7 @@ func execute(caster: BattleUnit) -> void:
 		return
 
 	var reach := _reach(caster)
-	var dir := _best_direction(caster, enemies, reach)
+	var dir := _aim_at_target(caster, enemies, func(): return _best_direction(caster, enemies, reach))
 
 	# Caster-based part is fixed at fire time; the max-health part is per enemy, at impact.
 	var flat := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
@@ -42,7 +42,7 @@ func execute(caster: BattleUnit) -> void:
 	var wrack_level := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE, can_wrack)
 	var wrack_multiplier := caster.effect_wrack_multiplier(1, Stats.EffectKind.GAMBIT_DAMAGE, can_wrack)   # per level
 	var bolt := PierceBolt.new()
-	bolt.setup(caster.get_instance_id(), caster.team, dir, reach, bolt_radius,
+	bolt.setup_bolt(caster.get_instance_id(), caster.team, dir, reach, bolt_radius,
 			flat, max_health_percent, damage_type, wrack_level, wrack_multiplier)
 	caster.get_tree().current_scene.add_child(bolt)
 	bolt.global_position = caster.global_position
@@ -95,3 +95,14 @@ func _count_on_line(caster: BattleUnit, enemies: Array[BattleUnit], dir: Vector2
 		if absf(to_enemy.cross(dir)) <= bolt_radius:
 			count += 1
 	return count
+
+
+## Aims at the caster's current target when it's in reach; otherwise at whatever line
+## catches the most enemies.
+func _aim_at_target(caster: BattleUnit, enemies: Array[BattleUnit], fallback: Callable) -> Vector2:
+	var t := caster.target
+	if caster._is_valid_target(t) and enemies.has(t):
+		var dir := (t.global_position - caster.global_position).normalized()
+		if dir != Vector2.ZERO:
+			return dir
+	return fallback.call()

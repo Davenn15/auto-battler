@@ -13,7 +13,7 @@ extends Gambit
 ## Getting a kill while raging drops all damage the passive is holding.
 @export var cleanse_on_kill: bool = false
 ## Getting a kill while raging resets the rage to its full duration.
-@export var refresh_on_kill: bool = false
+@export var kill_extension: float = 0.0
 ## While raging, targets are picked at random instead of nearest first.
 @export var random_targets: bool = false
 
@@ -23,6 +23,6 @@ func execute(caster: BattleUnit) -> void:
 		return
 	var rage := RageStatus.new(duration, might_bonus, celerity_bonus, lifesteal)
 	rage.cleanse_on_kill = cleanse_on_kill
-	rage.refresh_on_kill = refresh_on_kill
+	rage.kill_extension = kill_extension
 	rage.random_targets = random_targets
 	caster.add_status(rage)

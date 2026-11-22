@@ -65,7 +65,7 @@ static func _score(keepsake: Keepsake, data: UnitData, path: Array, carried: Arr
 static func best_score(keepsake: Keepsake, units: Array) -> float:
 	var best := -INF
 	for unit in units:
-		if unit.items.size() < BattleUnit.MAX_KEEPSAKES:
+		if unit.items.size() < unit.keepsake_slots():
 			best = maxf(best, score_for(keepsake, unit))
 	return best
 

@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_mfw47"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_1j1fl"]
 
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/empower_splash_a1.tres" id="t_tuning"]
+
 [resource]
 script = ExtResource("1_mfw47")
-description = "Empowered attacks also gain the Hit Effect: hit enemies next to the target."
-gambit_bonuses = Dictionary[String, float]({
-"splash_radius": 1.0
-})
+description = "Empowered attacks' Insight damage hits every enemy within 1 hex of the target."
+passives = Array[ExtResource("2_1j1fl")]([ExtResource("t_tuning")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

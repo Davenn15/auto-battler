@@ -26,6 +26,10 @@ class Grudge extends Status:
 		var mark := RevengeMark.find(unit.incoming_attacker, unit)
 		return damage * (1.0 - effect.per_stack * mark.stacks) if mark != null else damage
 
+	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
+	func reduces_damage(_unit: BattleUnit) -> bool:
+		return true
+
 
 ## On the enemy: how much Revenge it has against one wearer, and taking more damage from them.
 class RevengeMark extends Status:

@@ -16,7 +16,7 @@ signal message(kind: String, data: Dictionary)
 const PORT := 7777
 ## Bump whenever a change would make two copies play differently. Copies with different
 ## versions refuse to play each other.
-const PROTOCOL_VERSION := "proto-4"
+const PROTOCOL_VERSION := "proto-5"   # 5: un-ready ("go", "unready", "unready_request", "unready_ok")
 
 enum Mode { OFFLINE, HOST, CLIENT }
 

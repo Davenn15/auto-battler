@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ShredScavengePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/shred/upgrades/a_path/scripts/scavenge_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+chance = 0.35
+passive_name = "Scavenge"
+description = "When SHRED kills an enemy, there's a 35% chance you gain a random Shard from among the ones making up its Keepsakes."

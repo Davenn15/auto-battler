@@ -24,7 +24,6 @@ extends Gambit
 ## How close the next enemy must be to ricochet to, in hex cells.
 @export var bounce_range_cells: int = 2
 
-const TICK := 0.1
 
 
 func can_use(caster: BattleUnit) -> bool:
@@ -45,6 +44,7 @@ func execute(caster: BattleUnit) -> void:
 	var kills := 0
 	var elapsed := 0.0
 	var tick_left := 0.0
+	var charging := 0.0   # a new target: the Beam charges up first (Beam.retarget_time)
 	while elapsed < duration:
 		caster.lock_for(0.1)   # channelling: a frame at a time, so it ends cleanly
 		await caster.get_tree().physics_frame
@@ -60,6 +60,8 @@ func execute(caster: BattleUnit) -> void:
 				break
 			mark = FocusMarkStatus.new(caster, mark_share)
 			target.add_status(mark)
+			charging = Beam.retarget_time(caster.get_attack_cooldown())
+			tick_left = 0.0
 		var delta := caster.get_physics_process_delta_time()
 		elapsed += delta
 		var beam_settings := Beam.settings(caster, Beam.Kind.FOCUS)
@@ -73,12 +75,16 @@ func execute(caster: BattleUnit) -> void:
 		chain.append_array(Beam.ricochet_targets(caster, chain.back(), beam_settings.extra_ricochets,
 				beam_settings.ricochet_range, chain))
 		links.show(chain, BeamngPassive.COLOR)
+		if charging > 0.0:
+			charging -= delta * beam_settings.charge_up_speed
+			continue
 		tick_left -= delta
 		while tick_left <= 0.0:
-			tick_left += TICK
+			tick_left += Beam.tick_interval(caster.get_attack_cooldown())
+			links.pulse()
 			for i in chain.size():
 				var enemy = chain[i]
-				var share := TICK / caster.get_attack_cooldown() * beam_settings.rate
+				var share := Beam.tick_share(beam_settings)
 				if i >= own:
 					share *= beam_settings.ricochet_share
 				if not _alive(enemy):

@@ -1,10 +1,12 @@
 [gd_resource type="Resource" script_class="Ascension" format=3]
 
 [ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Resource" path="res://data/ascensions/obelisk/tier 3/processing_3.tres" id="empowers_prev"]
 
 [resource]
 script = ExtResource("1")
+empowers = ExtResource("empowers_prev")
 ascension_name = "Obelisk Placeholder 4A"
-description = "PLACEHOLDER. All your units gain 45 Insight."
+description = "PLACEHOLDER. All your units gain 32 Insight."
 tier = 4
-insight = 45.0
+insight = 32.0

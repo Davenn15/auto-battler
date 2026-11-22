@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1")
 ascension_name = "Obelisk Processing"
-description = "PLACEHOLDER. All your units gain 15 Insight."
+description = "PLACEHOLDER. All your units gain 13 Insight."
 tier = 1
-insight = 15.0
+insight = 13.0

@@ -38,5 +38,5 @@ func execute(caster: BattleUnit) -> void:
 	if chips != null:
 		chips.add_chips(consumed)
 	if shield > 0.0 or shield_per_stack > 0.0:
-		caster.add_shield(shield + shield_per_stack * consumed, shield_duration, caster.get_instance_id())
+		caster.add_shield(shield + shield_per_stack * consumed, shield_duration, caster.get_instance_id(), true)
 	caster.show_float_text("+%d Chips" % consumed, ChipPassive.LIGHT)

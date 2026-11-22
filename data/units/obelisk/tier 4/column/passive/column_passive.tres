@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Structure"
-description = "Can't gain Charge, has 100 Immovability, and has no Gambit. It walks like a normal unit, but its attacks come from its weapons: two continuous Beams at two different enemies to start, each weapon on its own timer that Celerity speeds up."
+description = "Can't gain Charge, has 100 Immovability, and has no Gambit. It walks like a normal unit, but its attacks come from its weapons: two Beams at two different enemies to start, each weapon on its own timer that Celerity speeds up."

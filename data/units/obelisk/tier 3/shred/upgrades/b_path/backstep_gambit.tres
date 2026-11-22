@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ShredBackstepGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/shred/upgrades/b_path/scripts/backstep_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+celerity = 30.0
+ward_shred = 0.4
+duration = 4.0
+gambit_name = "Backstep"
+cast_time = 0.3
+description = "Dashes out to its maximum attack range from its target, to the spot with the most room from other enemies, then gains 30 Celerity and its hits ignore 40% of the target's Wards for 4 seconds."

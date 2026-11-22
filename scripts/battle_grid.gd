@@ -56,7 +56,57 @@ func _ready() -> void:
 	_backing = Backing.new()
 	_backing.grid = self
 	_backing.z_index = BACKING_Z
-	add_child(_backing)
+	if Engine.is_editor_hint():
+		add_child(_backing)   # in the editor the grid simply draws itself, as before
+		return
+	# In the game the board is drawn on its own layer below everything else, so nothing
+	# (health bars, effects, anything on a lower layer) can ever end up behind it. The
+	# layer follows the camera, so the board still sits exactly where the grid is.
+	_board_layer = CanvasLayer.new()
+	_board_layer.name = "BoardLayer"
+	_board_layer.layer = BOARD_LAYER
+	_board_layer.follow_viewport_enabled = true
+	add_child(_board_layer)
+	_board_layer.add_child(_backing)
+	_drawer = BoardDrawer.new()
+	_drawer.grid = self
+	_board_layer.add_child(_drawer)
+	draw.connect(_redraw_board_layer)   # whenever the grid redraws, the board layer does too
+	_sync_board_layer()
+	set_process(true)
+
+
+## The board's own layer: the lowest of all. Every other layer must stay above it.
+const BOARD_LAYER := -100
+var _board_layer: CanvasLayer
+var _drawer: Node2D
+
+
+func _process(_delta: float) -> void:
+	if is_instance_valid(_drawer):
+		_sync_board_layer()
+
+
+## Keeps the board layer's drawing lined up with the grid (it may move or turn).
+func _sync_board_layer() -> void:
+	_drawer.global_transform = global_transform
+	_backing.global_transform = global_transform
+
+
+func _redraw_board_layer() -> void:
+	if is_instance_valid(_drawer):
+		_drawer.queue_redraw()
+	if is_instance_valid(_backing):
+		_backing.queue_redraw()
+
+
+## Draws the board (tints, outlines, hover) for the grid, on the board layer.
+class BoardDrawer extends Node2D:
+	var grid: BattleGrid
+
+	func _draw() -> void:
+		if is_instance_valid(grid):
+			grid._draw_board(self)
 
 
 # Throws away the built grid so it regenerates with the new settings.
@@ -284,18 +334,26 @@ class Backing extends Node2D:
 
 
 func _draw() -> void:
+	if is_instance_valid(_drawer):
+		return   # in the game the board layer draws it (see _ready)
+	_draw_board(self)
+
+
+## The board itself, drawn onto `canvas` (the grid in the editor, the board layer's
+## drawer in the game), in the grid's own coordinates.
+func _draw_board(canvas: CanvasItem) -> void:
 	if show_debug and tint_halves:
 		# Team 1's half (the bottom rows) blue, team 2's red; swapped while the battle is
 		# watched turned around, so your own half is always the blue one.
 		var swap := not Engine.is_editor_hint() and BattleUnit.swap_team_colors
 		for cell in _ids:
 			var bottom: bool = cell.y >= floori(rows / 2.0)
-			draw_colored_polygon(_hex_points(cell, 6), BOTTOM_TINT if bottom != swap else TOP_TINT)
+			canvas.draw_colored_polygon(_hex_points(cell, 6), BOTTOM_TINT if bottom != swap else TOP_TINT)
 	if show_debug:
 		for cell in _ids:
-			draw_polyline(_hex_points(cell, 7), Color(1, 1, 1, 0.25), 1.0, true)   # 7 points closes it; smoothed, so every border looks the same width at any window scale
+			canvas.draw_polyline(_hex_points(cell, 7), Color(1, 1, 1, 0.25), 1.0, true)   # 7 points closes it; smoothed, so every border looks the same width at any window scale
 	if _ids.has(_hover_cell):
-		draw_colored_polygon(_hex_points(_hover_cell, 6), Color(0.3, 0.6, 1.0, 0.35))
+		canvas.draw_colored_polygon(_hex_points(_hover_cell, 6), Color(0.3, 0.6, 1.0, 0.35))
 
 ## Free cells within `range_cells` of `center`: spots a unit could attack from.
 func free_cells_in_range(center: Vector2i, range_cells: int) -> Array[Vector2i]:

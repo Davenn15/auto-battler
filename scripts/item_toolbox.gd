@@ -144,7 +144,6 @@ static func describe(keepsake: Keepsake) -> String:
 		lines.append("+%s Health" % _number(keepsake.health))
 	if keepsake.description != "":
 		lines.append(keepsake.description)
-	lines.append("(%d Reserve)" % keepsake.get_reserve_value())
 	return "\n".join(lines)
 
 
@@ -191,12 +190,12 @@ func _refresh() -> void:
 	else:
 		var unit_name := _unit.data.display_name.capitalize() if _unit.data != null else str(_unit.name)
 		var count := _unit.keepsakes.size()
-		_status.text = "%s (team %d): %d / %d items" % [unit_name, _unit.team, count, BattleUnit.MAX_KEEPSAKES]
+		_status.text = "%s (team %d): %d / %d items" % [unit_name, _unit.team, count, _unit.max_keepsakes()]
 		if _locked:
 			_status.text += "\nThe fight has started; items can't change now."
-		elif count >= BattleUnit.MAX_KEEPSAKES:
+		elif count >= _unit.max_keepsakes():
 			_status.text += "\nFull: remove an item to add another."
-		can_equip = not _locked and count < BattleUnit.MAX_KEEPSAKES
+		can_equip = not _locked and count < _unit.max_keepsakes()
 		for keepsake in _unit.keepsakes:
 			var button := _item_button(keepsake)
 			button.disabled = _locked

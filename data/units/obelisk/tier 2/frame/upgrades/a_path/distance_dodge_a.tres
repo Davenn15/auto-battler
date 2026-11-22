@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DistanceDodgePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/frame/upgrades/a_path/scripts/distance_dodge_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+per_hex = 0.08
+max_bonus = 0.32
+passive_name = "Highswinging"
+description = "+8% dodge chance for each hex an attacker is away past the first (up to +32%)."

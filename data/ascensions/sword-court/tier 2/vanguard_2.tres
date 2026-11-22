@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="Ascension" format=3]
 
 [ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Resource" path="res://data/ascensions/sword-court/tier 1/vanguard_1.tres" id="empowers_prev"]
 
 [resource]
 script = ExtResource("1")
+empowers = ExtResource("empowers_prev")
 ascension_name = "Court Valor"
 description = "PLACEHOLDER. All your units gain 15 Might and 75 Health."
 tier = 2

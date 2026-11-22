@@ -1,7 +1,7 @@
 class_name EmpoweredEchoEffect
 extends Passive
 ## An Ascension effect (Long Knives): the unit gains attack range, and its empowered attacks
-## (the ones Silt's Gambit empowers, see EmpowerStatus) trigger their Hit Effects Extra more
+## (the ones his passive empowers after each Gambit, see EmpowerStatus) trigger their Hit Effects Extra more
 ## times (see Status.extra_hit_effect_runs).
 
 @export var range_bonus: int = 1

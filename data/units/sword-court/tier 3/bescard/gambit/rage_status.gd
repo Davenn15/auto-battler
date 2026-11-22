@@ -10,7 +10,7 @@ var celerity: float
 var lifesteal: float   # fraction of attack damage dealt that heals the unit
 var full_duration: float              # for refreshing back to full
 var cleanse_on_kill: bool = false     # a kill drops all damage the passive is holding
-var refresh_on_kill: bool = false     # a kill resets the rage timer
+var kill_extension: float = 0.0       # A2: seconds each kill adds to the rage
 var random_targets: bool = false      # picks targets at random while raging
 
 
@@ -40,12 +40,12 @@ func on_removed(unit: BattleUnit) -> void:
 
 func on_kill(unit: BattleUnit, _victim: BattleUnit) -> void:
 	if cleanse_on_kill:
-		for status in unit.statuses:
-			if status is DelayedDamageStatus:
-				status.clear()
+		var grit := Grit.of(unit)
+		if grit != null:
+			grit.clear()
 		unit.show_float_text("Cleansed", TINT)
-	if refresh_on_kill:
-		time_left = full_duration
+	if kill_extension > 0.0:
+		time_left += kill_extension
 
 
 func modify_target_choice(unit: BattleUnit, choice: BattleUnit, exclude: BattleUnit) -> BattleUnit:

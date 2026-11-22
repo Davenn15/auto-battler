@@ -20,3 +20,7 @@ class GuardStatus extends Status:
 		if unit.incoming_attacker != null and unit.incoming_attacker == unit.target:
 			return amount * (1.0 - reduction)
 		return amount
+
+	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
+	func reduces_damage(_unit: BattleUnit) -> bool:
+		return true

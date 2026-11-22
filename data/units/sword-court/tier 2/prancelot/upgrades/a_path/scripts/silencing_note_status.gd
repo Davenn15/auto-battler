@@ -25,8 +25,5 @@ func _pick_target(unit: BattleUnit) -> BattleUnit:
 
 
 func _arrive(unit, target: BattleUnit, strength: float) -> Status:
-	# An item can let control effects wrack, lengthening the silence.
-	var control: float = unit.wrack_effect_multiplier(Stats.EffectKind.CONTROL) if is_instance_valid(unit) else 1.0
-	var silence := SilenceStatus.new(duration * strength * control)
-	target.add_status(silence)
-	return silence   # a violet note lingers on the enemy while it's silenced
+	# Silence handles Immovability and items that let control effects wrack.
+	return Silence.apply(target, duration * strength, unit)   # a violet note lingers while it lasts

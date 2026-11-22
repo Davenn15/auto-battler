@@ -12,9 +12,9 @@
 [resource]
 script = ExtResource("1")
 display_name = "glaive"
-placement = 1
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
-max_health = 1100.0
+max_health = 900.0
+placement = 1
 passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("5")
 max_charge = 75.0

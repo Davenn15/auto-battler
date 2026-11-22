@@ -4,10 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-damage = 160.0
-per_voltage = 2.5
-per_voltage_insight = 0.02
-min_voltage = 0.0
+per_voltage = 5.0
 gambit_name = "Railgun"
 cast_time = 1.5
-description = "Charges up, then spends all its Voltage on a railgun shot at the enemy with the highest Might, dealing 160 + (2.5 + 2% of Insight) per Voltage spent as Insight damage."
+description = "Charges up for 1.5 seconds, building its own Voltage 5 times as fast, then spends all its Voltage on a railgun shot at the enemy in range with the highest Might, dealing 160 + (2.5 + 2% of Insight) per Voltage spent as Insight damage."

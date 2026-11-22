@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+description = "For each enemy Buffeting hits, a healing splash heals the ally within 3 cells with the lowest health % for 60 (+30% Insight)."
+gambit_overrides = Dictionary[String, float]({
+"splash_heal": 60.0,
+"splash_insight_scaling": 0.3,
+"splash_range": 3.0
+})

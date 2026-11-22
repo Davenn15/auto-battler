@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ByteRupturedPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/byte/upgrades/a_path/scripts/ruptured_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+shield_share = 0.3
+duration = 3.0
+passive_name = "Ruptured"
+description = "Whenever BYTE is healed (Regeneration included), it also gains 30% of the health it gained as Shield. It's one Shield: each heal adds to it and resets its 3 seconds."

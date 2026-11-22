@@ -44,7 +44,7 @@ func execute(caster: BattleUnit) -> void:
 			continue   # dodged: no shield, no stun
 		hits += 1
 		enemy.stun(stun_duration, caster)
-	caster.add_shield(shield_per_enemy * hits, shield_duration, caster.get_instance_id())
+	caster.add_shield(shield_per_enemy * hits, shield_duration, caster.get_instance_id(), true)
 
 
 func _enemies_in_range(caster: BattleUnit) -> Array[BattleUnit]:

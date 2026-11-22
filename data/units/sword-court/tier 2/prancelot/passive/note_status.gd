@@ -61,30 +61,50 @@ func _units_in_range(unit: BattleUnit, team: int) -> Array[BattleUnit]:
 	return result
 
 
-## Flies a ♪ to `target`, then calls _arrive if it's still alive.
+## Flies a ♪ to `target` as a projectile, then calls _arrive if it's still alive. Notes
+## count as projectiles for everything that cares about them: an enemy's Warding bubble
+## slows them, and an enemy that sends projectiles back (Glaive's spin, a parry) can send a
+## note at an enemy back at Prancelot, where it lands on him instead. Notes for allies can
+## only be slowed: allies never send a note back.
 func _send(unit: BattleUnit, target: BattleUnit, strength: float) -> void:
-	var note := Label.new()
-	note.text = "♪"
-	note.add_theme_font_size_override("font_size", 18)
-	note.add_theme_color_override("font_color", color)
-	note.add_theme_color_override("font_outline_color", Color.BLACK)
-	note.add_theme_constant_override("outline_size", 3)
-	note.z_index = 15
-	unit.get_tree().current_scene.add_child(note)
-	var offset := Vector2(-6, -24)   # roughly centres the glyph on a unit
-	note.global_position = unit.global_position + offset
-	note.pivot_offset = -offset   # turns about the unit, so it stays upright when the view is turned
-	note.rotation = unit.global_rotation
-	var time := unit.global_position.distance_to(target.global_position) / NOTE_SPEED
-	var tween := note.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
-	tween.tween_property(note, "global_position", target.global_position + offset, time)
-	tween.tween_callback(_land.bind(note, unit, target, strength))
+	var shot := NoteShot.new()
+	shot.setup(unit, target, 0.0, Color(0, 0, 0, 0))
+	shot.polygon = PackedVector2Array()   # drawn as the ♪ below, not a square
+	shot.speed = NOTE_SPEED
+	shot.is_attack = false
+	shot.grants_charge = false
+	shot.note = self
+	shot.strength = strength
+	shot.z_index = 15
+	var glyph := Label.new()
+	glyph.text = "♪"
+	glyph.add_theme_font_size_override("font_size", 18)
+	glyph.add_theme_color_override("font_color", color)
+	glyph.add_theme_color_override("font_outline_color", Color.BLACK)
+	glyph.add_theme_constant_override("outline_size", 3)
+	glyph.position = Vector2(-6, -24)   # roughly centres the glyph on a unit
+	shot.add_child(glyph)
+	unit.get_tree().current_scene.add_child(shot)
+	shot.global_position = unit.global_position
+	shot.rotation = unit.global_rotation   # stays upright when the view is turned
 
 
 ## Untyped `unit` and `target`: either may have died while the note was in the air.
-func _land(note: Label, unit, target, strength: float) -> void:
-	note.queue_free()
+func _land(unit, target, strength: float) -> void:
 	if is_instance_valid(target) and target.alive:
 		var buff := _arrive(unit, target, strength)
 		if buff != null:
 			KeepsakeVfx.note_linger(target, buff, color)
+
+
+## A note in flight. It deals no damage and isn't an attack: when it lands, the note does
+## its thing to whoever it reached (after a reflect, that's Prancelot, from the reflector).
+class NoteShot extends Projectile:
+	var note: NoteStatus
+	var strength := 1.0
+
+	func _hit() -> void:
+		if target.try_reflect(self):
+			return   # flying back at Prancelot now
+		note._land(instance_from_id(shooter_id), target, strength)
+		queue_free()

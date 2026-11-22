@@ -9,6 +9,8 @@ var ward_bonus: float
 var celerity_bonus: float
 var reflect_chance: float
 var reflect_wrack_bonus: float
+## B1: deflected projectiles fly at her current target (back at the shooter if she has none).
+var deflect_to_target := false
 
 
 func _init(p_duration: float, p_ward_bonus: float, p_celerity_bonus: float, p_reflect_chance: float, p_reflect_wrack_bonus: float) -> void:
@@ -37,7 +39,8 @@ func try_reflect(unit: BattleUnit, projectile: Projectile) -> bool:
 	if CombatRng.randf() >= reflect_chance:
 		return false
 	var wrack_chance := unit.get_stat(Stats.Stat.WRACK_CHANCE) + reflect_wrack_bonus
-	if not projectile.reflect(unit, wrack_chance):
+	var to: BattleUnit = unit.target if deflect_to_target and unit._is_valid_target(unit.target) else null
+	if not projectile.reflect(unit, wrack_chance, to):
 		return false
 	unit.show_float_text("Parry", PARRY_COLOR)
 	return true

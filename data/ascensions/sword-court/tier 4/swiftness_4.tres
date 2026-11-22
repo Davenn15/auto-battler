@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="Ascension" format=3]
 
 [ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Resource" path="res://data/ascensions/sword-court/tier 3/swiftness_3.tres" id="empowers_prev"]
 
 [resource]
 script = ExtResource("1")
+empowers = ExtResource("empowers_prev")
 ascension_name = "Court Finesse"
 description = "PLACEHOLDER. All your units gain 30 Celerity and 30 Might Ward."
 tier = 4

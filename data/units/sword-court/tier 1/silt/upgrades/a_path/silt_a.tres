@@ -5,11 +5,11 @@
 [ext_resource type="Resource" uid="uid://c6vqcc8ymskk1" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/silt_a1.tres" id="3_f383k"]
 [ext_resource type="Resource" uid="uid://cl6pobv7qn44r" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/silt_a2.tres" id="4_hinqs"]
 
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/silt/upgrades/a_path/empower_extra_a.tres" id="t_tuning"]
+
 [resource]
 script = ExtResource("1_u2t0r")
-description = "More of his attacks are empowered."
+description = "After each Gambit, 2 more of his attacks are empowered."
+passives = Array[ExtResource("2_3yevl")]([ExtResource("t_tuning")])
 next_choices = Array[ExtResource("1_u2t0r")]([ExtResource("3_f383k"), ExtResource("4_hinqs")])
-gambit_bonuses = Dictionary[String, float]({
-"attack_count": 2.0
-})
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

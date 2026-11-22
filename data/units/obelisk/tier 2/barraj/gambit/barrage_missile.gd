@@ -1,12 +1,16 @@
 class_name BarrageMissile
 extends Node2D
 ## One of BAR.RAJ's missiles: waits `delay` seconds, then arcs from where it was fired to a
-## point on the ground and explodes, damaging every enemy within `blast_radius` pixels.
+## point on the ground and explodes, damaging every enemy within `blast_radius` pixels: its
+## target for full damage, everyone else for SPLASH_SHARE of it. (If the target died in
+## flight, the enemy nearest where it lands counts as the target.)
 ## Everything it needs is copied in at fire time, so it keeps flying if he dies.
 
 const SPEED := 420.0        # pixels/sec along the ground
 const ARC_HEIGHT := 0.35    # how high it arcs, as a share of the distance flown
 const COLOR := Color(0.3, 0.85, 1.0)   # cyan blue
+## Share of the damage enemies other than the missile's target take.
+const SPLASH_SHARE := 0.5
 
 var shooter   # untyped: he may be freed while it's in the air
 var credit_id: int
@@ -76,12 +80,20 @@ func _speed_scale() -> float:
 
 func _explode() -> void:
 	var attacker := shooter as BattleUnit if is_instance_valid(shooter) else null
+	var caught: Array[BattleUnit] = []
 	for node in get_tree().get_nodes_in_group("units"):
 		var unit := node as BattleUnit
-		if unit == null or not unit.alive or unit.team == team:
-			continue
-		if unit.global_position.distance_to(target_point) <= blast_radius:
-			var dealt := unit.take_damage(damage, wrack_level, damage_type, false, attacker)
+		if unit != null and unit.alive and unit.team != team and unit.global_position.distance_to(target_point) <= blast_radius:
+			caught.append(unit)
+	var main = target_unit if is_instance_valid(target_unit) and target_unit.alive else null
+	if main == null:
+		for unit in caught:   # its target is gone: the enemy nearest the blast takes the hit
+			if main == null or unit.global_position.distance_to(target_point) < main.global_position.distance_to(target_point):
+				main = unit
+	for unit in caught:
+		if unit.alive:
+			var amount := damage if unit == main else damage * SPLASH_SHARE
+			var dealt := unit.take_damage(amount, wrack_level, damage_type, false, attacker)
 			BattleUnit.gambit_damage_dealt(shooter, unit, dealt)   # Gambit damage (see BattleUnit)
 			get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 	KeepsakeVfx.missile_blast(get_parent(), target_point, blast_radius, COLOR)

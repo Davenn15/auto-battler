@@ -30,7 +30,9 @@ func execute(caster: BattleUnit) -> void:
 	var amount := shield
 	for status in caster.statuses:
 		amount = status.modify_shield_received(caster, amount)
-	caster.add_status(PlantStatus.new(self, amount))
+	var plant := PlantStatus.new(self, amount)
+	caster.add_status(plant)
+	caster.place_own_shield(plant)
 	caster.get_tree().call_group("damage_tracker", "record_shielding", caster.get_instance_id(), amount)
 	caster.show_float_text("Planted", BalmedeFx.COLOR)
 
@@ -71,6 +73,14 @@ class PlantStatus extends Status:
 
 	func get_shield(_unit: BattleUnit) -> float:
 		return shield
+
+	func is_own_shield(_unit: BattleUnit) -> bool:
+		return true
+
+	## No Charge while the plant's Shield holds; once it breaks she charges again, even
+	## while still planted.
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return shield > 0.0
 
 	func modify_incoming_damage(_unit: BattleUnit, damage: float) -> float:
 		var absorbed := minf(shield, damage)

@@ -48,6 +48,12 @@ static func surviving_aura(tree: SceneTree, team: int) -> int:
 ## index: {"stats": {Stats.Stat: amount}, "glory": stacks}}}. Only units that gained some.
 static func collect_match_gains(tree: SceneTree) -> Dictionary:
 	var gains := {}
+	if not _reserve_earned.is_empty():
+		gains["reserve"] = _reserve_earned.duplicate()   # {team: Reserve earned this fight}
+		_reserve_earned.clear()
+	if not _shards_earned.is_empty():
+		gains["shards"] = _shards_earned.duplicate(true)   # {team: [Shard.Kind, ...]} earned this fight
+		_shards_earned.clear()
 	for entry in _fallen:   # units that died this fight: what they'd earned still counts
 		if not gains.has(entry["team"]):
 			gains[entry["team"]] = {}
@@ -83,6 +89,51 @@ static func bank_fallen(unit: BattleUnit) -> void:
 ## A new fight: forget the last one's fallen (test battles never collect theirs).
 static func reset_fallen() -> void:
 	_fallen.clear()
+	_reserve_earned.clear()
+	_shards_earned.clear()
+
+
+## Reserve a team's player earns during the current fight (Von Carrow's hero Ascension),
+## paid out after the combat by whatever collects its gains. Test battles never collect, so
+## they never pay.
+static var _reserve_earned := {}
+
+
+static func earn_reserve(team: int, amount: int) -> void:
+	_reserve_earned[team] = _reserve_earned.get(team, 0) + amount
+
+
+## Reserve `team` earned in a fight, from collect_match_gains' result.
+static func reserve_from(gains: Dictionary, team: int) -> int:
+	return int(gains.get("reserve", {}).get(team, 0))
+
+
+## Shards a team's units earned this fight (SHRED A2), paid into its inventory afterwards.
+## Like Reserve, only real combats pay: the computer's test battles never collect them.
+static var _shards_earned := {}
+
+static func earn_shard(team: int, kind: Shard.Kind) -> void:
+	if not _shards_earned.has(team):
+		_shards_earned[team] = []
+	_shards_earned[team].append(kind)
+
+
+## The Shard items `team` earned in a fight, from collect_match_gains' result.
+static func shards_from(gains: Dictionary, team: int) -> Array[Keepsake]:
+	var result: Array[Keepsake] = []
+	for kind in gains.get("shards", {}).get(team, []):
+		var shard := load(SHARD_DIR + SHARD_FILES[kind] + ".tres") as Keepsake
+		if shard != null:
+			result.append(shard)
+	return result
+
+const SHARD_DIR := "res://data/keepsakes/shards/"
+const SHARD_FILES := {
+	Shard.Kind.MIGHT: "might", Shard.Kind.MIGHT_WARD: "might_ward",
+	Shard.Kind.CELERITY: "celerity", Shard.Kind.CELERITY_WARD: "celerity_ward",
+	Shard.Kind.INSIGHT: "insight", Shard.Kind.INSIGHT_WARD: "insight_ward",
+	Shard.Kind.HEALTH: "health", Shard.Kind.WRACK: "wrack",
+}
 
 
 ## Adds one team's gains (from collect_match_gains) to the army they were spawned from.

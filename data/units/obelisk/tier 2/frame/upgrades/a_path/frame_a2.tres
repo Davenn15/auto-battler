@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/frame/upgrades/a_path/dodge_shield_a2.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "Whenever FRAME dodges, it gains a Shield of 50% of the damage it would have taken, for 4 seconds."
+passives = Array[ExtResource("2")]([ExtResource("3")])

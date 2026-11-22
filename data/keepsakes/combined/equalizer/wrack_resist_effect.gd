@@ -17,3 +17,7 @@ class Steady extends Status:
 
 	func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:
 		return damage * (1.0 - reduction) if unit.incoming_wrack_level > 0 else damage
+
+	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
+	func reduces_damage(_unit: BattleUnit) -> bool:
+		return true

@@ -34,7 +34,7 @@ func _nearest_ally(unit: BattleUnit, need_slot: bool) -> BattleUnit:
 		var ally := node as BattleUnit
 		if ally == null or ally == unit or not ally.alive or not ally.active or ally.team != unit.team:
 			continue
-		if need_slot and ally.keepsakes.size() >= BattleUnit.MAX_KEEPSAKES:
+		if need_slot and ally.keepsakes.size() >= ally.max_keepsakes():
 			continue
 		var distance := unit.grid.get_distance(unit.cell, ally.cell)
 		if best == null or distance < best_distance \

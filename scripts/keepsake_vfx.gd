@@ -238,6 +238,124 @@ static func swing(parent: Node2D, aim: float, color: Color, width: float = 5.0) 
 	tween.tween_callback(sword.queue_free)
 
 
+## Melee attack readability: the attacker hops toward its target and back, so you can
+## see who is swinging. Only the picture moves (the unit's cell and health bar stay put):
+## it moves the unit's own MeleeMotion node, never the sprite, so it can't fight other
+## effects that move the sprite, and it always comes back to exactly where it started.
+const LUNGE_DISTANCE := 12.0
+const LUNGE_TIME := 0.2            # out and back
+const LUNGE_MAX_SHARE := 0.4       # at most this share of the attack interval, for fast attackers
+
+static func lunge(unit: BattleUnit, aim: float, attack_interval: float) -> void:
+	if not enabled() or unit.melee_motion == null:
+		return
+	var time := minf(LUNGE_TIME, attack_interval * LUNGE_MAX_SHARE)
+	var step := Vector2.from_angle(aim - unit.global_rotation) * LUNGE_DISTANCE
+	var tween := _motion_tween(unit)
+	tween.tween_property(unit.melee_motion, "position", step, time * 0.4) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(unit.melee_motion, "position", Vector2.ZERO, time * 0.6) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+
+## Ranged attack readability: the shooter swells briefly as it fires. It scales the unit's
+## MeleeMotion node (never the sprite), so it can't fight effects that resize the sprite,
+## like FRAME's stretch or a unit growing big, and it always ends at exactly normal size.
+const FIRE_PULSE_SCALE := 1.15
+const FIRE_PULSE_TIME := 0.16
+const FIRE_PULSE_MAX_SHARE := 0.4   # at most this share of the attack interval
+
+static func fire_pulse(unit: BattleUnit, attack_interval: float) -> void:
+	if not enabled() or unit.melee_motion == null:
+		return
+	var node := unit.melee_motion
+	if node.has_meta(&"pulse_tween"):
+		var old: Tween = node.get_meta(&"pulse_tween")
+		if old != null and old.is_valid():
+			old.kill()
+	var time := minf(FIRE_PULSE_TIME, attack_interval * FIRE_PULSE_MAX_SHARE)
+	var tween := node.create_tween()
+	node.set_meta(&"pulse_tween", tween)
+	tween.tween_property(node, "scale", Vector2.ONE * FIRE_PULSE_SCALE, time * 0.35) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(node, "scale", Vector2.ONE, time * 0.65) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+
+## The unit refusing an item (a Keepsake it already has a copy of): a brief red outline
+## and a quick side-to-side "no" shake. The shake moves its MeleeMotion node, never the
+## sprite, so it can't fight other animations and always ends exactly in place.
+const REFUSE_COLOR := Color(1.0, 0.2, 0.2)
+const REFUSE_TIME := 0.5          # how long the outline lasts
+const REFUSE_SHAKE := [7.0, -7.0, 5.0, -5.0, 2.5, 0.0]   # pixels left and right, in turn
+const REFUSE_SHAKE_STEP := 0.05   # seconds per swing
+
+static func refuse(unit: BattleUnit) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	if unit.sprite != null:
+		var outline := _sprite_copy(unit, "VfxRefuseOutline", "outline", 3)
+		(outline.material as ShaderMaterial).set_shader_parameter("tint", REFUSE_COLOR)
+		var old = outline.get_meta("tween") if outline.has_meta("tween") else null
+		if old is Tween and old.is_valid():
+			old.kill()
+		outline.modulate.a = 1.0
+		var fade := outline.create_tween()
+		fade.tween_interval(REFUSE_TIME * 0.5)
+		fade.tween_property(outline, "modulate:a", 0.0, REFUSE_TIME * 0.5)
+		outline.set_meta("tween", fade)
+	if unit.melee_motion != null:
+		var tween := _motion_tween(unit)
+		var side := Vector2.RIGHT.rotated(-unit.global_rotation)   # "left and right" on screen
+		for x in REFUSE_SHAKE:
+			tween.tween_property(unit.melee_motion, "position", side * x, REFUSE_SHAKE_STEP)
+
+
+## A fresh tween for the unit's MeleeMotion node. A new lunge or jolt replaces the one
+## still playing (starting from wherever it got to), so two never fight over the node.
+static func _motion_tween(unit: BattleUnit) -> Tween:
+	if unit.melee_motion.has_meta(&"motion_tween"):
+		var old: Tween = unit.melee_motion.get_meta(&"motion_tween")
+		if old != null and old.is_valid():
+			old.kill()
+	var tween := unit.melee_motion.create_tween()
+	unit.melee_motion.set_meta(&"motion_tween", tween)
+	return tween
+
+
+## Melee attack readability: a slash in the attacker's team colour across the target, and
+## the target jolts back a little, so you can see who got hit.
+const HIT_MARK_LENGTH := 30.0
+const HIT_MARK_WIDTH := 5.0
+const HIT_MARK_TIME := 0.3
+const HIT_MARK_TILT := 0.5         # radians off square to the attack, so it reads as a slash
+const HIT_JOLT_DISTANCE := 5.0
+const HIT_JOLT_TIME := 0.12
+
+static func hit_mark(target: BattleUnit, aim: float, color: Color) -> void:
+	if not enabled() or not is_instance_valid(target):
+		return
+	var slash := Line2D.new()
+	var across := Vector2.from_angle(aim + PI / 2.0 + HIT_MARK_TILT) * HIT_MARK_LENGTH * 0.5
+	slash.points = PackedVector2Array([-across, across])
+	slash.width = HIT_MARK_WIDTH
+	slash.default_color = color
+	slash.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	slash.end_cap_mode = Line2D.LINE_CAP_ROUND
+	slash.z_index = 11
+	_spawn(target, slash, target.global_position)
+	slash.scale = Vector2(0.4, 0.4)
+	var tween := slash.create_tween()
+	tween.tween_property(slash, "scale", Vector2.ONE, HIT_MARK_TIME * 0.25)
+	tween.tween_property(slash, "modulate:a", 0.0, HIT_MARK_TIME * 0.75)
+	tween.tween_callback(slash.queue_free)
+	if target.melee_motion != null:
+		var push := Vector2.from_angle(aim - target.global_rotation) * HIT_JOLT_DISTANCE
+		var jolt := _motion_tween(target)
+		jolt.tween_property(target.melee_motion, "position", push, HIT_JOLT_TIME * 0.4)
+		jolt.tween_property(target.melee_motion, "position", Vector2.ZERO, HIT_JOLT_TIME * 0.6)
+
+
 ## Ghost Strike: a see-through copy of the unit appears just behind it, lunges at the
 ## target and swings (melee units), then fades.
 static func ghost_strike(unit: BattleUnit, target: BattleUnit) -> void:
@@ -283,6 +401,53 @@ static func set_glow(unit: BattleUnit, key: String, color: Color, strength: floa
 	node.modulate = Color(color, 0.35 + 0.65 * strength)
 	var diameter := _sprite_size(unit).length() * (0.9 + 0.5 * strength)
 	node.scale = Vector2.ONE * diameter / 64.0
+
+
+## Planning: a unit you can afford to upgrade gets a cyan glow behind it and a bobbing cyan
+## arrow pointing up beside it. on = false takes both away.
+const UPGRADE_READY_COLOR := Color(0.2, 0.9, 1.0)   # cyan blue
+
+static func upgrade_ready(unit: BattleUnit, on: bool) -> void:
+	if not enabled() or not is_instance_valid(unit) or unit.sprite == null:
+		return
+	var arrow := unit.get_node_or_null("VfxUpgradeArrow")
+	if not on:
+		clear(unit, "upgrade_ready")
+		if arrow != null:
+			arrow.queue_free()
+		return
+	set_glow(unit, "upgrade_ready", UPGRADE_READY_COLOR, 0.55)
+	if arrow == null:
+		arrow = UpgradeArrow.new()
+		arrow.name = "VfxUpgradeArrow"
+		arrow.z_index = 12
+		unit.add_child(arrow)
+	var size := _sprite_size(unit)
+	arrow.position = Vector2(size.x * 0.5 + 4.0, -size.y * 0.25)   # beside the sprite's upper right
+	arrow.rotation = -unit.global_rotation   # points up on screen however the board is turned
+
+
+## The upgrade arrow: a cyan up-arrow with a dark outline, bobbing gently.
+class UpgradeArrow extends Node2D:
+	const BOB := 3.0         # pixels up and down
+	const BOB_SPEED := 4.0   # radians a second
+	var _time := 0.0
+
+	func _process(delta: float) -> void:
+		_time += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var lift := Vector2(0, -BOB * (0.5 + 0.5 * sin(_time * BOB_SPEED)))
+		var shape := PackedVector2Array([
+			Vector2(0, -9), Vector2(7, -1), Vector2(2.5, -1), Vector2(2.5, 7),
+			Vector2(-2.5, 7), Vector2(-2.5, -1), Vector2(-7, -1)])
+		for i in shape.size():
+			shape[i] += lift
+		var outline := PackedVector2Array(shape)
+		outline.append(shape[0])
+		draw_colored_polygon(shape, KeepsakeVfx.UPGRADE_READY_COLOR)
+		draw_polyline(outline, Color(0.02, 0.12, 0.18), 1.5, true)
 
 
 ## Strength for a glow that grows with each stack and levels off: 35%, 58%, 73%, ...
@@ -495,6 +660,18 @@ static func upgrade_flourish(unit: BattleUnit, faction: String) -> void:
 	effect.z_index = 20
 	_spawn(unit, effect, unit.global_position)
 	effect.rotation = BattleUnit.view_rotation   # upright however the board is turned
+
+
+## A unit gains Glory: a quicker, subtler, golden take on the Sword Court upgrade (a short
+## beam of light with two small spectral swords crossing). A child of the unit, so it
+## follows it mid-fight.
+static func glory_flourish(unit: BattleUnit) -> void:
+	if not enabled() or not is_instance_valid(unit):
+		return
+	var effect := GloryFlourish.new()
+	effect.z_index = 20
+	effect.rotation = BattleUnit.view_rotation - unit.global_rotation   # upright however the board is turned
+	unit.add_child(effect)
 
 
 ## Prancelot's notes: once a note's effect lands, a note in its colour circles the unit for
@@ -1145,6 +1322,54 @@ class UpgradeHoly extends Node2D:
 		draw_polyline(blade + PackedVector2Array([blade[0]]), Color(1, 1, 1, 0.85 * alpha), 1.0)
 		draw_line(Vector2(-7, 12), Vector2(7, 12), Color(SWORD, 0.9 * alpha), 2.0)
 		draw_line(Vector2(0, 12), Vector2(0, 19), Color(SWORD, 0.9 * alpha), 2.0)
+
+
+## Glory (see glory_flourish): the Sword Court upgrade, quicker and subtler, in gold.
+class GloryFlourish extends Node2D:
+	const LIFE := 0.75
+	const GOLD := Color(1.0, 0.85, 0.35)
+	const BLADE := Color(1.0, 0.95, 0.75)
+	const HEIGHT := 70.0
+	var time := 0.0
+
+	func _process(delta: float) -> void:
+		time += delta
+		if time >= LIFE:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var fade := clampf(time / 0.08, 0.0, 1.0) * clampf((LIFE - time) / 0.3, 0.0, 1.0)
+		var width := 8.0 + 2.0 * sin(time * 14.0)
+		draw_set_transform(Vector2(0, 16), 0.0, Vector2(1.0, 0.35))
+		draw_circle(Vector2.ZERO, 18.0, Color(GOLD, 0.22 * fade))
+		draw_set_transform(Vector2.ZERO)
+		draw_rect(Rect2(-width / 2.0, -HEIGHT, width, HEIGHT + 16.0), Color(GOLD, 0.16 * fade))
+		draw_rect(Rect2(-width * 0.2, -HEIGHT, width * 0.4, HEIGHT + 16.0), Color(1, 1, 0.9, 0.35 * fade))
+		for i in 5:   # a few motes rising through the beam
+			var y := 14.0 - fmod(time * 120.0 + i * 15.0, HEIGHT)
+			var x := sin(i * 2.3 + time * 6.0) * width * 0.45
+			draw_rect(Rect2(x - 1.0, y - 1.0, 2.0, 2.0), Color(1, 1, 0.85, 0.8 * fade))
+		var swing := clampf((time - 0.06) / 0.25, 0.0, 1.0)
+		swing = 1.0 - pow(1.0 - swing, 3.0)   # fast in, settling
+		var angle := lerpf(1.2, 0.55, swing)
+		var blade_fade := clampf((time - 0.06) / 0.08, 0.0, 1.0) * fade
+		for side in [-1.0, 1.0]:
+			draw_set_transform(Vector2(0, -16), side * angle, Vector2(0.65, 0.65))
+			_sword(blade_fade)
+		draw_set_transform(Vector2.ZERO)
+		if swing >= 1.0:   # a small flash where the blades meet
+			var flash := clampf(1.0 - (time - 0.31) / 0.2, 0.0, 1.0)
+			draw_circle(Vector2(0, -16), 2.0 + 5.0 * (1.0 - flash), Color(1, 1, 0.9, 0.7 * flash * fade))
+
+	## One small ghostly sword, crossing at its middle: point up, hilt down.
+	func _sword(alpha: float) -> void:
+		var blade := PackedVector2Array([Vector2(0, -26), Vector2(3, -20), Vector2(3, 12), Vector2(-3, 12), Vector2(-3, -20)])
+		draw_colored_polygon(blade, Color(BLADE, 0.45 * alpha))
+		draw_polyline(blade + PackedVector2Array([blade[0]]), Color(GOLD, 0.8 * alpha), 1.0)
+		draw_line(Vector2(-7, 12), Vector2(7, 12), Color(GOLD, 0.85 * alpha), 2.0)
+		draw_line(Vector2(0, 12), Vector2(0, 19), Color(GOLD, 0.85 * alpha), 2.0)
 
 
 ## Obelisk's upgrade: three strands of bright data bits spiral up around the unit from a

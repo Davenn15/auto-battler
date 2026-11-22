@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/bleed_spread_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/cerceval/cerceval.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+share = 0.5
+range_cells = 2
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Bloodline"
+description = "While Cerceval is alive, whenever an enemy dies with Bleed left, 50% of it passes to that enemy's nearest ally within 2 hexes."
+tier = 4
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

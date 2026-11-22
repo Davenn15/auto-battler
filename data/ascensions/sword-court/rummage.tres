@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/gambit_reserve_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/sumpton/sumpton.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+chance = 0.35
+amount = 1
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Rummage"
+description = "When Sumpton finishes casting his Gambit, he has a 35% chance to rummage through his bag and earn you 1 Reserve after the combat."
+tier = 3
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

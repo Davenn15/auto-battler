@@ -57,6 +57,27 @@ const BLOCKED_TARGET_TIMEOUT := 1.0   # seconds unable to reach a target before 
 ## effective range and then isn't (whoever moved) is dropped for a new one.
 const RETARGET_SLACK := 1
 var _blocked_time: float = 0.0
+## A target given up on as unreachable is skipped for this long (unless it's the only one
+## left), so the unit doesn't swap straight back to it and get stuck again.
+const BLOCKED_MEMORY := 3.0
+var _blocked_targets := {}   # instance id -> seconds left
+## Seconds a unit waits for an ally standing in its way to move before walking around it.
+const ALLY_WAIT := 0.5
+var _ally_wait := 0.0
+## A unit that steps back into the cell it just left this many times within REVERSAL_WINDOW
+## seconds is going back and forth: it gives up on its target as unreachable.
+const MAX_REVERSALS := 2
+const REVERSAL_WINDOW := 3.0
+var _left_cell := Vector2i(-9999, -9999)   # the cell its last step left
+var _reversals := 0
+var _last_reversal := -INF
+## Ranged units (attack range over 1) take their first step this long after combat starts,
+## so melee units lead the charge.
+const RANGED_START_DELAY := 0.3
+var _combat_time := 0.0
+## True once a step has passed its halfway point: the unit has given up its old cell and
+## `cell` is already the one it's stepping into.
+var _step_switched := false
 
 const FLOAT_RISE := 40.0    # pixels the number drifts upward
 const FLOAT_TIME := 0.8     # seconds before it fades out
@@ -101,6 +122,10 @@ const PATH_COLORS: Array[Color] = [Color(0.94, 0.55, 0.16), Color(0.18, 0.72, 0.
 const FOLLOW_UP_SHADE := 0.4
 
 const KEEPSAKE_ICON_SIZE := 6.0   # pixels, square: the item icons just above the plate
+## The icons' size while the unit is selected in the info panel, so they can be read and
+## hovered (see UnitInfoPanel).
+const KEEPSAKE_FOCUS_SIZE := 13.0
+const KEEPSAKE_FOCUS_GAP := 2.0
 
 # ---------- The status plate ----------
 # Health, Charge, the attack wind-up, upgrade pips and the Ascension diamond sit on one
@@ -193,6 +218,7 @@ func _ready() -> void:
 	rotation = view_rotation
 	add_to_group("units")
 	add_to_group("damage_tracker")   # hears every damage report and keeps its own total
+	_setup_melee_motion()
 
 	grid = get_tree().get_first_node_in_group("battle_grid") as BattleGrid
 	if grid == null:
@@ -236,7 +262,7 @@ var ascensions: Array[Ascension] = []
 ## Stats this unit has gained for the rest of the match, {Stats.Stat: amount}, from its
 ## ArmyUnit. Added to its base stats. Set before the unit enters the tree.
 var match_stats: Dictionary = {}
-## Stacks of Glory from earlier fights: each raises its base attributes and Wards by
+## Stacks of Glory from earlier fights: each raises its base max health, attributes and Wards by
 ## GLORY_SHARE. Set before the unit enters the tree.
 var glory: int = 0
 ## What this fight added to them, written back to its ArmyUnit afterwards (real fights
@@ -248,6 +274,8 @@ const GLORY_STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY,
 		Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]
 ## Base stats before Glory, so Glory gained mid-fight adds the same 5% of them.
 var _base_before_glory: Dictionary = {}
+## Base max health before Glory (and before Keepsakes and Ascensions), for the same reason.
+var _base_health_before_glory := 0.0
 
 
 ## Gains `amount` of `stat` for the rest of the match: now (a permanent stat gain, so
@@ -280,8 +308,20 @@ func gain_glory() -> bool:
 		gains[stat] = _base_before_glory.get(stat, 0.0) * GLORY_SHARE
 	for stat in gains:
 		add_status(PermanentStatStatus.new(stat, gains[stat]))
+	# Max health too: gaining it heals by the same amount.
+	var health_gain := _base_health_before_glory * GLORY_SHARE
+	if health_gain > 0.0:
+		max_health += health_gain
+		health = minf(health + health_gain, max_health)
+		if health_bar != null:
+			health_bar.max_value = max_health
+		_update_health_bar()
+		_update_health_ticks()
 	show_float_text("Glory!", Color(1.0, 0.85, 0.35))
+	KeepsakeVfx.glory_flourish(self)
 	update_glory_badge()
+	for status in statuses.duplicate():
+		status.on_glory_gained(self)
 	return true
 
 
@@ -296,8 +336,9 @@ func _apply_data() -> void:
 		return
 	var chosen := get_chosen_upgrades()
 	var level := chosen.size()
-	max_health = data.max_health * Stats.upgrade_health_multiplier(level) * Stats.tier_health_multiplier(data.tier) \
-			* Stats.buff_health_multiplier(buffs)
+	_base_health_before_glory = data.max_health * Stats.upgrade_health_multiplier(level) \
+			* Stats.tier_health_multiplier(data.tier) * Stats.buff_health_multiplier(buffs)
+	max_health = _base_health_before_glory * (1.0 + GLORY_SHARE * glory)   # Glory: +5% per stack
 	for keepsake in keepsakes:
 		max_health += keepsake.health
 	for ascension in ascensions:
@@ -596,6 +637,42 @@ func _size_flash() -> void:
 	_flash.position = Vector2(start * width, 0.0)
 	_flash.size = Vector2((end - start) * width, health_bar.size.y)
 
+
+## The healing flash: the green twin of the damage flash. The part of the health bar a heal
+## just filled flashes green, then fades. Heals (Regeneration included) landing within
+## DAMAGE_FLASH_WINDOW of the first share one flash, so a stream of small heals reads as one.
+const HEAL_FLASH_COLOR := Color(0.4, 1.0, 0.5)
+var _heal_flash: ColorRect
+var _heal_flash_collecting := false
+var _heal_flash_low: float    # health when the current healing flash started
+var _heal_flash_top: float    # highest health since then
+
+func _flash_health_gain(from_health: float, to_health: float) -> void:
+	if SimMode.active:
+		return   # lean sim mode: nothing is watching
+	if health_bar == null or max_health <= 0.0 or to_health <= from_health:
+		return
+	if not _heal_flash_collecting or not is_instance_valid(_heal_flash):
+		_heal_flash = ColorRect.new()
+		_heal_flash.color = HEAL_FLASH_COLOR
+		_heal_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		health_bar.add_child(_heal_flash)   # a child of the bar, so it draws on top of it
+		_heal_flash_low = from_health
+		_heal_flash_top = from_health
+		_heal_flash_collecting = true
+		var flash := _heal_flash
+		var tween := flash.create_tween()
+		tween.tween_interval(DAMAGE_FLASH_WINDOW)
+		tween.tween_callback(func(): _heal_flash_collecting = false)
+		tween.tween_property(flash, "modulate:a", 0.0, DAMAGE_FLASH_TIME)
+		tween.tween_callback(flash.queue_free)
+	_heal_flash_top = maxf(_heal_flash_top, to_health)
+	var width := health_bar.size.x
+	var start := clampf(_heal_flash_low, 0.0, max_health) / max_health
+	var end := clampf(_heal_flash_top, 0.0, max_health) / max_health
+	_heal_flash.position = Vector2(start * width, 0.0)
+	_heal_flash.size = Vector2((end - start) * width, health_bar.size.y)
+
 var _badges: VBoxContainer
 
 ## Small pips in the plate's left tab, one per upgrade taken, top to bottom. How many =
@@ -639,9 +716,29 @@ func _badge_color(level: int) -> Color:
 
 
 var _keepsake_icons: HBoxContainer
+## True while the unit is selected in the info panel: its Keepsake icons are drawn big.
+var keepsakes_focused := false
 
-## A small icon for each equipped keepsake, in a row just above the plate. Safe to
-## call again whenever the keepsakes change.
+
+## Draws the Keepsake icons big (selected in the info panel) or small again.
+func set_keepsakes_focused(on: bool) -> void:
+	if keepsakes_focused == on:
+		return
+	keepsakes_focused = on
+	_setup_keepsake_icons()
+
+
+func _keepsake_icon_size() -> float:
+	return KEEPSAKE_FOCUS_SIZE if keepsakes_focused else KEEPSAKE_ICON_SIZE
+
+
+func _keepsake_icon_gap() -> float:
+	return KEEPSAKE_FOCUS_GAP if keepsakes_focused else PLATE_GAP
+
+
+## A small icon for each equipped keepsake, in a row just above the plate (bigger, and
+## drawn over neighbouring units, while it's selected). Safe to call again whenever the
+## keepsakes change.
 func _setup_keepsake_icons() -> void:
 	if _keepsake_icons != null:
 		_keepsake_icons.queue_free()
@@ -649,14 +746,17 @@ func _setup_keepsake_icons() -> void:
 	if health_bar == null or keepsakes.is_empty():
 		return
 	_keepsake_icons = HBoxContainer.new()
-	_keepsake_icons.add_theme_constant_override("separation", int(PLATE_GAP))
+	_keepsake_icons.add_theme_constant_override("separation", int(_keepsake_icon_gap()))
 	_keepsake_icons.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if keepsakes_focused:
+		_keepsake_icons.z_index = 30   # over the units around it
+	var size := _keepsake_icon_size()
 	for keepsake in keepsakes:
 		var icon := TextureRect.new()
 		icon.texture = keepsake.get_icon()
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_SCALE
-		icon.custom_minimum_size = Vector2(KEEPSAKE_ICON_SIZE, KEEPSAKE_ICON_SIZE)
+		icon.custom_minimum_size = Vector2(size, size)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_keepsake_icons.add_child(icon)
 	health_bar.add_child(_keepsake_icons)   # a child of the bar, so it moves with it
@@ -756,6 +856,14 @@ func _ascension_kind_color(kind: int) -> Color:
 ## the Keepsake icons in a row just above the plate (when it has any), and the Ascension diamonds
 ## on the top-left corner. Everything hangs off the health bar, so it moves, turns and hides
 ## with it. Safe to call again whenever upgrades, items or Ascensions change.
+## Extra height the plate floats at, e.g. FRAME looming over an ally in the same cell, so
+## the two plates don't sit on top of each other. Change it through set_plate_lift.
+var plate_lift := 0.0
+
+func set_plate_lift(lift: float) -> void:
+	plate_lift = lift
+	_layout_plate()
+
 func _layout_plate() -> void:
 	if health_bar == null:
 		return
@@ -789,12 +897,12 @@ func _layout_plate() -> void:
 		health_bar.add_child(_plate)
 	_plate.position = Vector2(-PLATE_PAD - tab, -PLATE_PAD)
 	_plate.size = Vector2(PLATE_WIDTH, y + PLATE_PAD * 2.0)
-	health_bar.position = Vector2(-PLATE_WIDTH / 2.0 + PLATE_PAD + tab, PLATE_BOTTOM - _plate.size.y + PLATE_PAD)
+	health_bar.position = Vector2(-PLATE_WIDTH / 2.0 + PLATE_PAD + tab, PLATE_BOTTOM - _plate.size.y + PLATE_PAD - plate_lift)
 	if _keepsake_icons != null and is_instance_valid(_keepsake_icons):   # centred just above the plate
 		var count := _keepsake_icons.get_child_count()
-		var row := count * KEEPSAKE_ICON_SIZE + maxf(count - 1, 0) * PLATE_GAP
+		var row := count * _keepsake_icon_size() + maxf(count - 1, 0) * _keepsake_icon_gap()
 		_keepsake_icons.position = Vector2(_plate.position.x + (PLATE_WIDTH - row) / 2.0,
-				-PLATE_PAD - 1.0 - KEEPSAKE_ICON_SIZE)
+				-PLATE_PAD - 1.0 - _keepsake_icon_size())
 
 ## Which keepsake badge is at `world` (with a little slack, as they're small), or -1.
 func keepsake_index_at(world: Vector2, slack: float = 3.0) -> int:
@@ -955,9 +1063,20 @@ func record_shielding(_unit_id: int, _amount: float) -> void:
 	pass
 
 ## Equips a keepsake if there's a free slot. Returns false if the unit is full.
+## How many Keepsakes it can carry: MAX_KEEPSAKES plus any extra slots from its Ascensions.
+func max_keepsakes() -> int:
+	var slots := MAX_KEEPSAKES
+	for ascension in ascensions:
+		if ascension != null and ascension.applies_to(data):
+			slots += ascension.keepsake_slots
+	return slots
+
+
 func equip(keepsake: Keepsake) -> bool:
-	if keepsake == null or keepsakes.size() >= MAX_KEEPSAKES:
+	if keepsake == null or keepsakes.size() >= max_keepsakes():
 		return false
+	if not Keepsake.allowed_with(keepsake, keepsakes):
+		return false   # the universal rule: never two of the same completed Keepsake
 	keepsakes.append(keepsake)
 	_keepsakes_changed()
 	return true
@@ -1069,6 +1188,7 @@ func _update_sprite_size() -> void:
 		_base_sprite_scale = sprite.scale
 	var big := keepsakes.any(func(k): return k.effect is RegenShareEffect)
 	sprite.scale = _base_sprite_scale * (BIG_SPRITE_SCALE if big else 1.0)
+	_rest_sprite_scale = sprite.scale
 
 ## True on the planning board after preview_combat_start: the unit carries everything
 ## combat start gives it, but stays out of combat, and nothing can hurt, heal or charge it.
@@ -1097,6 +1217,12 @@ func start_combat() -> void:
 	charge = starting_charge
 	_update_charge_bar()
 	active = true
+	_combat_time = 0.0
+	_left_cell = Vector2i(-9999, -9999)
+	_reversals = 0
+	_last_reversal = -INF
+	_blocked_targets.clear()
+	_ally_wait = 0.0
 	_locked_time = 0.0
 	_stunned_time = 0.0
 	damage_dealt = 0.0
@@ -1105,9 +1231,11 @@ func start_combat() -> void:
 
 
 ## Everything a unit gains as combat starts: its passives, Keepsakes (stats and effects)
-## and Ascensions (stats and effects). Clears what it had first.
+## and Ascensions (stats and effects). Clears what it had first. Grit goes on first, so it
+## catches hits before any shield (it does nothing for a unit without Grit).
 func _apply_battle_start_effects() -> void:
 	clear_statuses()
+	add_status(Grit.new())
 	for passive in passives:
 		passive.on_battle_start(self)
 	_keepsake_effect_statuses.clear()
@@ -1120,36 +1248,6 @@ func _apply_battle_start_effects() -> void:
 		add_status(Ascension.StatsStatus.new(ascension))
 		if ascension.effect != null:
 			ascension.effect.on_battle_start(self)
-	add_status(ImmovabilityHealth.new())
-
-
-## Immovability over 100 gives max health (Stats.IMMOVABILITY_HEALTH per point; the Wards
-## are added in get_stat). It follows the stat as it changes (shields, Plant), checked a few
-## times a second: gaining heals by the same amount, losing only trims health to the new max.
-class ImmovabilityHealth extends Status:
-	const CHECK_TIME := 0.25
-	var _granted := 0.0
-	var _check := 0.0
-
-	func blocks_charge_gain(_unit: BattleUnit) -> bool:
-		return false
-
-	func tick(unit: BattleUnit, delta: float) -> void:
-		_check -= delta
-		if _check > 0.0:
-			return
-		_check = CHECK_TIME
-		var want := maxf(unit.get_stat(Stats.Stat.IMMOVABILITY) - 100.0, 0.0) * Stats.IMMOVABILITY_HEALTH
-		if is_equal_approx(want, _granted):
-			return
-		var change := want - _granted
-		_granted = want
-		unit.max_health = maxf(unit.max_health + change, 1.0)
-		unit.health = minf(unit.health + maxf(change, 0.0), unit.max_health)
-		if unit.health_bar != null:
-			unit.health_bar.max_value = unit.max_health
-		unit._update_health_bar()
-		unit._update_health_ticks()
 
 
 func stop_combat() -> void:
@@ -1169,6 +1267,11 @@ func _physics_process(delta: float) -> void:
 
 	if active:
 		_rescale_attack_timer()
+		_combat_time += delta
+		for id in _blocked_targets.keys():
+			_blocked_targets[id] -= delta
+			if _blocked_targets[id] <= 0.0:
+				_blocked_targets.erase(id)
 	if _stunned_time > 0.0:
 		_stunned_time -= delta   # stunned: no winding up an attack
 	elif not _is_channeling():
@@ -1287,44 +1390,122 @@ func _is_channeling() -> bool:
 ## it was picked. Untyped: it may be freed. Leaving effective range drops that target.
 var _reached_target = null
 
-## The free cell nearest to this unit from which it could hit its target.
-## Returns the unit's own cell if every such cell is taken.
-func _pick_attack_cell() -> Vector2i:
-	var best := cell
-	var best_dist := INF
-	for c in grid.free_cells_in_range(target.cell, attack_range):
-		var d := global_position.distance_squared_to(grid.cell_to_world(c))
-		if d < best_dist:
-			best_dist = d
-			best = c
-	return best
+## The first step toward the nearest free cell (fewest steps away) from which this unit
+## could hit its target, or the unit's own cell if there's no way there. Enemies block the
+## way, and so do allies that are planted (fighting, casting, held or rooted: they won't
+## clear out). An ally on the move only blocks it when `allies_block` is true; otherwise
+## the path may lead through it and the unit waits for it to move. Ties between equally
+## near cells go to the one nearest the unit on screen.
+func _next_step_toward_target(allies_block: bool) -> Vector2i:
+	var came_from := {cell: cell}
+	var frontier: Array[Vector2i] = [cell]
+	while not frontier.is_empty():
+		var goals: Array[Vector2i] = []
+		for c in frontier:
+			if c != cell and grid.can_place(c) and grid.get_distance(c, target.cell) <= attack_range:
+				goals.append(c)
+		if not goals.is_empty():
+			var best: Vector2i = goals[0]
+			var best_d := INF
+			for g in goals:
+				var d := global_position.distance_squared_to(grid.cell_to_world(g))
+				if d < best_d:
+					best_d = d
+					best = g
+			var step := best
+			while came_from[step] != cell:
+				step = came_from[step]
+			return step
+		var next_frontier: Array[Vector2i] = []
+		for c in frontier:
+			for dir in BattleGrid.DIRECTIONS:
+				var n: Vector2i = c + dir
+				if came_from.has(n) or not grid.has_cell(n):
+					continue
+				var occupant := grid.unit_at(n)
+				if occupant != null and occupant != self and (occupant.team != team or allies_block or not occupant.is_about_to_move()):
+					continue   # can't walk through it
+				came_from[n] = c
+				next_frontier.append(n)
+		frontier = next_frontier
+	return cell
 
 func _start_step() -> void:
-	var goal := _pick_attack_cell()
-	var next := cell if goal == cell else grid.get_next_step(cell, goal)
+	if attack_range > 1 and _combat_time < RANGED_START_DELAY:
+		return   # melee units lead the charge
+	var next := _next_step_toward_target(false)
+	if next != cell and grid.is_occupied(next):
+		# An ally is in the way. If it's on the move (or about to be), give it a moment to
+		# clear out; if it's planted (fighting, casting, can't move), walk around it now.
+		var ally := grid.unit_at(next)
+		_ally_wait += get_physics_process_delta_time()
+		if _ally_wait >= ALLY_WAIT or ally == null or not ally.is_about_to_move():
+			next = _next_step_toward_target(true)
+		else:
+			return
 	if next == cell:
 		# No free path right now. Keep trying, but give up on this target if it stays unreachable.
 		_blocked_time += get_physics_process_delta_time()
 		if _blocked_time >= BLOCKED_TARGET_TIMEOUT:
-			var blocked := target
-			target = _choose_target(blocked)   # pick someone else
-			_blocked_time = 0.0
+			_give_up_on_target()
 		return
+	if next == _left_cell:
+		# Stepping straight back where it came from: going back and forth?
+		if _combat_time - _last_reversal > REVERSAL_WINDOW:
+			_reversals = 0
+		_reversals += 1
+		_last_reversal = _combat_time
+		if _reversals >= MAX_REVERSALS:
+			_reversals = 0
+			_give_up_on_target()
+			return
 	_blocked_time = 0.0
+	_ally_wait = 0.0
+	_left_cell = cell
 	_dest_cell = next
 	_dest_world = grid.cell_to_world(next)
 	grid.occupy(next, self)   # reserve the destination immediately
+	_step_switched = false
 	_moving = true
+
+
+## The target can't be reached for now: skip it for BLOCKED_MEMORY seconds and pick someone
+## else (it's still picked if it's the only one left).
+func _give_up_on_target() -> void:
+	if _is_valid_target(target):
+		_blocked_targets[target.get_instance_id()] = BLOCKED_MEMORY
+	target = _choose_target(target)
+	_blocked_time = 0.0
+	_ally_wait = 0.0
 
 
 func _continue_step(delta: float) -> void:
 	global_position = global_position.move_toward(_dest_world, move_speed * delta)
+	# Halfway there, it gives up its old cell, so whoever is waiting behind can follow.
+	if not _step_switched and global_position.distance_to(_dest_world) <= grid.cell_spacing() * 0.5:
+		_switch_step_cell()
 	if global_position.is_equal_approx(_dest_world):
-		grid.vacate(cell, self)   # release the old cell only once we've arrived
-		cell = _dest_cell
+		if not _step_switched:
+			_switch_step_cell()
 		_moving = false
 		if retarget_on_move:
 			_retarget_after_step()
+
+
+## True if this unit is walking, or will take a step soon: it isn't held, casting or rooted,
+## and its target is out of reach. A unit waiting behind it can expect the cell to clear.
+func is_about_to_move() -> bool:
+	if _moving:
+		return true
+	if not active or _locked_time > 0.0 or _casting or _stunned_time > 0.0 or is_immobile():
+		return false
+	return _is_valid_target(target) and grid.get_distance(cell, target.cell) > attack_range
+
+
+func _switch_step_cell() -> void:
+	grid.vacate(cell, self)
+	cell = _dest_cell
+	_step_switched = true
 
 
 ## Test rule: a unit whose attack is at least FINISH_ATTACK_SHARE wound up, with its target
@@ -1362,18 +1543,56 @@ func _retarget_after_step() -> void:
 		_blocked_time = 0.0
 
 
+## The nearest valid enemy, in hexes. Among equally near enemies: the current target if
+## it's one of them (so a unit never flips between them), else the one farthest from its
+## own team's back edge (usually its front line), then a random one. Enemies given up on as
+## unreachable a moment ago are skipped unless there's no one else.
 func _find_nearest_enemy(exclude: BattleUnit = null) -> BattleUnit:
-	var best: BattleUnit = null
+	var nearest := _nearest_enemies(exclude, true)
+	if nearest.is_empty():
+		nearest = _nearest_enemies(exclude, false)
+	if nearest.is_empty():
+		return null
+	if nearest.has(target):
+		return target
+	var best_depth := -1
+	var deepest: Array = []
+	for u in nearest:
+		var depth := _depth_from_back_edge(u)
+		if depth > best_depth:
+			best_depth = depth
+			deepest = [u]
+		elif depth == best_depth:
+			deepest.append(u)
+	if deepest.size() == 1:
+		return deepest[0]
+	# Random, but the same every time for the same fight: tree order can vary, ids don't.
+	deepest.sort_custom(func(a, b): return a.get_instance_id() < b.get_instance_id())
+	return CombatRng.pick(deepest)
+
+
+func _nearest_enemies(exclude: BattleUnit, skip_blocked: bool) -> Array:
+	var result: Array = []
 	var best_dist := INF
 	for node in get_tree().get_nodes_in_group("units"):
 		var u := node as BattleUnit
 		if u == null or u == exclude or not _is_valid_target(u):
 			continue
+		if skip_blocked and _blocked_targets.has(u.get_instance_id()):
+			continue
 		var d := grid.get_distance(cell, u.cell)
 		if d < best_dist:
 			best_dist = d
-			best = u
-	return best
+			result = [u]
+		elif d == best_dist:
+			result.append(u)
+	return result
+
+
+## Rows between `unit` and its own team's back edge (team 1 holds the bottom rows, team 2
+## the top).
+func _depth_from_back_edge(unit: BattleUnit) -> int:
+	return grid.rows - 1 - unit.cell.y if unit.team == 1 else unit.cell.y
 
 ## Who to target next: the nearest enemy, unless a status says otherwise.
 func _choose_target(exclude: BattleUnit = null) -> BattleUnit:
@@ -1402,7 +1621,8 @@ var attack_damage_type: int = Stats.DamageType.MIGHT
 ## taking, then slides there over `time`. Await it to wait for the slide.
 func force_move(dest: Vector2i, time: float) -> void:
 	if _moving:
-		grid.vacate(_dest_cell, self)   # give up the cell it was stepping into
+		if not _step_switched:
+			grid.vacate(_dest_cell, self)   # give up the cell it was stepping into
 		_moving = false
 		global_position = grid.cell_to_world(cell)
 	await dash_to(dest, time)
@@ -1495,6 +1715,7 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 		_fire_projectile(enemy, hit_damage, wrack_level, shot_color, hit_effects, projectile)
 		return wrack_level
 	_play_melee_swing(enemy.global_position)
+	KeepsakeVfx.hit_mark(enemy, (enemy.global_position - global_position).angle(), team_color(team))
 	var dealt := enemy.take_damage(hit_damage, wrack_level, get_attack_damage_type(), ignores_wards(), self)
 	get_tree().call_group("damage_tracker", "record_damage", get_credit_id(), dealt)
 	gain_charge_from_attack(dealt, enemy)
@@ -1604,7 +1825,36 @@ func _fire_projectile(enemy: BattleUnit, hit_damage: float, wrack_level: int, co
 	projectile.setup(self, enemy, hit_damage, color, wrack_level, get_attack_damage_type(), hit_effects)
 	get_tree().current_scene.add_child(projectile)
 	projectile.global_position = global_position
+	KeepsakeVfx.fire_pulse(self, get_attack_cooldown())
 
+
+## The melee lunge, hit jolt and ranged firing pulse move or scale this node, which sits
+## between the unit and its sprite. Nothing else touches it, so effects that move or resize
+## the sprite itself (FRAME's stretch, the Chosen's slam lift, Mallet's hop) never fight them.
+var melee_motion: Node2D
+
+## Where the sprite sits and how big it is when nothing is animating it. Shots hit the
+## sprite at rest (SpriteEdge), so animations never change when a shot lands.
+var rest_sprite_position := Vector2.ZERO
+var rest_sprite_offset := Vector2.ZERO   # the sprite's drawing offset at rest (a Knock-up lifts it)
+
+var _rest_sprite_scale := Vector2.ZERO   # kept up to date by _update_sprite_size
+
+func rest_sprite_scale() -> Vector2:
+	if sprite == null:
+		return Vector2.ZERO
+	return _rest_sprite_scale if _rest_sprite_scale != Vector2.ZERO else sprite.scale
+
+func _setup_melee_motion() -> void:
+	if sprite == null or melee_motion != null:
+		return
+	rest_sprite_position = sprite.position
+	rest_sprite_offset = sprite.offset
+	melee_motion = Node2D.new()
+	melee_motion.name = "MeleeMotion"
+	add_child(melee_motion)
+	move_child(melee_motion, sprite.get_index())
+	sprite.reparent(melee_motion, false)   # the motion node sits at (0, 0), so nothing shifts
 
 ## Set by effects that draw their own swing for an extra attack (Ghost Strike, Mage
 ## Hunter), so the unit's normal white swing doesn't play on top of it.
@@ -1616,7 +1866,9 @@ func _play_melee_swing(target_pos: Vector2) -> void:
 	var color := Color.WHITE
 	for status in statuses:
 		color = status.modify_swing_color(self, color)
-	KeepsakeVfx.swing(self, (target_pos - global_position).angle(), color)
+	var aim := (target_pos - global_position).angle()
+	KeepsakeVfx.swing(self, aim, color)
+	KeepsakeVfx.lunge(self, aim, get_attack_cooldown())
 
 ## Celerity (or anything else changing attack speed) that changes mid-swing applies to the
 ## attack already winding up: the wind-up keeps how far along it is and finishes at the new
@@ -1676,10 +1928,34 @@ func _update_attack_bar() -> void:
 		return   # lean sim mode: nothing is watching
 	if attack_bar == null or health_bar == null:
 		return
+	var value := 1.0
 	if _attack_cooldown_total > 0.0:
-		attack_bar.value = 1.0 - _attack_timer / _attack_cooldown_total
-	else:
-		attack_bar.value = 1.0
+		value = 1.0 - _attack_timer / _attack_cooldown_total
+	for status in _with(&"modify_attack_bar"):
+		value = status.modify_attack_bar(self, value)
+	attack_bar.value = value
+
+## Splits the attack bar into `count` equal parts with thin dividers (SHRED's three
+## attacks). 1 = a plain bar.
+func set_attack_bar_segments(count: int) -> void:
+	if attack_bar == null:
+		return
+	for child in attack_bar.get_children():
+		if child.has_meta(&"segment_divider"):
+			child.queue_free()
+	for i in range(1, count):
+		var divider := ColorRect.new()
+		divider.set_meta(&"segment_divider", true)
+		divider.color = Color(0.0, 0.0, 0.0, 0.85)
+		divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var at := float(i) / count
+		divider.anchor_left = at
+		divider.anchor_right = at
+		divider.anchor_top = 0.0
+		divider.anchor_bottom = 1.0
+		divider.offset_left = -0.5
+		divider.offset_right = 0.5
+		attack_bar.add_child(divider)
 
 ## Keeps the unit from moving, attacking, or using a Gambit for `duration` seconds.
 ## For Gambits that control the unit themselves (dashes, channels). Also blocks charge gain.
@@ -1735,6 +2011,8 @@ func is_targetable() -> bool:
 
 ## Gives this unit's statuses a chance to send an incoming projectile away.
 func try_reflect(projectile: Projectile) -> bool:
+	if projectile.team == team:
+		return false   # an ally's shot (a Prancelot note) is never sent back
 	for status in statuses.duplicate():
 		if status.try_reflect(self, projectile):
 			return true
@@ -1911,10 +2189,18 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	elif ignore_ward and not pass_through:
 		damage_type = Stats.DamageType.PURE
 	last_damage_type = damage_type
-	if CombatRng.randf() < get_dodge_chance():
+	dodging_attacker = attacker   # so dodge can depend on who's attacking (FRAME A)
+	# Pure Damage can't be dodged (it can't be avoided or reduced in any way; only shields
+	# soak it). No dodge roll at all, so the random sequence is the same as before otherwise.
+	var dodged := damage_type != Stats.DamageType.PURE and CombatRng.randf() < get_dodge_chance()
+	dodging_attacker = null
+	if dodged:
+		# What the hit would have done after Wards (FRAME A2 shields part of it).
+		dodged_damage = amount if ignore_ward else amount * Stats.ward_multiplier(get_stat(Stats.ward_stat_for(damage_type)))
 		show_float_text("Dodge", DODGE_COLOR)
 		for status in statuses.duplicate():
 			status.on_dodge(self)
+		dodged_damage = 0.0
 		return 0.0   # nothing dealt: no meter credit, no lifesteal, no charge from damage
 	# Wards come first. Shields and other effects apply to what's left.
 	if not ignore_ward:
@@ -1959,6 +2245,11 @@ var incoming_attacker: BattleUnit = null      # the attacker, for attacks; null 
 var incoming_damage_type: int = Stats.DamageType.MIGHT
 var incoming_is_hit: bool = false             # false for damage over time and held damage
 var incoming_wrack_level: int = 0
+## While a hit's dodge chance is being worked out: who's attacking (null for no attacker).
+## Read by Status.modify_dodge_chance.
+var dodging_attacker: BattleUnit = null
+## During Status.on_dodge: the damage the dodged hit would have dealt, after Wards.
+var dodged_damage := 0.0
 
 func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_numbers: bool) -> float:
 	if previewing:
@@ -1969,7 +2260,13 @@ func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_nu
 	# Health left once held damage lands, measured before any status holds this hit, so
 	# a held hit still flashes.
 	var effective_before := health - get_pending_damage()
+	# Pure Damage can't be reduced in any way: statuses that reduce, cap or hold back damage
+	# (Status.reduces_damage) are skipped. Shields still soak it, since it's still damage
+	# being dealt, and statuses that only watch, pass on or add to damage still run.
+	var pure := incoming_damage_type == Stats.DamageType.PURE
 	for status in statuses.duplicate():
+		if pure and status.reduces_damage(self):
+			continue
 		amount = status.modify_incoming_damage(self, amount)
 	if show_numbers:
 		var absorbed := shield_before - get_shield()
@@ -1986,9 +2283,19 @@ func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_nu
 	_update_pending_bar()
 	if show_numbers:
 		_flash_health_loss(effective_before, health - get_pending_damage())
-	if health <= 0.0:
+	if health <= 0.0 and not _escapes_death():
 		_die()
 	return dealt
+
+## A status may save the unit from a hit that would kill it (Status.prevents_death, e.g.
+## SEG.FAULT A1); it leaves the unit alive with at least 1 health. True if one did.
+func _escapes_death() -> bool:
+	for status in _with(&"prevents_death").duplicate():
+		if status.prevents_death(self):
+			health = maxf(health, 1.0)
+			_update_health_bar()
+			return true
+	return false
 
 ## Font size for a damage number: from DAMAGE_FONT_MIN for tiny hits up to DAMAGE_FONT_MAX
 ## at DAMAGE_FOR_MAX_FONT, growing fast for small hits and levelling off (square root), plus
@@ -2121,7 +2428,10 @@ func heal(amount: float, source_id: int = 0, can_wrack: bool = true) -> void:
 	if healed > 0.0:
 		health += healed
 		_update_health_bar()
+		_flash_health_gain(health - healed, health)   # the stretch of bar this heal filled
 		get_tree().call_group("damage_tracker", "record_healing", healer_id, healed)
+		for status in _with(&"on_healed").duplicate():
+			status.on_healed(self, healed)
 	if amount > healed:
 		for status in overheal.duplicate():
 			status.on_overheal(self, amount - healed)
@@ -2257,8 +2567,10 @@ func get_shield() -> float:
 	return total
 
 ## Gives this unit a shield, after anything that changes shields it receives. Credits the
-## shielding to `source_id` (the giver's instance id). Returns the shield actually given.
-func add_shield(amount: float, duration: float, source_id: int) -> float:
+## shielding to `source_id` (the giver's instance id). `locks_charge`: a shield the unit's own
+## Gambit gives it, which blocks Charge until it breaks or runs out. A unit's own shields
+## absorb damage before anyone else's. Returns the shield actually given.
+func add_shield(amount: float, duration: float, source_id: int, locks_charge := false) -> float:
 	if not alive or amount <= 0.0:
 		return 0.0
 	var giver := instance_from_id(source_id) as BattleUnit
@@ -2271,9 +2583,28 @@ func add_shield(amount: float, duration: float, source_id: int) -> float:
 		amount = status.modify_shield_received(self, amount)
 	if amount <= 0.0:
 		return 0.0
-	add_status(ShieldStatus.new(amount, duration))
+	var shield := ShieldStatus.new(amount, duration)
+	shield.source_id = source_id
+	shield.locks_charge = locks_charge
+	add_status(shield)
+	place_own_shield(shield)
 	get_tree().call_group("damage_tracker", "record_shielding", source_id, amount)
 	return amount
+
+
+## If `status` is one of this unit's own shields, moves it ahead of every shield from
+## someone else, so it soaks damage first (and a Charge-locking one breaks sooner).
+func place_own_shield(status: Status) -> void:
+	if not status.is_own_shield(self) or not statuses.has(status):
+		return
+	var at := statuses.find(status)
+	for i in at:
+		var other: Status = statuses[i]
+		if Status.overrides(other, &"get_shield") and not other.is_own_shield(self):
+			statuses.remove_at(at)
+			statuses.insert(i, status)
+			_hook_lists.clear()
+			return
 
 func clear_statuses() -> void:
 	for status in statuses.duplicate():
@@ -2330,6 +2661,8 @@ func _run_gambit() -> void:
 	for status in statuses:
 		if not before.has(status):
 			status.from_gambit = true
+	for status in statuses.duplicate():
+		status.on_gambit_finished(self)
 
 func _begin_gambit() -> void:
 	gambit_cast.emit(self)
@@ -2377,6 +2710,8 @@ func gain_charge_from_attack(dealt: float, victim: BattleUnit = null) -> void:
 	if dealt <= 0.0:
 		return
 	var amount := charge_on_attack
+	for status in _with(&"modify_own_attack_charge"):
+		amount = status.modify_own_attack_charge(self, amount)
 	if victim != null:
 		for status in victim.statuses:
 			amount = status.modify_attacker_charge(victim, self, amount)
@@ -2406,8 +2741,10 @@ func _die() -> void:
 	alive = false
 	remove_from_group("units")
 	grid.vacate(cell, self)
-	if _moving:
+	if _moving and not _step_switched:
 		grid.vacate(_dest_cell, self)
+	for status in statuses.duplicate():
+		status.on_death(self)
 	died.emit(self)
 	ArmySpawner.bank_fallen(self)   # after died: a Glory earned from its own death still counts
 	queue_free()

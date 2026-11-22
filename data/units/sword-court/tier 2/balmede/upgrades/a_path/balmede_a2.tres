@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "If Plant's Shield isn't broken by the time it ends, she gains a stack of Glory: her base attributes and Wards are 5% higher for the rest of the match."
+description = "If Plant's Shield isn't broken by the time it ends, she gains a stack of Glory: her base max health, attributes and Wards are 5% higher for the rest of the match."
 gambit_overrides = Dictionary[String, float]({
 "glory_if_unbroken": 1.0
 })

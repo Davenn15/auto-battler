@@ -33,9 +33,9 @@ func _after_hit() -> void:
 
 
 ## A reflected shot doesn't bounce.
-func reflect(by: BattleUnit, wrack_chance: float) -> bool:
+func reflect(by: BattleUnit, wrack_chance: float, to: BattleUnit = null) -> bool:
 	ricochet_share = 0.0
-	return super.reflect(by, wrack_chance)
+	return super.reflect(by, wrack_chance, to)
 
 
 ## The living unit on `hit`'s team closest to it within ricochet reach, other than `hit`.

@@ -26,3 +26,7 @@ class Plating extends Status:
 			Stats.DamageType.CELERITY:
 				return maxf(damage - effect.celerity_reduction, 0.0)
 		return damage
+
+	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
+	func reduces_damage(_unit: BattleUnit) -> bool:
+		return true

@@ -41,6 +41,6 @@ class GambitDuplicateStatus extends Status:
 		copy.add_status(DodgeStatus.new(effect.extra_dodge))
 		copy.add_status(SummonLifetimeStatus.new(effect.duration))
 		for keepsake in unit.keepsakes:
-			if copy.keepsakes.size() >= BattleUnit.MAX_KEEPSAKES:
+			if copy.keepsakes.size() >= copy.max_keepsakes():
 				break
 			copy.swap_keepsake_in_combat(keepsake)

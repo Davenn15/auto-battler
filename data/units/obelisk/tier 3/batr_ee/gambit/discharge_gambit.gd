@@ -1,17 +1,21 @@
 class_name DischargeGambit
 extends Gambit
-## BATR.EE spends its Voltage on Volts: one for every Voltage Per Volt it has, each fired
-## at a random enemy. Damage per Volt = Damage + Insight Scaling x Insight.
-##   A1: Volts give Mono-Virus stacks.  A2: Volts silence.
+## BATR.EE: for every Voltage Per Volt Voltage it has, it spends them and fires a Volt at a
+## random enemy within Range Cells. Damage per Volt = Damage + Insight Scaling x Insight.
+## Whatever Voltage is left over is cleared when the Gambit finishes, as for everyone.
+##   A1: Volts shred Insight Ward (stacking, each for its own Shred Duration).
+##   A2: Volts Silence enemies hit.
 
-@export var voltage_per_volt: float = 20.0
+@export var voltage_per_volt: float = 10.0
+@export var range_cells: int = 3
 @export var damage: float = 90.0
 @export var insight_scaling: float = 0.6
 @export_enum("Might", "Insight", "Celerity") var damage_type: int = 1
 ## Seconds between Volts.
 @export var interval: float = 0.15
-## A1: Mono-Virus stacks each Volt gives. 0 = none.
-@export var virus_stacks: int = 0
+## A1: Insight Ward each Volt hit takes off for Shred Duration seconds. Hits stack. 0 = none.
+@export var insight_ward_shred: float = 0.0
+@export var shred_duration: float = 4.0
 ## A2: seconds each Volt silences its target (no Gambit, no Charge). 0 = none.
 @export var silence_time: float = 0.0
 
@@ -35,14 +39,13 @@ func execute(caster: BattleUnit) -> void:
 	voltage.spend(volts * voltage_per_volt)
 	caster.show_float_text("Discharge x%d" % volts, VoltageStatus.LIGHT)
 	var hit := Stats.scaled(damage, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
-	var color := MonoVirusStatus.SETTINGS.color if virus_stacks > 0 else VoltageStatus.COLOR
 	for i in volts:
 		var enemy := _random_enemy(caster)
 		if enemy == null:
 			break
 		var level := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
 		var amount := hit * caster.effect_wrack_multiplier(level, Stats.EffectKind.GAMBIT_DAMAGE)
-		Volt.fire(caster.get_parent(), caster.global_position, enemy, color, i * interval,
+		Volt.fire(caster.get_parent(), caster.global_position, enemy, VoltageStatus.COLOR, i * interval,
 				_on_volt_hit.bind(caster.get_instance_id(), amount, level))
 
 
@@ -56,18 +59,19 @@ func _on_volt_hit(target: BattleUnit, caster_id: int, amount: float, level: int)
 	target.get_tree().call_group("damage_tracker", "record_damage", caster_id, dealt)
 	if dealt <= 0.0:
 		return   # dodged
-	if virus_stacks > 0 and target.alive:
-		MonoVirusStatus.infect(target, virus_stacks, caster_id)
+	if insight_ward_shred > 0.0 and target.alive:
+		WardShiftStatus.shred(caster, target, Stats.Stat.INSIGHT_WARD, insight_ward_shred, shred_duration)
 	if silence_time > 0.0 and target.alive:
-		SilencedStatus.silence(target, silence_time)
+		Silence.apply(target, silence_time, caster)
 
 
-## A random targetable enemy, or null.
+## A random targetable enemy within Range Cells, or null.
 func _random_enemy(caster: BattleUnit) -> BattleUnit:
 	var enemies: Array = []
 	for node in caster.get_tree().get_nodes_in_group("units"):
 		var unit := node as BattleUnit
-		if unit != null and unit.alive and unit.team != caster.team and unit.is_targetable():
+		if unit != null and unit.alive and unit.team != caster.team and unit.is_targetable() \
+				and caster.grid.get_distance(caster.cell, unit.cell) <= range_cells:
 			enemies.append(unit)
 	return CombatRng.pick(enemies) if not enemies.is_empty() else null
 

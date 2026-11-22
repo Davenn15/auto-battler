@@ -35,7 +35,7 @@ func _gift(caster: BattleUnit, ally: BattleUnit) -> void:
 			given = MatchRules.combine_result(own, shard)
 			replacing = own
 	if given == null:
-		if ally.keepsakes.size() >= BattleUnit.MAX_KEEPSAKES:
+		if ally.keepsakes.size() >= ally.max_keepsakes():
 			return
 		given = CombatRng.pick(MatchRules.shards())
 	if given == null:
@@ -62,7 +62,7 @@ func _pick_allies(caster: BattleUnit) -> Array[BattleUnit]:
 			continue
 		if not _held_shards(unit).is_empty():
 			combiners.append(unit)
-		elif unit.keepsakes.size() < BattleUnit.MAX_KEEPSAKES:
+		elif unit.keepsakes.size() < unit.max_keepsakes():
 			others.append(unit)
 	var by_distance := func(a, b): return caster.grid.get_distance(caster.cell, a.cell) < caster.grid.get_distance(caster.cell, b.cell)
 	combiners.sort_custom(by_distance)

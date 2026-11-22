@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/seg_fault/upgrades/a_path/swap_a1.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+description = "If SEG.FAULT would die, its duplicate dies instead: SEG.FAULT teleports to the duplicate's space and gains a Shield equal to the duplicate's remaining health for 4 seconds."
+passives = Array[ExtResource("2")]([ExtResource("3")])

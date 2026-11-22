@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ShredTriplePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 3/shred/passive/triple_strike_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attacks = 3
+passive_name = "Three Edges"
+description = "SHRED has three separate attacks on three separate attack timers, each dealing a third of a normal attack. Each counts as an attack for on-hit effects and Hit Effects, but gives a third of the Charge."

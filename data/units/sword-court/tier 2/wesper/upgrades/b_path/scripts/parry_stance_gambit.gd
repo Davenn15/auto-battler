@@ -13,6 +13,8 @@ extends Gambit
 @export var shield_amount: float = 0.0
 ## Added to wrack chance for reflected projectiles.
 @export var reflect_wrack_bonus: float = 0.0
+## B1: 1 = projectiles she deflects fly at her current target instead of back at the shooter.
+@export var deflect_to_target: float = 0.0
 
 
 func execute(caster: BattleUnit) -> void:
@@ -22,6 +24,8 @@ func execute(caster: BattleUnit) -> void:
 	for status in caster.statuses.duplicate():
 		if status is ParryStanceStatus:
 			caster.remove_status(status)
-	caster.add_status(ParryStanceStatus.new(duration, ward_bonus, celerity_bonus, reflect_chance, reflect_wrack_bonus))
+	var stance := ParryStanceStatus.new(duration, ward_bonus, celerity_bonus, reflect_chance, reflect_wrack_bonus)
+	stance.deflect_to_target = deflect_to_target > 0.0
+	caster.add_status(stance)
 	if shield_amount > 0.0:
-		caster.add_shield(shield_amount, duration, caster.get_instance_id())
+		caster.add_shield(shield_amount, duration, caster.get_instance_id(), true)

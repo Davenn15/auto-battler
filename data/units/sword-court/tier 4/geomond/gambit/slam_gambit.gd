@@ -49,7 +49,7 @@ func execute(caster: BattleUnit) -> void:
 	await caster.dash_to( spot["cell"], dash_time)
 	if not _alive(caster):
 		return
-	caster.add_shield(shield_amount, shield_duration, caster.get_instance_id())
+	caster.add_shield(shield_amount, shield_duration, caster.get_instance_id(), true)
 	if channel_ward_bonus > 0.0:
 		caster.add_status(ChannelWardStatus.new(channel_ward_bonus, channel_time))
 	caster.show_float_text("Slam", SLAM_COLOR)

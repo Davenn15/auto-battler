@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/shielded_reflect_effect.gd" id="2"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+chance = 0.1
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Polished Shields"
+description = "While shielded, your units have an extra 10% chance to reflect each projectile that hits them back at its shooter."
+tier = 3
+effect = SubResource("Effect")

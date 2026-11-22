@@ -12,7 +12,9 @@ extends Node2D
 ## army is at the bottom. The host's result counts; each side also sends a fingerprint of
 ## how the fight ended, so any difference gets noticed.
 
-## WAITING: online, your army is sent and you're waiting for the opponent's.
+## WAITING: you've readied (online, your army is sent) and are waiting for the opponent.
+## Your army is locked in, but you can un-ready (press_ready again) to go back to planning
+## until both players are ready: the round starts only once both are.
 ## ENCOUNTER: picking an Ascension between combats.
 enum Phase { PLANNING, WAITING, COMBAT, RESULT, GAME_OVER, ENCOUNTER }
 
@@ -110,6 +112,11 @@ var _encounter_heading := ""
 ## Online, the opponent's comes from Net instead.
 static var player_faction := MatchRules.DEFAULT_FACTION
 static var opponent_faction := MatchRules.DEFAULT_FACTION
+## What the menu's pickers chose, which may be MatchRules.RANDOM_FACTION. Each time the
+## match scene starts (a new match, or the next watched match) these are rolled into
+## player_faction and opponent_faction, so Random picks a fresh faction every match.
+static var player_faction_choice := MatchRules.DEFAULT_FACTION
+static var opponent_faction_choice := MatchRules.DEFAULT_FACTION
 
 
 func _ready() -> void:
@@ -121,6 +128,9 @@ func _ready() -> void:
 	player.player_name = "You"
 	ai.player_name = "Opponent"
 	online = Net.is_online()
+	if not online:   # online, your faction was settled (and sent) when you connected
+		player_faction = MatchRules.resolve_faction(player_faction_choice)
+		opponent_faction = MatchRules.resolve_faction(opponent_faction_choice)
 	player.faction = player_faction
 	ai.faction = Net.opponent_faction if online else opponent_faction
 	if spectating:
@@ -278,6 +288,7 @@ func _on_ai_plan_ready(summary: String) -> void:
 	if spectating:
 		_spectate_try_fight()
 	hud.refresh()
+	_try_proceed()   # you may have readied while it was still planning
 
 
 ## Your army on your half; the opponent's last fielded army under the fog on theirs.
@@ -291,6 +302,11 @@ func _show_planning_board() -> void:
 	# (Lunck's, BATR.EE's, Keepsakes'), other visuals. Once all are on the board.
 	for unit in units:
 		unit.preview_combat_start()
+	# Units you can afford to upgrade right now: a cyan glow and arrow (while planning only).
+	if phase == Phase.PLANNING and not spectating:
+		for unit in units:
+			if unit.team == PLAYER_TEAM:
+				KeepsakeVfx.upgrade_ready(unit, MatchRules.upgrade_affordable(player, _army_of(unit)))
 	_fog.show_fog(grid, ai.faction, ai.last_fielded_round)
 
 
@@ -408,32 +424,6 @@ func table_clicked(slot: int) -> void:
 	changed()
 
 
-## Double-clicking a Shard: moves that Shard (by identity, wherever it is now: your items
-## or one of your units) to the first empty ritual table slot. False if it isn't a Shard
-## you own, it's already on the table, or both slots are full.
-func send_shard_to_table(item: Keepsake) -> bool:
-	if item == null or not item.is_shard:
-		return false
-	var source := {}
-	for i in player.inventory.size():
-		if is_same(player.inventory[i], item):
-			source = {"from": "inventory", "index": i}
-	for unit in player.units:
-		for i in unit.items.size():
-			if is_same(unit.items[i], item):
-				source = {"from": "unit", "unit": unit, "index": i}
-	if source.is_empty():
-		return false
-	for slot in table.size():
-		if table[slot] == null:
-			var dest := {"to": "table", "slot": slot}
-			if not can_move_item(source, dest):
-				return false
-			move_item(source, dest)
-			return true
-	return false
-
-
 func table_preview() -> Keepsake:
 	return MatchRules.combine_result(table[0], table[1])
 
@@ -451,7 +441,9 @@ func combine_table() -> void:
 # ---------- Dragging items ----------
 
 ## Where a dragged item comes from: {"from": "inventory", "index": i},
-## {"from": "table", "slot": s} or {"from": "unit", "unit": ArmyUnit, "index": i}.
+## {"from": "table", "slot": s}, {"from": "unit", "unit": ArmyUnit, "index": i}, or (bought
+## or made as it's placed) {"from": "shop_shard", "slot": s}, {"from": "shop_keepsake"} and
+## {"from": "table_result"}.
 ## Where it goes: {"to": "inventory"}, {"to": "table", "slot": s} or {"to": "unit", "unit": ArmyUnit}.
 
 func item_at(source: Dictionary) -> Keepsake:
@@ -465,7 +457,20 @@ func item_at(source: Dictionary) -> Keepsake:
 			var unit: ArmyUnit = source["unit"]
 			var i: int = source["index"]
 			return unit.items[i] if player.units.has(unit) and i >= 0 and i < unit.items.size() else null
+		"shop_shard":
+			var s: int = source["slot"]
+			return player.shard_offers[s] if s >= 0 and s < player.shard_offers.size() else null
+		"shop_keepsake":
+			return player.keepsake_offer
+		"table_result":
+			return table_preview()
 	return null
+
+
+## True for sources that are bought or made when they're placed (shop offers, the ritual's
+## result): they can only go to the inventory or onto a unit.
+func _is_new_item(source: Dictionary) -> bool:
+	return source.get("from") in ["shop_shard", "shop_keepsake", "table_result"]
 
 
 ## True if the item at `source` may go to `dest`. Only Shards go on the table or come off a
@@ -478,6 +483,17 @@ func can_move_item(source: Dictionary, dest: Dictionary) -> bool:
 		return false
 	if source["from"] == "unit" and not item.is_shard:
 		return false
+	if _is_new_item(source):
+		if source["from"] == "shop_shard" and player.reserve < MatchRules.SHARD_COST:
+			return false
+		if source["from"] == "shop_keepsake" and player.reserve < MatchRules.KEEPSAKE_COST:
+			return false
+		if dest.get("to") == "unit":
+			var target: ArmyUnit = dest["unit"]
+			# A copy it already has may still be dropped on it: it's refused (see move_item).
+			return player.units.has(target) and (target.items.size() < target.keepsake_slots() \
+					or not Keepsake.allowed_with(item, target.items))
+		return dest.get("to") == "inventory"
 	match dest.get("to"):
 		"inventory":
 			return source["from"] != "inventory"
@@ -487,7 +503,8 @@ func can_move_item(source: Dictionary, dest: Dictionary) -> bool:
 			var unit: ArmyUnit = dest["unit"]
 			if not player.units.has(unit) or (source["from"] == "unit" and source["unit"] == unit):
 				return false
-			return unit.items.size() < BattleUnit.MAX_KEEPSAKES
+			# A copy it already has may still be dropped on it: it's refused (see move_item).
+			return unit.items.size() < unit.keepsake_slots() or not Keepsake.allowed_with(item, unit.items)
 	return false
 
 
@@ -495,6 +512,15 @@ func can_move_item(source: Dictionary, dest: Dictionary) -> bool:
 ## one there if it came from the other slot; otherwise the one there goes to the inventory.
 func move_item(source: Dictionary, dest: Dictionary) -> void:
 	if not can_move_item(source, dest):
+		return
+	# The universal Keepsake rule: a unit never carries two of the same completed Keepsake.
+	# The copy goes to the inventory instead (bought or made first, if it's new) and the
+	# unit refuses it with a red outline and a shake.
+	if dest.get("to") == "unit" and not Keepsake.allowed_with(item_at(source), dest["unit"].items):
+		_refuse_item(source, dest["unit"])
+		return
+	if _is_new_item(source):
+		_place_new_item(source, dest)
 		return
 	var item := item_at(source)
 	var bumped: Keepsake = null
@@ -524,6 +550,96 @@ func move_item(source: Dictionary, dest: Dictionary) -> void:
 			selected = dest["unit"]
 	held = {}
 	changed()
+
+
+## A Keepsake `unit` already has a copy of, dropped on it: the item ends up in the
+## inventory (bought or made, if it came from the shop or the ritual table; taken off the
+## table if it was there; left where it is if it came from the inventory), and the unit
+## refuses it.
+func _refuse_item(source: Dictionary, unit: ArmyUnit) -> void:
+	var item := item_at(source)
+	if _is_new_item(source):
+		_place_new_item(source, {"to": "inventory"})
+	else:
+		match source["from"]:
+			"table":
+				player.inventory.append(table[source["slot"]])
+				table[source["slot"]] = null
+		held = {}
+		changed()
+	add_log("%s already has %s." % [unit.label(), item.get_display_name()])
+	_play_refusal(unit)
+
+
+## The red outline and "no" shake on `unit`'s figure on the board (just rebuilt).
+func _play_refusal(unit: ArmyUnit) -> void:
+	var index := player.units.find(unit)
+	for node in units_parent.get_children():
+		var shown := node as BattleUnit
+		if shown != null and shown.team == PLAYER_TEAM and shown.get_meta("army_index", -1) == index:
+			KeepsakeVfx.refuse(shown)
+			return
+	hud.flash_refusal(unit)   # on the bench: its tile shakes instead
+
+
+## Buys (a shop offer) or makes (the ritual's result) the item at `source`, and puts it in
+## the inventory or on the unit at `dest`.
+func _place_new_item(source: Dictionary, dest: Dictionary) -> void:
+	var made := false
+	match source["from"]:
+		"shop_shard":
+			made = MatchRules.buy_shard_offer(player, source["slot"])
+		"shop_keepsake":
+			made = MatchRules.buy_keepsake_offer(player)
+			if made:
+				add_log("Bought %s." % player.inventory[-1].get_display_name())
+		"table_result":
+			var result := table_preview()
+			if result != null:
+				player.inventory.append(result)
+				table = [null, null]
+				add_log("The ritual made %s." % result.get_display_name())
+				made = true
+	if made and dest["to"] == "unit":
+		MatchRules.equip(player, dest["unit"], player.inventory.size() - 1)
+		selected = dest["unit"]
+	held = {}
+	changed()
+
+
+## Left-clicking a Shard anywhere but the inventory: it goes to the inventory (a shop Shard
+## is bought). True if it moved.
+func shard_to_inventory(source: Dictionary) -> bool:
+	var item := item_at(source)
+	if item == null or not item.is_shard or source.get("from") == "inventory":
+		return false
+	if source["from"] == "shop_shard":
+		buy_shard(source["slot"])
+		return true
+	if not can_move_item(source, {"to": "inventory"}):
+		return false
+	move_item(source, {"to": "inventory"})
+	return true
+
+
+## Right-clicking a Shard anywhere: it goes to the first free ritual table slot (a shop
+## Shard is bought first; with the table full it stays in the inventory). True if it moved.
+func shard_to_table(source: Dictionary) -> bool:
+	var item := item_at(source)
+	if item == null or not item.is_shard or phase != Phase.PLANNING or spectating:
+		return false
+	if source["from"] == "table":
+		return false   # already there
+	if source["from"] == "shop_shard":
+		if not MatchRules.buy_shard_offer(player, source["slot"]):
+			return false
+		source = {"from": "inventory", "index": player.inventory.size() - 1}
+	for slot in table.size():
+		if table[slot] == null and can_move_item(source, {"to": "table", "slot": slot}):
+			move_item(source, {"to": "table", "slot": slot})
+			return true
+	changed()   # bought, but the table was full: it waits in the inventory
+	return source["from"] == "inventory"
 
 
 ## A screen position (as the HUD sees it) on the board.
@@ -572,16 +688,28 @@ func _unhandled_input(event: InputEvent) -> void:
 	var world := get_global_mouse_position()
 	var button := event as InputEventMouseButton
 	if button != null and button.button_index == MOUSE_BUTTON_RIGHT and button.pressed:
+		var badge := _badge_source_at(world)
+		if not badge.is_empty() and shard_to_table(badge):
+			return
 		held = {}
 		hud.refresh()
 		return
 	if button != null and button.button_index == MOUSE_BUTTON_LEFT:
 		if button.pressed:
 			_press(world)
+		elif not _pending_badge.is_empty():
+			var badge := _pending_badge
+			_pending_badge = {}
+			shard_to_inventory(badge)   # a click, not a drag: off the unit
 		elif _drag_unit != null:
 			_release(world, button.position)
-	elif event is InputEventMouseMotion and _drag_unit != null:
-		_drag_unit.global_position = world
+	elif event is InputEventMouseMotion:
+		if not _pending_badge.is_empty() and world.distance_to(_pending_at) > BADGE_DRAG_START:
+			var badge := _pending_badge
+			_pending_badge = {}
+			hud.start_item_drag(badge)
+		elif _drag_unit != null:
+			_drag_unit.global_position = world
 
 
 ## Picking a unit for a chosen-unit Ascension: left-click one of yours, right-click to go back.
@@ -612,18 +740,13 @@ func _press(world: Vector2) -> void:
 			held = {}
 		changed()
 		return
-	# A Shard's badge above a unit's health bar: drag it off.
-	for node in units_parent.get_children():
-		var badge_owner := node as BattleUnit
-		if badge_owner == null or badge_owner.team != PLAYER_TEAM:
-			continue
-		var index := badge_owner.keepsake_index_at(world)
-		if index >= 0:
-			var source := {"from": "unit", "unit": _army_of(badge_owner), "index": index}
-			if item_at(source) != null and item_at(source).is_shard:
-				selected = source["unit"]
-				hud.start_item_drag(source)
-				return
+	# A Shard's badge above a unit's health bar: click it off, or drag it somewhere.
+	var badge := _badge_source_at(world)
+	if not badge.is_empty():
+		selected = badge["unit"]
+		_pending_badge = badge
+		_pending_at = world
+		return
 	if unit != null:
 		_drag_unit = unit
 		_drag_army = _army_of(unit)
@@ -643,6 +766,27 @@ func _release(world: Vector2, screen: Vector2) -> void:
 	changed()
 
 
+## A Shard badge pressed but not yet dragged or released (see _unhandled_input).
+var _pending_badge := {}
+var _pending_at := Vector2.ZERO
+## How far (in world pixels) the mouse moves before a pressed badge starts dragging.
+const BADGE_DRAG_START := 4.0
+
+
+## The item source of the Shard badge of one of your units at `world`, or {}.
+func _badge_source_at(world: Vector2) -> Dictionary:
+	for node in units_parent.get_children():
+		var badge_owner := node as BattleUnit
+		if badge_owner == null or badge_owner.team != PLAYER_TEAM or not badge_owner.has_meta("army_index"):
+			continue
+		var index := badge_owner.keepsake_index_at(world)
+		if index >= 0:
+			var source := {"from": "unit", "unit": _army_of(badge_owner), "index": index}
+			if item_at(source) != null and item_at(source).is_shard:
+				return source
+	return {}
+
+
 func _own_unit_near(world: Vector2) -> BattleUnit:
 	var best: BattleUnit = null
 	var best_dist := 30.0
@@ -660,22 +804,55 @@ func _army_of(unit: BattleUnit) -> ArmyUnit:
 
 # ---------- Combat ----------
 
-## The Ready / Fight button. Online it sends your army and waits for the opponent's.
+## The Ready button. Readying locks your army in and waits for the opponent (online it
+## sends your army). The round begins only once both players are ready. Pressing it again
+## while waiting un-readies you, back to planning, in case you forgot something.
 func press_ready() -> void:
+	if phase == Phase.WAITING:
+		_unready()
+		return
 	if phase != Phase.PLANNING:
 		return
 	if online:
 		_submit()
 		return
-	if not ai_ready:
-		return
 	_return_table()
 	held = {}
-	if is_opening():
-		_advance_rounds()
-		_begin_planning()
-	else:
-		_start_combat()
+	selected = null
+	hud.hide_result()   # an open upgrade choice
+	phase = Phase.WAITING
+	_show_planning_board()
+	hud.refresh()
+	_try_proceed()
+
+
+## Online, the joiner asked the host to un-ready and is waiting for its answer.
+var _unready_pending := false
+
+
+## Back from waiting to planning. Offline right away. Online the host decides when the
+## round starts (it sends "go"), so the host can always take its army back; the joiner
+## asks the host first, and goes back only once the host agrees (if the host has already
+## started the round, its "go" arrives instead and the round goes ahead).
+func _unready() -> void:
+	if not online:
+		_back_to_planning()
+		return
+	if Net.is_host():
+		Net.send("unready", {"round": round_number})
+		_back_to_planning()
+	elif not _unready_pending:
+		_unready_pending = true
+		Net.send("unready_request", {"round": round_number})
+		hud.refresh()
+
+
+func _back_to_planning() -> void:
+	phase = Phase.PLANNING
+	_unready_pending = false
+	_sent_army = []
+	_show_planning_board()
+	hud.refresh()
 
 
 ## Online: locks in your army as it stands and sends it to the opponent.
@@ -694,11 +871,24 @@ func _submit() -> void:
 	_try_proceed()
 
 
-## Online: once both armies for this round are in, moves on to the fight (or, after the
-## Opening Shop, to the next planning phase).
+## Once both players are ready, moves on to the fight (or, after the Opening Shop, to the
+## next planning phase). Offline that's you and the computer. Online the host decides: once
+## it's ready and has the joiner's army it sends "go" and starts; the joiner starts on "go".
 func _try_proceed() -> void:
-	if phase != Phase.WAITING or not _remote_armies.has(round_number):
+	if phase != Phase.WAITING:
 		return
+	if not online:
+		if ai_ready:
+			_proceed()
+		return
+	if not _remote_armies.has(round_number) or not Net.is_host():
+		return
+	Net.send("go", {"round": round_number})
+	_proceed()
+
+
+func _proceed() -> void:
+	_unready_pending = false
 	if is_opening():
 		_advance_rounds()
 		_begin_planning()
@@ -716,6 +906,24 @@ func _on_net_message(kind: String, data: Dictionary) -> void:
 				ai_ready = true
 				hud.refresh()
 				_try_proceed()
+		"go":   # host -> joiner: both are ready, the round starts
+			if for_round == round_number and phase == Phase.WAITING and _remote_armies.has(for_round):
+				_proceed()
+		"unready":   # host -> joiner: the host took its army back
+			if for_round == round_number:
+				_remote_armies.erase(for_round)
+				ai_ready = false
+				hud.refresh()
+		"unready_request":   # joiner -> host: may the joiner take its army back?
+			# Only if the round hasn't started (no "go" sent): then the host forgets it.
+			if for_round == round_number and phase in [Phase.PLANNING, Phase.WAITING]:
+				_remote_armies.erase(for_round)
+				ai_ready = false
+				Net.send("unready_ok", {"round": for_round})
+				hud.refresh()
+		"unready_ok":   # host -> joiner: yes
+			if for_round == round_number and phase == Phase.WAITING and _unready_pending:
+				_back_to_planning()
 		"result":   # host -> joiner
 			_host_results[for_round] = data
 			_try_finish_as_joiner()
@@ -935,6 +1143,24 @@ func _try_end_encounter() -> void:
 	_begin_planning()
 
 
+## Seconds of countdown before each fight (see _start_combat).
+const COMBAT_COUNTDOWN := 3.0
+## How many Ascensions each player had at their last combat, so the countdown can show
+## only the ones picked since (at the Encounter just before this combat).
+var _ascensions_seen := {}   # PlayerState -> count
+
+
+## The Ascensions `p` picked since its last combat (usually none, or the one from the
+## Encounter just before), and remembers its count for next time.
+func _new_ascensions(p: PlayerState) -> Array[Ascension]:
+	var seen: int = _ascensions_seen.get(p, 0)
+	var fresh: Array[Ascension] = []
+	for i in range(seen, p.ascensions.size()):
+		fresh.append(p.ascensions[i])
+	_ascensions_seen[p] = p.ascensions.size()
+	return fresh
+
+
 func _start_combat() -> void:
 	phase = Phase.COMBAT
 	_fight_over = false
@@ -974,6 +1200,17 @@ func _start_combat() -> void:
 	damage_tracker.set_team_titles({my_team: player.player_name, 3 - my_team: ai.player_name}, my_team != PLAYER_TEAM)
 	damage_tracker.set_planning(false)
 	hud.refresh()
+	# A short countdown before the fight, over the board, with the Ascension each player
+	# picked at the Encounter just before this combat (if there was one). Only this match
+	# scene waits: sims and the computer's planning copies fight straight away. Online
+	# both games wait the same way and then play the same fight, so they still agree.
+	var my_picks := _new_ascensions(player)
+	var their_picks := _new_ascensions(ai)
+	hud.show_combat_intro(player.player_name, my_picks, ai.player_name, their_picks, COMBAT_COUNTDOWN)
+	await get_tree().create_timer(COMBAT_COUNTDOWN).timeout
+	if not is_inside_tree() or phase != Phase.COMBAT:
+		return
+	hud.hide_combat_intro()
 	await get_tree().physics_frame   # let every unit finish _ready
 	if is_instance_valid(_manager):
 		_manager.queue_free()
@@ -1038,9 +1275,15 @@ func _keep_match_gains() -> void:
 	if not online:
 		ArmySpawner.apply_match_gains(player.units, gains.get(PLAYER_TEAM, {}))
 		ArmySpawner.apply_match_gains(ai.units, gains.get(ENEMY_TEAM, {}))
+		player.reserve += ArmySpawner.reserve_from(gains, PLAYER_TEAM)   # Von Carrow's bounty
+		ai.reserve += ArmySpawner.reserve_from(gains, ENEMY_TEAM)
+		player.inventory.append_array(ArmySpawner.shards_from(gains, PLAYER_TEAM))   # SHRED A2
+		ai.inventory.append_array(ArmySpawner.shards_from(gains, ENEMY_TEAM))
 		return
 	var mine := PLAYER_TEAM if Net.is_host() else ENEMY_TEAM
 	ArmySpawner.apply_match_gains(player.board_units(), gains.get(mine, {}))
+	player.reserve += ArmySpawner.reserve_from(gains, mine)
+	player.inventory.append_array(ArmySpawner.shards_from(gains, mine))
 
 
 func _try_finish_as_joiner() -> void:

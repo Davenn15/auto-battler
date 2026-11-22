@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ByteBuffetGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 1/byte/upgrades/b_path/scripts/buffet_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+reach_cells = 2
+cone_degrees = 90.0
+damage = 60.0
+insight_scaling = 0.3
+damage_type = 1
+might_cut = 0.3
+might_cut_duration = 3.0
+knockback_cells = 1.0
+gambit_name = "Buffeting"
+cast_time = 0.5
+description = "Blasts a cone 2 cells long and 90 degrees wide, aimed where it catches the most enemies. Each enemy in it takes 60 (+30% Insight) Insight damage, has 30% less Might for 3 seconds, and is knocked back 1 cell."

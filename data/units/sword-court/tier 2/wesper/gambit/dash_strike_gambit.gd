@@ -7,6 +7,8 @@ extends Gambit
 const NO_CELL := Vector2i(-9999, -9999)
 
 @export var strikes: int = 2
+## A2: each strike also inflicts Bleed for this share of the damage it dealt. 0 = none.
+@export_range(0.0, 2.0, 0.05) var bleed_share: float = 0.0
 ## Seconds the dash takes.
 @export var dash_time: float = 0.15
 ## Seconds between strikes.
@@ -61,7 +63,10 @@ func execute(caster: BattleUnit) -> void:
 		# Either unit may have died, or the battle ended, while we were waiting.
 		if not _alive(caster) or not caster.active or not _alive(target):
 			return
-		caster.attack_now(target)
+		var extra: Array[HitEffect] = []
+		if bleed_share > 0.0:
+			extra.append(StrikeBleed.new(caster.get_instance_id(), bleed_share))
+		caster.attack_now(target, 0.0, 0.0, null, extra)
 		await caster.get_tree().create_timer(strike_interval, true, true).timeout
 
 
@@ -118,3 +123,17 @@ func _landing_cell(caster: BattleUnit, enemy: BattleUnit) -> Vector2i:
 			best_dist = dist
 			best = cell
 	return best
+
+
+## A2: Bleed for Share of the damage the strike dealt.
+class StrikeBleed extends HitEffect:
+	var source_id: int
+	var share: float
+
+	func _init(p_source_id: int, p_share: float) -> void:
+		source_id = p_source_id
+		share = p_share
+
+	func apply(target: BattleUnit, dealt: float, _wrack_level: int) -> void:
+		if dealt > 0.0:
+			Bleed.apply(target, dealt * share, source_id, false)   # worked out from damage dealt

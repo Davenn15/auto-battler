@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CompassGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/frame/upgrades/b_path/scripts/compass_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+reach_cells = 4
+duration = 4.0
+celerity_share = 0.35
+gambit_name = "Compassing"
+cast_time = 0.5
+description = "Extends its legs extra long and strides into the space of the ally within 4 cells with the most Celerity, looming over it for 4 seconds. The ally gains 35% of FRAME's Celerity, and whenever it attacks, FRAME attacks its target too. FRAME makes no attacks of its own and gains no Charge meanwhile."

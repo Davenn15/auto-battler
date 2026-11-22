@@ -1,11 +1,13 @@
 [gd_resource type="Resource" script_class="Ascension" format=3]
 
 [ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Resource" path="res://data/ascensions/obelisk/tier 2/shielding_2.tres" id="empowers_prev"]
 
 [resource]
 script = ExtResource("1")
+empowers = ExtResource("empowers_prev")
 ascension_name = "Obelisk Placeholder 3D"
-description = "PLACEHOLDER. All your units gain 40 Insight Ward and 40 Celerity Ward."
+description = "PLACEHOLDER. All your units gain 20 Insight Ward and 20 Celerity Ward."
 tier = 3
-insight_ward = 40.0
-celerity_ward = 40.0
+insight_ward = 20.0
+celerity_ward = 20.0
