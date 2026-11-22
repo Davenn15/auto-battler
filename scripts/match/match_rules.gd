@@ -207,11 +207,9 @@ static func upgrade_choices(unit: ArmyUnit) -> Array:
 	return choices
 
 
-## TESTING (2026-11-16): the Aura upgrade system, picked on the main menu before a match
-## (online, both players use the host's choice). true = upgrades are bought from an owned
-## unit's upgrade menu for Aura, during planning only, and a shop copy of a unit you own
-## always buys its Reserve stat buff. false = the old system: the shop copy is the upgrade.
-static var aura_upgrades := false
+# Upgrades are bought from an owned unit's upgrade menu for Aura, during planning only. A
+# shop copy of a unit you own buys its Reserve stat buff. (The old system, where the shop
+# copy was the upgrade, is gone.)
 
 
 ## Aura the next upgrade of `unit` costs (the same tier prices the shop used). -1 if maxed.
@@ -223,11 +221,10 @@ static func upgrade_cost(unit: ArmyUnit) -> int:
 
 ## Whether `player` can buy `unit`'s next upgrade from its upgrade menu right now.
 static func can_buy_upgrade(player: PlayerState, unit: ArmyUnit) -> bool:
-	return aura_upgrades and player.units.has(unit) and not unit.is_maxed() \
-			and player.aura >= upgrade_cost(unit)
+	return player.units.has(unit) and not unit.is_maxed() and player.aura >= upgrade_cost(unit)
 
 
-## Aura upgrade system: buys `unit`'s next upgrade, `choice` picking the path (an index
+## Buys `unit`'s next upgrade from its menu, `choice` picking the path (an index
 ## from upgrade_choices). Returns false if it isn't allowed.
 static func buy_upgrade(player: PlayerState, unit: ArmyUnit, choice: int) -> bool:
 	if not can_buy_upgrade(player, unit):
@@ -244,14 +241,13 @@ static func buff_cost(tier: int, buffs_bought: int) -> int:
 
 
 ## What buying `data` from the shop means for this player:
-## {kind: "buy" | "upgrade" | "buff", aura: cost, reserve: cost}.
+## {kind: "buy" | "buff", aura: cost, reserve: cost}: a new unit, or a Reserve stat buff
+## for one you own.
 static func offer_info(player: PlayerState, data: UnitData) -> Dictionary:
 	var owned := player.find_unit(data)
 	var costs: Array = Economy.tier_aura_costs(data.tier)
 	if owned == null:
 		return {"kind": "buy", "aura": costs[0], "reserve": 0}
-	if not owned.is_maxed() and not aura_upgrades:
-		return {"kind": "upgrade", "aura": costs[owned.level() + 1], "reserve": 0}
 	return {"kind": "buff", "aura": 0, "reserve": owned.next_buff_cost()}
 
 
@@ -259,25 +255,14 @@ static func can_afford(player: PlayerState, info: Dictionary) -> bool:
 	return player.aura >= info["aura"] and player.reserve >= info["reserve"]
 
 
-## True if `player` could upgrade `unit` right now: with Aura upgrades, its next upgrade
-## from its menu; otherwise, a shop offer of the same unit that would upgrade it and that
-## they can pay for. Planning shows these units with a cyan glow and arrow.
+## True if `player` could buy `unit`'s next upgrade from its menu right now. Planning
+## shows these units with a cyan glow and arrow.
 static func upgrade_affordable(player: PlayerState, unit: ArmyUnit) -> bool:
-	if unit == null or unit.is_maxed() or not player.units.has(unit):
-		return false
-	if aura_upgrades:
-		return can_buy_upgrade(player, unit)
-	for data in player.unit_offers:
-		if data != unit.data:
-			continue
-		var info := offer_info(player, data)
-		if info["kind"] == "upgrade" and can_afford(player, info):
-			return true
-	return false
+	return unit != null and can_buy_upgrade(player, unit)
 
 
-## Buys shop slot `slot`. For an upgrade, `choice` picks the path (an index from
-## upgrade_choices). Returns false if it isn't allowed.
+## Buys shop slot `slot`: a new unit, or a Reserve stat buff for one you own. Returns
+## false if it isn't allowed. (`choice` is unused, kept so older callers still work.)
 static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> bool:
 	if slot < 0 or slot >= player.unit_offers.size():
 		return false
@@ -288,11 +273,6 @@ static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> 
 	match info["kind"]:
 		"buy":
 			player.units.append(ArmyUnit.new(data))
-		"upgrade":
-			var owned := player.find_unit(data)
-			if choice < 0 or choice >= upgrade_choices(owned).size():
-				return false
-			owned.path.append(choice)
 		"buff":
 			player.find_unit(data).buffs += 1
 	player.aura -= info["aura"]

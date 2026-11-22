@@ -153,21 +153,18 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 			if not MatchRules.can_afford(p, info):
 				continue
 			var weight: float = g["unit_rate"] * float(g["units"].get(data.display_name, 1.0))
-			if info["kind"] == "upgrade":
-				weight *= g["upgrade_bias"]
-			elif info["kind"] == "buff":
+			if info["kind"] == "buff":
 				if p.reserve - info["reserve"] < g["reserve_floor"]:
 					continue
 				weight *= g["buff_bias"]
 			options.append([weight, "unit", slot])
-		# Aura upgrade system: upgrades come from each owned unit's menu, not the shop. Weighted
-		# like a shop upgrade was (unit_rate x the unit's weight x upgrade_bias).
-		if MatchRules.aura_upgrades:
-			for index in p.units.size():
-				var unit := p.units[index]
-				if MatchRules.can_buy_upgrade(p, unit):
-					var weight: float = g["unit_rate"] * float(g["units"].get(unit.data.display_name, 1.0)) * g["upgrade_bias"]
-					options.append([weight, "upgrade", index])
+		# Upgrades come from each owned unit's menu, weighted unit_rate x the unit's weight x
+		# upgrade_bias.
+		for index in p.units.size():
+			var unit := p.units[index]
+			if MatchRules.can_buy_upgrade(p, unit):
+				var weight: float = g["unit_rate"] * float(g["units"].get(unit.data.display_name, 1.0)) * g["upgrade_bias"]
+				options.append([weight, "upgrade", index])
 		# KeepsakeSense only changes which Shards it prefers, not how many it buys: each
 		# offer is rated against the average offer.
 		var desires: Array = p.shard_offers.map(func(offer): return _shard_desire(p, offer))
@@ -195,15 +192,11 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 			"unit":
 				var data := p.unit_offers[pick[2]]
 				var owned := p.find_unit(data)
-				var choice := -1
-				if owned != null and MatchRules.offer_info(p, data)["kind"] == "upgrade":
-					choice = _path_choice(owned)
-					stats["upgrades"] += 1
-				elif owned != null:
+				if owned != null:
 					stats["buffs"] += 1
 				else:
 					stats["units"] += 1
-				MatchRules.buy_unit_offer(p, pick[2], choice)
+				MatchRules.buy_unit_offer(p, pick[2])
 			"upgrade":
 				var unit := p.units[pick[2]]
 				if MatchRules.buy_upgrade(p, unit, _path_choice(unit)):

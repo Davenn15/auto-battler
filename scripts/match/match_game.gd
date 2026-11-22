@@ -164,8 +164,6 @@ func _ready() -> void:
 	unit_info.unit_selected.connect(_on_unit_info_selected)
 	_layout_left.call_deferred()
 	add_log("Round 1: Opening Shop. Spend your starting Aura and Reserve.")
-	if MatchRules.aura_upgrades:
-		add_log("Aura upgrades are on: upgrade a unit from its menu; a shop copy of a unit you own buys a Reserve stat buff.")
 	_begin_planning()
 
 
@@ -328,14 +326,11 @@ func buy_unit(slot: int, choice: int = -1) -> void:
 	if phase != Phase.PLANNING:
 		return
 	var data := player.unit_offers[slot]
-	var upgrading: bool = MatchRules.offer_info(player, data)["kind"] == "upgrade"
 	var bought := MatchRules.buy_unit_offer(player, slot, choice)
 	var info := player.find_unit(data)
 	if bought:
 		add_log("Bought %s." % (info.label() if info != null else data.display_name))
 	changed()
-	if bought and upgrading and info != null and info.placed:
-		_play_upgrade_flourish(info)
 
 
 ## Aura upgrade system: buys `unit`'s next upgrade from its upgrade menu (planning only).

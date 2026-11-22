@@ -17,7 +17,6 @@ extends Node
 ##     --rungs 1,3,6      successive halving for plans (see SimMatch)
 ##     --pick-rungs 2,6   the same for Ascension options
 ##     --final N          champion vs current strategy matches at the end (default 24)
-##     --aura-upgrades    the Aura upgrade system (MatchRules.aura_upgrades)
 ##     --install          if the champion beats the current strategy in the final matches,
 ##                        save it to data/ai/trained_policy.json: the computer opponent and
 ##                        real_sim use it from then on
@@ -126,7 +125,6 @@ func _parse(args: PackedStringArray) -> void:
 	rungs = _arg(args, "--rungs", rungs)
 	pick_rungs = _arg(args, "--pick-rungs", pick_rungs)
 	install = args.has("--install")
-	MatchRules.aura_upgrades = args.has("--aura-upgrades")
 	final_matches = int(_arg(args, "--final", str(final_matches)))
 	seed_value = int(_arg(args, "--seed", str(seed_value)))
 
@@ -139,8 +137,8 @@ func _coordinate() -> void:
 	var stamp := Time.get_datetime_string_from_system().replace(":", "-").replace("T", "_")
 	out_dir = ProjectSettings.globalize_path("res://tools/sim_results/match_sim_%s" % stamp)
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	print("Match sim (real rules): %d generations x %d strategies x %d matches, %d workers, %d plans, halving %s / %s, aura upgrades %s, seed %d" %
-			[generations, population, matches_per, workers, candidates, rungs, pick_rungs, "on" if MatchRules.aura_upgrades else "off", seed_value])
+	print("Match sim (real rules): %d generations x %d strategies x %d matches, %d workers, %d plans, halving %s / %s, seed %d" %
+			[generations, population, matches_per, workers, candidates, rungs, pick_rungs, seed_value])
 	print("  results: %s" % out_dir)
 	var started := Time.get_ticks_msec()
 
@@ -249,7 +247,7 @@ func _run_matches(jobs: Array) -> Array:
 		var out_path := tmp.path_join("w%d_out.json" % w)
 		var file := FileAccess.open(in_path, FileAccess.WRITE)
 		file.store_string(JSON.stringify({"matches": mine, "candidates": candidates, "rungs": rungs,
-				"pick_rungs": pick_rungs, "aura_upgrades": MatchRules.aura_upgrades}))
+				"pick_rungs": pick_rungs}))
 		file.close()
 		DirAccess.remove_absolute(out_path)
 		var pid := OS.create_process(OS.get_executable_path(), ["--headless", "--fixed-fps", "60",
@@ -283,7 +281,6 @@ func _write_json(file: String, data) -> void:
 
 func _worker(args: PackedStringArray) -> void:
 	var job = JSON.parse_string(FileAccess.get_file_as_string(_arg(args, "--in", "")))
-	MatchRules.aura_upgrades = bool(job.get("aura_upgrades", false))
 	var sim := SimMatch.new(self)
 	sim.candidates = int(job["candidates"])
 	sim.plan_rungs = SimMatch.parse_rungs(str(job.get("rungs", rungs)))

@@ -114,7 +114,7 @@ func play(match_seed: int, policies: Array) -> Dictionary:
 		result = 1.0
 	elif players[1].is_alive() and not players[0].is_alive():
 		result = 0.0
-	var record := {"seed": match_seed, "aura_upgrades": MatchRules.aura_upgrades, "rounds": round_number, "combats": combats.size(),
+	var record := {"seed": match_seed, "rounds": round_number, "combats": combats.size(),
 			"seconds": (Time.get_ticks_msec() - started) / 1000.0, "test_battles": battles_fought, "players": []}
 	for i in 2:
 		var p := players[i]

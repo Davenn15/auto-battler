@@ -251,19 +251,9 @@ static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
 		lines.append(_ability_text("Passive", UnitInfoPanel._ability_name(passive, passive.passive_name, "Passive"), passive.description))
 	if gambit != null:
 		lines.append(_ability_text("Gambit", UnitInfoPanel._ability_name(gambit, gambit.gambit_name, "Gambit"), gambit.description))
-	if owned != null and MatchRules.aura_upgrades:
+	if owned != null:
 		lines.append("")
 		lines.append("[b]You own it:[/b] buying it buffs its stats (upgrade it from its own menu).")
-	elif owned != null and not owned.is_maxed():
-		lines.append("")
-		lines.append("[b]Buying it upgrades yours. Choose one:[/b]")
-		for choice in MatchRules.upgrade_choices(owned):
-			var path := owned.path.duplicate()
-			path.append(choice["index"])
-			lines.append("[color=#ffd24d]%s[/color]  %s" % [RandomTeams.path_label(path), Keyphrases.format(describe_upgrade(choice["upgrade"]).replace("\n", " "))])
-	elif owned != null:
-		lines.append("")
-		lines.append("[b]Yours is fully upgraded:[/b] buying it buffs its stats.")
 	return "\n".join(lines)
 
 
@@ -1044,23 +1034,11 @@ func show_game_over(text: String) -> void:
 			["Main menu", func(): game.return_to_menu()]])
 
 
-func _show_upgrade_choice(slot: int, unit: ArmyUnit) -> void:
-	var buttons := []
-	for choice in MatchRules.upgrade_choices(unit):
-		var upgrade: Upgrade = choice["upgrade"]
-		var path := unit.path.duplicate()
-		path.append(choice["index"])
-		buttons.append(["%s: %s" % [RandomTeams.path_label(path), describe_upgrade(upgrade)],
-				_pick_upgrade.bind(slot, choice["index"])])
-	buttons.append(["Cancel", func(): hide_result()])
-	_show_popup("Choose %s's upgrade:" % unit.display_name(), buttons)
-
-
-## Aura upgrade system (MatchRules.aura_upgrades): `unit`'s upgrade choices, as two small
+## `unit`'s upgrade choices, as two small
 ## cards beside the unit info panel. Click one to buy it; click anywhere else (or the
 ## Upgrade button again) to close. Planning only.
 func show_upgrade_menu(unit: ArmyUnit) -> void:
-	if not MatchRules.aura_upgrades or unit.is_maxed() or game.phase != MatchGame.Phase.PLANNING or MatchGame.spectating:
+	if unit.is_maxed() or game.phase != MatchGame.Phase.PLANNING or MatchGame.spectating:
 		return
 	if _upgrade_menu == null:
 		_build_upgrade_menu()
@@ -1210,11 +1188,6 @@ static func describe_upgrade(upgrade: Upgrade) -> String:
 	return "\n".join(parts)
 
 
-func _pick_upgrade(slot: int, choice: int) -> void:
-	hide_result()
-	game.buy_unit(slot, choice)
-
-
 func is_over_bench(screen_point: Vector2) -> bool:
 	return _side.visible and _bench_box.get_global_rect().has_point(screen_point)
 
@@ -1313,18 +1286,12 @@ func _refresh_shop() -> void:
 		match info["kind"]:
 			"buy":
 				cost = "Buy " + aura_text(info["aura"])
-			"upgrade":
-				cost = "Upgrade " + aura_text(info["aura"])
 			"buff":
 				cost = "Buff " + reserve_text(info["reserve"])
 		button.disabled = not MatchRules.can_afford(p, info)
 		_set_rich_text(button, "%s\n%s" % [title, cost], 10, 0.0, SHOP_TILE.y - 34.0)
 		picture.modulate.a = 0.45 if button.disabled else 1.0
-		if info["kind"] == "upgrade":
-			var owned := p.find_unit(data)
-			button.pressed.connect(func(): _show_upgrade_choice(slot, owned))
-		else:
-			button.pressed.connect(func(): game.buy_unit(slot))
+		button.pressed.connect(func(): game.buy_unit(slot))
 		button.mouse_entered.connect(show_unit_tip.bind(button, data))
 		button.mouse_exited.connect(hide_unit_tip)
 		_shop_units.add_child(button)
@@ -1399,7 +1366,7 @@ func _refresh_bench() -> void:
 		if game.held.get("bench") == unit:
 			button.modulate = HELD_COLOR
 		button.pressed.connect(func(): game.bench_clicked(unit))
-		if MatchRules.aura_upgrades and not unit.is_maxed():
+		if not unit.is_maxed():
 			button.tooltip_text += "\nRight-click to upgrade (%d Aura)." % MatchRules.upgrade_cost(unit)
 			button.gui_input.connect(func(event: InputEvent):
 				if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -1607,7 +1574,7 @@ func _refresh_upgrade_button(unit: ArmyUnit) -> void:
 	for child in slot.get_children():
 		slot.remove_child(child)
 		child.queue_free()
-	slot.visible = unit != null and MatchRules.aura_upgrades and not unit.is_maxed()
+	slot.visible = unit != null and not unit.is_maxed()
 	if not slot.visible:
 		return
 	var cost := MatchRules.upgrade_cost(unit)
@@ -1681,7 +1648,5 @@ func _refresh_hint() -> void:
 				game.player.inventory[game.held["item"]].get_display_name()
 	elif game.held.has("bench"):
 		_hint.text = "Placing %s: click a cell on your half (right-click to cancel)." % game.held["bench"].label()
-	elif MatchRules.aura_upgrades:
-		_hint.text = "Drag your units to rearrange them. Click a unit (or right-click it on the bench) to upgrade it."
 	else:
-		_hint.text = "Drag your units to rearrange them."
+		_hint.text = "Drag your units to rearrange them. Click a unit (or right-click it on the bench) to upgrade it."

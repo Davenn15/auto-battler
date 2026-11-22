@@ -14,7 +14,6 @@ extends Node
 ##     --no-halving      the old even testing: --battles N per plan (default 2) and
 ##                       --pick-battles N per Ascension option (default 6)
 ##     --seed N
-##     --aura-upgrades   the Aura upgrade system (MatchRules.aura_upgrades); off = the old shop upgrades
 ##
 ## Both players use the computer's strategy (AiPolicy.load_trained(): the trained one in
 ## data/ai/ if there is one, else the default), and battles run in lean mode (SimMode).
@@ -51,7 +50,6 @@ func _ready() -> void:
 	pick_rungs = _arg(args, "--pick-rungs", pick_rungs)
 	halving = not args.has("--no-halving")
 	seed_value = int(_arg(args, "--seed", str(randi())))
-	MatchRules.aura_upgrades = args.has("--aura-upgrades")
 	if args.has("--worker"):
 		_worker(args)
 	else:
@@ -73,8 +71,8 @@ func _coordinate() -> void:
 	FileAccess.open(out_path, FileAccess.WRITE).close()
 	var count := clampi(workers, 1, total_matches)
 	var testing := ("halving %s, Ascensions %s" % [rungs, pick_rungs]) if halving else ("%d battles per plan, %d per Ascension" % [battles, pick_battles])
-	print("Real sim: %d matches on %d workers (%d plans, %s), seed %d, aura upgrades %s, strategy %s -> %s" %
-			[total_matches, count, candidates, testing, seed_value, "on" if MatchRules.aura_upgrades else "off",
+	print("Real sim: %d matches on %d workers (%d plans, %s), seed %d, strategy %s -> %s" %
+			[total_matches, count, candidates, testing, seed_value,
 			"trained" if AiPolicy.has_trained() else "default", out_dir])
 	var pids: Array = []
 	for w in count:
@@ -84,7 +82,7 @@ func _coordinate() -> void:
 				"--worker", "--matches", str(mine), "--seed", str(seed_value * 1000 + w),
 				"--candidates", str(candidates), "--battles", str(battles), "--pick-battles", str(pick_battles),
 				"--rungs", rungs, "--pick-rungs", pick_rungs,
-				"--out", out_dir.path_join("w%d.jsonl" % w)] + (["--aura-upgrades"] if MatchRules.aura_upgrades else [])
+				"--out", out_dir.path_join("w%d.jsonl" % w)]
 				+ ([] if halving else ["--no-halving"]))
 		pids.append(pid)
 	var started := Time.get_ticks_msec()
