@@ -1,15 +1,19 @@
 class_name ReplicantOnGambitEffect
 extends Passive
-## An Ascension effect (Spawn Protocol): whenever the unit casts its Gambit, REPLK4NTs
-## appear in free cells beside it, made the way REPL\K8R's seeds make them: the REPLK4NT's
-## own body plus a share of the unit's max health and of its attributes and wards.
+## An Ascension effect (Spawn Protocol): every time the unit has spent Charge Threshold
+## Charge on its Gambit (the whole bar, each time it casts), Count REPLK4NTs appear in free
+## cells beside it when that Gambit plays. Charge spent past a threshold carries over toward the next one, for the
+## rest of the combat. They're made the way REPL\K8R's seeds make them: the REPLK4NT's own
+## body plus a share of the unit's max health and of its attributes and wards.
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 
 ## The REPLK4NT: its own look, stats and Gambit.
 @export var profile: UnitData
-## REPLK4NTs per Gambit cast.
+## REPLK4NTs each time the threshold is reached.
 @export var count: int = 1
+## Charge the unit must spend for each spawn.
+@export var charge_threshold: float = 100.0
 ## Share of the unit's max health the REPLK4NT adds to its own, and of its attributes and wards.
 @export_range(0.0, 1.0, 0.05) var health_share: float = 0.2
 @export_range(0.0, 1.0, 0.05) var stat_share: float = 0.2
@@ -45,22 +49,29 @@ func spawn(unit: BattleUnit) -> void:
 			KeepsakeVfx.missile_blast(parent, replicant.global_position, 34.0, Replicator.COLOR)
 
 
-## Listens for the unit's Gambit casts.
+## Counts the Charge the unit spends on its Gambit (all of it, at each cast).
 class SpawnStatus extends Status:
 	var effect: ReplicantOnGambitEffect
-	var _unit   # untyped: may be freed
+	var spent := 0.0   # Charge spent toward the next spawn
 
 	func _init(p_effect: ReplicantOnGambitEffect) -> void:
 		effect = p_effect
 
-	func on_applied(unit: BattleUnit) -> void:
-		_unit = unit
-		if not unit.gambit_cast.is_connected(_on_cast):
-			unit.gambit_cast.connect(_on_cast)
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return false
 
-	func on_removed(unit: BattleUnit) -> void:
-		if is_instance_valid(unit) and unit.gambit_cast.is_connected(_on_cast):
-			unit.gambit_cast.disconnect(_on_cast)
+	var _due := 0   # spawns earned at the cast, waiting for the Gambit to play
 
-	func _on_cast(unit: BattleUnit) -> void:
-		effect.spawn(unit)
+	## The Charge is counted when it's spent (the cast)...
+	func on_gambit(unit: BattleUnit) -> void:
+		spent += unit.max_charge
+		var threshold := maxf(effect.charge_threshold, 1.0)
+		while spent >= threshold:
+			spent -= threshold
+			_due += 1
+
+	## ...and the REPLK4NTs it earned appear when the Gambit plays.
+	func on_gambit_played(unit: BattleUnit) -> void:
+		while _due > 0:
+			_due -= 1
+			effect.spawn(unit)

@@ -7,6 +7,7 @@ var time_left: float
 var might_bonus: float
 var celerity_bonus: float
 var burn_per_second: float   # share of max health lost each second (0.04 = 4%)
+var voltage_per_second := 0.0   # A2: Voltage built each second while it lasts
 
 
 func _init(p_duration: float, p_might: float, p_celerity: float, p_burn: float) -> void:
@@ -38,6 +39,8 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	if time_left <= 0.0:
 		unit.remove_status(self)
 		return
+	if voltage_per_second > 0.0:
+		VoltageStatus.ensure(unit).add(voltage_per_second * delta)
 	unit.add_running_damage("self_burn", unit.take_warded_damage(unit.max_health * burn_per_second * delta, false, Stats.DamageType.PURE), OverdriveStatus.OVERDRIVE_GLOW)
 
 

@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="Ascension" format=3]
+[gd_resource type="Resource" script_class="Ascension" format=3 uid="uid://b8yse0w4iq481"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/glory_boon_effect.gd" id="2"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_l7f3r"]
+[ext_resource type="Script" uid="uid://bi7reay7gvbe" path="res://data/ascensions/effects/glory_boon_effect.gd" id="2"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
-extra_cap = 1
 charge_share = 0.5
 
 [resource]

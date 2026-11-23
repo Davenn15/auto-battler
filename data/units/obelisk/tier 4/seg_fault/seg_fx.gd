@@ -116,6 +116,13 @@ class IonBolt extends Projectile:
 	const SPIN := 12.0                # radians a second it turns
 	var on_hit: Callable
 	var _reflected := false
+	## SEG.FAULT's hero Ascension (SegBounceEffect): after hitting its target the bolt flies
+	## on to the board's edge, bounces once, and hits the first enemy on its way back.
+	var bounces := 0
+	var _grid: BattleGrid
+	var _free_flight := false   # past its target, heading for the edge or back
+	var _free_dir := Vector2.ZERO
+	var _bounced := false
 	var _trail: Array[Vector2] = []
 	var _spin := 0.0
 
@@ -133,13 +140,18 @@ class IonBolt extends Projectile:
 		speed = BOLT_SPEED
 		polygon = PackedVector2Array()   # drawn as an oval below, not the plain comet
 		z_index = 12
+		_grid = caster.grid
+		bounces = 1 if SegBounceEffect.has_on(caster) else 0
 
 	func _process(delta: float) -> void:
 		_spin = wrapf(_spin + SPIN * delta, 0.0, TAU)   # only the drawing turns
 
 	func _physics_process(delta: float) -> void:
 		var before := global_position
-		super(delta)   # flies like any Projectile (homing, slowed by bubbles, edge hits)
+		if _free_flight:
+			_fly_free(delta)
+		else:
+			super(delta)   # flies like any Projectile (homing, slowed by bubbles, edge hits)
 		if is_queued_for_deletion() or not KeepsakeVfx.enabled():
 			return
 		_trail.push_front(before)
@@ -155,7 +167,44 @@ class IonBolt extends Projectile:
 			return
 		if on_hit.is_valid():
 			on_hit.call(target)
+		if bounces > 0 and _grid != null:
+			# Its hero Ascension: on through the target, toward the edge.
+			bounces -= 1
+			_free_flight = true
+			_free_dir = _heading if _heading != Vector2.ZERO else Vector2.UP
+			return
 		_after_hit()
+
+	## Past its target: straight on to the board's edge, bounce once, then the first enemy
+	## it passes takes the Gambit's hit. It fizzles at the next edge.
+	func _fly_free(delta: float) -> void:
+		var from := global_position
+		var to := from + _free_dir * speed * speed_scale() * delta
+		if _bounced:
+			for node in get_tree().get_nodes_in_group("units"):
+				var unit := node as BattleUnit
+				if unit == null or not unit.alive or unit.team == team or not unit.is_targetable():
+					continue
+				var closest := Geometry2D.get_closest_point_to_segment(unit.global_position, from, to)
+				if closest.distance_to(unit.global_position) > HIT_DISTANCE + 8.0:
+					continue
+				global_position = closest
+				target = unit
+				_free_flight = false
+				_hit()   # reflectable, then the Gambit's hit
+				if _free_flight == false and not is_queued_for_deletion() and not _reflected:
+					_after_hit()
+				return
+		if not _grid.has_cell(_grid.world_to_cell(to)):
+			if _bounced:
+				queue_free()
+				return
+			_bounced = true
+			_free_dir = SegBounceEffect.bounce_dir(_grid, from, _free_dir)
+			_heading = _free_dir
+			return
+		global_position = to
+		_heading = _free_dir
 
 	func reflect(by: BattleUnit, wrack_chance: float, to: BattleUnit = null) -> bool:
 		if not super(by, wrack_chance, to):

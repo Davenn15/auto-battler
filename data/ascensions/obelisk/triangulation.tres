@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/column_missile_weapon.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/column/column.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+interval = 10.0
+timer_color = Color(0.85, 0.9, 1, 1)
+missiles = 5
+triangulate = 2.0
+damage = 90.0
+might_scaling = 0.5
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Triangulation"
+description = "New weapon: every 10 seconds, COLUMN launches 5 seeking missiles that hang in the air for 2 seconds triangulating, then dive at the lowest-health enemies in range (a different one each, when it can), dealing 90 + 0.5x Might damage each."
+tier = 4
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

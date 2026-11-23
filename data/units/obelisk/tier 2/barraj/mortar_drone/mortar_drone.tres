@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Mortar Drone"
+summon_only = true
+max_health = 300.0
+max_charge = 100.0
+starting_charge = 0.0

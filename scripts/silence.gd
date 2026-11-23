@@ -1,11 +1,11 @@
 class_name Silence
 extends Status
 ## The Silence keyword: a Silenced unit can't cast its Gambit or gain Charge for a while
-## (Charge it already has is kept). It's crowd control: Immovability shortens it, 100 or
-## more ignores it, and an item that lets control effects wrack lengthens it. Silencing a
-## unit that's already Silenced keeps whichever silence is longer, and counts as a new
-## silence (Codger's passive watches for it). Prancelot's Silencing Note and BATR.EE's A2
-## Volts both use it.
+## (Charge it already has is kept), and a cast time already running is paused until it ends. It's
+## crowd control: Immovability shortens it, 100 or more ignores it, and an item that lets control
+## effects wrack lengthens it. Silencing a unit that's already Silenced keeps whichever silence
+## is longer, and counts as a new silence (Codger's passive watches for it). Prancelot's
+## Silencing Note and BATR.EE's A2 Volts both use it.
 
 const COLOR := Color(0.75, 0.6, 1.0)   # violet
 

@@ -67,7 +67,8 @@ func _physics_process(delta: float) -> void:
 		if unit == null or not unit.alive or not contains(unit):
 			continue
 		if unit.team == team:
-			BubbleStatus.refresh_on(unit, key, ward_bonus, 0.0)
+			var marker := BubbleGuardEffect.marker_of(caster_id)
+			BubbleStatus.refresh_on(unit, key, ward_bonus, 0.0, marker.effect if marker != null else null)
 			if pulse and shield_per_second > 0.0:
 				unit.add_shield(shield_per_second * PULSE, shield_duration, caster_id if is_instance_id_valid(caster_id) else 0)
 		elif enemy_celerity_cut > 0.0:

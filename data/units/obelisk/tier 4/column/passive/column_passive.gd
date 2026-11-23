@@ -11,6 +11,10 @@ func on_battle_start(unit: BattleUnit) -> void:
 
 
 class ColumnStatus extends Status:
+	func on_applied(unit: BattleUnit) -> void:
+		unit.hide_attack_bar()   # its weapons have their own timer bars
+		unit.hide_charge_bar()   # no Gambit, no Charge
+
 	func blocks_attacks(_unit: BattleUnit) -> bool:
 		return true   # its weapons are its only attacks
 

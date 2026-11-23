@@ -9,6 +9,8 @@ const GLOW_KEY := "VfxGrouserShred"
 const WARDS := [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]
 
 var _entries: Array = []   # [stat, amount, time left]
+## A duration that never runs out within a combat.
+const FOREVER := 1.0e9
 
 
 ## Grouser takes `amount` of `stat` (a ward) from `target` for `duration` seconds. If he can
@@ -16,6 +18,8 @@ var _entries: Array = []   # [stat, amount, time left]
 static func shred(grouser: BattleUnit, target: BattleUnit, stat: Stats.Stat, amount: float, duration: float) -> void:
 	if not is_instance_valid(target) or not target.alive or amount <= 0.0:
 		return
+	if LastingWardsEffect.has_on(grouser):
+		duration = FOREVER   # his hero Ascension: his shreds never wear off
 	_on(target).add(stat, -amount, duration)
 	if is_instance_valid(grouser) and grouser.alive:
 		for status in grouser.statuses:

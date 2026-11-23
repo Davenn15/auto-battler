@@ -13,7 +13,7 @@ amount = 1
 [resource]
 script = ExtResource("1")
 ascension_name = "Rummage"
-description = "When Sumpton finishes casting his Gambit, he has a 35% chance to rummage through his bag and earn you 1 Reserve after the combat."
+description = "When Sumpton plays his Gambit, he has a 35% chance to rummage through his bag and earn you 1 Reserve after the combat."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

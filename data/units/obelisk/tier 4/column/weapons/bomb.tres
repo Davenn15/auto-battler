@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1")
 damage = 90.0
+timer_color = Color(1, 0.5, 0.2, 1)
 interval = 5.0
 passive_name = "Matter Bomb"
 description = "Every 5 seconds: lobs an unstable matter bomb at the enemy with the lowest health. It bursts on landing, dealing 90 + 0.6x Might damage to every enemy within 1 cell."

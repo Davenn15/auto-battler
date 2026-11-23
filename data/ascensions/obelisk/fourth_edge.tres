@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/fourth_edge_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/shred/shred.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+strikes = 4
+max_vampirism = 0.3
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Fourth Edge"
+description = "SHRED's attack is split into 4 strikes instead of 3, and it gains Vampirism as its health drops, up to 30% near 0 health."
+tier = 3
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

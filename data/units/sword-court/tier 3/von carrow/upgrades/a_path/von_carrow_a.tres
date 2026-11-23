@@ -7,7 +7,7 @@
 
 [resource]
 script = ExtResource("1_cvkwx")
-description = "Each cast gives her Might for the rest of combat."
+description = "Her Gambit also gives her Might for the rest of combat, stacking."
 next_choices = Array[ExtResource("1_cvkwx")]([ExtResource("2_6fk18"), ExtResource("3_253ir")])
 gambit_overrides = Dictionary[String, float]({
 "might_per_cast": 35.0

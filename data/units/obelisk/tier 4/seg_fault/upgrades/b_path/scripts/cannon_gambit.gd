@@ -65,6 +65,7 @@ func execute(caster: BattleUnit) -> void:
 	orb.end = edge
 	orb.dir = dir
 	orb.reach = spacing * half_width
+	orb.bounces = 1 if SegBounceEffect.has_on(caster) else 0
 	if mark_duration > 0.0:
 		_last_group += 1
 		orb.group = _last_group   # this orb's marks share it
@@ -105,6 +106,8 @@ class CannonOrb extends Projectile:
 	var dir := Vector2.RIGHT
 	var reach := 50.0
 	var group := 0
+	## SEG.FAULT's hero Ascension (SegBounceEffect): bounces left at the board's edge.
+	var bounces := 0
 	var _hit_ids := {}
 	var _reflected := false
 	var _spin := 0.0
@@ -139,6 +142,13 @@ class CannonOrb extends Projectile:
 		if step >= left - 0.01:
 			if not _reflected:
 				_detonate()
+			if bounces > 0 and not _reflected:
+				# Its hero Ascension: off the edge and back across the board, hitting again.
+				bounces -= 1
+				dir = SegBounceEffect.bounce_dir(grid, global_position, dir)
+				end = SegBounceEffect.edge_from(grid, global_position, dir)
+				_hit_ids = {}
+				return
 			queue_free()
 
 	func _strike(unit: BattleUnit) -> void:

@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_bkxj8")
 cast_time = 0.5
-description = "A three-part combo, one part per cast: blink and strike the enemy with the most Insight, then the most Celerity, then the most health, hardest of all."
+description = "A three-part combo, one part each time: blink and strike the enemy with the most Insight, then the most Celerity, then the most health, hardest of all."
 metadata/_custom_type_script = "uid://blvbunkhy2lej"

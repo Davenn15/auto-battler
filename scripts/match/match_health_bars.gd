@@ -10,6 +10,8 @@ extends Control
 ## glows a slow red pulse. An orb that kills shatters the bar.
 
 const BAR_SIZE := Vector2(300, 16)
+## The canvas layer the damage animation draws on: above the board (0) and the HUD (1).
+const FX_LAYER := 5
 ## Gap between the board and each bar (the same above and below).
 const BOARD_GAP := 12.0
 ## Bars' vertical centres, in HUD coordinates: BOARD_GAP above and below the board.
@@ -44,6 +46,9 @@ var _danger := {true: false, false: false}
 ## Per bar: shattered by a killing orb (not drawn any more).
 var _shattered := {true: false, false: false}
 var _time := 0.0
+## The damage animation's pieces (pips, orbs, a shattered bar) go on this layer, above the
+## board, its units and the HUD, while the bars themselves stay behind the board.
+var _fx: CanvasLayer
 
 
 func _init() -> void:
@@ -53,6 +58,9 @@ func _init() -> void:
 
 func _ready() -> void:
 	_font = get_theme_default_font()
+	_fx = CanvasLayer.new()
+	_fx.layer = FX_LAYER
+	add_child(_fx)
 
 
 ## Sets both bars from the players (skipped while an animation holds them).
@@ -120,7 +128,7 @@ func _play_one(hit: Dictionary, index: int, count: int, running: Array, gather_w
 	var orb := Orb.new()
 	orb.color = MINE.lerp(ORB_COLOR, 0.5) if from_mine else THEIRS.lerp(ORB_COLOR, 0.5)
 	orb.position = orb_at
-	add_child(orb)
+	_fx.add_child(orb)
 	# The pips: the bar's (round damage) first, then each survivor's (its Aura).
 	var sources: Array = [{"at": bar_center(from_mine), "text": str(hit["round_damage"]), "color": ROUND_PIP}]
 	for survivor in hit["survivors"]:
@@ -131,7 +139,7 @@ func _play_one(hit: Dictionary, index: int, count: int, running: Array, gather_w
 		pip.text = sources[i]["text"]
 		pip.color = sources[i]["color"]
 		pip.position = sources[i]["at"]
-		add_child(pip)
+		_fx.add_child(pip)
 		var tween := pip.create_tween()
 		tween.tween_interval(i * PIP_STAGGER)
 		tween.tween_property(pip, "position", orb_at, PIP_TIME).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -162,7 +170,7 @@ func _shatter(mine: bool) -> void:
 	queue_redraw()
 	var shatter := Shatter.new()
 	shatter.setup(Rect2(bar_center(mine) - BAR_SIZE / 2.0, BAR_SIZE).grow(2.0), MINE if mine else THEIRS)
-	add_child(shatter)
+	_fx.add_child(shatter)
 	await get_tree().create_timer(SHATTER_TIME).timeout
 
 

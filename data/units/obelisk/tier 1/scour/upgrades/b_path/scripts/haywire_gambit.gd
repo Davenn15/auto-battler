@@ -1,7 +1,8 @@
 class_name HaywireGambit
 extends Gambit
 ## Scour goes haywire: dashes up to Dash Cells hexes to the spot where his blast would catch
-## the most enemies, then detonates, damaging every enemy within Radius Cells and dying.
+## the most enemies, then detonates, damaging every enemy within Radius Cells and dying
+## (unless something saves him from death, like his hero Ascension).
 ## He's dead afterwards, so he doesn't count toward the surviving Aura that damages the
 ## losing player. Damage per enemy = Damage + Might Scaling x Might.
 
@@ -38,7 +39,10 @@ func execute(caster: BattleUnit) -> void:
 		var dealt := enemy.take_damage(hit, 0, damage_type, ignore_wards, caster)
 		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
-	caster.kill()
+	# The blast kills him, unless something saves him from death (his hero Ascension).
+	caster.health = 0.0
+	if not caster._escapes_death():
+		caster.kill()
 
 
 ## {"cell": where to blow up, "count": enemies the blast would catch there}. His own cell

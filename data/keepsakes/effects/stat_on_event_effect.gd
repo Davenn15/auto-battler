@@ -2,9 +2,11 @@ class_name StatOnEventEffect
 extends Passive
 ## Each time something happens (a kill, an attack, a Gambit, an attack landing), the unit
 ## gains a stat. HIT is a Hit Effect: it happens when the attack lands, not when it's made.
+## GAMBIT is when the Gambit is cast (Charge spent); GAMBIT_PLAYED when it's played (its
+## cast time over).
 ## With a duration it's temporary; without one it stacks for the rest of combat.
 
-enum Event { KILL, ATTACK, GAMBIT, HIT }
+enum Event { KILL, ATTACK, GAMBIT, HIT, GAMBIT_PLAYED }
 
 @export var event: Event = Event.KILL
 @export var stat: Stats.Stat = Stats.Stat.MIGHT
@@ -38,6 +40,10 @@ class Tracker extends Status:
 
 	func on_gambit(unit: BattleUnit) -> void:
 		if effect.event == Event.GAMBIT:
+			_gain(unit)
+
+	func on_gambit_played(unit: BattleUnit) -> void:
+		if effect.event == Event.GAMBIT_PLAYED:
 			_gain(unit)
 
 	func get_hit_effect(unit: BattleUnit) -> HitEffect:

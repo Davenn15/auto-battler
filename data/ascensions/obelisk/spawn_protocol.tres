@@ -9,15 +9,17 @@
 script = ExtResource("3")
 profile = ExtResource("4")
 count = 1
+charge_threshold = 100.0
 
 [sub_resource type="Resource" id="Effect_tier3"]
 script = ExtResource("3")
 profile = ExtResource("4")
-count = 2
+count = 1
+charge_threshold = 60.0
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "Choose a unit: whenever it casts its Gambit, a REPLK4NT appears beside it."
+description = "Choose a unit: every time it spends 100 Charge on its Gambit, a REPLK4NT appears beside it. Leftover Charge counts toward the next one."
 tier = 1
 target = 1
 requires_gambit = true
@@ -25,7 +27,7 @@ effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "Choose a unit: whenever it casts its Gambit, two REPLK4NTs appear beside it."
+description = "Choose a unit: every time it spends 60 Charge on its Gambit, a REPLK4NT appears beside it. Leftover Charge counts toward the next one."
 tier = 3
 target = 1
 requires_gambit = true

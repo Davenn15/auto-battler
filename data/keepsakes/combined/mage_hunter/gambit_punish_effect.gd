@@ -22,13 +22,13 @@ class Vigil extends Status:
 		for node in unit.get_tree().get_nodes_in_group("units"):
 			var enemy := node as BattleUnit
 			if enemy != null and enemy.team != unit.team:
-				enemy.gambit_cast.connect(_on_enemy_cast)
+				enemy.gambit_played.connect(_on_enemy_cast)
 				_watching.append(enemy)
 
 	func on_removed(_u: BattleUnit) -> void:
 		for enemy in _watching:
-			if is_instance_valid(enemy) and enemy.gambit_cast.is_connected(_on_enemy_cast):
-				enemy.gambit_cast.disconnect(_on_enemy_cast)
+			if is_instance_valid(enemy) and enemy.gambit_played.is_connected(_on_enemy_cast):
+				enemy.gambit_played.disconnect(_on_enemy_cast)
 		_watching.clear()
 
 	func _on_enemy_cast(enemy: BattleUnit) -> void:

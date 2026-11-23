@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="Ascension" format=3]
+[gd_resource type="Resource" script_class="Ascension" format=3 uid="uid://tak7j6dkyyno"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/glory_trigger_effect.gd" id="2"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_hx4bx"]
+[ext_resource type="Script" uid="uid://bdh2lvk2f7eqs" path="res://data/ascensions/effects/glory_trigger_effect.gd" id="2"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
@@ -12,5 +13,4 @@ count = 12
 script = ExtResource("1")
 ascension_name = "Relentless"
 description = "The first time each combat a unit in your army attacks 12 times, it gains Glory."
-tier = 1
 effect = SubResource("Effect")

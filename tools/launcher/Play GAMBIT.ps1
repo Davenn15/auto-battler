@@ -1,5 +1,5 @@
-# Auto Battler launcher: downloads the newest build from GitHub if there is one, then
-# starts the game. Players run "Play Auto Battler.cmd" (double-click) instead of the exe.
+# GAMBIT launcher: downloads the newest build from GitHub if there is one, then
+# starts the game. Players run "Play GAMBIT.cmd" (double-click) instead of the exe.
 #
 # Setup (once):
 #   1. Set $Repo below to your GitHub repository, e.g. "your-name/auto-battler".
@@ -12,6 +12,8 @@
 
 param(
     [string]$Repo = "Davenn15/auto-battler",
+    # The build files keep their old "AutoBattler" names (zip, exe, process) on purpose:
+    # launchers already on players' computers look for them, so renaming would strand them.
     [string]$Asset = "AutoBattler-windows.zip",
     [switch]$CheckOnly   # only report whether an update is available
 )

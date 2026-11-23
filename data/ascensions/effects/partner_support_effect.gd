@@ -1,7 +1,7 @@
 class_name PartnerSupportEffect
 extends Passive
 ## An Ascension effect (Partners in Crime) for a pair fighting together: when the Shielder
-## casts its Gambit it shields the Partner, and when the Partner gets a kill (with an attack
+## plays its Gambit it shields the Partner, and when the Partner gets a kill (with an attack
 ## or its Gambit damage) it gives the Shielder a burst of Charge.
 
 @export var shielder: UnitData     # Sumpton
@@ -28,7 +28,7 @@ static func ally_of(unit: BattleUnit, data: UnitData) -> BattleUnit:
 	return null
 
 
-## On the Shielder: each Gambit cast shields the Partner.
+## On the Shielder: each Gambit played shields the Partner.
 class ShielderStatus extends Status:
 	var effect: PartnerSupportEffect
 
@@ -36,12 +36,12 @@ class ShielderStatus extends Status:
 		effect = p_effect
 
 	func on_applied(unit: BattleUnit) -> void:
-		if not unit.gambit_cast.is_connected(_on_cast):
-			unit.gambit_cast.connect(_on_cast)
+		if not unit.gambit_played.is_connected(_on_cast):
+			unit.gambit_played.connect(_on_cast)
 
 	func on_removed(unit: BattleUnit) -> void:
-		if is_instance_valid(unit) and unit.gambit_cast.is_connected(_on_cast):
-			unit.gambit_cast.disconnect(_on_cast)
+		if is_instance_valid(unit) and unit.gambit_played.is_connected(_on_cast):
+			unit.gambit_played.disconnect(_on_cast)
 
 	func _on_cast(unit: BattleUnit) -> void:
 		var partner := PartnerSupportEffect.ally_of(unit, effect.partner)

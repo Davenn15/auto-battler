@@ -11,6 +11,9 @@ const LIGHT := Color(0.85, 1.0, 0.6)
 
 ## Seconds between shots at normal attack speed (100 Celerity).
 @export var interval: float = 3.0
+## The colour of this weapon's timer bar on COLUMN's plate (one thin bar per timed weapon,
+## filling as it winds up; Beams and the Gatling Cannon have none).
+@export var timer_color: Color = COLOR
 
 
 func on_battle_start(unit: BattleUnit) -> void:
@@ -127,18 +130,42 @@ class TimerStatus extends Status:
 	const RETRY := 0.25   # seconds before trying again when there was nothing to fire at
 	var weapon: ColumnWeapon
 	var _left := 0.0
+	var _full := 1.0   # the wait being counted down, for the timer bar
+	var _waiting := false   # ready but nothing to fire at: the bar shows full
+	var _bar: ProgressBar
 
 	func _init(p_weapon: ColumnWeapon) -> void:
 		weapon = p_weapon
 		_left = p_weapon.interval * 0.5   # the first shot comes half an interval in
+		_full = maxf(p_weapon.interval, 0.01)
 
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false
+
+	func on_applied(unit: BattleUnit) -> void:
+		_bar = unit.add_timer_bar(weapon.timer_color)
+		_show()
+
+	func on_removed(unit: BattleUnit) -> void:
+		unit.remove_timer_bar(_bar)
+		_bar = null
+
+	func _show() -> void:
+		if is_instance_valid(_bar):
+			_bar.value = 1.0 if _waiting else clampf(1.0 - _left / _full, 0.0, 1.0)
 
 	func tick(unit: BattleUnit, delta: float) -> void:
 		if not ColumnWeapon.can_act(unit):
 			return
 		_left -= delta
 		if _left > 0.0:
+			_show()
 			return
-		_left = weapon.interval * ColumnWeapon.speed_scale(unit) if weapon.fire(unit) else RETRY
+		if weapon.fire(unit):
+			_left = weapon.interval * ColumnWeapon.speed_scale(unit)
+			_full = maxf(_left, 0.01)
+			_waiting = false
+		else:
+			_left = RETRY   # nothing to fire at: try again soon, the bar waiting full
+			_waiting = true
+		_show()

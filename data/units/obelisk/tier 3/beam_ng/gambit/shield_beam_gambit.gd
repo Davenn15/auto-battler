@@ -42,6 +42,7 @@ func execute(caster: BattleUnit) -> void:
 		return
 	caster.show_float_text("Shield Beam", BeamngPassive.LIGHT)
 	var links := BeamLinks.new(caster)
+	var fan := Beam.FanLines.new()   # extra Beams (BEAM.NG's hero Ascension)
 	var shields := {}   # ally instance id -> its BeamShieldStatus
 	var given := 0.0
 	var elapsed := 0.0
@@ -72,6 +73,10 @@ func execute(caster: BattleUnit) -> void:
 		chain.append_array(Beam.ricochet_targets(caster, chain.back(), beam_settings.extra_ricochets,
 				beam_settings.ricochet_range, chain + [caster], true))
 		links.show(chain, BeamngPassive.LIGHT)
+		var extras: Array = []
+		if beam_settings.extra_beams > 0:
+			extras = Beam.extra_beam_targets(caster, first, beam_settings.extra_beams, _range(caster), chain + [caster], true)
+		fan.show(caster, extras, BeamngPassive.LIGHT)
 		if charging > 0.0:
 			charging -= delta * beam_settings.charge_up_speed
 			continue
@@ -82,21 +87,28 @@ func execute(caster: BattleUnit) -> void:
 		var interval := Beam.tick_interval(caster.get_attack_cooldown())
 		tick_left += interval
 		links.pulse()
+		fan.pulse()
 		var per_second := Stats.scaled(shield_per_second, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT)) \
 				* beam_settings.rate
-		for index in chain.size():
-			var ally = chain[index]
+		var fed: Array = chain + extras
+		for index in fed.size():
+			var ally = fed[index]
+			if not _alive(ally):
+				continue
 			var shield: BeamShieldStatus = shields.get(ally.get_instance_id())
 			if shield == null or not ally.statuses.has(shield):
 				shield = BeamShieldStatus.new(0.0, shield_linger)
 				ally.add_status(shield)
 				shields[ally.get_instance_id()] = shield
 			var amount := per_second * BeamngPassive.distance_multiplier(caster, ally) * interval
-			if index >= own:
+			if index >= chain.size():
+				amount *= beam_settings.extra_beam_share
+			elif index >= own:
 				amount *= beam_settings.ricochet_share
 			shield.feed(amount, shield_linger, immovability)
 			given += amount
 	links.clear()
+	fan.clear()
 	if is_instance_valid(caster) and caster.is_inside_tree():
 		caster.get_tree().call_group("damage_tracker", "record_shielding", caster.get_instance_id(), given)
 

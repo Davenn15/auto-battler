@@ -78,6 +78,11 @@ class Settings extends RefCounted:
 	var ricochet_share: float = 0.5
 	## How close each extra ricochet target must be to the one before, in hex cells.
 	var ricochet_range: int = 2
+	## Extra Beams straight from the caster, each at another target when there is one (the
+	## main target again when there isn't). BEAM.NG's hero Ascension.
+	var extra_beams: int = 0
+	## How effective each extra Beam is: 0.3 = 30% of the damage or shielding.
+	var extra_beam_share: float = 0.3
 
 	func _init(p_caster: BattleUnit, p_kind: Kind) -> void:
 		caster = p_caster
@@ -138,6 +143,25 @@ static func ricochet_targets(caster: BattleUnit, from: BattleUnit, count: int, r
 	return chain
 
 
+## Targets for `count` extra Beams from `caster` (Settings.extra_beams): the nearest other
+## enemies within `range_cells` of it (with `allies`, its lowest-health other allies), never
+## one in `skip`. When there aren't enough, the rest go to `main`, the Beam's own target.
+static func extra_beam_targets(caster: BattleUnit, main: BattleUnit, count: int, range_cells: int,
+		skip: Array, allies: bool = false) -> Array:
+	var result: Array = []
+	var taken := skip.duplicate()
+	for i in count:
+		var next: BattleUnit = BeamLinks.lowest_ally(caster, caster, range_cells, taken) if allies \
+				else BeamLinks.nearest_enemy(caster, caster, range_cells, taken)
+		if next == null:
+			next = main
+		else:
+			taken.append(next)
+		if is_instance_valid(next):
+			result.append(next)
+	return result
+
+
 ## The plain damage of one Beam tick at `share` of an attack (no Wrack, no ramp), for
 ## ricochets: the caster's attack damage after its damage buffs.
 static func tick_damage(caster: BattleUnit, share: float) -> float:
@@ -159,6 +183,28 @@ static func hit_ricochets(caster: BattleUnit, targets: Array, hit: float) -> flo
 		target.add_running_damage("beam_%d" % caster.get_instance_id(), dealt, Stats.damage_color(caster.get_attack_damage_type()))
 		total += dealt
 	return total
+
+
+## The lines of a caster's extra Beams on screen: one from the caster to each target.
+class FanLines extends RefCounted:
+	var _lines: Array = []   # one RicochetLines per extra Beam
+
+	func show(caster: BattleUnit, targets: Array, color: Color) -> void:
+		while _lines.size() < targets.size():
+			_lines.append(RicochetLines.new())
+		for i in _lines.size():
+			if i < targets.size():
+				_lines[i].show(caster, [targets[i]], color)
+			else:
+				_lines[i].clear()
+
+	func pulse() -> void:
+		for lines in _lines:
+			lines.pulse()
+
+	func clear() -> void:
+		for lines in _lines:
+			lines.clear()
 
 
 ## The lines of a Beam's extra ricochets on screen: from its target to each ricochet in turn.

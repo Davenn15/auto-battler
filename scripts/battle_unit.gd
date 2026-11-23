@@ -14,8 +14,12 @@ signal status_added(unit: BattleUnit, status: Status)
 signal permanent_stats_gained(unit: BattleUnit, gains: Dictionary, copied: bool)
 ## Emitted when this unit is stunned or silenced (Codger's passive watches for it).
 signal crowd_controlled(unit: BattleUnit)
-## Emitted when this unit starts its Gambit.
+## Emitted when this unit CASTS its Gambit: its Charge is full and spent, and its cast time
+## begins.
 signal gambit_cast(unit: BattleUnit)
+## Emitted when this unit PLAYS its Gambit: its cast time is over and the Gambit starts
+## (just before it runs). With no cast time, right after gambit_cast.
+signal gambit_played(unit: BattleUnit)
 
 # Health bar fill color per team.
 const TEAM_COLORS := {
@@ -137,6 +141,7 @@ const PLATE_GAP := 1.0        # between the rows
 const HEALTH_HEIGHT := 4.0
 const CHARGE_HEIGHT := 2.0
 const ATTACK_HEIGHT := 1.0
+const TIMER_HEIGHT := 2.0     # each extra timer bar (COLUMN's weapons)
 const PIP_SIZE := Vector2(3, 3)   # one upgrade pip in the plate's left tab
 const PLATE_COLOR := Color(0.08, 0.08, 0.1, 0.75)
 const PLATE_BORDER := Color(0.35, 0.35, 0.4)
@@ -871,14 +876,19 @@ func _layout_plate() -> void:
 	var width := PLATE_WIDTH - PLATE_PAD * 2.0 - tab
 	health_bar.size = Vector2(width, HEALTH_HEIGHT)
 	var y := HEALTH_HEIGHT + PLATE_GAP
-	if charge_bar != null:
+	if charge_bar != null and charge_bar.visible:
 		charge_bar.position = Vector2(0, y)
 		charge_bar.size = Vector2(width, CHARGE_HEIGHT)
 		y += CHARGE_HEIGHT + PLATE_GAP
-	if attack_bar != null:
+	if attack_bar != null and attack_bar.visible:
 		attack_bar.position = Vector2(0, y)
 		attack_bar.size = Vector2(width, ATTACK_HEIGHT)
 		y += ATTACK_HEIGHT
+	for bar in _timer_bars:
+		y += PLATE_GAP
+		bar.position = Vector2(0, y)
+		bar.size = Vector2(width, TIMER_HEIGHT)
+		y += TIMER_HEIGHT
 	if _badges != null and is_instance_valid(_badges):
 		_badges.position = Vector2(-tab, 0)
 	var marker := health_bar.get_node_or_null("AscensionMarker")
@@ -1305,6 +1315,11 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if _casting:
+		# Silence that lands during the cast time pauses it until it ends.
+		for status in _with(&"blocks_gambit"):
+			if status.blocks_gambit(self):
+				_update_charge_bar()
+				return
 		_cast_timer -= delta
 		_update_charge_bar()
 		if _cast_timer <= 0.0:
@@ -1923,6 +1938,58 @@ func _setup_attack_bar() -> void:
 		add_child(attack_bar)
 
 
+## Extra timer bars stacked under the attack bar, one per timed weapon (COLUMN): see
+## add_timer_bar.
+var _timer_bars: Array[ProgressBar] = []
+
+
+## Adds a thin bar in `color` to the bottom of the plate, for a timer of its own (COLUMN's
+## weapons fill theirs as they wind up). Returns it, to set its value (0 to 1); null in
+## lean sim mode, where nothing is drawn.
+func add_timer_bar(color: Color) -> ProgressBar:
+	if SimMode.active or health_bar == null:
+		return null
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.min_value = 0.0
+	bar.max_value = 1.0
+	bar.step = 0.0
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var back := StyleBoxFlat.new()
+	back.bg_color = Color(0.0, 0.0, 0.0, 0.5)
+	bar.add_theme_stylebox_override("background", back)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = color
+	bar.add_theme_stylebox_override("fill", fill)
+	health_bar.add_child(bar)
+	_timer_bars.append(bar)
+	_layout_plate()
+	return bar
+
+
+func remove_timer_bar(bar: ProgressBar) -> void:
+	if bar == null:
+		return
+	_timer_bars.erase(bar)
+	if is_instance_valid(bar):
+		bar.queue_free()
+	_layout_plate()
+
+
+## Hides the attack bar, for units that never make normal attacks (COLUMN).
+func hide_attack_bar() -> void:
+	if attack_bar != null:
+		attack_bar.visible = false
+		_layout_plate()
+
+
+## Hides the Charge bar, for units with no Gambit that never gain Charge (COLUMN).
+func hide_charge_bar() -> void:
+	if charge_bar != null:
+		charge_bar.visible = false
+		_layout_plate()
+
+
 func _update_attack_bar() -> void:
 	if SimMode.active:
 		return   # lean sim mode: nothing is watching
@@ -2016,6 +2083,10 @@ func try_reflect(projectile: Projectile) -> bool:
 	for status in statuses.duplicate():
 		if status.try_reflect(self, projectile):
 			return true
+	# It will hit: statuses that soften projectiles get their say (never on Pure Damage).
+	if projectile.damage_type != Stats.DamageType.PURE:
+		for status in _with(&"modify_incoming_projectile_damage"):
+			projectile.damage = status.modify_incoming_projectile_damage(self, projectile.damage)
 	return false
 
 ## Rolls a wrack for something other than an attack. Returns 0 unless the ability can
@@ -2220,6 +2291,9 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	var dealt := _apply_damage(amount, Stats.damage_color(damage_type, wrack_level), wrack_level, show_numbers)
 	incoming_attacker = null
 	_note_direct_damage(self, dealt, show_numbers)
+	if attacker != null and dealt > 0.0 and is_instance_valid(attacker):
+		for status in attacker._with(&"on_damage_landed").duplicate():
+			status.on_damage_landed(attacker, self, dealt)
 	return dealt
 
 ## Damage that has already been through wards, such as damage released over time.
@@ -2647,6 +2721,12 @@ func _ready_to_gambit() -> bool:
 
 ## Runs the Action and marks any statuses it attached, so they block charge gain.
 func _run_gambit() -> void:
+	# The Gambit is played: its cast time is over and it starts now.
+	gambit_played.emit(self)
+	for status in statuses.duplicate():
+		status.on_gambit_played(self)
+	if not alive:
+		return
 	var before := statuses.duplicate()
 	var timer_before := _attack_timer
 	gambit.execute(self)
@@ -2670,6 +2750,7 @@ func _begin_gambit() -> void:
 	_update_charge_bar()
 	for status in statuses.duplicate():
 		status.on_gambit(self)
+	gambit.on_cast(self)
 	if gambit.cast_time <= 0.0:
 		_run_gambit()
 		return

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/mend_pulse_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/m-path/m-path.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Empathic Pulse"
+description = "M-PATH's passive returns 30% of the damage he takes as healing, instead of 15%. Every 3 seconds, allies within 2 cells are healed for 50% of the healing he received in that time."
+tier = 2
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

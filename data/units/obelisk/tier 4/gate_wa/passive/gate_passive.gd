@@ -1,8 +1,8 @@
 class_name GatePassive
 extends Passive
-## GATE.W(A) can't move or attack. Whenever it casts, every unit it brought in (its
+## GATE.W(A) can't move or attack. Whenever it plays its Gambit, every unit it brought in (its
 ## Gatelings, or allies it revived) is healed and permanently gains a share of its
-## attributes and wards for the rest of combat (GateBoonStatus, stacking each cast).
+## attributes and wards for the rest of combat (GateBoonStatus, stacking each play).
 ## With A2 that goes to every summoned or revived ally instead (GateWideBoonPassive).
 ## It also keeps a record of allies who die, for its B Gambit's revive (see ReviveGambit).
 ## While it's the only living unit on its team it takes ramping damage, like Sumpton's bag.
@@ -11,9 +11,9 @@ extends Passive
 
 ## Charge per second, only under the old Insight rule (Stats.insight_charge_regen off).
 @export var old_rule_regen: float = 8.0
-## Share of its max health each follower is healed for on every cast (0.25 = 25%).
+## Share of its max health each follower is healed for on every play (0.25 = 25%).
 @export_range(0.0, 1.0, 0.05) var cast_heal_share: float = 0.25
-## Attributes and wards each follower gains per cast, as a share (0.1 = +10% per cast).
+## Attributes and wards each follower gains per play, as a share (0.1 = +10% per play).
 @export_range(0.0, 1.0, 0.01) var cast_stat_bonus: float = 0.1
 @export_group("While alone")
 ## Share of its max health it loses per second while it's the only living unit on its team
@@ -50,22 +50,24 @@ class GateStatus extends Status:
 	func _init(p_passive: GatePassive) -> void:
 		passive = p_passive
 
-	func blocks_attacks(_unit: BattleUnit) -> bool:
-		return true   # it never attacks
+	## It never moves or attacks, unless its hero Ascension gave it legs (GateLegsEffect).
+	func blocks_attacks(unit: BattleUnit) -> bool:
+		return not GateLegsEffect.has_on(unit)
 
-	func blocks_movement(_unit: BattleUnit) -> bool:
-		return true
+	func blocks_movement(unit: BattleUnit) -> bool:
+		return not GateLegsEffect.has_on(unit)
 
 	func on_applied(unit: BattleUnit) -> void:
 		_holder = unit
-		unit.gambit_cast.connect(_on_cast)
+		unit.gambit_played.connect(_on_cast)
 
 	func on_removed(unit: BattleUnit) -> void:
-		if unit.gambit_cast.is_connected(_on_cast):
-			unit.gambit_cast.disconnect(_on_cast)
+		if unit.gambit_played.is_connected(_on_cast):
+			unit.gambit_played.disconnect(_on_cast)
 
 	func tick(unit: BattleUnit, delta: float) -> void:
-		unit._attack_timer = maxf(unit._attack_timer, 1.0)   # it never attacks
+		if not GateLegsEffect.has_on(unit):
+			unit._attack_timer = maxf(unit._attack_timer, 1.0)   # it never attacks
 		if not unit.active or not unit.alive:
 			return
 		if not Stats.insight_charge_regen and passive.old_rule_regen > 0.0:
@@ -122,7 +124,7 @@ class GateStatus extends Status:
 				"army_index": ally.get_meta("army_index", -1),
 			})
 
-	## Every cast: heal and permanently boost the units it brought in (before this cast's
+	## Every play: heal and permanently boost the units it brought in (before this play's
 	## own summons arrive, so they start fresh).
 	func _on_cast(unit: BattleUnit) -> void:
 		if not unit.is_inside_tree():
@@ -139,8 +141,8 @@ class GateStatus extends Status:
 			KeepsakeVfx.pulse_glow(ally, "VfxGateBoon", GateRules.COLOR, 0.6)
 
 
-## A follower's lasting boost from GATE.W(A)'s casts: +Bonus x stacks to its Might,
-## Insight, Celerity and all three wards. One per unit; each cast adds a stack.
+## A follower's lasting boost from GATE.W(A)'s plays: +Bonus x stacks to its Might,
+## Insight, Celerity and all three wards. One per unit; each play adds a stack.
 class GateBoonStatus extends Status:
 	const STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY,
 			Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]

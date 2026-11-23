@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Barbed Frenzy's +50 Celerity lasts for the rest of combat, stacking with every cast."
+description = "Barbed Frenzy's +50 Celerity lasts for the rest of combat, stacking each time."
 gambit_overrides = Dictionary[String, float]({
 "lasting_celerity": 1.0
 })

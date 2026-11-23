@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_ws2s5")
-description = "Casting Mark also loads pistol shots."
+description = "Mark also loads pistol shots."
 gambit_overrides = Dictionary[String, float]({
 "shots_on_cast": 3.0
 })

@@ -1,16 +1,15 @@
-[gd_resource type="Resource" script_class="Ascension" format=3]
+[gd_resource type="Resource" script_class="Ascension" format=3 uid="uid://c4lu1m1yups8q"]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/glory_trigger_effect.gd" id="2"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="1_g0io8"]
+[ext_resource type="Script" uid="uid://bdh2lvk2f7eqs" path="res://data/ascensions/effects/glory_trigger_effect.gd" id="2"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
 trigger = 2
-count = 2
 
 [resource]
 script = ExtResource("1")
 ascension_name = "Encore"
-description = "The first time each combat a unit in your army casts its Gambit for the second time, it gains Glory."
-tier = 1
+description = "The first time each combat a unit in your army plays its Gambit for the third time, it gains Glory."
 effect = SubResource("Effect")

@@ -64,13 +64,24 @@ func execute(caster: BattleUnit) -> void:
 	KeepsakeVfx.missile_blast(caster.get_parent(), caster.global_position, 40.0, Replicator.COLOR)
 	caster.show_float_text("Replicate", Replicator.LIGHT)
 	for i in cells.size():
-		Replicator.spawn(tmpl, cells[i], shares[i + 1], new_max, new_hp)
+		var copy := Replicator.spawn(tmpl, cells[i], shares[i + 1], new_max, new_hp)
+		if copy != null:   # copies start at the team's raised cost (the cast already raised it)
+			_apply_cost(copy, _team_casts(caster), charge_per_cast, false)
+
+
+## A safety measure: every cast (the moment Charge is spent, not when it plays) makes
+## Replicate cost more for every REPL\K8R on the team, so splitting can't run away. Each
+## cast so far adds Charge Per Cast to their max Charge, for the rest of combat; the new
+## copies start at the raised cost (see _apply_cost).
+func on_cast(caster: BattleUnit) -> void:
 	_raise_cost(caster)
 
 
-## A safety measure: every cast makes Replicate cost more for every REPL\K8R on the team
-## (the new copies included), so splitting can't run away. Each cast so far adds Charge
-## Per Cast to their max Charge, for the rest of combat.
+## How many times `caster`'s team has cast Replicate so far.
+static func _team_casts(caster: BattleUnit) -> int:
+	return int(caster.get_meta(CASTS_META, 0))
+
+
 func _raise_cost(caster: BattleUnit) -> void:
 	var team: Array[BattleUnit] = []
 	var casts := 0
@@ -81,7 +92,17 @@ func _raise_cost(caster: BattleUnit) -> void:
 			casts = maxi(casts, int(unit.get_meta(CASTS_META, 0)))
 	casts += 1
 	for unit in team:
-		unit.set_meta(CASTS_META, casts)
-		unit.max_charge = unit.data.max_charge + charge_per_cast * casts
-		unit.charge = minf(unit.charge, unit.max_charge)
-		unit._update_charge_bar()
+		_apply_cost(unit, casts, charge_per_cast, true)
+
+
+## Sets `unit`'s max Charge for `casts` Replicate casts so far (its bar shows the new size),
+## with a "+Max Charge" pop and a pulse when `show` and it went up.
+static func _apply_cost(unit: BattleUnit, casts: int, per_cast: float, show: bool) -> void:
+	var before := unit.max_charge
+	unit.set_meta(CASTS_META, casts)
+	unit.set_max_charge(unit.data.max_charge + per_cast * casts)
+	unit.charge = minf(unit.charge, unit.max_charge)
+	unit._update_charge_bar()
+	if show and unit.max_charge > before:
+		unit.show_float_text("+%d Max Charge" % roundi(unit.max_charge - before), Replicator.LIGHT)
+		KeepsakeVfx.pulse_glow(unit, "VfxReplCost", Replicator.COLOR, 0.5)

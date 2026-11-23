@@ -7,5 +7,5 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Open Arms"
-description = "The cast heal and boost go to every summoned or revived ally, not just its own."
+description = "The heal and boost from its passive go to every summoned or revived ally, not just its own."
 passives = Array[ExtResource("2")]([ExtResource("3")])

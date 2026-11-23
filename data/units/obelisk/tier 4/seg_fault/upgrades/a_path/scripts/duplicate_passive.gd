@@ -32,7 +32,7 @@ static func duplicate_of(unit: BattleUnit) -> BattleUnit:
 class DuplicateStatus extends Status:
 	var passive: SegDuplicatePassive
 	var done := false
-	var waiting := -1.0   # seconds since the first cast while waiting for the teleport
+	var waiting := -1.0   # seconds since the first play while waiting for the teleport
 	var copy   # untyped: may be freed
 
 	func _init(p_passive: SegDuplicatePassive) -> void:
@@ -41,7 +41,7 @@ class DuplicateStatus extends Status:
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false
 
-	func on_gambit(unit: BattleUnit) -> void:
+	func on_gambit_played(unit: BattleUnit) -> void:
 		if not done and waiting < 0.0:
 			waiting = 0.0
 

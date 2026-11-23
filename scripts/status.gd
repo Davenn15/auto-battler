@@ -104,9 +104,14 @@ func reduces_damage(_unit: BattleUnit) -> bool:
 func on_glory_gained(_unit: BattleUnit) -> void:
 	pass
 
-## Called once the unit finishes casting its Gambit: its Act time is over and the Gambit
-## has gone off (whatever path's Gambit it is).
+## Called once the unit's Gambit has been played and has run (whatever path's Gambit it
+## is). Use on_gambit_played for effects at the moment it's played, before it runs.
 func on_gambit_finished(_unit: BattleUnit) -> void:
+	pass
+
+## Called when the unit PLAYS its Gambit: its cast time is over and the Gambit starts (just
+## before it runs). With no cast time, this comes right after on_gambit.
+func on_gambit_played(_unit: BattleUnit) -> void:
 	pass
 
 ## Called on each of a unit's statuses as it dies, before it leaves the board.
@@ -132,7 +137,8 @@ func blocks_charge_gain(_unit: BattleUnit) -> bool:
 func modify_projectile_color(_unit: BattleUnit, color: Color) -> Color:
 	return color
 
-## Called when the unit Acts (at the moment its charge is spent).
+## Called when the unit CASTS its Gambit: its Charge is full and spent, and its cast time
+## begins (see on_gambit_played for when the cast time ends).
 func on_gambit(_unit: BattleUnit) -> void:
 	pass
 
@@ -270,6 +276,19 @@ func on_dodge(_unit: BattleUnit) -> void:
 ## True makes the unit untargetable: enemies drop it as their target and can't pick it.
 func blocks_targeting(_unit: BattleUnit) -> bool:
 	return false
+
+## Changes the damage an enemy projectile is about to deal to the unit (after no status
+## reflected it). Not called for Pure Damage, which can't be reduced. Bubbler's hero
+## Ascension.
+func modify_incoming_projectile_damage(_unit: BattleUnit, damage: float) -> float:
+	return damage
+
+## On the attacker: called after any hit it's named as the attacker of (take_damage with
+## an attacker: attacks, projectiles, most Gambit hits) lands, with what it dealt. Unlike
+## on_direct_damage_dealt, summons get it for their own hits (their damage is credited to
+## their summoner). Recycloid's hero Ascension.
+func on_damage_landed(_unit: BattleUnit, _target: BattleUnit, _dealt: float) -> void:
+	pass
 
 ## Called when a projectile is about to hit the unit. Return true if this status sent it
 ## somewhere else (by calling projectile.reflect), so it doesn't hit.

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/pulse_drone_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/ctrl_r/ctrl_r.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Pulse Drone"
+description = "The first time each combat CTRL(R) drops below 50% health, it launches a pulse drone that detonates over the most enemies: enemies within 2 cells are stunned for 1 second, and allies there gain a 150 Shield for 4 seconds."
+tier = 4
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

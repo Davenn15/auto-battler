@@ -15,6 +15,12 @@ func can_use(_caster: BattleUnit) -> bool:
 	return true
 
 
+## Runs when the Gambit is CAST: Charge is full and spent and the cast time begins (the
+## Gambit is played, and execute runs, when the cast time ends). Most Gambits don't need it.
+func on_cast(_caster: BattleUnit) -> void:
+	pass
+
+
 ## The effect itself. Runs when Act time ends (immediately if cast_time is 0).
 ## The caster or its target may have died while Acting, so check before using them.
 func execute(_caster: BattleUnit) -> void:

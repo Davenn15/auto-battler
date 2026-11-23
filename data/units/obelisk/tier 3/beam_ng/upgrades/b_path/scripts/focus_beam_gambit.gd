@@ -40,6 +40,7 @@ func execute(caster: BattleUnit) -> void:
 	var mark := FocusMarkStatus.new(caster, mark_share)
 	target.add_status(mark)
 	var links := BeamLinks.new(caster)
+	var fan := Beam.FanLines.new()   # extra Beams (BEAM.NG's hero Ascension)
 	var beams := {}   # enemy instance id -> its BeamngBeamStatus (used as a damage helper)
 	var kills := 0
 	var elapsed := 0.0
@@ -75,6 +76,10 @@ func execute(caster: BattleUnit) -> void:
 		chain.append_array(Beam.ricochet_targets(caster, chain.back(), beam_settings.extra_ricochets,
 				beam_settings.ricochet_range, chain))
 		links.show(chain, BeamngPassive.COLOR)
+		var extras: Array = []
+		if beam_settings.extra_beams > 0:
+			extras = Beam.extra_beam_targets(caster, target, beam_settings.extra_beams, caster.attack_range, chain)
+		fan.show(caster, extras, BeamngPassive.COLOR)
 		if charging > 0.0:
 			charging -= delta * beam_settings.charge_up_speed
 			continue
@@ -82,10 +87,14 @@ func execute(caster: BattleUnit) -> void:
 		while tick_left <= 0.0:
 			tick_left += Beam.tick_interval(caster.get_attack_cooldown())
 			links.pulse()
-			for i in chain.size():
-				var enemy = chain[i]
+			fan.pulse()
+			var hit_list: Array = chain + extras
+			for i in hit_list.size():
+				var enemy = hit_list[i]
 				var share := Beam.tick_share(beam_settings)
-				if i >= own:
+				if i >= chain.size():
+					share *= beam_settings.extra_beam_share
+				elif i >= own:
 					share *= beam_settings.ricochet_share
 				if not _alive(enemy):
 					continue
@@ -101,6 +110,7 @@ func execute(caster: BattleUnit) -> void:
 		if _alive(caster):
 			beam._flush(caster)   # the last partial attack's effects
 	links.clear()
+	fan.clear()
 	if is_instance_valid(target) and target.statuses.has(mark):
 		target.remove_status(mark)
 	if kills > 0 and charge_on_kill > 0.0 and _alive(caster):

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/keepsakes/effects/stat_on_event_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/byte/byte.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+visual = 2
+event = 2
+stat = 1
+amount = 30.0
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Bit Stacking"
+description = "Each time BYTE casts its Gambit, it gains 30 Insight for the rest of combat."
+tier = 1
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

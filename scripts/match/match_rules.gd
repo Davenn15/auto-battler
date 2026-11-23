@@ -4,7 +4,7 @@ extends RefCounted
 ## and damage. Both the screen and the computer opponent go through these, so they always
 ## play by the same rules.
 
-const START_HP := 64
+const START_HP := 90
 const START_RESERVE := 10
 ## Loss damage starts from this, plus half the round number (see round_damage).
 const ROUND_DAMAGE_BASE := 3

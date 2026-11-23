@@ -16,7 +16,7 @@ signal message(kind: String, data: Dictionary)
 const PORT := 7777
 ## Bump whenever a change would make two copies play differently. Copies with different
 ## versions refuse to play each other.
-const PROTOCOL_VERSION := "proto-6"   # 6: Aura upgrades only (5: un-ready)
+const PROTOCOL_VERSION := "proto-7"   # 7: 90 player health (6: Aura upgrades only, 5: un-ready)
 
 enum Mode { OFFLINE, HOST, CLIENT }
 

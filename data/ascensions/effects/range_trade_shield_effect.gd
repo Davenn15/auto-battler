@@ -2,7 +2,7 @@ class_name RangeTradeShieldEffect
 extends Passive
 ## An Ascension effect (Point Blank): the unit loses Range Loss attack range (never below
 ## 1), and gains a Shield of Shield Share of its max health for Shield Duration seconds
-## each time it casts its Gambit. (Its stat gains are the Ascension's own stats.)
+## each time it plays its Gambit. (Its stat gains are the Ascension's own stats.)
 
 @export var range_loss: int = 2
 @export_range(0.0, 1.0, 0.01) var shield_share: float = 0.3
@@ -20,5 +20,5 @@ class GambitShieldStatus extends Status:
 	func _init(p_effect: RangeTradeShieldEffect) -> void:
 		effect = p_effect
 
-	func on_gambit(unit: BattleUnit) -> void:
+	func on_gambit_played(unit: BattleUnit) -> void:
 		unit.add_shield(unit.max_health * effect.shield_share, effect.shield_duration, unit.get_instance_id())

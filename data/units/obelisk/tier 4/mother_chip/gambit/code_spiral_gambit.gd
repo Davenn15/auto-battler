@@ -25,6 +25,7 @@ func execute(caster: BattleUnit) -> void:
 	spiral.center = center
 	spiral.team = caster.team
 	spiral.credit_id = caster.get_credit_id()
+	spiral.caster_id = caster.get_instance_id()
 	spiral.radius_cells = radius_cells
 	spiral.time_left = duration
 	spiral.duration = duration
@@ -68,6 +69,7 @@ class CodeSpiral extends Node2D:
 	var center: Vector2i
 	var team := 0
 	var credit_id := 0
+	var caster_id := 0   # MOTHER-CHIP herself (her hero Ascension's knock-up)
 	var radius_cells := 1
 	var time_left := 5.0
 	var duration := 5.0
@@ -89,6 +91,7 @@ class CodeSpiral extends Node2D:
 				if unit != null and unit.alive and unit.active and unit.team != team \
 						and grid.get_distance(center, unit.cell) <= radius_cells:
 					MonoVirusStatus.infect(unit, stacks, credit_id)
+					CodeShockEffect.touch(caster_id, unit)
 		if time_left <= 0.0:
 			_fading = true
 			var tween := create_tween()

@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1")
+timer_color = Color(1, 0.82, 0.3, 1)
 interval = 10.0
 passive_name = "Fabricator"
 description = "Every 10 seconds: manufactures a random full keepsake and magnetizes it to the nearest ally with an open slot, which equips it for the rest of combat and gains a 150 Shield for 4 seconds. If no ally has an open slot, the nearest ally still gets the Shield."

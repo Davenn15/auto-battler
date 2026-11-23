@@ -11,5 +11,5 @@ second_shard = 4
 effect = ExtResource("2_effect")
 might_ward = 35.0
 insight = 20.0
-description = "Whenever you play your Gambit, gain 50 Might Ward for 3 seconds."
+description = "Whenever you cast your Gambit, gain 50 Might Ward for 3 seconds."
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -8,4 +8,4 @@ celerity = 40.0
 ward_bonus = 25.0
 duration = 4.0
 passive_name = "Overclocked Frame"
-description = "After casting its Gambit, FRAME gains 40 Celerity and 25 to each Ward for 4 seconds."
+description = "After playing its Gambit, FRAME gains 40 Celerity and 25 to each Ward for 4 seconds."

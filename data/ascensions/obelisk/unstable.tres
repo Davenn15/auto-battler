@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/unstable_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 3/batr_ee/batr_ee.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+self_damage = 0.15
+stun = 1.5
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Unstable"
+description = "BATR.EE gains 50 Insight and 30 Celerity, but after each of its Gambits it takes 15% of its max health as Pure Damage and is stunned for 1.5 seconds."
+tier = 3
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+celerity = 30.0
+insight = 50.0
+effect = SubResource("Effect")

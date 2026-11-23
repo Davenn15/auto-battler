@@ -10,7 +10,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Return"
-description = "New Gambit: Return. Revives the last ally that died beside it with 40% of its health (each ally only once). Revived allies count as its own for the cast heal and boost. Whenever an ally dies, gains 20 Charge."
+description = "New Gambit: Return. Revives the last ally that died beside it with 40% of its health (each ally only once). Revived allies count as its own for its passive's heal and boost. Whenever an ally dies, gains 20 Charge."
 passives = Array[ExtResource("2")]([ExtResource("6")])
 gambit = ExtResource("3")
 next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

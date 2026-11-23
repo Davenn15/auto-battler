@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/recycle_leech_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/recycloid/recycloid.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+share = 0.5
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Closed Loop"
+description = "Recycloid heals for 50% of his Gambit damage, and for 50% of the damage his revived ally deals."
+tier = 1
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

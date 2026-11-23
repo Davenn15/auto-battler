@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Ascension" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/effects/mortar_uplink_effect.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/barraj/barraj.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("2")
+
+[resource]
+script = ExtResource("1")
+ascension_name = "Mortar Uplink"
+description = "The first time BAR.RAJ plays his Gambit each combat, a Mortar Drone appears beside him for the rest of combat. It has 30% of his max health and his Wards, never moves or attacks, and every 5 seconds fires a volley of 3 of his Gambit's missiles at 70% damage."
+tier = 2
+affected_units = Array[ExtResource("4")]([ExtResource("3")])
+effect = SubResource("Effect")

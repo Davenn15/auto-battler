@@ -11,6 +11,11 @@ var pop_stun: float
 var damage_type: int
 var _popped := false
 var _visual: Node2D
+## Bubbler's hero Ascension (BubbleGuardEffect): extra Wards and less projectile damage for
+## the unit holding this bubble. Read from Bubbler the first time it's needed.
+var _guard_ward := 0.0
+var _guard_cut := 0.0
+var _guard_checked := false
 
 
 func _init(p_shield: float, p_duration: float) -> void:
@@ -39,6 +44,28 @@ func on_removed(unit: BattleUnit) -> void:
 	super(unit)
 	if is_instance_valid(_visual):
 		_visual.queue_free()
+
+
+func _check_guard() -> void:
+	if _guard_checked:
+		return
+	_guard_checked = true
+	var marker := BubbleGuardEffect.marker_of(caster_id)
+	if marker != null:
+		_guard_ward = marker.effect.ward_bonus
+		_guard_cut = marker.effect.projectile_cut
+
+
+func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
+	_check_guard()
+	if _guard_ward != 0.0 and stat in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
+		return value + _guard_ward
+	return value
+
+
+func modify_incoming_projectile_damage(_unit: BattleUnit, damage: float) -> float:
+	_check_guard()
+	return damage * (1.0 - _guard_cut)
 
 
 func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:

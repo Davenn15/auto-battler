@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_eff")
 visual = 2
-event = 2
+event = 4
 stat = 1
 amount = 15.0
 metadata/_custom_type_script = "uid://dcp4ys2j7wj5p"

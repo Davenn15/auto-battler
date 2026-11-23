@@ -38,6 +38,7 @@ var _visual: BeamLine = null
 var pulse_age := 99.0
 var _range_given := 0   # Beam range bonus currently added to the unit's attack range
 var _ricochet_lines := Beam.RicochetLines.new()
+var _fan_lines := Beam.FanLines.new()   # extra Beams (BEAM.NG's hero Ascension)
 
 
 func _init(p_retarget_delay: float) -> void:
@@ -51,6 +52,7 @@ func on_removed(unit: BattleUnit) -> void:
 	if is_instance_valid(unit):
 		unit.attack_range -= _range_given
 	_range_given = 0
+	_fan_lines.clear()
 
 
 func blocks_attacks(_unit: BattleUnit) -> bool:
@@ -69,6 +71,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	if not _can_fire(unit, enemy):
 		_show(unit, null, false)
 		_ricochet_lines.clear()
+		_fan_lines.clear()
 		return
 	if enemy != _target:
 		_flush(unit)
@@ -80,6 +83,7 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		_charging -= delta * beam.charge_up_speed
 		_show(unit, enemy, false)
 		_ricochet_lines.clear()
+		_fan_lines.clear()
 		return
 	_show(unit, enemy, true)
 	_firing_time += delta * beam.ramp_speed
@@ -88,6 +92,10 @@ func tick(unit: BattleUnit, delta: float) -> void:
 	if beam.extra_ricochets > 0:
 		ricochets = Beam.ricochet_targets(unit, enemy, beam.extra_ricochets, beam.ricochet_range, [enemy])
 	_ricochet_lines.show(enemy, ricochets, beam_color(unit))
+	var extras: Array = []
+	if beam.extra_beams > 0:
+		extras = Beam.extra_beam_targets(unit, enemy, beam.extra_beams, unit.attack_range, [enemy] + ricochets)
+	_fan_lines.show(unit, extras, beam_color(unit))
 	while _tick_left <= 0.0 and _alive(enemy):
 		_tick_left += Beam.tick_interval(unit.get_attack_cooldown())
 		var share := Beam.tick_share(beam)
@@ -95,6 +103,9 @@ func tick(unit: BattleUnit, delta: float) -> void:
 		Beam.notify_tick(unit, enemy)
 		if not ricochets.is_empty():
 			_dealt += Beam.hit_ricochets(unit, ricochets, Beam.tick_damage(unit, share) * beam.ricochet_share)
+		if not extras.is_empty():
+			_dealt += Beam.hit_ricochets(unit, extras, Beam.tick_damage(unit, share) * beam.extra_beam_share)
+			_fan_lines.pulse()
 		pulse_age = 0.0
 		if is_instance_valid(_visual):
 			_visual.pulse()
