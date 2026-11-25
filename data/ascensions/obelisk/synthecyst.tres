@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/synthecyst_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+absorb_share = 0.75
+revive_base_share = 0.15
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+absorb_share = 1.0
+revive_base_share = 0.15
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+absorb_share = 1.25
+revive_base_share = 0.15
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+absorb_share = 1.5
+revive_base_share = 0.15
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "The first time your army summons a unit, it summons the Synthecyst instead: a slow melee brawler that absorbs {absorb_share%} of the summon's max health, attributes and Wards. While it lives, your later summons are absorbed into it instead. If it's dead, the next summon Revives it with the health it absorbs plus {revive_base_share%} of its base health."
+tier = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "The first time your army summons a unit, it summons the Synthecyst instead: a slow melee brawler that absorbs {absorb_share%} of the summon's max health, attributes and Wards. While it lives, your later summons are absorbed into it instead. If it's dead, the next summon Revives it with the health it absorbs plus {revive_base_share%} of its base health."
+tier = 2
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "The first time your army summons a unit, it summons the Synthecyst instead: a slow melee brawler that absorbs {absorb_share%} of the summon's max health, attributes and Wards. While it lives, your later summons are absorbed into it instead. If it's dead, the next summon Revives it with the health it absorbs plus {revive_base_share%} of its base health."
+tier = 3
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "The first time your army summons a unit, it summons the Synthecyst instead: a slow melee brawler that absorbs {absorb_share%} of the summon's max health, attributes and Wards. While it lives, your later summons are absorbed into it instead. If it's dead, the next summon Revives it with the health it absorbs plus {revive_base_share%} of its base health."
+tier = 4
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Synthecyst"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

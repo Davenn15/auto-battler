@@ -27,4 +27,5 @@ class ThirdPlayStatus extends Status:
 			return
 		var kind: Shard.Kind = CombatRng.pick(Shard.Kind.values())
 		ArmySpawner.earn_shard(unit.team, kind)
+		KeepsakeForge.created(unit, 1)
 		unit.show_float_text("+%s Shard" % Shard.NAMES[kind], StunBoltGambit.COLOR)

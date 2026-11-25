@@ -24,7 +24,14 @@ func execute(caster: BattleUnit) -> void:
 
 
 func _gift(caster: BattleUnit, ally: BattleUnit) -> void:
-	var held := _held_shards(ally)
+	gift_to(caster, ally)
+
+
+## Gives `ally` a temporary Shard from `giver` (combining with one it holds, or into a free
+## slot), announced to KeepsakeForge. Returns what it got, or null if it couldn't take one.
+## Replication Feed gives a unit Shards this way too.
+static func gift_to(giver: BattleUnit, ally: BattleUnit) -> Keepsake:
+	var held: Array = ally.keepsakes.filter(func(k): return k.is_shard)
 	var given: Keepsake = null
 	var replacing: Keepsake = null
 	if not held.is_empty():
@@ -36,14 +43,16 @@ func _gift(caster: BattleUnit, ally: BattleUnit) -> void:
 			replacing = own
 	if given == null:
 		if ally.keepsakes.size() >= ally.max_keepsakes():
-			return
+			return null
 		given = CombatRng.pick(MatchRules.shards())
 	if given == null:
-		return
+		return null
 	ally.swap_keepsake_in_combat(given, replacing)
 	ally.add_status(TempItemStatus.new(given, replacing))
-	KeepsakeVfx.gift_icon(caster.global_position, ally, given)
+	KeepsakeVfx.gift_icon(giver.global_position, ally, given)
 	ally.show_float_text("+" + given.get_display_name(), GIFT_COLOR)
+	KeepsakeForge.created_item(giver, given)
+	return given
 
 
 func _held_shards(unit: BattleUnit) -> Array:

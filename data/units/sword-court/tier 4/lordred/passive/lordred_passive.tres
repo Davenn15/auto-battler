@@ -1,9 +1,8 @@
-[gd_resource type="Resource" script_class="LordredPassive" format=3 uid="uid://kut5p0p4myvc"]
+[gd_resource type="Resource" script_class="SharedGainsPassive" format=3 uid="uid://kut5p0p4myvc"]
 
-[ext_resource type="Script" uid="uid://cdfg2v65k6x30" path="res://data/units/sword-court/tier 4/lordred/passive/lordred_passive.gd" id="1_0w7qu"]
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/lordred/passive/shared_gains_passive.gd" id="1"]
 
 [resource]
-script = ExtResource("1_0w7qu")
-max_bonus = 75.0
-description = "Lordred gains Might, Insight and Celerity as his health falls, up to +{max_bonus} each."
-metadata/_custom_type_script = "uid://cdfg2v65k6x30"
+script = ExtResource("1")
+share = 1.2
+description = "Whenever an ally gains stats for the rest of combat, Lordred gains {share%} of them too."

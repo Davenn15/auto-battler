@@ -1,7 +1,7 @@
 class_name ReviveGambit
 extends Gambit
-## Gateway B: brings back the last allies that died (not summons, and each only once), newest first, each with
-## Health Share of its max health. They appear beside Gateway, with their upgrades, buffs
+## Gateway B: Revives the last allies that died (not summons, and each only once), newest
+## first, each with Health Share of its max health; like every Revive, they then decay. They appear beside Gateway, with their upgrades, buffs
 ## and items, and count as its own for its cast heal and boost (GatePassive).
 ## Gateway's passive keeps the record of who fell.
 ##   B1: revived allies come back with full Charge.
@@ -51,9 +51,12 @@ func _revive(caster: BattleUnit, record: Dictionary, cell: Vector2i) -> void:
 	for item in record["items"]:   # after add_child: equip recomputes health from the data
 		unit.equip(item)
 	unit.place_at(cell)
+	Revive.mark(unit)
 	caster.get_tree().call_group("battle_manager", "add_summon", unit)
+	if not is_instance_valid(unit) or unit.is_queued_for_deletion():
+		return
 	# After add_summon: start_combat sets full health, starting charge and clears statuses.
-	unit.set_health(unit.max_health * health_share)
+	Revive.start(unit, unit.max_health * health_share)
 	if full_charge > 0.0:
 		unit.fill_charge()
 	KeepsakeVfx.gate_glow(unit, 0, GateRules.COLOR)

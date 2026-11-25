@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="AttributeWardPassive" format=3 uid="uid://cmg15ktro6j1x"]
-
-[ext_resource type="Script" uid="uid://b0jewntwhwuo3" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/scripts/attribute_ward_passive.gd" id="1_mb5w4"]
-
-[resource]
-script = ExtResource("1_mb5w4")
-scaling = 0.1
-description = "Each Ward gains {scaling%} of its matching attribute."
-metadata/_custom_type_script = "uid://b0jewntwhwuo3"

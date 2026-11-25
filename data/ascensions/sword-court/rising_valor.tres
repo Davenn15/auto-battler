@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/gambit_might_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+might_per_play = 3.0
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+might_per_play = 6.0
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+might_per_play = 9.0
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+might_per_play = 12.0
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Your units gain {might} Might. Whenever one plays its Gambit, it gains {might_per_play} Might for the rest of combat."
+tier = 1
+might = 5.0
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Your units gain {might} Might. Whenever one plays its Gambit, it gains {might_per_play} Might for the rest of combat."
+tier = 2
+might = 10.0
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Your units gain {might} Might. Whenever one plays its Gambit, it gains {might_per_play} Might for the rest of combat."
+tier = 3
+might = 15.0
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Your units gain {might} Might. Whenever one plays its Gambit, it gains {might_per_play} Might for the rest of combat."
+tier = 4
+might = 20.0
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Rising Valor"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

@@ -11,6 +11,9 @@ extends Gambit
 @export var ward_per_taunt: float = 15.0
 ## Seconds the ward bonus lasts.
 @export var ward_time: float = 4.0
+## Lordred B: the first time each combat the caster is still alive when the ward bonus
+## ends, it gains Glory.
+@export var glory_on_survive: bool = false
 
 
 func can_use(caster: BattleUnit) -> bool:
@@ -37,6 +40,30 @@ func execute(caster: BattleUnit) -> void:
 		caster.add_status(TimedStatStatus.new(ward, ward_per_taunt * taunted, ward_time))
 	caster.show_float_text("Taunt ×%d" % taunted, Color(0.85, 0.15, 0.15))
 	KeepsakeVfx.taunt_ring(caster, ward_time)   # lasts as long as the Ward bonus
+	if glory_on_survive and not caster.statuses.any(func(s): return s is TauntGloryStatus):
+		caster.add_status(TauntGloryStatus.new(ward_time))
+
+
+## Counts down the first Taunt's Ward bonus; if the unit is still alive at the end (statuses
+## stop ticking when it dies), it gains Glory. Stays on afterwards, so it's once per combat.
+class TauntGloryStatus extends Status:
+	var time_left: float
+	var done := false
+
+	func _init(p_time: float) -> void:
+		time_left = p_time
+
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return false
+
+	func tick(unit: BattleUnit, delta: float) -> void:
+		if done:
+			return
+		time_left -= delta
+		if time_left <= 0.0:
+			done = true
+			if unit.alive:
+				unit.gain_glory()
 
 
 func _enemies_in_range(caster: BattleUnit) -> Array[BattleUnit]:

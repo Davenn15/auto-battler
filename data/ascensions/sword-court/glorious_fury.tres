@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/glory_wrack_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+wrack_chance_per_glory = 0.05
+wrack_damage_per_glory = 0.05
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+wrack_chance_per_glory = 0.1
+wrack_damage_per_glory = 0.1
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Your units gain {wrack_chance_per_glory%} Wrack Chance and {wrack_damage_per_glory%} Wrack Damage for each stack of Glory they have."
+tier = 3
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Your units gain {wrack_chance_per_glory%} Wrack Chance and {wrack_damage_per_glory%} Wrack Damage for each stack of Glory they have."
+tier = 4
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Glorious Fury"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

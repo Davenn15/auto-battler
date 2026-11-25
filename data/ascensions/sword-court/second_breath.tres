@@ -1,0 +1,58 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/gain_regen_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+regen = 10.0
+duration = 4.0
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+regen = 15.0
+duration = 4.0
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+regen = 22.0
+duration = 4.0
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+regen = 30.0
+duration = 4.0
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Choose a unit: whenever it gains permanent stats, it gains {regen} Regeneration for {duration} seconds. Stacks."
+tier = 1
+target = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Choose a unit: whenever it gains permanent stats, it gains {regen} Regeneration for {duration} seconds. Stacks."
+tier = 2
+target = 1
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Choose a unit: whenever it gains permanent stats, it gains {regen} Regeneration for {duration} seconds. Stacks."
+tier = 3
+target = 1
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Choose a unit: whenever it gains permanent stats, it gains {regen} Regeneration for {duration} seconds. Stacks."
+tier = 4
+target = 1
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Second Breath"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

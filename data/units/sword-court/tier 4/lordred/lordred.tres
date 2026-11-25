@@ -6,8 +6,8 @@
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="3_3ceq5"]
 [ext_resource type="Resource" uid="uid://kut5p0p4myvc" path="res://data/units/sword-court/tier 4/lordred/passive/lordred_passive.tres" id="3_iohu0"]
 [ext_resource type="Texture2D" uid="uid://dk0a7jnl0wrr4" path="res://assets/lordred.png" id="5_eq5kh"]
-[ext_resource type="Resource" uid="uid://bnkq72bbha8op" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/lordred_a.tres" id="7_eq5kh"]
-[ext_resource type="Resource" uid="uid://btwepq6ccicui" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/lordred_b.tres" id="8_frb6k"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/lordred_a.tres" id="7_eq5kh"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/lordred_b.tres" id="8_frb6k"]
 
 [resource]
 script = ExtResource("2_qm605")
@@ -25,6 +25,6 @@ might = 110.0
 insight = 80.0
 celerity = 80.0
 might_ward = 45.0
-insight_ward = 25.0
-celerity_ward = 30.0
+insight_ward = 30.0
+celerity_ward = 35.0
 metadata/_custom_type_script = "uid://cj6m3iw6d33sq"

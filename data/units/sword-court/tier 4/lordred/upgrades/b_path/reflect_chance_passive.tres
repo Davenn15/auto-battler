@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ReflectChancePassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/scripts/reflect_chance_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+chance = 0.3
+description = "{chance%} chance to reflect each projectile that hits him back at its shooter."

@@ -94,14 +94,25 @@ func spend(amount: float) -> bool:
 		return false
 	stacks -= amount
 	_show()
+	_spent(amount)
 	return true
+
+
+## Tells the unit's statuses it spent `amount` Voltage (Status.on_voltage_spent).
+func _spent(amount: float) -> void:
+	if amount <= 0.0 or _owner == null or not is_instance_valid(_owner):
+		return
+	for status in _owner.statuses.duplicate():
+		status.on_voltage_spent(_owner, amount)
 
 
 ## The unit's Gambit is over: all its Voltage is gone (then any it's owed after, B2).
 func on_gambit_finished(_unit: BattleUnit) -> void:
+	var cleared := stacks
 	stacks = after_gambit
 	after_gambit = 0.0
 	_show()
+	_spent(cleared)
 
 
 func _show() -> void:
