@@ -1,14 +1,14 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://nwlnyg1v8h0o"]
+[gd_resource type="Resource" script_class="Upgrade" format=3]
 
-[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" uid="uid://4u4r68xeojcj" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/cutting.tres" id="3"]
-[ext_resource type="Resource" uid="uid://dyijoysdrcljr" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a1.tres" id="4"]
-[ext_resource type="Resource" uid="uid://ccbkasl7uc252" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a2.tres" id="5"]
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/cutting.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a1.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 1/scour/upgrades/a_path/scour_a2.tres" id="5"]
 
 [resource]
 script = ExtResource("1")
 upgrade_name = "Cutting"
-description = "The Beam's damage slowly ramps up until Scour switches targets."
+description = "The Beam's damage ramps up by {damage_ramp_per_second%} per second (up to +{max_damage_ramp%}) until Scour switches targets."
 passives = Array[ExtResource("2")]([ExtResource("3")])
 next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

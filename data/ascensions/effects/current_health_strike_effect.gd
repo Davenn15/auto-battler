@@ -1,6 +1,6 @@
 class_name CurrentHealthStrikeEffect
 extends Passive
-## MALLET's hero Ascension: its attacks gain a Hit Effect dealing Attack Share of the
+## Mallet's hero Ascension: its attacks gain a Hit Effect dealing Attack Share of the
 ## target's current health, and each enemy its Gambit damages (the slam, or B's flying hit)
 ## takes Gambit Share of its current health on top.
 

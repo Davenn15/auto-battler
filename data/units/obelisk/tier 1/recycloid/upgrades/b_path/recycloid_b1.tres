@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The revived ally comes back with more of its health."
+description = "The revived ally comes back with {health_fraction%} of its health."
 gambit_overrides = Dictionary[String, float]({
 "health_fraction": 0.7
 })

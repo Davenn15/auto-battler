@@ -48,17 +48,17 @@ func on_attack(_unit: BattleUnit) -> void:
 	pass
 
 ## Adjust what the unit's attack bar shows (0 to 1; `value` is how far the current attack
-## has wound up). Display only. SHRED's bar fills across all three of its attacks.
+## has wound up). Display only. Shred's bar fills across all three of its attacks.
 func modify_attack_bar(_unit: BattleUnit, value: float) -> float:
 	return value
 
-## Adjust the Charge the unit gains when one of its own attacks hits (SHRED's three
+## Adjust the Charge the unit gains when one of its own attacks hits (Shred's three
 ## attacks each give a third).
 func modify_own_attack_charge(_unit: BattleUnit, amount: float) -> float:
 	return amount
 
 ## Called whenever the unit is healed, Regeneration included, with the health it actually
-## gained (healing past max health doesn't count; see on_overheal for that). BYTE A.
+## gained (healing past max health doesn't count; see on_overheal for that). Byte A.
 func on_healed(_unit: BattleUnit, _gained: float) -> void:
 	pass
 
@@ -67,7 +67,7 @@ func on_healed(_unit: BattleUnit, _gained: float) -> void:
 func on_beam_tick(_unit: BattleUnit, _enemy: BattleUnit) -> void:
 	pass
 
-## True for the Status that IS the unit's attack Beam (BeamStatus, COLUMN's beam weapons).
+## True for the Status that IS the unit's attack Beam (BeamStatus, Column's beam weapons).
 func is_attack_beam() -> bool:
 	return false
 
@@ -89,7 +89,7 @@ func modify_incoming_damage(_unit: BattleUnit, damage: float) -> float:
 	return damage
 
 ## Called when damage would kill the unit. Return true to save it (it's left at 1 health,
-## or more if this raised it). SEG.FAULT A1: its duplicate dies instead.
+## or more if this raised it). Fault A1: its duplicate dies instead.
 func prevents_death(_unit: BattleUnit) -> bool:
 	return false
 
@@ -155,7 +155,7 @@ func get_shield(_unit: BattleUnit) -> float:
 func get_pending_damage(_unit: BattleUnit) -> float:
 	return 0.0
 
-## Healing this status will give later (like Quickscar or M-PATH's passive). Shown on the
+## Healing this status will give later (like Quickscar or M-Path's passive). Shown on the
 ## health bar as a darker stretch after current health.
 ## Beams (see Beam): change the Settings of this unit's Beams, e.g. more range, faster
 ## delivery or extra ricochets. Called every frame by each Beam; check settings.kind to
@@ -211,6 +211,61 @@ func on_summoned(_unit: BattleUnit, _summon: BattleUnit) -> void:
 func on_gambit_damage(_unit: BattleUnit, _target: BattleUnit, _amount: float) -> void:
 	pass
 
+## True if the attack the unit is making right now carries no Hit Effects (Vestibule's
+## burst: every shot but the last). Checked once per attack, before its Hit Effects are
+## gathered.
+func blocks_hit_effects(_unit: BattleUnit) -> bool:
+	return false
+
+## Voltage the unit gains (Vestibule A1 makes it more). Pass it on, changed or not.
+func modify_voltage_gain(_unit: BattleUnit, amount: float) -> float:
+	return amount
+
+## Charge the unit gains from being hit (Nullstone gives more). Pass it on, changed or not.
+func modify_hit_charge(_unit: BattleUnit, amount: float) -> float:
+	return amount
+
+## Extra Gambit damage, as a share of each Gambit hit (0.2 = +20%), dealt again right after
+## it (see BattleUnit.gambit_damage_dealt). Voltaic Rings.
+func gambit_damage_bonus(_unit: BattleUnit) -> float:
+	return 0.0
+
+## The unit Wracked: `target` is who it Wracked with damage (attacks, Gambit damage), or
+## null for an effect's Wrack (a heal, shield or control effect).
+func on_wrack_landed(_unit: BattleUnit, _target) -> void:
+	pass
+
+## An enemy (`source`) Wracked this unit with damage.
+func on_wracked_by(_unit: BattleUnit, _source: BattleUnit) -> void:
+	pass
+
+## The unit controlled or debuffed `target` (a stun, Silence, Sap, ward shred, taunt...):
+## every effect that can Wrack as control does (see BattleUnit.wrack_effect_multiplier).
+func on_control_applied(_unit: BattleUnit, _target: BattleUnit) -> void:
+	pass
+
+## The unit's control and debuff effects: a multiplier on how long (or, without a duration,
+## how strongly) they work. 1 = normal. Pass it on, changed or not.
+func modify_control_power(_unit: BattleUnit, multiplier: float) -> float:
+	return multiplier
+
+## A heal (`is_shield` false) or shield the unit gives `target`, after Wracks: change the
+## amount. `from_gambit`: the unit's Gambit gives it.
+func modify_outgoing_support(_unit: BattleUnit, _target: BattleUnit, amount: float, _is_shield: bool, _from_gambit: bool) -> float:
+	return amount
+
+## How long a shield the unit gives `target` lasts.
+func modify_support_duration(_unit: BattleUnit, _target: BattleUnit, duration: float, _from_gambit: bool) -> float:
+	return duration
+
+## The unit healed or shielded `target`.
+func on_support_given(_unit: BattleUnit, _target: BattleUnit, _is_shield: bool, _from_gambit: bool) -> void:
+	pass
+
+## A heal or shield the unit gave `target` Wracked (`amount` is what it came to).
+func on_support_wracked(_unit: BattleUnit, _target: BattleUnit, _amount: float, _is_shield: bool) -> void:
+	pass
+
 
 ## A Hit Effect for shots a Gambit made that fire on their own (Trompero's Arcane Blades),
 ## so effects on a unit's Gambit damage can ride on them too. null = none.
@@ -240,12 +295,12 @@ func blocks_crowd_control(_unit: BattleUnit) -> bool:
 	return false
 
 ## Crowd control on this unit lasts multiplier times as long (0.65 = 35% shorter).
-## MALLET's passive lowers it. Pass the value on, changed or not.
+## Mallet's passive lowers it. Pass the value on, changed or not.
 func modify_crowd_control(_unit: BattleUnit, multiplier: float) -> float:
 	return multiplier
 
 ## How effective debuffs on this unit are (0.65 = 35% less): timed ones wear off that much
-## sooner, ones that last all combat are that much weaker. MALLET's passive lowers it.
+## sooner, ones that last all combat are that much weaker. Mallet's passive lowers it.
 func modify_debuff_strength(_unit: BattleUnit, multiplier: float) -> float:
 	return multiplier
 
@@ -342,8 +397,8 @@ func ignores_wards(_unit: BattleUnit) -> bool:
 func blocks_movement(_unit: BattleUnit) -> bool:
 	return false
 
-## True while the unit's normal attacks are off (Scour's beam, Glaive's spin, COLUMN and
-## GATE.W(A)), so it never holds its Gambit to finish an attack that won't come.
+## True while the unit's normal attacks are off (Scour's beam, Glaive's spin, Column and
+## Gateway), so it never holds its Gambit to finish an attack that won't come.
 ## The status still has to keep the attack timer from firing itself.
 func blocks_attacks(_unit: BattleUnit) -> bool:
 	return false

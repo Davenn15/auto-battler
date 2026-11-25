@@ -10,4 +10,4 @@ pop_might_scaling = 0.4
 damage_type = 1
 gambit_name = "Popping"
 cast_time = 0.5
-description = "Blows bubbles that float to the most hurt nearby allies and shield them. When a bubble's shield breaks or runs out, it pops and damages nearby enemies."
+description = "Blows {bubbles} bubbles that float to the most hurt allies within {range_cells} cells and shield them for {shield_amount|shield} for {shield_duration|shieldtime} seconds. When a bubble's shield breaks or runs out, it pops and deals {pop_damage+pop_might_scaling} Insight damage to enemies within {pop_radius_cells} cells."

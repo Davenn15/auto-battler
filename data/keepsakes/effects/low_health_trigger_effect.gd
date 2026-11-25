@@ -11,6 +11,9 @@ extends Passive
 @export var vampirism_duration: float = 5.0
 ## Seconds the unit is stunned and untargetable. 0 = neither.
 @export var hide_time: float = 0.0
+## Phase Button's Empowers: Lasting Amount of Lasting Stat for the rest of combat. 0 = none.
+@export var lasting_stat: Stats.Stat = Stats.Stat.INSIGHT
+@export var lasting_amount: float = 0.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
@@ -35,3 +38,5 @@ class Watch extends Status:
 			KeepsakeVfx.pulse_glow(unit, "VfxLastChance", KeepsakeVfx.LAST_CHANCE_GLOW, effect.vampirism_duration)
 		if effect.hide_time > 0.0:
 			PhaseStatus.phase(unit, effect.hide_time)
+		if effect.lasting_amount != 0.0:
+			unit.add_status(StatBonusStatus.new(effect.lasting_stat, effect.lasting_amount))

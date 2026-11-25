@@ -9,4 +9,4 @@ profile = ExtResource("2")
 gestation = 5.0
 gambit_name = "Replication Seed"
 cast_time = 0.75
-description = "Plants a replication seed in the nearby non-REPL\\K8R ally with the lowest health. It hatches after 5 seconds, or when that ally dies, into a REPLK4NT beside it. The longer it gestates, the more health the REPLK4NT starts with (30% at once, up to full)."
+description = "Plants a replication seed in the non-Replicator ally within {range_cells} cells with the lowest health. It hatches after {gestation} seconds, or when that ally dies, into a Replicant beside it. The longer it gestates, the more health the Replicant starts with ({min_start_health%} at once, up to full)."

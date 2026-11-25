@@ -13,7 +13,7 @@ cooldown = 3.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Aftershock"
-description = "Geomond's Gambit damage stuns enemies for 1 second (at most once every 3 seconds for each enemy)."
+description = "Geomond's Gambit damage stuns enemies for {duration|cc} seconds (at most once every {cooldown} seconds for each enemy)."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

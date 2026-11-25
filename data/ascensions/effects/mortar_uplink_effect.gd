@@ -1,6 +1,6 @@
 class_name MortarUplinkEffect
 extends Passive
-## BAR.RAJ's hero Ascension: the first time each combat he plays his Gambit, a Mortar Drone
+## Barrage's hero Ascension: the first time each combat he plays his Gambit, a Mortar Drone
 ## appears in a free cell next to him. It's a normal summon that stays put for the rest of
 ## combat: Health Share of his max health, his Wards and Might (his base stats, buffs and
 ## levels included), never moves or attacks, and every Volley Interval seconds fires a
@@ -24,7 +24,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(status)
 
 
-## On BAR.RAJ: spawns the drone on his first play.
+## On Barrage: spawns the drone on his first play.
 class UplinkStatus extends Status:
 	var effect: MortarUplinkEffect
 	var spawned := false
@@ -112,7 +112,7 @@ class MortarStatus extends Status:
 
 
 ## A placeholder look, drawn in code (no art yet): a small hovering drone with a mortar tube
-## and spinning rotors, in BAR.RAJ's missile colour.
+## and spinning rotors, in Barrage's missile colour.
 class DroneLook extends Node2D:
 	const BODY := Color(0.28, 0.3, 0.36)
 	const TRIM := Color(1.0, 0.55, 0.2)

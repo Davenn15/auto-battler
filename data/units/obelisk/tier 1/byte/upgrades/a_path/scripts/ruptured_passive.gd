@@ -1,6 +1,6 @@
 class_name ByteRupturedPassive
 extends Passive
-## BYTE A (Ruptured): whenever BYTE is healed (Regeneration included), it also gains Shield
+## Byte A (Ruptured): whenever Byte is healed (Regeneration included), it also gains Shield
 ## Share of the health it actually gained as a shield lasting Duration seconds. It's one
 ## shield: each heal adds to it and starts its timer over.
 

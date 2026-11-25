@@ -1,6 +1,6 @@
 class_name CtrlPassive
 extends Passive
-## CTRL(R)'s passive: every time it takes damage it gains Ward of that damage's type for a
+## Controller's passive: every time it takes damage it gains Ward of that damage's type for a
 ## while, and the first time it drops below each health threshold it launches a siphon
 ## drone (see CtrlDrones).
 

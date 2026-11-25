@@ -1,6 +1,6 @@
 class_name GateLegsEffect
 extends Passive
-## GATE.W(A)'s hero Ascension: it sprouts legs. It walks like a normal unit and attacks with
+## Gateway's hero Ascension: it sprouts legs. It walks like a normal unit and attacks with
 ## Attack Range, and each attack opens a small portal above its target and drops a hunk of
 ## metal on it: the attack's normal damage, plus a Hit Effect dealing Max Health Share of
 ## the target's max health and stunning it for Stun seconds. It keeps its passive's Charge

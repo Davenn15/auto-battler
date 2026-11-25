@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Triplicate"
-description = "Replicate creates 3 copies instead of 2."
+description = "Replicate creates {copies} copies."
 gambit_bonuses = Dictionary[String, float]({
 "copies": 1.0
 })

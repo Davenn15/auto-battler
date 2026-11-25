@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Long Range"
-description = "The pulse reaches 5 cells instead of 3."
+description = "The pulse reaches {radius_cells} cells."
 gambit_bonuses = Dictionary[String, float]({
 "radius_cells": 2.0
 })

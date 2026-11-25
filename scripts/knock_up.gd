@@ -3,7 +3,7 @@ extends RefCounted
 ## The Knock-up keyword: the unit is thrown into the air, stunned for the duration (it
 ## can't move, attack or cast). It's crowd control like a stun: Immovability shortens it,
 ## 100 or more ignores it, and an item that lets control effects wrack lengthens it.
-## BYTE's ripple uses it.
+## Byte's ripple uses it.
 ##
 ## On screen the unit's sprite lifts up and drops back down. The lift moves the sprite's
 ## drawing offset, which nothing else animates, and shots still hit the unit where it

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_h7tbi")
-description = "She rebuilds her shield faster."
+description = "She rebuilds her shield faster, in {rebuild_time} seconds."
 gambit_bonuses = Dictionary[String, float]({
 "rebuild_time": -2.0
 })

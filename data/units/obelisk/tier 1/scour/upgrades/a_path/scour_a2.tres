@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Scour builds 2 Voltage per second during Overdrive."
+description = "Scour builds {voltage_per_second} Voltage per second during Overdrive."
 gambit_overrides = Dictionary[String, float]({
 "voltage_per_second": 2.0
 })

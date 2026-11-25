@@ -11,7 +11,7 @@ gambit_bonus = 0.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Neutral Ruin"
-description = "All your units gain 10% Wrack Chance, and their Gambit damage can Wrack."
+description = "All your units gain {wrack_chance%} Wrack Chance, and their Gambit damage can Wrack."
 tier = 2
 wrack_chance = 0.1
 effect = SubResource("Effect")

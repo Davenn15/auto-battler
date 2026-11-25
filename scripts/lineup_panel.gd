@@ -186,7 +186,7 @@ func _refresh_teams() -> void:
 ## "Garth A1 (Crusher, Might Shard)": name and path, items in grey. The name and path are
 ## joined by a non-breaking space so they never wrap apart.
 func _unit_entry(unit: BattleUnit) -> String:
-	var name_text := unit.data.display_name.capitalize().replace(" ", "\u00a0")
+	var name_text := unit.data.get_title().replace(" ", "\u00a0")
 	var entry := "%s\u00a0[b]%s[/b]" % [name_text, RandomTeams.path_label(unit.upgrade_path)]
 	if not unit.keepsakes.is_empty():
 		var items := PackedStringArray(unit.keepsakes.map(func(k): return k.get_display_name()))

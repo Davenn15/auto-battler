@@ -47,7 +47,7 @@ func execute(caster: BattleUnit) -> void:
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		if dealt > 0.0:
 			hits += 1   # a dodged swing doesn't count
-	caster.heal(heal_per_hit * hits)
+	caster.heal(heal_per_hit * hits, caster.get_instance_id(), true, true)
 
 
 func _enemies_in_range(caster: BattleUnit) -> Array[BattleUnit]:

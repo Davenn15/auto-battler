@@ -12,6 +12,6 @@ shield_duration = 4.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Gilded Aegis"
-description = "Units in your army can gain one more Glory each combat. Whenever a unit in your army gains Glory, it gains a Shield of 25% of its max health for 4 seconds."
+description = "Units in your army can gain {extra_cap} more Glory each combat. Whenever a unit in your army gains Glory, it gains a {shield_share%|maxhp|shield} Shield for {shield_duration|shieldtime} seconds."
 tier = 3
 effect = SubResource("Effect")

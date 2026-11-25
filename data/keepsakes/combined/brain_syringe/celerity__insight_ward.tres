@@ -1,7 +1,25 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://d0i1xkn830wgr"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://gdh61xj450mp" path="res://data/keepsakes/combined/brain_syringe/celerity__insight_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_c4tex"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/brain_syringe/celerity__insight_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_awik2"]
+
+[sub_resource type="Resource" id="Resource_x6bip"]
+script = ExtResource("2_c4tex")
+shard = 2
+description = "Sap {amount} Insight."
+effect_overrides = {
+"amount": 4.0
+}
+
+[sub_resource type="Resource" id="Resource_q81go"]
+script = ExtResource("2_c4tex")
+shard = 5
+description = "Sap {second_amount} Insight Ward."
+effect_overrides = {
+"second_amount": 4.0
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -11,5 +29,6 @@ second_shard = 5
 celerity = 20.0
 insight_ward = 35.0
 effect = ExtResource("2_effect")
-description = "Hit Effect: Sap 2 Insight from the target."
+description = "Hit Effect: Sap {amount} Insight and {second_amount} Insight Ward from the target."
+empowerments = Array[ExtResource("2_c4tex")]([SubResource("Resource_x6bip"), SubResource("Resource_q81go")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

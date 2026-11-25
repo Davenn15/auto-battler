@@ -12,7 +12,7 @@ share = 0.5
 [resource]
 script = ExtResource("1")
 ascension_name = "Hex of Thorns"
-description = "Trompero's Gambit damage also inflicts Bleed for 50% of the damage dealt. His Arcane Blades' shots Bleed too."
+description = "Trompero's Gambit damage also inflicts Bleed for {share%} of the damage dealt. His Arcane Blades' shots Bleed too."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

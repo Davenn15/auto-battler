@@ -9,4 +9,4 @@ duration = 4.0
 celerity_share = 0.35
 gambit_name = "Compassing"
 cast_time = 0.5
-description = "Extends its legs extra long and strides into the space of the ally within 4 cells with the most Celerity, looming over it for 4 seconds. The ally gains 35% of FRAME's Celerity, and whenever it attacks, FRAME attacks its target too. FRAME makes no attacks of its own and gains no Charge meanwhile."
+description = "Extends its legs extra long and strides into the space of the ally within {reach_cells} cells with the most Celerity, looming over it for {duration} seconds. The ally gains {celerity_share%} of Frame's Celerity, and whenever it attacks, Frame attacks its target too. Frame makes no attacks of its own and gains no Charge meanwhile."

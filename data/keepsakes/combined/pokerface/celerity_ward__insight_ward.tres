@@ -1,15 +1,34 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/pokerface/celerity_ward__insight_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_khyi1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_eg34q"]
+
+[sub_resource type="Resource" id="Resource_b7jvm"]
+script = ExtResource("2_khyi1")
+shard = 3
+description = "Enemies gain {reduction%} less Charge for damaging you."
+effect_overrides = {
+"reduction": 0.6
+}
+
+[sub_resource type="Resource" id="Resource_30bpt"]
+script = ExtResource("2_khyi1")
+shard = 5
+description = "You gain {self_bonus%} more Charge from taking damage."
+effect_overrides = {
+"self_bonus": 0.6
+}
 
 [resource]
 script = ExtResource("1_keep")
-keepsake_name = "Pokerface"
+keepsake_name = "Nullstone"
 first_shard = 3
 second_shard = 5
-effect = ExtResource("2_effect")
 celerity_ward = 35.0
 insight_ward = 35.0
-description = "Enemies gain 50% less Charge for damaging you."
+effect = ExtResource("2_effect")
+description = "Enemies gain {reduction%} less Charge for damaging you. You gain {self_bonus%} more Charge from taking damage."
+empowerments = Array[ExtResource("2_khyi1")]([SubResource("Resource_b7jvm"), SubResource("Resource_30bpt")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

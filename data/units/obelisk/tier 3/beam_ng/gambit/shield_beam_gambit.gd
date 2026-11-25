@@ -1,16 +1,16 @@
 class_name ShieldBeamGambit
 extends Gambit
-## BEAM.NG channels a beam at the ally with the lowest share of its health (not itself),
+## Beam channels a beam at the ally with the lowest share of its health (not itself),
 ## shielding it continuously: Shield Per Second + Insight Scaling x Insight, more the farther
 ## away it is (its passive). The shield lingers a little after the beam ends. If the target
 ## dies before the beam ends, it moves on to the next lowest-health ally for the time left.
 ##   A: the beam ricochets from its target to that ally's lowest-health nearby ally.
 ##   A1: allies under the beam gain Immovability.
 ##   A2: one more ricochet.
-## A Beam (see Beam): BEAM.NG's Beam settings add range to the first target, speed up the
+## A Beam (see Beam): Beam's Beam settings add range to the first target, speed up the
 ## shielding, and add extra ricochets (at their reduced share) after its own.
 
-## Seconds BEAM.NG channels the beam.
+## Seconds Beam channels the beam.
 @export var duration: float = 4.0
 @export var shield_per_second: float = 30.0
 @export var insight_scaling: float = 0.25
@@ -42,7 +42,7 @@ func execute(caster: BattleUnit) -> void:
 		return
 	caster.show_float_text("Shield Beam", BeamngPassive.LIGHT)
 	var links := BeamLinks.new(caster)
-	var fan := Beam.FanLines.new()   # extra Beams (BEAM.NG's hero Ascension)
+	var fan := Beam.FanLines.new()   # extra Beams (Beam's hero Ascension)
 	var shields := {}   # ally instance id -> its BeamShieldStatus
 	var given := 0.0
 	var elapsed := 0.0
@@ -105,7 +105,8 @@ func execute(caster: BattleUnit) -> void:
 				amount *= beam_settings.extra_beam_share
 			elif index >= own:
 				amount *= beam_settings.ricochet_share
-			shield.feed(amount, shield_linger, immovability)
+			amount = caster.outgoing_support(ally, amount, true, true)   # a Gambit shield
+			shield.feed(amount, caster.support_duration(ally, shield_linger, true), immovability)
 			given += amount
 	links.clear()
 	fan.clear()

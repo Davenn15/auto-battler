@@ -12,7 +12,7 @@ health_threshold = 0.2
 [resource]
 script = ExtResource("1")
 ascension_name = "Culling Hook"
-description = "Codger's Gambit damage executes enemies it leaves at 20% health or less."
+description = "Codger's Gambit damage executes enemies it leaves at {health_threshold%} health or less."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

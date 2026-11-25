@@ -11,6 +11,6 @@ charge_share = 0.5
 [resource]
 script = ExtResource("1")
 ascension_name = "Exultation"
-description = "Units in your army can gain one more Glory each combat. Whenever a unit in your army gains Glory, it gains 50% of its max Charge."
+description = "Units in your army can gain {extra_cap} more Glory each combat. Whenever a unit in your army gains Glory, it gains {charge_share%} of its max Charge."
 tier = 3
 effect = SubResource("Effect")

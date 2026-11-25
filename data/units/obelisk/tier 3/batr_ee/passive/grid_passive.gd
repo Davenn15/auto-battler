@@ -1,14 +1,14 @@
 class_name GridPassive
 extends Passive
-## BATR.EE's passive (Power Grid). Allies within Range Cells of it, BATR.EE included,
+## Battery's passive (Power Grid). Allies within Range Cells of it, Battery included,
 ## build Voltage (see VoltageStatus) at Voltage Per Second. Units keep their Voltage when
-## they leave the aura; casting their Gambit clears it. While BATR.EE charges its B path
+## they leave the aura; casting their Gambit clears it. While Battery charges its B path
 ## railgun, it builds its own Voltage faster (RailgunGambit.charge_voltage_multiplier).
 ## Upgrades change it through GridBoostPassive:
-##   A: BATR.EE gains Voltage whenever a unit in its aura casts its Gambit.
-##   A1: BATR.EE's Voltage gives it Wrack Chance.
+##   A: Battery gains Voltage whenever a unit in its aura casts its Gambit.
+##   A1: Battery's Voltage gives it Wrack Chance.
 
-## How far allies can be from BATR.EE to build Voltage, in hex cells.
+## How far allies can be from Battery to build Voltage, in hex cells.
 @export var range_cells: int = 2
 ## Voltage each unit in the aura builds per second.
 @export var voltage_per_second: float = 2.0
@@ -46,7 +46,7 @@ class GridStatus extends Status:
 	func on_applied(unit: BattleUnit) -> void:
 		_holder = unit
 
-	## A1: Wrack Chance from BATR.EE's own Voltage.
+	## A1: Wrack Chance from Battery's own Voltage.
 	func modify_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 		if stat != Stats.Stat.WRACK_CHANCE:
 			return value
@@ -79,13 +79,13 @@ class GridStatus extends Status:
 					rate *= _charge_multiplier(unit)
 				VoltageStatus.ensure(ally).add(rate * delta)
 
-	## B: while BATR.EE is charging its railgun (casting it), its own Voltage builds faster.
+	## B: while Battery is charging its railgun (casting it), its own Voltage builds faster.
 	func _charge_multiplier(unit: BattleUnit) -> float:
 		if unit._casting and unit.gambit is RailgunGambit:
 			return unit.gambit.charge_voltage_multiplier
 		return 1.0
 
-	## A: a unit in the aura cast its Gambit: BATR.EE gains a share of its max Charge.
+	## A: a unit in the aura cast its Gambit: Battery gains a share of its max Charge.
 	func _on_ally_cast(ally: BattleUnit) -> void:
 		if not is_instance_valid(_holder) or not _holder.alive or not _holder.active:
 			return
@@ -95,7 +95,7 @@ class GridStatus extends Status:
 			return
 		VoltageStatus.ensure(_holder).add(ally.max_charge * share)
 		KeepsakeVfx.pulse_glow(_holder, "VfxBatreeVoltage", VoltageStatus.COLOR, 0.4)
-		if KeepsakeVfx.enabled() and ally.is_inside_tree():   # a small jolt from the ally to BATR.EE
+		if KeepsakeVfx.enabled() and ally.is_inside_tree():   # a small jolt from the ally to Battery
 			var jolt := Volt.fire(_holder.get_parent(), ally.global_position, _holder, VoltageStatus.COLOR, 0.0, Callable())
 			jolt.scale = Vector2(0.6, 0.6)
 

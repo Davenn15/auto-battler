@@ -1,9 +1,9 @@
 class_name CtrlSwarmPassive
 extends Passive
-## CTRL(R)'s A path, one script for its three passives (set Kind in the .tres):
+## Controller's A path, one script for its three passives (set Kind in the .tres):
 ##   Swarming (A): every siphon launch also sends bore drones (see CtrlDrones).
 ##   A1: more healing received from every source.
-##   A2: every drone that makes it back gives CTRL(R) a Shield.
+##   A2: every drone that makes it back gives Controller a Shield.
 
 enum Kind { SWARMING, HEALING, DRONE_SHIELD }
 @export var kind: Kind = Kind.SWARMING
@@ -12,7 +12,7 @@ enum Kind { SWARMING, HEALING, DRONE_SHIELD }
 @export var bores_per_siphon: int = 2
 ## Damage each bore drone deals.
 @export var bore_damage: float = 30.0
-## Taken off each of the enemy's three wards (for the rest of combat) and given to CTRL(R).
+## Taken off each of the enemy's three wards (for the rest of combat) and given to Controller.
 @export var ward_steal: float = 7.0
 @export_group("A1")
 ## Extra healing received (0.4 = +40%).

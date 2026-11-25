@@ -2,10 +2,10 @@ class_name Beam
 extends RefCounted
 ## The official "Beam" keyword (used by Obelisk units): a continuous, targeted beam. These
 ## are Beams:
-##   - Scour's attack, BEAM.NG's attack and MOTHER-CHIP's B attack (and her Chips' beams),
+##   - Scour's attack, Beam's attack and Mother-Chip's B attack (and her Chips' beams),
 ##     all built on BeamStatus;
-##   - COLUMN's two beam weapons (ColumnBeamWeapon);
-##   - BEAM.NG's Focus Beam (FocusBeamGambit) and Shield Beam (ShieldBeamGambit).
+##   - Column's two beam weapons (ColumnBeamWeapon);
+##   - Beam's Focus Beam (FocusBeamGambit) and Shield Beam (ShieldBeamGambit).
 ##
 ## Every Beam reads its Settings each frame, so effects (an Ascension's effect, say) can
 ## change all Beams at once: give the unit a Status whose modify_beam() adjusts them. The
@@ -15,7 +15,7 @@ extends RefCounted
 enum Kind { ATTACK, WEAPON, FOCUS, SHIELD }
 
 ## Every Beam's rhythm. A Beam ticks TICKS_PER_ATTACK times per attack interval (its unit's,
-## or a COLUMN weapon's own), each tick dealing or shielding its share all at once: so it
+## or a Column weapon's own), each tick dealing or shielding its share all at once: so it
 ## delivers exactly as much per second as before, and Celerity makes the ticks come faster.
 ## After switching to a new target it charges up for RETARGET_SHARE of an attack interval
 ## first (also faster with Celerity). Each tick sends a bright pulse down the beam.
@@ -23,7 +23,7 @@ const TICKS_PER_ATTACK := 4
 const RETARGET_SHARE := 1.0 / 3.0
 
 ## True while an attack Beam runs its once-per-attack effects (its on_attack calls), so an
-## effect that counts Beam ticks itself (FRAME's Compassing) can skip those.
+## effect that counts Beam ticks itself (Frame's Compassing) can skip those.
 static var flushing := false
 
 ## An attack Beam tick landed on `enemy`: tells every Status on the unit (on_beam_tick).
@@ -62,7 +62,7 @@ static func retarget_time(attack_interval: float) -> float:
 ## change them in modify_beam().
 class Settings extends RefCounted:
 	var caster: BattleUnit
-	## Which Beam is asking: an attack beam, a COLUMN weapon, Focus Beam or Shield Beam.
+	## Which Beam is asking: an attack beam, a Column weapon, Focus Beam or Shield Beam.
 	var kind: Kind
 	## Extra reach, in hex cells. (For attack beams this is added to the unit's attack range.)
 	var range_bonus: int = 0
@@ -79,7 +79,7 @@ class Settings extends RefCounted:
 	## How close each extra ricochet target must be to the one before, in hex cells.
 	var ricochet_range: int = 2
 	## Extra Beams straight from the caster, each at another target when there is one (the
-	## main target again when there isn't). BEAM.NG's hero Ascension.
+	## main target again when there isn't). Beam's hero Ascension.
 	var extra_beams: int = 0
 	## How effective each extra Beam is: 0.3 = 30% of the damage or shielding.
 	var extra_beam_share: float = 0.3
@@ -99,8 +99,8 @@ static func settings(unit: BattleUnit, kind: Kind) -> Settings:
 
 
 ## True if a unit of `data` on upgrade `path` has a Beam: its passives (its own and its
-## upgrades') or its Gambit are one of the Beams above. MOTHER-CHIP only counts on her B
-## path, BEAM.NG always (its attack). New kinds of Beam need adding here.
+## upgrades') or its Gambit are one of the Beams above. Mother-Chip only counts on her B
+## path, Beam always (its attack). New kinds of Beam need adding here.
 static func has_beam(data: UnitData, path: Array) -> bool:
 	if data == null:
 		return false

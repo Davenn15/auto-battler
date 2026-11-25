@@ -7,4 +7,4 @@ script = ExtResource("1")
 wrack_ramp_per_second = 0.05
 max_wrack_ramp = 0.5
 passive_name = "Focused Fire"
-description = "The Beam's Wrack chance ramps up with sustained fire on one target."
+description = "The Beam's Wrack chance ramps up by {wrack_ramp_per_second%} per second of sustained fire on one target (up to +{max_wrack_ramp%})."

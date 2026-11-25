@@ -1,9 +1,9 @@
 class_name ReviveGambit
 extends Gambit
-## GATE.W(A) B: brings back the last allies that died (not summons, and each only once), newest first, each with
-## Health Share of its max health. They appear beside GATE.W(A), with their upgrades, buffs
+## Gateway B: brings back the last allies that died (not summons, and each only once), newest first, each with
+## Health Share of its max health. They appear beside Gateway, with their upgrades, buffs
 ## and items, and count as its own for its cast heal and boost (GatePassive).
-## GATE.W(A)'s passive keeps the record of who fell.
+## Gateway's passive keeps the record of who fell.
 ##   B1: revived allies come back with full Charge.
 ##   B2: one more ally.
 
@@ -17,7 +17,7 @@ const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 
 
 ## Always casts: with nobody to revive (or no room), the cast still heals and boosts the
-## allies GATE.W(A) brought back (GatePassive).
+## allies Gateway brought back (GatePassive).
 func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive or not caster.is_inside_tree():
 		return
@@ -25,7 +25,7 @@ func execute(caster: BattleUnit) -> void:
 	if fallen.is_empty():
 		caster.show_float_text("Empower", GateRules.LIGHT)
 		return
-	# Beside GATE.W(A), nearest cells first. Allies there's no room for stay on the record.
+	# Beside Gateway, nearest cells first. Allies there's no room for stay on the record.
 	var cells := Replicator.free_cells_near(caster.grid, caster.cell, mini(count, fallen.size()))
 	var revived := 0
 	for cell in cells:

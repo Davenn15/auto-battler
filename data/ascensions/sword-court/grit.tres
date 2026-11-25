@@ -22,25 +22,25 @@ amount = 50.0
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "Your units have 20 Grit."
+description = "Your units have {amount} Grit."
 tier = 1
 effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "Your units have 30 Grit."
+description = "Your units have {amount} Grit."
 tier = 2
 effect = SubResource("Effect_tier2")
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "Your units have 40 Grit."
+description = "Your units have {amount} Grit."
 tier = 3
 effect = SubResource("Effect_tier3")
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "Your units have 50 Grit."
+description = "Your units have {amount} Grit."
 tier = 4
 effect = SubResource("Effect_tier4")
 

@@ -8,5 +8,5 @@ shield_gain = 750.0
 max_sacrifice = 600.0
 rebuild_time = 5.0
 cast_time = 0.75
-description = "Gains a shield, then shatters it to damage and stun nearby enemies. If she has no shield, she instead floats out of reach and rebuilds her starting shield (once per combat)."
+description = "Gains a {shield_gain|shield} shield, then shatters up to {max_sacrifice} of it to deal {base_damage} damage plus {damage_share%} of what it used to enemies within {radius_cells} cells and stun them for {stun_time|cc} seconds. If she has no shield, she instead floats out of reach and rebuilds her starting shield over {rebuild_time} seconds (once per combat)."
 metadata/_custom_type_script = "uid://cdsgcg6vjbnnf"

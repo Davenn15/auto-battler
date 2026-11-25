@@ -7,7 +7,7 @@
 script = ExtResource("1")
 empowers = ExtResource("empowers_prev")
 ascension_name = "Court Valor"
-description = "PLACEHOLDER. All your units gain 15 Might and 75 Health."
+description = "PLACEHOLDER. All your units gain {might} Might and {health} Health."
 tier = 2
 might = 15.0
 health = 75.0

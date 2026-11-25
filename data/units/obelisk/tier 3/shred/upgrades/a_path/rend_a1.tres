@@ -7,4 +7,4 @@ script = ExtResource("1")
 cut = 0.3
 radius = 1
 passive_name = "Rending Field"
-description = "Enemies within 1 hex of SHRED receive 30% less healing and Shield."
+description = "Enemies within {radius} hex of Shred receive {cut%} less healing and Shield."

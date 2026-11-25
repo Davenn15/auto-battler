@@ -1,6 +1,6 @@
 class_name LegsOutGambit
 extends Gambit
-## FRAME: extends its legs, gaining Range Bonus attack range and Dodge chance for Duration
+## Frame: extends its legs, gaining Range Bonus attack range and Dodge chance for Duration
 ## seconds. Recasting starts it over.
 
 @export var range_bonus: int = 1

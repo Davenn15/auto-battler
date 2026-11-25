@@ -1,6 +1,6 @@
 class_name ShredRendAuraPassive
 extends Passive
-## SHRED A1: enemies within Radius cells of SHRED receive Cut less healing and Shield. An
+## Shred A1: enemies within Radius cells of Shred receive Cut less healing and Shield. An
 ## aura, so 100 Immovability blocks it (BattleUnit.debuff_strength).
 
 @export_range(0.0, 1.0, 0.05) var cut: float = 0.3
@@ -11,7 +11,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(AuraStatus.new(self))
 
 
-## On SHRED: hands the debuff to enemies that come within reach.
+## On Shred: hands the debuff to enemies that come within reach.
 class AuraStatus extends Status:
 	var passive: ShredRendAuraPassive
 
@@ -39,8 +39,8 @@ class AuraStatus extends Status:
 				enemy.add_status(RendStatus.new(passive, unit))
 
 
-## On an enemy near SHRED: less healing and Shield. It ends itself once the enemy is out of
-## reach, or SHRED is gone.
+## On an enemy near Shred: less healing and Shield. It ends itself once the enemy is out of
+## reach, or Shred is gone.
 class RendStatus extends Status:
 	var passive: ShredRendAuraPassive
 	var source   # untyped: may be freed

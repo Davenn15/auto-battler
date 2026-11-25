@@ -6,4 +6,4 @@
 script = ExtResource("1")
 passive_name = "Quick Cycle"
 change = -30.0
-description = "His Gambit needs less Charge."
+description = "His Gambit needs less Charge ({change})."

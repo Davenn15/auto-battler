@@ -9,4 +9,4 @@ ward_shred = 0.4
 duration = 4.0
 gambit_name = "Backstep"
 cast_time = 0.3
-description = "Dashes out to its maximum attack range from its target, to the spot with the most room from other enemies, then gains 30 Celerity and its hits ignore 40% of the target's Wards for 4 seconds."
+description = "Dashes out to its maximum attack range from its target, to the spot with the most room from other enemies, then gains {celerity} Celerity and its hits ignore {ward_shred%} of the target's Wards for {duration} seconds."

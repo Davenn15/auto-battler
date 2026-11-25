@@ -9,5 +9,5 @@ enemy_might_reduction = 25.0
 duration = 6.0
 damage = 85.0
 cast_time = 1.0
-description = "Bellows: nearby allies gain Might, and nearby enemies lose Might and take damage, for a while."
+description = "Bellows: for {duration} seconds, allies within {range_cells} cells gain {ally_might_bonus} Might, and enemies within it lose {enemy_might_reduction} Might and take {damage+might_scaling} damage."
 metadata/_custom_type_script = "uid://bqxuhfakopowh"

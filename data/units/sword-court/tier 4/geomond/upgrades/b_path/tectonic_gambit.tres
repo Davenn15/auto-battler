@@ -12,5 +12,5 @@ dash_time = 0.3
 attack_shield = 100.0
 attack_shield_duration = 2.0
 cast_time = 0.5
-description = "For a while he gains attack range, his attacks become waves that hit every enemy in a line, and each attack shields him. He also dashes away from his target."
+description = "For {duration} seconds he gains +{range_bonus} attack range, his attacks become waves that hit every enemy in a line (plus {wave_max_health_percent%} of their max health), and each attack shields him for {attack_shield|shield}. He also dashes away from his target."
 metadata/_custom_type_script = "uid://moboh6rdne36"

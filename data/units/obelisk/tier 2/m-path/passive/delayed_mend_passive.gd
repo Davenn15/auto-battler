@@ -1,44 +1,13 @@
 class_name DelayedMendPassive
 extends Passive
-## M-PATH's passive: a share of the health he loses to damage comes back as healing a few
-## seconds later.
+## M-Path's passive: Share x 100 percent Scar (see Scar): that share of the health he loses
+## to each hit comes back as healing a few seconds later. Adds to any other Scar he has.
 
-## Share of the health lost that comes back (0.15 = 15%).
+## Share of each hit that comes back (0.15 = 15% Scar).
 @export_range(0.0, 1.0, 0.05) var share: float = 0.15
-## Seconds before it comes back.
+## Unused: Scar always comes back after Stats.SCAR_DELAY seconds. Kept so saved files load.
 @export var delay: float = 3.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
-	unit.add_status(MendStatus.new(share, delay))
-
-
-class MendStatus extends Status:
-	var share: float
-	var delay: float
-	var _seen := 0.0          # the unit's damage_taken already accounted for
-	var _queue: Array = []    # [time left, amount] pairs waiting to heal
-
-	func _init(p_share: float, p_delay: float) -> void:
-		share = p_share
-		delay = p_delay
-
-	func tick(unit: BattleUnit, delta: float) -> void:
-		if not unit.active:
-			return
-		var lost := unit.damage_taken - _seen
-		if lost > 0.0:
-			_seen = unit.damage_taken
-			_queue.append([delay, lost * share])
-		for entry in _queue.duplicate():
-			entry[0] -= delta
-			if entry[0] <= 0.0:
-				_queue.erase(entry)
-				unit.heal(entry[1], unit.get_instance_id())
-
-	## Health still waiting to come back, shown on the health bar.
-	func get_pending_healing(_unit: BattleUnit) -> float:
-		var total := 0.0
-		for entry in _queue:
-			total += entry[1]
-		return total
+	unit.add_status(StatBonusStatus.new(Stats.Stat.SCAR, share * 100.0))

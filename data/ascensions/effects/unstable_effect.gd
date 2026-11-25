@@ -1,6 +1,6 @@
 class_name UnstableEffect
 extends Passive
-## BATR.EE's hero Ascension (its stat gains are the Ascension's own stats): after each of
+## Battery's hero Ascension (its stat gains are the Ascension's own stats): after each of
 ## its Gambits has had its effect, it takes Self Damage of its max health as Pure Damage and
 ## is stunned for Stun seconds.
 

@@ -6,4 +6,4 @@
 script = ExtResource("1")
 regen = 10.0
 passive_name = "Self-Repair"
-description = "BYTE has +10 Regeneration (health per second)."
+description = "Byte has +{regen} Regeneration (health per second)."

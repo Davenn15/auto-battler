@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_mb5w4")
 scaling = 0.1
-description = "Wards based on his attributes."
+description = "Each Ward gains {scaling%} of its matching attribute."
 metadata/_custom_type_script = "uid://b0jewntwhwuo3"

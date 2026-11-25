@@ -10,6 +10,6 @@ cooldown = 2.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Arcane Edge"
-description = "Your Gambit damage triggers your Hit Effects (once every 2 seconds per enemy)."
+description = "Your Gambit damage triggers your Hit Effects (once every {cooldown} seconds per enemy)."
 tier = 2
 effect = SubResource("Effect")

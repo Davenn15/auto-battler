@@ -1,20 +1,20 @@
 class_name ReplicantOnGambitEffect
 extends Passive
 ## An Ascension effect (Spawn Protocol): every time the unit has spent Charge Threshold
-## Charge on its Gambit (the whole bar, each time it casts), Count REPLK4NTs appear in free
+## Charge on its Gambit (the whole bar, each time it casts), Count Replicants appear in free
 ## cells beside it when that Gambit plays. Charge spent past a threshold carries over toward the next one, for the
-## rest of the combat. They're made the way REPL\K8R's seeds make them: the REPLK4NT's own
+## rest of the combat. They're made the way Replicator's seeds make them: the Replicant's own
 ## body plus a share of the unit's max health and of its attributes and wards.
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 
-## The REPLK4NT: its own look, stats and Gambit.
+## The Replicant: its own look, stats and Gambit.
 @export var profile: UnitData
-## REPLK4NTs each time the threshold is reached.
+## Replicants each time the threshold is reached.
 @export var count: int = 1
 ## Charge the unit must spend for each spawn.
 @export var charge_threshold: float = 100.0
-## Share of the unit's max health the REPLK4NT adds to its own, and of its attributes and wards.
+## Share of the unit's max health the Replicant adds to its own, and of its attributes and wards.
 @export_range(0.0, 1.0, 0.05) var health_share: float = 0.2
 @export_range(0.0, 1.0, 0.05) var stat_share: float = 0.2
 
@@ -23,7 +23,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(SpawnStatus.new(self))
 
 
-## Summons the REPLK4NTs beside `unit`, at full health.
+## Summons the Replicants beside `unit`, at full health.
 func spawn(unit: BattleUnit) -> void:
 	if profile == null or not is_instance_valid(unit) or not unit.alive or not unit.is_inside_tree():
 		return
@@ -70,7 +70,7 @@ class SpawnStatus extends Status:
 			spent -= threshold
 			_due += 1
 
-	## ...and the REPLK4NTs it earned appear when the Gambit plays.
+	## ...and the Replicants it earned appear when the Gambit plays.
 	func on_gambit_played(unit: BattleUnit) -> void:
 		while _due > 0:
 			_due -= 1

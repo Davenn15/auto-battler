@@ -27,7 +27,7 @@ func execute(caster: BattleUnit) -> void:
 	blades.add_blades(caster, mini(blades_per_cast, max_blades - blades.blade_count()))
 	if shield_amount > 0.0:
 		var shield := Stats.scaled(shield_amount, shield_insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
-		caster.add_shield(shield, shield_duration, caster.get_instance_id(), true)
+		caster.add_shield(shield, shield_duration, caster.get_instance_id(), true, true)
 
 
 ## The caster's blades from an earlier cast, or null if this is the first.

@@ -46,7 +46,7 @@ func create_projectile(unit: BattleUnit) -> Projectile:
 ## Every attack during the stance shields him.
 func on_attack(unit: BattleUnit) -> void:
 	if attack_shield > 0.0:
-		unit.add_shield(attack_shield, attack_shield_duration, unit.get_instance_id())
+		unit.add_shield(attack_shield, attack_shield_duration, unit.get_instance_id(), false, true)
 
 func get_hit_effect(unit: BattleUnit) -> HitEffect:
 	if ward_shred_per_hit > 0.0:

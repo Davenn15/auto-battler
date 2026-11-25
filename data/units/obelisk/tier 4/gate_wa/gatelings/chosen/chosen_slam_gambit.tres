@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Ascension"
 cast_time = 0.3
-description = "Shields itself for 200 + 100% of Insight, lifts every enemy next to it into the air, then slams them down for 15% of their max health."
+description = "Shields itself for {shield+shield_insight_scaling|shield}, lifts every enemy next to it into the air, then slams them down for {max_health_share%} of their max health."

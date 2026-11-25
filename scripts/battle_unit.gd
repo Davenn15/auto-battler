@@ -141,7 +141,7 @@ const PLATE_GAP := 1.0        # between the rows
 const HEALTH_HEIGHT := 4.0
 const CHARGE_HEIGHT := 2.0
 const ATTACK_HEIGHT := 1.0
-const TIMER_HEIGHT := 2.0     # each extra timer bar (COLUMN's weapons)
+const TIMER_HEIGHT := 2.0     # each extra timer bar (Column's weapons)
 const PIP_SIZE := Vector2(3, 3)   # one upgrade pip in the plate's left tab
 const PLATE_COLOR := Color(0.08, 0.08, 0.1, 0.75)
 const PLATE_BORDER := Color(0.35, 0.35, 0.4)
@@ -185,7 +185,7 @@ var _cast_total: float = 0.0   # length of the cast in progress, for the bar
 ## Damage this unit has dealt this battle, including its summons'. For effects that
 ## care who has been hitting hardest.
 var damage_dealt: float = 0.0
-## Health this unit has lost to damage this combat (after wards and shields). M-PATH links
+## Health this unit has lost to damage this combat (after wards and shields). M-Path links
 ## to the ally with the most.
 var damage_taken: float = 0.0
 
@@ -212,7 +212,7 @@ var is_summon: bool = false
 var _summon_max_health: float = 0.0
 var _summon_stats: Dictionary = {}
 var _summoner_id: int = 0   # who a summon's damage is credited to
-## Summons normally don't cast. True keeps the summon's own data Gambit (GATE.W(A)'s Gatelings).
+## Summons normally don't cast. True keeps the summon's own data Gambit (Gateway's Gatelings).
 var summon_keeps_gambit: bool = false
 
 func _ready() -> void:
@@ -861,7 +861,7 @@ func _ascension_kind_color(kind: int) -> Color:
 ## the Keepsake icons in a row just above the plate (when it has any), and the Ascension diamonds
 ## on the top-left corner. Everything hangs off the health bar, so it moves, turns and hides
 ## with it. Safe to call again whenever upgrades, items or Ascensions change.
-## Extra height the plate floats at, e.g. FRAME looming over an ally in the same cell, so
+## Extra height the plate floats at, e.g. Frame looming over an ally in the same cell, so
 ## the two plates don't sit on top of each other. Change it through set_plate_lift.
 var plate_lift := 0.0
 
@@ -1128,7 +1128,7 @@ func _keepsakes_changed() -> void:
 ## Mid-combat: puts `added` on the unit with its stats and effect, taking `replacing` off
 ## first if given (a Shard being combined into `added`). Unlike equip(), it doesn't rebuild
 ## the unit, which would undo things set up at the start of the fight. Either may be null.
-## For temporary items, such as VE5TIBULE's Shards.
+## For temporary items, such as Vestibule's Shards.
 func swap_keepsake_in_combat(added: Keepsake, replacing: Keepsake = null) -> void:
 	var had := max_health
 	if replacing != null and keepsakes.has(replacing):
@@ -1157,11 +1157,24 @@ func swap_keepsake_in_combat(added: Keepsake, replacing: Keepsake = null) -> voi
 ## effect with it.
 var _keepsake_effect_statuses: Array = []
 
+
+## Status -> the Keepsake whose effect added it (descriptions show its icon by a boost).
+func status_sources() -> Dictionary:
+	var out := {}
+	for entry in _keepsake_effect_statuses:
+		for status in entry[1]:
+			out[status] = entry[0]
+	return out
+
 func _start_keepsake_effect(keepsake: Keepsake) -> void:
-	if keepsake.effect == null:
+	if keepsake.effect == null and keepsake.extra_effects.is_empty():
 		return
 	var before := statuses.duplicate()
-	keepsake.effect.on_battle_start(self)
+	if keepsake.effect != null:
+		keepsake.effect.on_battle_start(self)
+	for extra in keepsake.extra_effects:   # an Empowerment's extra effects
+		if extra != null:
+			extra.on_battle_start(self)
 	var added: Array[Status] = []
 	for status in statuses:
 		if not before.has(status):
@@ -1170,7 +1183,7 @@ func _start_keepsake_effect(keepsake: Keepsake) -> void:
 
 
 ## Mid-combat: sets max health and health directly and redraws the bar. For effects that
-## resize a unit, such as REPL\K8R splitting itself.
+## resize a unit, such as Replicator splitting itself.
 func resize_health(new_max: float, new_health: float) -> void:
 	max_health = maxf(new_max, 1.0)
 	_refresh_after_keepsakes(max_health)
@@ -1212,11 +1225,29 @@ var previewing := false
 func preview_combat_start() -> void:
 	previewing = true
 	_apply_battle_start_effects()
+	_description_snapshot.clear()
+
+
+## Start-of-combat stats for descriptions' current numbers: taken when combat starts, so
+## the text doesn't change mid-fight; while planning, the previewed start-of-combat stats.
+var _description_snapshot := {}
+
+
+func description_stat(stat: Stats.Stat) -> float:
+	return float(_description_snapshot[stat]) if _description_snapshot.has(stat) else get_stat(stat)
+
+
+func description_max_health() -> float:
+	return float(_description_snapshot.get("max_health", max_health))
 
 
 func start_combat() -> void:
 	previewing = false
 	_apply_battle_start_effects()
+	_description_snapshot.clear()   # descriptions read the stats it starts the fight with
+	for stat in DescriptionContext.SCALING_STATS:
+		_description_snapshot[stat] = get_stat(stat)
+	_description_snapshot["max_health"] = max_health
 	_casting = false
 	# Safety net: the stored cell must match where the unit is actually standing.
 	var actual := grid.world_to_cell(global_position)
@@ -1246,6 +1277,7 @@ func start_combat() -> void:
 func _apply_battle_start_effects() -> void:
 	clear_statuses()
 	add_status(Grit.new())
+	add_status(Scar.new())
 	for passive in passives:
 		passive.on_battle_start(self)
 	_keepsake_effect_statuses.clear()
@@ -1360,7 +1392,7 @@ func _physics_process(delta: float) -> void:
 	_start_step()
 
 
-## True while a status stops the unit from walking (COLUMN and GATE.W(A) never move).
+## True while a status stops the unit from walking (Column and Gateway never move).
 func is_immobile() -> bool:
 	for status in _with(&"blocks_movement"):
 		if status.blocks_movement(self):
@@ -1716,15 +1748,22 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 	attack_target = enemy
 	var shot_color: Color = team_color(team)
 	var hit_effects: Array[HitEffect] = []
+	# An attack can carry no Hit Effects at all (Vestibule's burst: only its last shot does).
+	var no_hit_effects := false
+	for status in statuses:
+		if status.blocks_hit_effects(self):
+			no_hit_effects = true
 	for status in statuses.duplicate():
 		base_damage = status.modify_outgoing_damage(self, base_damage)
 		shot_color = status.modify_projectile_color(self, shot_color)
-		var effect : HitEffect = status.get_hit_effect(self)
-		if effect != null:
-			hit_effects.append(effect)
+		if not no_hit_effects:
+			var effect : HitEffect = status.get_hit_effect(self)
+			if effect != null:
+				hit_effects.append(effect)
 		status.on_attack(self)
-	hit_effects.append_array(extra_hit_effects)
-	hit_effects = repeat_hit_effects(hit_effects)
+	if not no_hit_effects:
+		hit_effects.append_array(extra_hit_effects)
+		hit_effects = repeat_hit_effects(hit_effects)
 	var hit_damage := base_damage * Stats.wrack_multiplier(wrack_level, get_wrack_damage_against(enemy))
 	if ranged or projectile != null:
 		_fire_projectile(enemy, hit_damage, wrack_level, shot_color, hit_effects, projectile)
@@ -1792,6 +1831,16 @@ static func gambit_damage_dealt(caster, target: BattleUnit, dealt: float) -> voi
 		caster = instance_from_id(caster)
 	if dealt <= 0.0 or not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(target):
 		return
+	# Extra Gambit damage (Voltaic Rings): a share of what landed, dealt again as it was
+	# (Wards already applied), and not counted as Gambit damage itself.
+	var bonus := 0.0
+	for status in caster.statuses:
+		bonus += status.gambit_damage_bonus(caster)
+	if bonus > 0.0 and target.alive:
+		target.take_damage(dealt * bonus, 0, target.last_damage_type, true, null, true, true)
+	# A Wracking Gambit hit (one with no attacker) counts as the caster Wracking.
+	if target.last_hit_attacker == null and target.incoming_wrack_level > 0:
+		BattleUnit.note_wrack(caster, target)
 	for status in caster.statuses.duplicate():
 		status.on_gambit_damage(caster, target, dealt)
 
@@ -1845,7 +1894,7 @@ func _fire_projectile(enemy: BattleUnit, hit_damage: float, wrack_level: int, co
 
 ## The melee lunge, hit jolt and ranged firing pulse move or scale this node, which sits
 ## between the unit and its sprite. Nothing else touches it, so effects that move or resize
-## the sprite itself (FRAME's stretch, the Chosen's slam lift, Mallet's hop) never fight them.
+## the sprite itself (Frame's stretch, the Chosen's slam lift, Mallet's hop) never fight them.
 var melee_motion: Node2D
 
 ## Where the sprite sits and how big it is when nothing is animating it. Shots hit the
@@ -1938,12 +1987,12 @@ func _setup_attack_bar() -> void:
 		add_child(attack_bar)
 
 
-## Extra timer bars stacked under the attack bar, one per timed weapon (COLUMN): see
+## Extra timer bars stacked under the attack bar, one per timed weapon (Column): see
 ## add_timer_bar.
 var _timer_bars: Array[ProgressBar] = []
 
 
-## Adds a thin bar in `color` to the bottom of the plate, for a timer of its own (COLUMN's
+## Adds a thin bar in `color` to the bottom of the plate, for a timer of its own (Column's
 ## weapons fill theirs as they wind up). Returns it, to set its value (0 to 1); null in
 ## lean sim mode, where nothing is drawn.
 func add_timer_bar(color: Color) -> ProgressBar:
@@ -1976,14 +2025,14 @@ func remove_timer_bar(bar: ProgressBar) -> void:
 	_layout_plate()
 
 
-## Hides the attack bar, for units that never make normal attacks (COLUMN).
+## Hides the attack bar, for units that never make normal attacks (Column).
 func hide_attack_bar() -> void:
 	if attack_bar != null:
 		attack_bar.visible = false
 		_layout_plate()
 
 
-## Hides the Charge bar, for units with no Gambit that never gain Charge (COLUMN).
+## Hides the Charge bar, for units with no Gambit that never gain Charge (Column).
 func hide_charge_bar() -> void:
 	if charge_bar != null:
 		charge_bar.visible = false
@@ -2002,7 +2051,7 @@ func _update_attack_bar() -> void:
 		value = status.modify_attack_bar(self, value)
 	attack_bar.value = value
 
-## Splits the attack bar into `count` equal parts with thin dividers (SHRED's three
+## Splits the attack bar into `count` equal parts with thin dividers (Shred's three
 ## attacks). 1 = a plain bar.
 func set_attack_bar_segments(count: int) -> void:
 	if attack_bar == null:
@@ -2094,7 +2143,11 @@ func try_reflect(projectile: Projectile) -> bool:
 func roll_effect_wrack(kind: Stats.EffectKind, already_can: bool = false) -> int:
 	if not (already_can or can_wrack_kind(kind)):
 		return 0
-	return Stats.roll_wrack(get_stat(Stats.Stat.WRACK_CHANCE))
+	var level := Stats.roll_wrack(get_stat(Stats.Stat.WRACK_CHANCE))
+	if level > 0:
+		for status in statuses.duplicate():
+			status.on_wrack_landed(self, null)   # an effect Wracked (on whom isn't known here)
+	return level
 
 
 ## True if any status lets this kind of effect from the unit wrack.
@@ -2117,12 +2170,23 @@ func effect_wrack_multiplier(level: int, kind: Stats.EffectKind, already_can: bo
 
 ## Rolls and returns the multiplier in one go, for effects that only need the number.
 ## `at` is where to show the wrack's flourish (the unit it affects); it defaults to this unit.
+## Control and debuff effects all come through here with their target (`at`), so this is
+## also where the unit's statuses hear it controlled or debuffed someone
+## (Status.on_control_applied) and can make its control last longer (modify_control_power).
 func wrack_effect_multiplier(kind: Stats.EffectKind, already_can: bool = false, at: Node2D = null) -> float:
 	var level := roll_effect_wrack(kind, already_can)
 	if level > 0:
 		var color := KeepsakeVfx.HEAL_WRACK_COLOR if kind == Stats.EffectKind.HEALING else KeepsakeVfx.CONTROL_WRACK_COLOR
 		KeepsakeVfx.flourish(at if at != null else self, color)
-	return effect_wrack_multiplier(level, kind, already_can)
+	var multiplier := effect_wrack_multiplier(level, kind, already_can)
+	if kind == Stats.EffectKind.CONTROL:
+		for status in statuses:
+			multiplier = status.modify_control_power(self, multiplier)
+		var target := at as BattleUnit
+		if target != null and target != self and target.team != team:
+			for status in statuses.duplicate():
+				status.on_control_applied(self, target)
+	return multiplier
 
 ## Stops the unit from moving, attacking, or using its Gambit for `duration` seconds.
 ## A step already in progress still finishes, so the unit stays on the grid.
@@ -2260,13 +2324,15 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	elif ignore_ward and not pass_through:
 		damage_type = Stats.DamageType.PURE
 	last_damage_type = damage_type
-	dodging_attacker = attacker   # so dodge can depend on who's attacking (FRAME A)
+	dodging_attacker = attacker   # so dodge can depend on who's attacking (Frame A)
+	taking_hit = true   # a real dodge roll (Eel Sash's Empower dodges only non-attacks)
 	# Pure Damage can't be dodged (it can't be avoided or reduced in any way; only shields
 	# soak it). No dodge roll at all, so the random sequence is the same as before otherwise.
 	var dodged := damage_type != Stats.DamageType.PURE and CombatRng.randf() < get_dodge_chance()
 	dodging_attacker = null
+	taking_hit = false
 	if dodged:
-		# What the hit would have done after Wards (FRAME A2 shields part of it).
+		# What the hit would have done after Wards (Frame A2 shields part of it).
 		dodged_damage = amount if ignore_ward else amount * Stats.ward_multiplier(get_stat(Stats.ward_stat_for(damage_type)))
 		show_float_text("Dodge", DODGE_COLOR)
 		for status in statuses.duplicate():
@@ -2290,11 +2356,51 @@ func take_damage(amount: float, wrack_level: int = 0, damage_type: int = Stats.D
 	incoming_wrack_level = wrack_level
 	var dealt := _apply_damage(amount, Stats.damage_color(damage_type, wrack_level), wrack_level, show_numbers)
 	incoming_attacker = null
+	last_hit_attacker = attacker
 	_note_direct_damage(self, dealt, show_numbers)
 	if attacker != null and dealt > 0.0 and is_instance_valid(attacker):
 		for status in attacker._with(&"on_damage_landed").duplicate():
 			status.on_damage_landed(attacker, self, dealt)
+		if wrack_level > 0:
+			BattleUnit.note_wrack(attacker, self)
 	return dealt
+
+
+## Who dealt the last hit through take_damage (null: no attacker, as for Gambit damage).
+var last_hit_attacker: BattleUnit = null
+
+
+## `source` Wracked `target` with damage: both sides' statuses hear of it
+## (Status.on_wrack_landed, Status.on_wracked_by).
+static func note_wrack(source: BattleUnit, target: BattleUnit) -> void:
+	if not is_instance_valid(source) or not is_instance_valid(target):
+		return
+	for status in source.statuses.duplicate():
+		status.on_wrack_landed(source, target)
+	if target.alive:
+		for status in target.statuses.duplicate():
+			status.on_wracked_by(target, source)
+
+
+## A heal or shield `target` gets from this unit, after its statuses change it
+## (Status.modify_outgoing_support); tells them it happened (on_support_given, and
+## on_support_wracked if it Wracked).
+func outgoing_support(target: BattleUnit, amount: float, is_shield: bool, from_gambit: bool, wrack_level: int = 0) -> float:
+	for status in statuses:
+		amount = status.modify_outgoing_support(self, target, amount, is_shield, from_gambit)
+	if amount > 0.0:
+		for status in statuses.duplicate():
+			status.on_support_given(self, target, is_shield, from_gambit)
+			if wrack_level > 0:
+				status.on_support_wracked(self, target, amount, is_shield)
+	return amount
+
+
+## How long a shield this unit gives `target` lasts, after its statuses change it.
+func support_duration(target: BattleUnit, duration: float, from_gambit: bool) -> float:
+	for status in statuses:
+		duration = status.modify_support_duration(self, target, duration, from_gambit)
+	return duration
 
 ## Damage that has already been through wards, such as damage released over time.
 ## Shields and other statuses still apply. Leave show_numbers off for small, frequent
@@ -2322,6 +2428,8 @@ var incoming_wrack_level: int = 0
 ## While a hit's dodge chance is being worked out: who's attacking (null for no attacker).
 ## Read by Status.modify_dodge_chance.
 var dodging_attacker: BattleUnit = null
+## True only while take_damage rolls its dodge (not when the dodge chance is just shown).
+var taking_hit := false
 ## During Status.on_dodge: the damage the dodged hit would have dealt, after Wards.
 var dodged_damage := 0.0
 
@@ -2362,7 +2470,7 @@ func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_nu
 	return dealt
 
 ## A status may save the unit from a hit that would kill it (Status.prevents_death, e.g.
-## SEG.FAULT A1); it leaves the unit alive with at least 1 health. True if one did.
+## Fault A1); it leaves the unit alive with at least 1 health. True if one did.
 func _escapes_death() -> bool:
 	for status in _with(&"prevents_death").duplicate():
 		if status.prevents_death(self):
@@ -2481,7 +2589,8 @@ func show_float_text(text: String, color: Color = Color.WHITE, font_size: int = 
 	tween.chain().tween_callback(label.queue_free)
 	return label
 
-func heal(amount: float, source_id: int = 0, can_wrack: bool = true) -> void:
+## `from_gambit`: the healer's Gambit is doing it (Keepsakes like Manalyzer care).
+func heal(amount: float, source_id: int = 0, can_wrack: bool = true, from_gambit: bool = false) -> void:
 	if previewing:
 		return
 	if not alive or amount <= 0.0:
@@ -2489,10 +2598,15 @@ func heal(amount: float, source_id: int = 0, can_wrack: bool = true) -> void:
 	var overheal := _with(&"on_overheal")   # statuses that want healing past max health
 	if health >= max_health and overheal.is_empty():
 		return
-	if can_wrack:
-		var healer := instance_from_id(source_id if source_id != 0 else get_instance_id()) as BattleUnit
-		if healer != null:
-			amount *= healer.wrack_effect_multiplier(Stats.EffectKind.HEALING, false, self)
+	var healer := instance_from_id(source_id if source_id != 0 else get_instance_id()) as BattleUnit
+	var wrack_level := 0
+	if can_wrack and healer != null:
+		wrack_level = healer.roll_effect_wrack(Stats.EffectKind.HEALING)
+		if wrack_level > 0:
+			KeepsakeVfx.flourish(self, KeepsakeVfx.HEAL_WRACK_COLOR)
+		amount *= healer.effect_wrack_multiplier(wrack_level, Stats.EffectKind.HEALING)
+	if healer != null:
+		amount = healer.outgoing_support(self, amount, false, from_gambit, wrack_level)
 	for status in _with(&"modify_healing_received"):
 		amount = status.modify_healing_received(self, amount)
 	if amount <= 0.0:
@@ -2644,7 +2758,8 @@ func get_shield() -> float:
 ## shielding to `source_id` (the giver's instance id). `locks_charge`: a shield the unit's own
 ## Gambit gives it, which blocks Charge until it breaks or runs out. A unit's own shields
 ## absorb damage before anyone else's. Returns the shield actually given.
-func add_shield(amount: float, duration: float, source_id: int, locks_charge := false) -> float:
+## `from_gambit`: the giver's Gambit is doing it (Keepsakes like Manalyzer care).
+func add_shield(amount: float, duration: float, source_id: int, locks_charge := false, from_gambit := false) -> float:
 	if not alive or amount <= 0.0:
 		return 0.0
 	var giver := instance_from_id(source_id) as BattleUnit
@@ -2653,6 +2768,8 @@ func add_shield(amount: float, duration: float, source_id: int, locks_charge := 
 		if level > 0:
 			KeepsakeVfx.flourish(self, KeepsakeVfx.SHIELD_WRACK_COLOR)   # silver: a wracked shield
 		amount *= giver.effect_wrack_multiplier(level, Stats.EffectKind.HEALING)
+		amount = giver.outgoing_support(self, amount, true, from_gambit, level)
+		duration = giver.support_duration(self, duration, from_gambit)
 	for status in statuses:
 		amount = status.modify_shield_received(self, amount)
 	if amount <= 0.0:
@@ -2801,7 +2918,10 @@ func gain_charge_from_attack(dealt: float, victim: BattleUnit = null) -> void:
 ## Charge for being hit by an attack: a share of the damage taken (plus a flat amount when
 ## FLAT_HIT_CHARGE is on).
 func gain_charge_from_hit(taken: float) -> void:
-	gain_charge((charge_on_hit if FLAT_HIT_CHARGE else 0.0) + taken * charge_per_damage)
+	var amount := (charge_on_hit if FLAT_HIT_CHARGE else 0.0) + taken * charge_per_damage
+	for status in statuses:
+		amount = status.modify_hit_charge(self, amount)
+	gain_charge(amount)
 
 ## Sets charge to full, ignoring anything that blocks charge gain. For effects that
 ## refund a Gambit outright.

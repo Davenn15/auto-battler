@@ -6,4 +6,4 @@
 script = ExtResource("1")
 rot_per_stack = 0.03
 passive_name = "Bitrot"
-description = "Enemies lose 3% of their healing, shielding and wards for each Mono-Virus stack on them, up to 60%."
+description = "Enemies lose {rot_per_stack%} of their healing, shielding and wards for each Mono-Virus stack on them, up to {rot_cap%}."

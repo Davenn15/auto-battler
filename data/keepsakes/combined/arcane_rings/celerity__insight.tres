@@ -1,15 +1,34 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://digtnpg2vpa74"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://c6n834ib2o4xs" path="res://data/keepsakes/combined/arcane_rings/celerity__insight_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/arcane_rings/celerity__insight_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_qd21r"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_t5cma"]
+
+[sub_resource type="Resource" id="Resource_s7tbh"]
+script = ExtResource("2_qd21r")
+shard = 2
+description = "Your second Gambit deals, shields and heals {bonus_per_voltage%} more for each Voltage it spends."
+effect_overrides = {
+"bonus_per_voltage": 0.02
+}
+
+[sub_resource type="Resource" id="Resource_xkmlp"]
+script = ExtResource("2_qd21r")
+shard = 4
+description = "Your second play gives {second_play_share%} of that Voltage again."
+effect_overrides = {
+"second_play_share": 0.7
+}
 
 [resource]
 script = ExtResource("1_keep")
-keepsake_name = "Arcane Rings"
+keepsake_name = "Voltaic Rings"
 first_shard = 2
 second_shard = 4
 celerity = 20.0
 insight = 20.0
 effect = ExtResource("2_effect")
-description = "Your Celerity is increased by 4 for every 10 Charge you have."
+description = "The first time you play your Gambit each combat, gain {voltage} Voltage."
+empowerments = Array[ExtResource("2_qd21r")]([SubResource("Resource_s7tbh"), SubResource("Resource_xkmlp")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

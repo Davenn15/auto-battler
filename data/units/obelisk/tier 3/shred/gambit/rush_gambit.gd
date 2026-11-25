@@ -1,6 +1,6 @@
 class_name ShredRushGambit
 extends Gambit
-## SHRED: dashes to a free cell next to the enemy with the highest Celerity (ties go to the
+## Shred: dashes to a free cell next to the enemy with the highest Celerity (ties go to the
 ## nearest, then the lower instance id), locks onto it for Duration seconds, and gains
 ## Penetration flat Ward penetration for Duration seconds: its hits treat the target's Ward
 ## as that much lower, never below 0. Casting again starts both over.
@@ -59,7 +59,7 @@ func _fastest_enemy(caster: BattleUnit) -> BattleUnit:
 
 
 ## Its own cell if it's already next to `enemy`, else the free cell next to it nearest
-## SHRED (staying put if there's none).
+## Shred (staying put if there's none).
 static func adjacent_cell(caster: BattleUnit, enemy: BattleUnit) -> Vector2i:
 	var grid := caster.grid
 	if grid.get_distance(caster.cell, enemy.cell) <= 1:

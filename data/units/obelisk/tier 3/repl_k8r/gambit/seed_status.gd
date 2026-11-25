@@ -1,11 +1,11 @@
 class_name SeedStatus
 extends Status
-## A replication seed growing in an ally. Hatches into a REPLK4NT (see SeedGambit) after its
-## gestation, or at once if the ally dies. With REPL\K8R's A path it also raises its host's
+## A replication seed growing in an ally. Hatches into a Replicant (see SeedGambit) after its
+## gestation, or at once if the ally dies. With Replicator's A path it also raises its host's
 ## health regen while it's there.
 
 var gambit: SeedGambit
-var owner: Dictionary   # SeedGambit.snapshot of the REPL\K8R that planted it
+var owner: Dictionary   # SeedGambit.snapshot of the Replicator that planted it
 var _time := 0.0
 var _hatched := false
 var _mark: SeedMark

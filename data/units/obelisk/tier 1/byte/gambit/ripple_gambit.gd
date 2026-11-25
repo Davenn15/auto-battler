@@ -1,7 +1,7 @@
 class_name ByteRippleGambit
 extends Gambit
-## BYTE: a concussive ripple under its current target deals Damage (+ Insight Scaling of its
-## Insight) as Damage Type and knocks it up for Knock Up seconds (see KnockUp). BYTE heals
+## Byte: a concussive ripple under its current target deals Damage (+ Insight Scaling of its
+## Insight) as Damage Type and knocks it up for Knock Up seconds (see KnockUp). Byte heals
 ## itself for Heal Share of its max health.
 ##   A1 (Health Scaling): the damage and knock-up time grow with the target's current health
 ##   %: up to +Health Scaling against a full-health target, nothing against an empty one.
@@ -35,7 +35,7 @@ func execute(caster: BattleUnit) -> void:
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_credit_id(), dealt)
 		if target.alive:
 			KnockUp.apply(target, knock_up * boost, caster)
-	caster.heal(caster.max_health * heal_share, caster.get_instance_id())
+	caster.heal(caster.max_health * heal_share, caster.get_instance_id(), true, true)
 
 
 ## Its current target if it's alive, targetable and within its attack range.

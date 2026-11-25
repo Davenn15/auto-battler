@@ -7,5 +7,5 @@ script = ExtResource("1_c8pvq")
 might_ward = 40.0
 insight_ward = 10.0
 celerity_ward = 40.0
-description = "More Wards while shielded."
+description = "+{might_ward} Might Ward, +{insight_ward} Insight Ward and +{celerity_ward} Celerity Ward while shielded."
 metadata/_custom_type_script = "uid://b05dn03vjblyp"

@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="Ascension" format=3]
 
-[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="1"]
-[ext_resource type="Script" path="res://data/ascensions/effects/seg_bounce_effect.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/seg_fault/seg_fault.tres" id="3"]
-[ext_resource type="Script" path="res://scripts/unit_data.gd" id="4"]
+[ext_resource type="Script" uid="uid://bwe8lufftj82p" path="res://data/ascensions/scripts/ascension.gd" id="1"]
+[ext_resource type="Script" uid="uid://dym2oj7rrr01q" path="res://data/ascensions/effects/seg_bounce_effect.gd" id="2"]
+[ext_resource type="Resource" uid="uid://j8xiskiwwssm" path="res://data/units/obelisk/tier 4/fault/seg_fault.tres" id="3"]
+[ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4"]
 
 [sub_resource type="Resource" id="Effect"]
 script = ExtResource("2")
@@ -11,7 +11,7 @@ script = ExtResource("2")
 [resource]
 script = ExtResource("1")
 ascension_name = "Ricochet"
-description = "SEG.FAULT's Gambit projectiles bounce off the edge of the board once. Ion Salvo bolts fly on through their target, bounce, and hit the first enemy on their way back; the Ion Cannon orb flies back across the board (with B2, it detonates at both edges)."
+description = "Fault's Gambit projectiles bounce off the edge of the board once. Ion Salvo bolts fly on through their target, bounce, and hit the first enemy on their way back; the Ion Cannon orb flies back across the board (with B2, it detonates at both edges)."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

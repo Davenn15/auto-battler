@@ -12,4 +12,4 @@ might_scaling = 0.2
 damage_type = 1
 gambit_name = "Injector"
 cast_time = 0.4
-description = "Aims at the cone holding the most enemies and quickly fires injector missiles at random within it. Each hits the first enemy it touches, dealing damage and giving it a stack of Mono-Virus."
+description = "Aims at the cone holding the most enemies within {range_cells} cells and quickly fires {missiles} injector missiles at random within it. Each hits the first enemy it touches, dealing {damage+might_scaling} Insight damage and giving it {virus_stacks} stacks of Mono-Virus."

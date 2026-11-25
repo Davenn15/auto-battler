@@ -67,6 +67,8 @@ enum Target { ARMY, CHOSEN_UNIT }
 
 ## Extra Keepsake slots every affected unit gets (a chosen-unit one: its chosen unit).
 @export var keepsake_slots: int = 0
+## Extra empowered Keepsakes every affected unit may carry (Keepsake Empowering; one is usual).
+@export var empowered_keepsakes: int = 0
 ## Random Shards the player gets in their inventory when they take this Ascension.
 @export var random_shards: int = 0
 
@@ -260,3 +262,14 @@ class StatsStatus extends Status:
 
 	func modify_dodge_chance(_unit: BattleUnit, chance: float) -> float:
 		return chance + ascension.dodge_chance
+
+
+## Where this Ascension's description placeholders get their numbers: its effect, then
+## itself (its stats, Keepsake slots...). Add a unit's stats with with_unit for current numbers.
+func description_context() -> DescriptionContext:
+	var ctx := DescriptionContext.new()
+	if effect != null:
+		ctx.sources.append(effect)
+		ctx.named["effect"] = effect
+	ctx.sources.append(self)
+	return ctx

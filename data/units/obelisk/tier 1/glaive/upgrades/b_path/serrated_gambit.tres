@@ -8,4 +8,4 @@ duration = 3.5
 celerity_scaling = 0.1
 gambit_name = "Serrated"
 cast_time = 0.6
-description = "Spins like a sawblade for a while, damaging every enemy next to him. He can't attack or gain Charge while spinning, but can still move."
+description = "Spins like a sawblade for {duration} seconds, dealing {damage+celerity_scaling} damage to every enemy next to him every {tick_time} seconds. He can't attack or gain Charge while spinning, but can still move."

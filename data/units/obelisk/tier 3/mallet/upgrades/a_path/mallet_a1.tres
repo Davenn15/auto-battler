@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "MALLET Phases for 2 seconds after landing from its slam."
+description = "Mallet Phases for {phase_after} seconds after landing from its slam."
 gambit_overrides = Dictionary[String, float]({
 "phase_after": 2.0
 })

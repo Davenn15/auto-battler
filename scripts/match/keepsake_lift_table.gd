@@ -5,7 +5,7 @@ extends Resource
 ## the same number of other items at a similar ARV. Built by tools/keepsake_table.gd from a
 ## sim's _units.csv; read by KeepsakeSense.
 
-## Unit name (as the sim writes it, e.g. "Batr.ee") ->
+## Unit name (as the sim writes it, e.g. "Battery", UnitData.get_title) ->
 ## {keepsake name -> [lift, battles, reliability, average]}.
 ##   average: how much more often the unit's team won with it, in win rate (0.05 = 5 points).
 ##   reliability: 0-1, how much of that average is real rather than chance from few battles.

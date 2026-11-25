@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_mho86")
-description = "Each of his Wards grows with its matching attribute."
+description = "Each of his Wards grows by {scaling%} of its matching attribute."
 passives = Array[ExtResource("2_i6g5s")]([ExtResource("3_i6g5s")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

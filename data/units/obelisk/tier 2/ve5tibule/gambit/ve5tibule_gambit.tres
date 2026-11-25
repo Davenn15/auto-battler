@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="PhaseGambit" format=3]
+[gd_resource type="Resource" script_class="StunBoltGambit" format=3]
 
-[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/gambit/phase_gambit.gd" id="1"]
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/gambit/stun_bolt_gambit.gd" id="1_5q2mu"]
 
 [resource]
-script = ExtResource("1")
-gambit_name = "Phase"
+script = ExtResource("1_5q2mu")
+gambit_name = "Stun Bolts"
 cast_time = 0.3
-description = "Phases the enemy in range that has dealt the most damage this combat: it is stunned and untargetable for a while."
+description = "Sends out {bolts} spiralling stun bolts at the enemies within {range_cells} cells who have dealt the most damage this combat, one each. Each deals {damage+insight_scaling} Insight damage and stuns its target for {stun_time|cc} seconds."

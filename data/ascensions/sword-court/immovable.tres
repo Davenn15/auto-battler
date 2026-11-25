@@ -14,7 +14,7 @@ radius_cells = 2
 [resource]
 script = ExtResource("1")
 ascension_name = "Unshakable"
-description = "Enemies within 2 cells of Balmede have 20 less Celerity."
+description = "Enemies within {radius_cells} cells of Balmede have {amount} less Celerity."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

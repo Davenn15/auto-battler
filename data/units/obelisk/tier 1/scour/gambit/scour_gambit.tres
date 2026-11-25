@@ -8,4 +8,4 @@ might_bonus = 30.0
 burn_per_second = 0.05
 gambit_name = "Overdrive"
 cast_time = 0.5
-description = "Goes into overdrive: gains Might and Celerity for a while, but burns a share of his max health every second. The burn can kill him."
+description = "Goes into overdrive: gains {might_bonus} Might and {celerity_bonus} Celerity for {duration} seconds, but burns {burn_per_second%|maxhp} every second. The burn can kill him."

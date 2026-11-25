@@ -8,4 +8,4 @@ radius_cells = 1
 ally_share = 0.015
 self_share = 0.4
 passive_name = "Hearty"
-description = "Allies within 1 cell gain Regeneration equal to 1.5% of their max health per second. Brogaine gains 40% of the total Regeneration of those allies."
+description = "Allies within {radius_cells} cells gain Regeneration equal to {ally_share%} of their max health per second. Brogaine gains {self_share%} of the total Regeneration of those allies."

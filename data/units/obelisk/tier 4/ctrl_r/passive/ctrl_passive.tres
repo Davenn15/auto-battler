@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Command Link"
-description = "Whenever CTRL(R) is hit, it gains 5 Ward of that hit's damage type for 3 seconds (up to +40 per type). The first time it drops below 66% health, and again below 33%, it launches a siphon drone that drains 8% of an enemy's max health and heals CTRL(R) that much."
+description = "Whenever Controller is hit, it gains {ward_per_hit} Ward of that hit's damage type for {ward_duration} seconds (up to +{ward_cap} per type). The first time it drops below 66% health, and again below 33%, it launches a siphon drone that drains {drain_share%} of an enemy's max health and heals Controller that much."

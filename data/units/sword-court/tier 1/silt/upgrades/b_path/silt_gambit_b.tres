@@ -7,5 +7,5 @@ script = ExtResource("1_lrrkg")
 duration = 5.0
 ally_count = 2
 cast_time = 0.75
-description = "Sends a knife to orbit his fastest ally for a while. Their attacks gain the Hit Effect: a knife flies at the target and strikes it."
+description = "Sends knives to orbit his {ally_count} fastest allies for {duration} seconds. Their attacks gain the Hit Effect: a knife flies at the target and strikes it for {knife_damage+might_scaling} damage."
 metadata/_custom_type_script = "uid://ci21lhcorw03o"

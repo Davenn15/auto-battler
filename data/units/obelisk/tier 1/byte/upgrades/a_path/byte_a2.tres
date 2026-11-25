@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "BYTE has +10 Regeneration (health per second)."
+description = "Byte has +{regen} Regeneration (health per second)."
 passives = Array[ExtResource("2")]([ExtResource("3")])

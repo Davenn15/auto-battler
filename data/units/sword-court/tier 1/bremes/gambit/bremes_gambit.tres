@@ -8,5 +8,5 @@ damage = 130.0
 might_scaling = 0.65
 ward_reduction = 20.0
 cast_time = 0.5
-description = "Strikes her target and lowers all of its Wards for a few seconds."
+description = "Strikes her target for {damage+might_scaling+insight_scaling} damage and lowers all of its Wards by {ward_reduction} for {ward_duration} seconds."
 metadata/_custom_type_script = "uid://bgftcakf2rch6"

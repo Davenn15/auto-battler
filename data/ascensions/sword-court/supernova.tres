@@ -14,7 +14,7 @@ burst_radius = 1
 [resource]
 script = ExtResource("1")
 ascension_name = "Supernova"
-description = "Vere's Starburn lasts 3.5 seconds and keeps ramping up the whole time. Each burn that runs its course bursts, dealing 4% of each nearby enemy's max health as Insight damage."
+description = "Vere's Starburn lasts {duration} seconds and keeps ramping up the whole time. Each burn that runs its course bursts, dealing {burst_share%} of each enemy's max health within {burst_radius} cells as Insight damage."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

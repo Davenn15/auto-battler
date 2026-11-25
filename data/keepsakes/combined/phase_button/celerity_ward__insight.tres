@@ -1,15 +1,36 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/phase_button/celerity_ward__insight_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_u0s4w"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_5r0sj"]
+
+[sub_resource type="Resource" id="Resource_gelx6"]
+script = ExtResource("2_u0s4w")
+shard = 4
+description = "When it triggers, gain {lasting_amount} Insight for the rest of combat."
+effect_overrides = {
+"lasting_amount": 30.0,
+"lasting_stat": 1
+}
+
+[sub_resource type="Resource" id="Resource_u0a86"]
+script = ExtResource("2_u0s4w")
+shard = 3
+description = "When it triggers, gain {lasting_amount} Celerity Ward for the rest of combat."
+effect_overrides = {
+"lasting_amount": 40.0,
+"lasting_stat": 5
+}
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Phase Button"
 first_shard = 3
 second_shard = 4
-effect = ExtResource("2_effect")
 celerity_ward = 35.0
 insight = 20.0
-description = "The first time each combat that you drop below 50% health, you become stunned and untargetable for 2.5 seconds."
+effect = ExtResource("2_effect")
+description = "The first time each combat that you drop below {threshold%} health, you Phase (stunned and untargetable) for {hide_time} seconds."
+empowerments = Array[ExtResource("2_u0s4w")]([SubResource("Resource_gelx6"), SubResource("Resource_u0a86")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

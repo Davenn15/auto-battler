@@ -10,6 +10,6 @@ chance = 0.1
 [resource]
 script = ExtResource("1")
 ascension_name = "Polished Shields"
-description = "While shielded, your units have an extra 10% chance to reflect each projectile that hits them back at its shooter."
+description = "While shielded, your units have an extra {chance%} chance to reflect each projectile that hits them back at its shooter."
 tier = 3
 effect = SubResource("Effect")

@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Whenever an ally within 2 cells is healed, Cerceval is healed for 40% of it."
+description = "Whenever an ally within {radius_cells} cells is healed, Cerceval is healed for {share%} of it."
 passives = Array[ExtResource("2")]([ExtResource("3")])

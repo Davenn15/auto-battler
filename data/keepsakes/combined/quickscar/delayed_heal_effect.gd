@@ -1,39 +1,10 @@
 class_name DelayedHealEffect
 extends Passive
-## Whenever the unit takes damage, it heals a share of it back after a delay.
+## Quickscar: the unit has Share x 100 percent Scar (see Scar): that share of each hit it
+## takes heals back a few seconds later. Adds to any other Scar it has.
 
-@export var share: float = 0.15
-@export var delay: float = 3.0
+@export_range(0.0, 1.0, 0.05) var share: float = 0.15
 
 
 func on_battle_start(unit: BattleUnit) -> void:
-	unit.add_status(Afterglow.new(self))
-
-
-class Afterglow extends Status:
-	var effect: DelayedHealEffect
-	var _time := 0.0
-	var _due: Array = []   # [time to heal at, amount]
-
-	func _init(p_effect: DelayedHealEffect) -> void:
-		effect = p_effect
-
-	func modify_incoming_damage(_unit: BattleUnit, damage: float) -> float:
-		if damage > 0.0:
-			_due.append([_time + effect.delay, damage * effect.share])
-		return damage
-
-	func tick(unit: BattleUnit, delta: float) -> void:
-		_time += delta
-		while not _due.is_empty() and _due[0][0] <= _time:
-			var before := unit.health
-			unit.heal(_due.pop_front()[1], unit.get_instance_id())
-			if unit.health > before:
-				KeepsakeVfx.heal_flash(unit)
-
-	## Health still waiting to come back, shown on the health bar.
-	func get_pending_healing(_unit: BattleUnit) -> float:
-		var total := 0.0
-		for entry in _due:
-			total += entry[1]
-		return total
+	unit.add_status(StatBonusStatus.new(Stats.Stat.SCAR, share * 100.0))

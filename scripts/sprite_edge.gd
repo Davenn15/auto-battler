@@ -7,7 +7,7 @@ class_name SpriteEdge
 ## computer's planning sims and the real game agree.
 ##
 ## Gameplay uses the sprite at rest: its normal position and size, ignoring lunges, jolts,
-## pulses, FRAME's stretch and other animations (which don't run in sims), and ignoring the
+## pulses, Frame's stretch and other animations (which don't run in sims), and ignoring the
 ## online view turn (so both players' games hit at the same moment). Beams can ask for the
 ## sprite as drawn instead (`visual`), since where their line ends is only a picture.
 

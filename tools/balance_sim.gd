@@ -298,7 +298,7 @@ func _print_placement(grid: BattleGrid, teams: Dictionary, placement: Dictionary
 			for enemy in placement[3 - team]:
 				nearest = mini(nearest, grid.get_distance(placement[team][i], enemy))
 			print("  team %d  %-10s range %d  cell %s  nearest enemy %d" % [team,
-					pick["data"].display_name.capitalize(), RandomTeams.attack_range(pick), placement[team][i], nearest])
+					pick["data"].get_title(), RandomTeams.attack_range(pick), placement[team][i], nearest])
 
 
 ## Removes everything from the last battle: grid, manager, units, projectiles, effects.
@@ -403,7 +403,7 @@ func _new_unit_row(index: int, target: int, team: int, unit: BattleUnit, pick: D
 	var data: UnitData = pick["data"]
 	return {
 		"battle": index, "arv": target, "team": team, "result": "",
-		"unit": data.display_name.capitalize(), "tier": data.tier,
+		"unit": data.get_title(), "tier": data.tier,
 		"path": RandomTeams.path_label(pick["path"]), "upgrades": _upgrade_names(data, pick["path"]),
 		"aura": unit.get_aura_value(), "reserve": unit.get_reserve_value(),
 		"items": unit.keepsakes.map(func(k): return k.get_display_name()),

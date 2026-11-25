@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Vacuum executes its target when it drops below a share of its max health."
+description = "Vacuum executes its target when it drops below {execute_threshold%} of its max health."
 gambit_overrides = Dictionary[String, float]({
 "execute_threshold": 0.12
 })

@@ -9,5 +9,5 @@ max_health_percent = 0.1
 damage_growth = 0.45
 charge_growth = 10.0
 cast_time = 0.4
-description = "Cleaves his target with a heavy max-health attack. Each time, it costs more Charge and hits harder than the last."
+description = "Cleaves his target with an attack dealing {bonus_damage} extra damage plus {max_health_percent%} of its max health. Each time, it costs {charge_growth} more Charge and hits {damage_growth%} harder than the last."
 metadata/_custom_type_script = "uid://ce25uodbfvhj7"

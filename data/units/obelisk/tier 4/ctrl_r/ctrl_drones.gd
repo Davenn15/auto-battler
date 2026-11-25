@@ -1,16 +1,16 @@
 class_name CtrlDrones
 extends RefCounted
-## CTRL(R)'s drones, shared by its passive and its Gambit.
+## Controller's drones, shared by its passive and its Gambit.
 ##   Siphon drone (SiphonDrone, below). Flies to an enemy, beams away
-##     a share of its max health (for the rest of combat), flies back and heals CTRL(R) that much.
+##     a share of its max health (for the rest of combat), flies back and heals Controller that much.
 ##   Bore drone (Swarming, A): every siphon launch also sends Bores Per Siphon of these. Each
 ##     flies to an enemy, deals a little damage, drills away some of all three of its wards
-##     (for the rest of combat) and brings them back to CTRL(R).
-##   A2: every drone that makes it back gives CTRL(R) a Shield.
+##     (for the rest of combat) and brings them back to Controller.
+##   A2: every drone that makes it back gives Controller a Shield.
 
 const DRONE_SPEED := 240.0
 const CHANNEL_TIME := 1.5
-## CTRL(R)'s colours: an orange-red for every drone, beam and pulse.
+## Controller's colours: an orange-red for every drone, beam and pulse.
 const COLOR := Color(1.0, 0.38, 0.18)
 const LIGHT := Color(1.0, 0.72, 0.5)
 
@@ -80,7 +80,7 @@ static func swarm_of(unit: BattleUnit) -> SwarmStatus:
 	return null
 
 
-## A drone (siphon or bore) got back to CTRL(R): A2's Shield.
+## A drone (siphon or bore) got back to Controller: A2's Shield.
 static func on_drone_returned(unit: BattleUnit) -> void:
 	if not is_instance_valid(unit) or not unit.alive:
 		return
@@ -101,7 +101,7 @@ static func _launch_bore(unit: BattleUnit, target: BattleUnit, swarm: SwarmStatu
 	bore.global_position = unit.global_position + Vector2(0, -22)
 
 
-## Swarming (A): on CTRL(R), holding the bore drone numbers.
+## Swarming (A): on Controller, holding the bore drone numbers.
 class SwarmStatus extends Status:
 	var bores: int
 	var bore_damage: float
@@ -113,7 +113,7 @@ class SwarmStatus extends Status:
 		ward_steal = p_steal
 
 
-## A2: on CTRL(R), the Shield each returning drone gives.
+## A2: on Controller, the Shield each returning drone gives.
 class DroneShieldStatus extends Status:
 	var shield: float
 	var duration: float
@@ -124,7 +124,7 @@ class DroneShieldStatus extends Status:
 
 
 ## Wards moved by a bore drone, for the rest of combat: negative on the enemy it drilled,
-## positive on CTRL(R) once the drone brings them home. Each drill adds its own.
+## positive on Controller once the drone brings them home. Each drill adds its own.
 class DrilledWards extends Status:
 	var amount: float
 
@@ -155,7 +155,7 @@ class BoreDrone extends Node2D:
 
 	func _physics_process(delta: float) -> void:
 		if not is_instance_valid(home) or not home.alive:
-			queue_free()   # CTRL(R) is gone: the wards with it
+			queue_free()   # Controller is gone: the wards with it
 			return
 		if not _back:
 			if not _alive(victim):
@@ -225,8 +225,8 @@ class BoreDrone extends Node2D:
 
 ## A siphon drone: flies out on a curve, hovers over its enemy shining an orange-red beam
 ## down for Channel Time while it drains Total of its max health (for the rest of combat),
-## then flies home and heals CTRL(R) for all of it. If the enemy dies mid-drain it comes
-## back with what it has; if CTRL(R) dies, the drained health is lost.
+## then flies home and heals Controller for all of it. If the enemy dies mid-drain it comes
+## back with what it has; if Controller dies, the drained health is lost.
 class SiphonDrone extends Node2D:
 	enum Stage { OUT, DRAIN, BACK }
 	const HOVER := Vector2(0, -30)   # how far above a unit's middle the drone hovers
@@ -249,7 +249,7 @@ class SiphonDrone extends Node2D:
 
 	func _physics_process(delta: float) -> void:
 		if not is_instance_valid(home) or not home.alive:
-			queue_free()   # CTRL(R) is gone: the drained health with it
+			queue_free()   # Controller is gone: the drained health with it
 			return
 		match _stage:
 			Stage.OUT:

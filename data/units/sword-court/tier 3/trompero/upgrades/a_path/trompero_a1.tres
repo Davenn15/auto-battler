@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_c7612")
-description = "Enemies in the ring lose Insight."
+description = "Enemies in the ring lose {insight_drain} Insight."
 gambit_overrides = Dictionary[String, float]({
 "insight_drain": 35.0
 })

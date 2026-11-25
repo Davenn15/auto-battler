@@ -7,5 +7,5 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Gatling Cannon"
-description = "New weapon, Gatling Cannon: rapid shots at the nearest enemy that come faster the longer it fires at the same one."
+description = "New weapon, Gatling Cannon: rapid shots of {damage+celerity_scaling} Might damage at the nearest enemy that come faster the longer it fires at the same one."
 passives = Array[ExtResource("2")]([ExtResource("3")])

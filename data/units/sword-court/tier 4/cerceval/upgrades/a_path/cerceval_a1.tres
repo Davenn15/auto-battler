@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "+1% Wrack Chance for every 50 Bleed on enemies within his attack range (up to +30%)."
+description = "+{per_step%} Wrack Chance for every {step} Bleed on enemies within his attack range (up to +{cap%})."
 passives = Array[ExtResource("2")]([ExtResource("3")])

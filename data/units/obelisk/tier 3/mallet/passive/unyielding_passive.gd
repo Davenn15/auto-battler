@@ -1,6 +1,6 @@
 class_name UnyieldingPassive
 extends Passive
-## MALLET: Immovability (see Stats.Stat.IMMOVABILITY): crowd control and debuffs on it last
+## Mallet: Immovability (see Stats.Stat.IMMOVABILITY): crowd control and debuffs on it last
 ## that much shorter.
 
 @export var immovability: float = 40.0

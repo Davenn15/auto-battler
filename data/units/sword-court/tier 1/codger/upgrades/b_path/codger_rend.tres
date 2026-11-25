@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Rend"
 cast_time = 0.4
-description = "Rends his target with his bladehook for 120 (+100% Might) damage and gives it Bleed for 80 (+80% Might)."
+description = "Rends his target with his bladehook for {damage+might_scaling} damage and gives it Bleed for {bleed_damage+bleed_might_scaling}."

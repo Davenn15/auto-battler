@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_8if57")
-description = "Lunck gains Charge whenever his adored ally gets a kill."
+description = "Lunck gains {charge_on_kill} Charge whenever his adored ally gets a kill."
 gambit_bonuses = Dictionary[String, float]({
 "charge_on_kill": 30.0
 })

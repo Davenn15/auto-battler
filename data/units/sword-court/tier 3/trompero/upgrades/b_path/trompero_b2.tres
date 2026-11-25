@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_c786d")
-description = "Arcane Blades also shields him."
+description = "Arcane Blades also shields him for {shield_amount+shield_insight_scaling|shield} for {shield_duration|shieldtime} seconds."
 gambit_overrides = Dictionary[String, float]({
 "shield_amount": 150.0,
 "shield_insight_scaling": 0.3

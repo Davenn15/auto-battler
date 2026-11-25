@@ -1,12 +1,12 @@
 class_name PathLink
 extends Node2D
-## A running link between M-PATH and an ally (see LinkGambit). Both get a LinkStatus that
+## A running link between M-Path and an ally (see LinkGambit). Both get a LinkStatus that
 ## points back here. Ends when time runs out or either of them dies. Draws a pulsing line
 ## between them.
 
 const COLOR := Color(1.0, 0.45, 0.75)
 
-var source: BattleUnit   # M-PATH
+var source: BattleUnit   # M-Path
 var ally: BattleUnit
 var time_left: float
 var regen_bonus: float
@@ -54,7 +54,7 @@ func end() -> void:
 	queue_free()
 
 
-## A2: the ally would die. M-PATH gives up Sacrifice Share of his max health (never going
+## A2: the ally would die. M-Path gives up Sacrifice Share of his max health (never going
 ## below 1 health) and heals the ally for the same. Once per link. Returns how much he gave.
 func sacrifice() -> float:
 	if sacrificed or not _alive(source) or not _alive(ally):
@@ -66,7 +66,7 @@ func sacrifice() -> float:
 	source.set_health(source.health - amount)
 	source.show_float_text("-%d" % roundi(amount), COLOR)
 	ally.show_float_text("Sacrifice", COLOR)
-	ally.heal(amount, source.get_instance_id())
+	ally.heal(amount, source.get_instance_id(), true, true)
 	return amount
 
 
@@ -105,7 +105,7 @@ class LinkStatus extends Status:
 		link = p_link
 		partner = p_partner
 
-	## M-PATH gains no Charge while his link is up; the ally gains Charge as normal.
+	## M-Path gains no Charge while his link is up; the ally gains Charge as normal.
 	func blocks_charge_gain(unit: BattleUnit) -> bool:
 		return is_instance_valid(link) and unit == link.source and link.is_live()
 
@@ -126,7 +126,7 @@ class LinkStatus extends Status:
 			partner.take_warded_damage(passed, false, unit.incoming_damage_type)
 			link.passing = false
 			amount -= passed
-		# A2: the ally would die, so M-PATH gives up health to save it (once per link).
+		# A2: the ally would die, so M-Path gives up health to save it (once per link).
 		if unit == link.ally and link.sacrifice_share > 0.0 and amount >= unit.health:
 			var survivable := maxf(unit.health - 1.0, 0.0)   # taken before the heal lands
 			if link.sacrifice() > 0.0:

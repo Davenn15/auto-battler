@@ -32,6 +32,6 @@ func execute(caster: BattleUnit) -> void:
 	var amount := Stats.scaled(shield, shield_insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
 	for unit in allies:
 		if caster.grid.get_distance(focus.cell, unit.cell) <= splash_cells:
-			unit.add_shield(amount, duration, caster.get_credit_id())
+			unit.add_shield(amount, duration, caster.get_credit_id(), false, true)
 			KeepsakeVfx.ward_circle(unit, 0.6)
 	caster.show_float_text("Bulwark", GateRules.LIGHT)

@@ -1,6 +1,6 @@
 class_name DischargeGambit
 extends Gambit
-## BATR.EE: for every Voltage Per Volt Voltage it has, it spends them and fires a Volt at a
+## Battery: for every Voltage Per Volt Voltage it has, it spends them and fires a Volt at a
 ## random enemy within Range Cells. Damage per Volt = Damage + Insight Scaling x Insight.
 ## Whatever Voltage is left over is cleared when the Gambit finishes, as for everyone.
 ##   A1: Volts shred Insight Ward (stacking, each for its own Shred Duration).

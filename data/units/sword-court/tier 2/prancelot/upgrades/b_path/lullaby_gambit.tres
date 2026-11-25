@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_cuckd")
 cast_time = 1.0
-description = "Sends a lulling wave forward. Enemies in it fall asleep until the time runs out or they take enough damage."
+description = "Sends a lulling wave {length_cells} cells forward. Enemies in it fall asleep for {sleep_time|cc} seconds, or until they take {wake_share%} of their max health in damage."
 metadata/_custom_type_script = "uid://1avfnlhibkck"

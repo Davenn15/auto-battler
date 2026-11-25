@@ -1,7 +1,6 @@
 class_name MendPulseEffect
 extends Passive
-## M-PATH's hero Ascension: his passive turns Mend Share of the damage he takes into
-## delayed healing (instead of 15%), and every Pulse Interval seconds he heals allies within
+## M-Path's hero Ascension: his passive's Scar becomes Mend Share in all (instead of 15%), and every Pulse Interval seconds he heals allies within
 ## Pulse Cells for Pulse Share of all the healing he received in that time.
 
 @export var mend_share: float = 0.3
@@ -24,6 +23,10 @@ class PulseStatus extends Status:
 	var _received := 0.0
 	var _until_pulse := 0.0
 	var _share_set := false
+	var _extra_scar := 0.0
+
+	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
+		return value + _extra_scar if stat == Stats.Stat.SCAR else value
 
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false
@@ -35,11 +38,13 @@ class PulseStatus extends Status:
 		_received += gained
 
 	func tick(unit: BattleUnit, delta: float) -> void:
-		if not _share_set:   # his passive may be added after this, so set it on the first tick
+		if not _share_set:   # his passive's Scar, raised to Mend Share in all (Scar adds up)
 			_share_set = true
-			for status in unit.statuses:
-				if status is DelayedMendPassive.MendStatus:
-					status.share = effect.mend_share
+			var base := 0.0
+			for passive in unit.passives:
+				if passive is DelayedMendPassive:
+					base = maxf(base, passive.share)
+			_extra_scar = maxf(effect.mend_share - base, 0.0) * 100.0
 		if not unit.active or not unit.alive:
 			return
 		_until_pulse -= delta

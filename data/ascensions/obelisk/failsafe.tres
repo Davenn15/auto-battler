@@ -13,7 +13,7 @@ shield_duration = 4.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Failsafe"
-description = "The first time Scour would die each combat (his own detonation included), he stays alive at 1 health and gains a Shield of 40% of his max health for 4 seconds."
+description = "The first time Scour would die each combat (his own detonation included), he stays alive at 1 health and gains a {shield_share%|maxhp|shield} Shield for {shield_duration|shieldtime} seconds."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

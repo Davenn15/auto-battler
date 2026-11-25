@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cubngwdapb6sp"]
+[gd_resource type="Resource" script_class="Upgrade" format=3]
 
-[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_okvlk"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_fg6rc"]
-[ext_resource type="Resource" uid="uid://ysolibsngb0x" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/geomond_a1.tres" id="2_u2w3d"]
-[ext_resource type="Resource" uid="uid://c1agc70oici3k" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/geomond_a2.tres" id="3_mmcbt"]
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1_okvlk"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2_fg6rc"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/geomond_a1.tres" id="2_u2w3d"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/geomond_a2.tres" id="3_mmcbt"]
 
 [resource]
 script = ExtResource("1_okvlk")
-description = "The slam is longer and wider."
+upgrade_name = "Seismic"
+description = "The slam is longer and wider: {length_cells} cells long, {width_cells} cells wide."
 next_choices = Array[ExtResource("1_okvlk")]([ExtResource("2_u2w3d"), ExtResource("3_mmcbt")])
 gambit_bonuses = Dictionary[String, float]({
 "length_cells": 1.0,

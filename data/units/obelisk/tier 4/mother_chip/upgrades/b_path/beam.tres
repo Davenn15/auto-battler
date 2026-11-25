@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Overclock"
-description = "Her and her Chips' attacks become Beams that deal up to double damage the lower the target's health."
+description = "Her and her Chips' attacks become Beams that deal up to +{execute_bonus%} damage the lower the target's health."

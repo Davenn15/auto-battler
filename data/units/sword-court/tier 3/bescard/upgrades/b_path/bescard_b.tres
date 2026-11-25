@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bhkggc8vmypm8"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dupefe0c1ec6"]
 
 [ext_resource type="Resource" uid="uid://cxt8ubomxoqrc" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/flurry_gambit.tres" id="1_kqkwv"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_kqq4m"]
@@ -8,7 +8,8 @@
 
 [resource]
 script = ExtResource("1_kqq4m")
-description = "New Gambit: Flurry. A quick burst of attacks on his target."
+upgrade_name = "Gauging"
+description = "New Gambit: Flurry. A quick burst of {strikes} attacks on his target."
 gambit = ExtResource("1_kqkwv")
 next_choices = Array[ExtResource("1_kqq4m")]([ExtResource("3_nnuof"), ExtResource("4_t8pfo")])
 placement = 2

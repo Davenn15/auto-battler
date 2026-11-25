@@ -1,16 +1,39 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_a37u5"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/saviour/health__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_7irm7"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/support_boost_effect.gd" id="4_licvl"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/saviour_wrack_effect.gd" id="5_438s7"]
+
+[sub_resource type="Resource" id="Resource_k0cjj"]
+script = ExtResource("4_licvl")
+
+[sub_resource type="Resource" id="Resource_15dai"]
+script = ExtResource("2_a37u5")
+shard = 6
+description = "Your heals and shields are {extra.bonus%} bigger."
+extra_effects = Array[ExtResource("3_7irm7")]([SubResource("Resource_k0cjj")])
+
+[sub_resource type="Resource" id="Resource_gvbnr"]
+script = ExtResource("5_438s7")
+
+[sub_resource type="Resource" id="Resource_8wqrp"]
+script = ExtResource("2_a37u5")
+shard = 7
+description = "When your heal Wracks, the target also gains a Shield of {extra.shield_share%} of it for {extra.shield_duration|shieldtime} seconds. When your shield Wracks, the target gains {extra.celerity} Celerity for {extra.celerity_duration} seconds."
+extra_effects = Array[ExtResource("3_7irm7")]([SubResource("Resource_gvbnr")])
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Saviour"
 first_shard = 6
 second_shard = 7
-effect = ExtResource("2_effect")
 health = 200.0
 wrack_chance = 0.15
 wrack_damage = 0.15
+effect = ExtResource("2_effect")
 description = "Your Heals and Shields can Wrack."
+empowerments = Array[ExtResource("2_a37u5")]([SubResource("Resource_15dai"), SubResource("Resource_8wqrp")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

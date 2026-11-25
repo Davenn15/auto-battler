@@ -1,6 +1,6 @@
 class_name CodeSpiralGambit
 extends Gambit
-## MOTHER-CHIP calls down a corrupted code spiral: a circle on the ground, centred on the
+## Mother-Chip calls down a corrupted code spiral: a circle on the ground, centred on the
 ## cell within her attack range that covers the most enemies. For Duration seconds, every
 ## enemy inside it gets Stacks Per Second Mono-Virus stacks each second. It stays where it
 ## landed, and keeps going if she dies.
@@ -69,7 +69,7 @@ class CodeSpiral extends Node2D:
 	var center: Vector2i
 	var team := 0
 	var credit_id := 0
-	var caster_id := 0   # MOTHER-CHIP herself (her hero Ascension's knock-up)
+	var caster_id := 0   # Mother-Chip herself (her hero Ascension's knock-up)
 	var radius_cells := 1
 	var time_left := 5.0
 	var duration := 5.0

@@ -12,7 +12,7 @@ share = 0.6
 [resource]
 script = ExtResource("1")
 ascension_name = "Twin Boot"
-description = "At the start of combat, REPLK8R becomes two units, each with 60% of its health and stats and all of its Keepsakes."
+description = "At the start of combat, Replicator becomes two units, each with {share%} of its health and stats and all of its Keepsakes."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

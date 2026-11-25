@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://cg6lp2sk6owfn"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://00dlru728bbn"]
 
 [ext_resource type="Resource" uid="uid://dai1c0d3pprf4" path="res://data/units/sword-court/tier 1/lunck/upgrades/b_path/adoring_gambit.tres" id="1_wwfeg"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_xb06s"]
@@ -8,7 +8,8 @@
 
 [resource]
 script = ExtResource("1_xb06s")
-description = "New Gambit: Adoration. Rushes to his strongest ally and gives them a big shield and extra Wrack Chance."
+upgrade_name = "Adoring"
+description = "New Gambit: Adoration. Rushes to his strongest ally and gives them a {shield_amount|shield} shield and +{wrack_chance%} Wrack Chance for {duration|shieldtime} seconds."
 gambit = ExtResource("1_wwfeg")
 next_choices = Array[ExtResource("1_xb06s")]([ExtResource("3_bvlcg"), ExtResource("4_5v0hw")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

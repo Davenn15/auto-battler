@@ -1,15 +1,32 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_dmali"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/revenge/might__celerity_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_18kme"]
+
+[sub_resource type="Resource" id="Resource_4hbad"]
+script = ExtResource("2_dmali")
+description = "Each stack makes the enemy take another {extra_taken_per_stack%} more damage from you."
+effect_overrides = {
+"extra_taken_per_stack": 0.01
+}
+
+[sub_resource type="Resource" id="Resource_de66g"]
+script = ExtResource("2_dmali")
+shard = 3
+description = "Each stack makes the enemy deal another {extra_guard_per_stack%} less damage to you."
+effect_overrides = {
+"extra_guard_per_stack": 0.01
+}
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Revenge"
-first_shard = 0
 second_shard = 3
-effect = ExtResource("2_effect")
 might = 25.0
 celerity_ward = 35.0
-description = "Whenever an enemy damages you, they gain a stack of Revenge up to a maximum of 10. Each stack causes the enemy to deal 1% less damage to you and take 1% more damage from you."
+effect = ExtResource("2_effect")
+description = "Whenever an enemy damages you, they gain a stack of Revenge up to a maximum of {max_stacks}. Each stack causes the enemy to deal {per_stack%} less damage to you and take {per_stack%} more damage from you."
+empowerments = Array[ExtResource("2_dmali")]([SubResource("Resource_4hbad"), SubResource("Resource_de66g")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

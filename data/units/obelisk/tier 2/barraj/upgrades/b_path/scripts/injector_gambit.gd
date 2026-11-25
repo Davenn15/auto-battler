@@ -1,6 +1,6 @@
 class_name InjectorGambit
 extends Gambit
-## BAR.RAJ B: picks the cone in front of him that holds the most enemies, then quickly fires
+## Barrage B: picks the cone in front of him that holds the most enemies, then quickly fires
 ## injector missiles at random angles inside it. Each missile flies straight, hits the first
 ## enemy it touches, deals damage and gives it Mono-Virus stacks.
 ## Damage = Damage + Might Scaling x Might.

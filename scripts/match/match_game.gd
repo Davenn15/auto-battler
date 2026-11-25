@@ -57,8 +57,14 @@ var log_lines: PackedStringArray = []
 var held: Dictionary = {}
 ## The unit whose items are listed in the panel.
 var selected: ArmyUnit = null
-## The ritual table's two slots: Shards taken out of the inventory, or null.
+## The ritual table's two slots: Shards taken out of the inventory, or null. From
+## EMPOWER_ROUND a finished Keepsake can go there too, to be empowered by the Shard in the
+## other slot (Keepsake Empowering).
 var table: Array = [null, null]
+## For each slot, the unit wearing the Keepsake there, or null. An equipped Keepsake never
+## really leaves its unit: the table just points at it, and empowering it swaps the
+## empowered copy in on the unit.
+var table_links: Array = [null, null]
 
 var _fog: MatchFog
 var _manager: BattleManager
@@ -120,6 +126,7 @@ static var opponent_faction_choice := MatchRules.DEFAULT_FACTION
 
 
 func _ready() -> void:
+	add_to_group("match_game")   # descriptions find units on the board through it (MatchHud._board_unit)
 	# A background test copy that booted straight into a match (the main scene isn't the
 	# menu): go to the tester instead of playing.
 	if AiPlanner.is_eval_copy():
@@ -206,6 +213,10 @@ func add_log(text: String) -> void:
 
 # ---------- Planning ----------
 
+## True once the "Keepsake Empowering Unlocked" banner has shown this match.
+var _empowering_announced := false
+
+
 func _begin_planning() -> void:
 	phase = Phase.PLANNING
 	if is_instance_valid(_manager):   # the last combat's; the combat timer reads it
@@ -219,6 +230,10 @@ func _begin_planning() -> void:
 	# The last fight's meter stays up so it can inform planning (hidden before the first).
 	damage_tracker.set_planning(true)
 	_show_planning_board()
+	if MatchRules.empowering_open(round_number) and not _empowering_announced:
+		_empowering_announced = true   # the first planning it's open: say so, once a match
+		hud.announce("Keepsake Empowering Unlocked",
+				"Put a Keepsake and one of its Shards on the ritual table to empower it.")
 	if online:
 		ai_ready = _remote_armies.has(round_number)   # they may have finished already
 		planning_left = PLANNING_TIME
@@ -297,7 +312,7 @@ func _show_planning_board() -> void:
 		unit.modulate.a = 0.6
 		units.append(unit)
 	# Everything that starts with combat shows while planning too: stats, shields, auras
-	# (Lunck's, BATR.EE's, Keepsakes'), other visuals. Once all are on the board.
+	# (Lunck's, Battery's, Keepsakes'), other visuals. Once all are on the board.
 	for unit in units:
 		unit.preview_combat_start()
 	# Units you can afford to upgrade right now: a cyan glow and arrow (while planning only).
@@ -317,6 +332,7 @@ func _clear_board() -> void:
 
 ## Rebuilds the board and the panels after anything in the planning phase changes.
 func changed() -> void:
+	_check_table_links()
 	if phase == Phase.PLANNING:
 		_show_planning_board()
 	hud.refresh()
@@ -407,30 +423,126 @@ func unequip(unit: ArmyUnit, item_index: int) -> void:
 		changed()
 
 
-## Puts the held Shard on the ritual table, or takes a Shard off it.
+## Puts the held Shard (or, from EMPOWER_ROUND, Keepsake) on the ritual table, or takes
+## an item off it.
 func table_clicked(slot: int) -> void:
 	if table[slot] != null:
-		player.inventory.append(table[slot])
-		table[slot] = null
-	elif held.has("item") and player.inventory[held["item"]].is_shard:
+		_clear_table_slot(slot)
+	elif held.has("item") and table_accepts(player.inventory[held["item"]]):
 		table[slot] = player.inventory[held["item"]]
 		player.inventory.remove_at(held["item"])
 		held = {}
 	changed()
 
 
+## True if `item` may go on the ritual table: any Shard, and from EMPOWER_ROUND a
+## finished Keepsake that isn't empowered yet.
+func table_accepts(item: Keepsake) -> bool:
+	if item == null:
+		return false
+	if item.is_shard:
+		return true
+	return MatchRules.empowering_open(round_number) and not item.is_empowered()
+
+
+## Takes the item off a table slot: back to the inventory, or (an equipped Keepsake) just
+## no longer pointed at, as it never left its unit.
+func _clear_table_slot(slot: int) -> void:
+	if table[slot] != null and table_links[slot] == null:
+		player.inventory.append(table[slot])
+	table[slot] = null
+	table_links[slot] = null
+
+
+## Drops table links to Keepsakes their unit no longer has (the unit was sold).
+func _check_table_links() -> void:
+	for slot in table.size():
+		var unit = table_links[slot]
+		if unit != null and (not player.units.has(unit) or not unit.items.has(table[slot])):
+			table[slot] = null
+			table_links[slot] = null
+
+
 func table_preview() -> Keepsake:
-	return MatchRules.combine_result(table[0], table[1])
+	var made := MatchRules.combine_result(table[0], table[1])
+	if made != null:
+		return made
+	return _empower_preview()
+
+
+## The empowered Keepsake the table would make, or null (not open yet, no Empowerment for
+## that Shard, or its unit already carries as many empowered Keepsakes as it may).
+func _empower_preview() -> Keepsake:
+	var slot := _table_keepsake_slot()
+	if slot == -1 or not MatchRules.can_empower(table[slot], table[1 - slot], table_links[slot], round_number, player):
+		return null
+	return MatchRules.empower_result(table[0], table[1])
+
+
+## True if the table holds a Keepsake beside a Shard (empowering, not combining).
+func is_empowering_on_table() -> bool:
+	return _table_keepsake_slot() != -1
+
+
+## The slot holding a finished Keepsake beside a Shard, or -1.
+func _table_keepsake_slot() -> int:
+	for slot in table.size():
+		if table[slot] != null and not table[slot].is_shard \
+				and table[1 - slot] != null and table[1 - slot].is_shard:
+			return slot
+	return -1
+
+
+## Why the table can't empower what's on it, for its hint; "" if it can (or isn't trying).
+func empower_problem() -> String:
+	var slot := _table_keepsake_slot()
+	if slot == -1:
+		return ""
+	var keepsake: Keepsake = table[slot]
+	if not MatchRules.empowering_open(round_number):
+		return "Keepsakes can be empowered from round %d." % MatchRules.EMPOWER_ROUND
+	if MatchRules.empower_result(table[0], table[1]) == null:
+		return "A %s Shard can't empower %s." % [Shard.NAMES[table[1 - slot].first_shard], keepsake.get_display_name()]
+	var limit := MatchRules.empowered_limit(round_number)
+	var owned := MatchRules.empowered_owned(player)
+	if owned >= limit:
+		return "Your army already has %d of %d empowered Keepsakes. The limit grows after each Neutral Encounter." % [owned, limit]
+	var wearer: ArmyUnit = table_links[slot]
+	if wearer != null and wearer.empowered_count() >= wearer.empowered_cap():
+		return "%s can't carry another empowered Keepsake." % wearer.label()
+	return ""
 
 
 func combine_table() -> void:
 	var result := table_preview()
 	if result == null:
 		return
+	if _table_keepsake_slot() != -1:
+		_empower_table()
+		changed()
+		return
 	player.inventory.append(result)
 	table = [null, null]
+	table_links = [null, null]
 	add_log("The ritual made %s." % result.get_display_name())
 	changed()
+
+
+## Empowers the Keepsake on the table with the Shard beside it. The result takes the
+## Keepsake's place: on its unit, or in the inventory. Returns it, or null.
+func _empower_table() -> Keepsake:
+	var slot := _table_keepsake_slot()
+	if slot == -1 or _empower_preview() == null:
+		return null
+	var keepsake: Keepsake = table[slot]
+	var shard: Keepsake = table[1 - slot]
+	for s in table.size():   # loose items back to the inventory, where empower finds them
+		_clear_table_slot(s)
+	var result := MatchRules.empower(player, keepsake, shard, round_number)
+	if result == null:
+		return null
+	add_log("The ritual empowered %s with a %s Shard." % [keepsake.get_display_name(), Shard.NAMES[shard.first_shard]])
+	return result
 
 
 # ---------- Dragging items ----------
@@ -477,7 +589,11 @@ func can_move_item(source: Dictionary, dest: Dictionary) -> bool:
 	if item == null:
 		return false
 	if source["from"] == "unit" and not item.is_shard:
-		return false
+		# A Keepsake stays on its unit; it can only be pointed at from the ritual table, to
+		# be empowered (from EMPOWER_ROUND).
+		return dest.get("to") == "table" and table_accepts(item) and not table.has(item)
+	if source["from"] == "table" and table_links[source["slot"]] != null and dest.get("to") == "unit":
+		return false   # an equipped Keepsake on the table belongs to its unit already
 	if _is_new_item(source):
 		if source["from"] == "shop_shard" and player.reserve < MatchRules.SHARD_COST:
 			return false
@@ -487,19 +603,19 @@ func can_move_item(source: Dictionary, dest: Dictionary) -> bool:
 			var target: ArmyUnit = dest["unit"]
 			# A copy it already has may still be dropped on it: it's refused (see move_item).
 			return player.units.has(target) and (target.items.size() < target.keepsake_slots() \
-					or not Keepsake.allowed_with(item, target.items))
+					or not target.accepts(item))
 		return dest.get("to") == "inventory"
 	match dest.get("to"):
 		"inventory":
 			return source["from"] != "inventory"
 		"table":
-			return item.is_shard and not (source["from"] == "table" and source["slot"] == dest["slot"])
+			return table_accepts(item) and not (source["from"] == "table" and source["slot"] == dest["slot"])
 		"unit":
 			var unit: ArmyUnit = dest["unit"]
 			if not player.units.has(unit) or (source["from"] == "unit" and source["unit"] == unit):
 				return false
 			# A copy it already has may still be dropped on it: it's refused (see move_item).
-			return unit.items.size() < unit.keepsake_slots() or not Keepsake.allowed_with(item, unit.items)
+			return unit.items.size() < unit.keepsake_slots() or not unit.accepts(item)
 	return false
 
 
@@ -511,7 +627,7 @@ func move_item(source: Dictionary, dest: Dictionary) -> void:
 	# The universal Keepsake rule: a unit never carries two of the same completed Keepsake.
 	# The copy goes to the inventory instead (bought or made first, if it's new) and the
 	# unit refuses it with a red outline and a shake.
-	if dest.get("to") == "unit" and not Keepsake.allowed_with(item_at(source), dest["unit"].items):
+	if dest.get("to") == "unit" and not dest["unit"].accepts(item_at(source)):
 		_refuse_item(source, dest["unit"])
 		return
 	if _is_new_item(source):
@@ -519,26 +635,38 @@ func move_item(source: Dictionary, dest: Dictionary) -> void:
 		return
 	var item := item_at(source)
 	var bumped: Keepsake = null
+	var bumped_link = null
+	var link = null   # the unit wearing the moved Keepsake, if it stays on it (see table_links)
 	if dest["to"] == "table":
 		bumped = table[dest["slot"]]
+		bumped_link = table_links[dest["slot"]]
 		table[dest["slot"]] = null
+		table_links[dest["slot"]] = null
 	match source["from"]:
 		"inventory":
 			player.inventory.remove_at(source["index"])
 		"table":
+			link = table_links[source["slot"]]
 			table[source["slot"]] = null
+			table_links[source["slot"]] = null
 		"unit":
-			source["unit"].items.remove_at(source["index"])
+			if item.is_shard:
+				source["unit"].items.remove_at(source["index"])
+			else:
+				link = source["unit"]   # an equipped Keepsake: the table only points at it
 	if bumped != null:
 		if source["from"] == "table":
 			table[source["slot"]] = bumped
-		else:
+			table_links[source["slot"]] = bumped_link
+		elif bumped_link == null:
 			player.inventory.append(bumped)
 	match dest["to"]:
 		"inventory":
-			player.inventory.append(item)
+			if link == null:   # an equipped Keepsake taken off the table just stays on its unit
+				player.inventory.append(item)
 		"table":
 			table[dest["slot"]] = item
+			table_links[dest["slot"]] = link
 		"unit":
 			player.inventory.append(item)
 			MatchRules.equip(player, dest["unit"], player.inventory.size() - 1)
@@ -558,11 +686,13 @@ func _refuse_item(source: Dictionary, unit: ArmyUnit) -> void:
 	else:
 		match source["from"]:
 			"table":
-				player.inventory.append(table[source["slot"]])
-				table[source["slot"]] = null
+				_clear_table_slot(source["slot"])
 		held = {}
 		changed()
-	add_log("%s already has %s." % [unit.label(), item.get_display_name()])
+	if Keepsake.allowed_with(item, unit.items):   # refused for the empowered limit instead
+		add_log("%s can't carry another empowered Keepsake." % unit.label())
+	else:
+		add_log("%s already has %s." % [unit.label(), item.get_display_name()])
 	_play_refusal(unit)
 
 
@@ -589,10 +719,21 @@ func _place_new_item(source: Dictionary, dest: Dictionary) -> void:
 			if made:
 				add_log("Bought %s." % player.inventory[-1].get_display_name())
 		"table_result":
+			if _table_keepsake_slot() != -1:
+				# Empowering: the result takes the Keepsake's place (on its unit, or in the
+				# inventory, from where it may then go onto the unit it was dropped on).
+				var empowered := _empower_table()
+				if empowered != null and dest["to"] == "unit" and player.inventory.has(empowered):
+					MatchRules.equip(player, dest["unit"], player.inventory.find(empowered))
+					selected = dest["unit"]
+				held = {}
+				changed()
+				return
 			var result := table_preview()
 			if result != null:
 				player.inventory.append(result)
 				table = [null, null]
+				table_links = [null, null]
 				add_log("The ritual made %s." % result.get_display_name())
 				made = true
 	if made and dest["to"] == "unit":
@@ -621,8 +762,8 @@ func shard_to_inventory(source: Dictionary) -> bool:
 ## Shard is bought first; with the table full it stays in the inventory). True if it moved.
 func shard_to_table(source: Dictionary) -> bool:
 	var item := item_at(source)
-	if item == null or not item.is_shard or phase != Phase.PLANNING or spectating:
-		return false
+	if item == null or not table_accepts(item) or phase != Phase.PLANNING or spectating:
+		return false   # from EMPOWER_ROUND, Keepsakes go there too (to be empowered)
 	if source["from"] == "table":
 		return false   # already there
 	if source["from"] == "shop_shard":
@@ -667,9 +808,7 @@ func own_army_unit_at_screen(screen: Vector2) -> ArmyUnit:
 
 func _return_table() -> void:
 	for slot in 2:
-		if table[slot] != null:
-			player.inventory.append(table[slot])
-			table[slot] = null
+		_clear_table_slot(slot)
 
 
 # ---------- Moving units on the board ----------
@@ -777,8 +916,9 @@ func _badge_source_at(world: Vector2) -> Dictionary:
 		var index := badge_owner.keepsake_index_at(world)
 		if index >= 0:
 			var source := {"from": "unit", "unit": _army_of(badge_owner), "index": index}
-			if item_at(source) != null and item_at(source).is_shard:
-				return source
+			var item := item_at(source)
+			if item != null and (item.is_shard or table_accepts(item)):
+				return source   # Keepsakes only to the ritual table, to be empowered
 	return {}
 
 
@@ -791,6 +931,18 @@ func _own_unit_near(world: Vector2) -> BattleUnit:
 			best = unit
 			best_dist = unit.global_position.distance_to(world)
 	return best
+
+
+## The figure standing for `army_unit` on the board (planning), or null.
+func board_unit_of(army_unit: ArmyUnit) -> BattleUnit:
+	var index := player.units.find(army_unit)
+	if index == -1:
+		return null
+	for node in units_parent.get_children():
+		var shown := node as BattleUnit
+		if shown != null and shown.team == PLAYER_TEAM and shown.get_meta("army_index", -1) == index:
+			return shown
+	return null
 
 
 func _army_of(unit: BattleUnit) -> ArmyUnit:
@@ -1272,7 +1424,7 @@ func _keep_match_gains() -> void:
 		ArmySpawner.apply_match_gains(ai.units, gains.get(ENEMY_TEAM, {}))
 		player.reserve += ArmySpawner.reserve_from(gains, PLAYER_TEAM)   # Von Carrow's bounty
 		ai.reserve += ArmySpawner.reserve_from(gains, ENEMY_TEAM)
-		player.inventory.append_array(ArmySpawner.shards_from(gains, PLAYER_TEAM))   # SHRED A2
+		player.inventory.append_array(ArmySpawner.shards_from(gains, PLAYER_TEAM))   # Shred A2
 		ai.inventory.append_array(ArmySpawner.shards_from(gains, ENEMY_TEAM))
 		return
 	var mine := PLAYER_TEAM if Net.is_host() else ENEMY_TEAM

@@ -1,7 +1,7 @@
 class_name ShredShrapnelPassive
 extends Passive
-## SHRED B1: its attacks gain the Hit Effect: a shrapnel blast at a random other enemy
-## within Radius cells of the target, dealing Damage (+ Might Scaling of SHRED's Might) as
+## Shred B1: its attacks gain the Hit Effect: a shrapnel blast at a random other enemy
+## within Radius cells of the target, dealing Damage (+ Might Scaling of Shred's Might) as
 ## Might damage. It fizzles if there's no other enemy there.
 
 @export var damage: float = 20.0

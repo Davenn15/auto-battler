@@ -9,4 +9,4 @@ dodge = 0.2
 duration = 4.0
 gambit_name = "Legs Out"
 cast_time = 0.3
-description = "Extends its legs, gaining +1 attack range and 20% dodge chance for 4 seconds."
+description = "Extends its legs, gaining +{range_bonus} attack range and {dodge%} dodge chance for {duration} seconds."

@@ -9,10 +9,13 @@ extends RefCounted
 ## gives IMMOVABILITY_WARDS to every Ward.
 ## GRIT: that many percent of each hit (at most 100) is spread over GRIT_DURATION seconds
 ## (see Grit); each point over 100 gives GRIT_HEALTH max health.
-enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM, IMMOVABILITY, GRIT }
+enum Stat { MIGHT, INSIGHT, CELERITY, MIGHT_WARD, INSIGHT_WARD, CELERITY_WARD, WRACK_CHANCE, WRACK_DAMAGE, VAMPIRISM, IMMOVABILITY, GRIT, SCAR }
 const IMMOVABILITY_WARDS := 0.5    # to each Ward per point over 100
 const GRIT_DURATION := 4.0         # seconds a held hit is spread over
 const GRIT_HEALTH := 10.0          # max health per point over 100
+## SCAR: that many percent of the health each hit takes comes back as healing SCAR_DELAY
+## seconds later (see Scar). Sources add together.
+const SCAR_DELAY := 3.0
 
 ## The three kinds of damage. The order matches the "Might / Insight / Celerity" dropdown
 ## on UnitData and Gambits, so keep them in sync if you reorder or rename.
@@ -36,6 +39,7 @@ const STAT_NAMES := {
 	Stat.VAMPIRISM: "Vampirism",
 	Stat.IMMOVABILITY: "Immovability",
 	Stat.GRIT: "Grit",
+	Stat.SCAR: "Scar",
 }
 
 ## Highest wrack level a hit can reach: 1 = wrack, 2 = Hyper-Wrack, 3 = Uber-Wrack.

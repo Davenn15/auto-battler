@@ -9,4 +9,4 @@ damage = 350.0
 might_scaling = 2.5
 gambit_name = "Haywire"
 cast_time = 0.4
-description = "Dashes to where the most enemies are, then detonates, dealing heavy damage around him and dying."
+description = "Dashes up to {dash_cells} cells to where the most enemies are, then detonates, dealing {damage+might_scaling} damage within {radius_cells} cells and dying."

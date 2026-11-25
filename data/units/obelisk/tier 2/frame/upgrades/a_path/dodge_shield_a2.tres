@@ -7,4 +7,4 @@ script = ExtResource("1")
 share = 0.5
 duration = 4.0
 passive_name = "Deflecting Stride"
-description = "Whenever FRAME dodges, it gains a Shield of 50% of the damage it would have taken, for 4 seconds."
+description = "Whenever Frame dodges, it gains a Shield of {share%} of the damage it would have taken, for {duration} seconds."

@@ -1,7 +1,7 @@
 class_name ShredBackstepGambit
 extends Gambit
-## SHRED B: dashes out to its maximum attack range from its target, to the free cell there
-## with the most room from other enemies (ties go to the nearest one to SHRED), then gains
+## Shred B: dashes out to its maximum attack range from its target, to the free cell there
+## with the most room from other enemies (ties go to the nearest one to Shred), then gains
 ## Celerity and Ward Shred for Duration seconds: its hits ignore Ward Shred of the target's
 ## Wards. Casting again starts it over.
 ##   B2 (Untargetable Time): untargetable for that many seconds after casting.
@@ -61,7 +61,7 @@ func _target(caster: BattleUnit) -> BattleUnit:
 
 
 ## The free cell exactly its attack range from `target` with the most room from the other
-## enemies (the distance to the nearest of them); ties go to the cell nearest SHRED, then the
+## enemies (the distance to the nearest of them); ties go to the cell nearest Shred, then the
 ## first found. Its own cell counts when it's at that range already. Stays put if there's none.
 func _dash_cell(caster: BattleUnit, target: BattleUnit) -> Vector2i:
 	var grid := caster.grid

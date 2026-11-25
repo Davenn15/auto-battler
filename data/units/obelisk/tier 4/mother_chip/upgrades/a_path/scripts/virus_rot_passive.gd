@@ -1,6 +1,6 @@
 class_name VirusRotPassive
 extends Passive
-## MOTHER-CHIP's A path, one passive per upgrade, each switching on its part:
+## Mother-Chip's A path, one passive per upgrade, each switching on its part:
 ##   A: enemies lose a share of their healing, shielding and wards for each Mono-Virus
 ##      stack on them, up to a cap.
 ##   A1: her team gains Charge every second for each Mono-Virus stack on enemies.
@@ -20,7 +20,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(RotSource.new(self))
 
 
-## True if `dead`'s enemies include a living MOTHER-CHIP with A2.
+## True if `dead`'s enemies include a living Mother-Chip with A2.
 static func full_transfer_against(dead: BattleUnit) -> bool:
 	for node in dead.get_tree().get_nodes_in_group("units"):
 		var unit := node as BattleUnit
@@ -64,7 +64,7 @@ class RotSource extends Status:
 						ally.gain_charge(passive.charge_per_stack * stacks * delta)
 
 
-## On an enemy with Mono-Virus near a MOTHER-CHIP with A: less healing, shielding and wards
+## On an enemy with Mono-Virus near a Mother-Chip with A: less healing, shielding and wards
 ## for each stack (read live). Lasts a moment after its last refresh.
 class RotStatus extends Status:
 	const LINGER := 0.4

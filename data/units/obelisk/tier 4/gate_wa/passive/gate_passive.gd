@@ -1,6 +1,6 @@
 class_name GatePassive
 extends Passive
-## GATE.W(A) can't move or attack. Whenever it plays its Gambit, every unit it brought in (its
+## Gateway can't move or attack. Whenever it plays its Gambit, every unit it brought in (its
 ## Gatelings, or allies it revived) is healed and permanently gains a share of its
 ## attributes and wards for the rest of combat (GateBoonStatus, stacking each play).
 ## With A2 that goes to every summoned or revived ally instead (GateWideBoonPassive).
@@ -28,7 +28,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(GateStatus.new(self))
 
 
-## The fallen allies GATE.W(A) can revive, newest last (see ReviveGambit).
+## The fallen allies Gateway can revive, newest last (see ReviveGambit).
 static func fallen(unit: BattleUnit) -> Array:
 	for status in unit.statuses:
 		if status is GateStatus:
@@ -88,7 +88,7 @@ class GateStatus extends Status:
 				ally.died.connect(_on_ally_died)
 
 	## Alone on its team, it falls apart: damage over time that grows the longer it stays
-	## alone, so a lone GATE.W(A) can't stall the battle.
+	## alone, so a lone Gateway can't stall the battle.
 	func _lone_decay(unit: BattleUnit, delta: float) -> void:
 		var alone := true
 		for node in unit.get_tree().get_nodes_in_group("units"):
@@ -114,7 +114,7 @@ class GateStatus extends Status:
 			if status is GateDeathChargePassive.Marker:
 				_holder.gain_charge(status.charge)
 				KeepsakeVfx.pulse_glow(_holder, "VfxGateCharge", GateRules.COLOR, 0.4)
-		# Each ally can only be revived once: one this GATE.W(A) already brought back stays dead.
+		# Each ally can only be revived once: one this Gateway already brought back stays dead.
 		if ally.get_meta(GateRules.REVIVED_META, 0) == _holder.get_instance_id():
 			return
 		if not ally.is_summon and ally.data != null:
@@ -141,7 +141,7 @@ class GateStatus extends Status:
 			KeepsakeVfx.pulse_glow(ally, "VfxGateBoon", GateRules.COLOR, 0.6)
 
 
-## A follower's lasting boost from GATE.W(A)'s plays: +Bonus x stacks to its Might,
+## A follower's lasting boost from Gateway's plays: +Bonus x stacks to its Might,
 ## Insight, Celerity and all three wards. One per unit; each play adds a stack.
 class GateBoonStatus extends Status:
 	const STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY,

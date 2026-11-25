@@ -1,7 +1,17 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://3qaicia2sivs"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://df5tifiw54ins" path="res://data/keepsakes/combined/halting_harness/celerity_ward__celerity_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_62af5"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/halting_harness/celerity_ward__celerity_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_vmpnb"]
+
+[sub_resource type="Resource" id="Resource_7xhvx"]
+script = ExtResource("2_62af5")
+shard = 3
+description = "Attackers lose {amount} Celerity."
+effect_overrides = {
+"amount": 10.0
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -10,5 +20,6 @@ first_shard = 3
 second_shard = 3
 celerity_ward = 60.0
 effect = ExtResource("2_effect")
-description = "Whenever an enemy attacks you, they lose 5 Celerity for 3 seconds."
+description = "Whenever an enemy attacks you, they lose {amount} Celerity for {duration|cc} seconds."
+empowerments = Array[ExtResource("2_62af5")]([SubResource("Resource_7xhvx")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

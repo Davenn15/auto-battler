@@ -1,6 +1,6 @@
 class_name ChipHarvestPassive
 extends Passive
-## MOTHER-CHIP B2: whenever an ally dies, she absorbs its source code as another Chip
+## Mother-Chip B2: whenever an ally dies, she absorbs its source code as another Chip
 ## (switches on ChipPassive's chip_per_ally_death).
 
 

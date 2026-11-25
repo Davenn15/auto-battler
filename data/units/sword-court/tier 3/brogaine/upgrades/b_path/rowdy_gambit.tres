@@ -9,4 +9,4 @@ reduction = 0.75
 celerity_bonus = 40.0
 gambit_name = "Called Out"
 cast_time = 0.3
-description = "Singles out the enemy with the most max health and charges at it. For 5 seconds, Brogaine and that enemy can only attack each other, can't gain Charge, and take 75% less damage from anyone else. Brogaine gains +40 Celerity for the duel. Immovability shortens it."
+description = "Singles out the enemy with the most max health and charges at it. For {duration} seconds, Brogaine and that enemy can only attack each other, can't gain Charge, and take {reduction%} less damage from anyone else. Brogaine gains +{celerity_bonus} Celerity for the duel. Immovability shortens it."

@@ -6,4 +6,4 @@
 script = ExtResource("1")
 attacks = 3
 passive_name = "Three Edges"
-description = "SHRED has three separate attacks on three separate attack timers, each dealing a third of a normal attack. Each counts as an attack for on-hit effects and Hit Effects, but gives a third of the Charge."
+description = "Shred has three separate attacks on three separate attack timers, each dealing a third of a normal attack. Each counts as an attack for on-hit effects and Hit Effects, but gives a third of the Charge."

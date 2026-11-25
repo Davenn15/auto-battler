@@ -1,7 +1,26 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://2i3buu0jiyjf"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://iae7krnm20qs" path="res://data/keepsakes/combined/crusher/might__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/crusher/might__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_s13cr"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_kcxhd"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/heal_on_hit_effect.gd" id="4_tfyqc"]
+
+[sub_resource type="Resource" id="Resource_b0ck0"]
+script = ExtResource("2_s13cr")
+description = "The Hit Effect deals {share%|maxhp}."
+effect_overrides = {
+"share": 0.03
+}
+
+[sub_resource type="Resource" id="Resource_kxmff"]
+script = ExtResource("4_tfyqc")
+
+[sub_resource type="Resource" id="Resource_xorjk"]
+script = ExtResource("2_s13cr")
+shard = 6
+description = "Your attacks heal you for {extra.share%|maxhp|heal}."
+extra_effects = Array[ExtResource("3_kcxhd")]([SubResource("Resource_kxmff")])
 
 [resource]
 script = ExtResource("1_keep")
@@ -10,5 +29,6 @@ second_shard = 6
 might = 20.0
 health = 200.0
 effect = ExtResource("2_effect")
-description = "Hit Effect: Deal 2% of your Maximum Health as damage."
+description = "Hit Effect: Deal {share%|maxhp} as damage."
+empowerments = Array[ExtResource("2_s13cr")]([SubResource("Resource_b0ck0"), SubResource("Resource_xorjk")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -1,10 +1,10 @@
 class_name GateRules
 extends RefCounted
-## Shared bits for GATE.W(A): its colour, and which units count as "brought in" by it.
+## Shared bits for Gateway: its colour, and which units count as "brought in" by it.
 
 const COLOR := Color(0.95, 0.75, 0.05)   # deep yellow
 const LIGHT := Color(1.0, 0.92, 0.5)
-## Set on a unit brought back by GATE.W(A)'s revive; the value is that GATE.W(A)'s id.
+## Set on a unit brought back by Gateway's revive; the value is that Gateway's id.
 const REVIVED_META := "gate_revived"
 
 

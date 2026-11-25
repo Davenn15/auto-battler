@@ -7,4 +7,4 @@ script = ExtResource("1")
 shield_share = 0.3
 duration = 3.0
 passive_name = "Ruptured"
-description = "Whenever BYTE is healed (Regeneration included), it also gains 30% of the health it gained as Shield. It's one Shield: each heal adds to it and resets its 3 seconds."
+description = "Whenever Byte is healed (Regeneration included), it also gains {shield_share%} of the health it gained as Shield. It's one Shield: each heal adds to it and resets its {duration} seconds."

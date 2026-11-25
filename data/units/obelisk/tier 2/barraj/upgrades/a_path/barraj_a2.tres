@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Barrage fires more missiles."
+description = "Barrage fires {missiles} missiles."
 gambit_bonuses = Dictionary[String, float]({
 "missiles": 4.0
 })

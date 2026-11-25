@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Absorbent"
-description = "Bubbler gains extra Charge from taking damage."
+description = "Bubbler gains Charge equal to {charge_per_damage%} of the damage he takes."

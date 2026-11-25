@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dd4a1o1463cnb"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://du2ysukbcexb3"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_0q57n"]
 [ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_kaaut"]
@@ -8,7 +8,8 @@
 
 [resource]
 script = ExtResource("1_0q57n")
-description = "Wesper has extra Wrack Chance against enemies below half health."
+upgrade_name = "Critical"
+description = "Wesper has +{bonus_wrack_chance%} Wrack Chance against enemies below {health_threshold%} health."
 passives = Array[ExtResource("2_kaaut")]([ExtResource("5_ejdtr")])
 next_choices = Array[ExtResource("1_0q57n")]([ExtResource("2_y1nsd"), ExtResource("3_6af45")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

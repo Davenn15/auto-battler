@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SegSwapPassive" format=3]
+
+[ext_resource type="Script" uid="uid://bkok7jcieakys" path="res://data/units/obelisk/tier 4/fault/upgrades/a_path/scripts/swap_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+shield_share = 1.0
+shield_duration = 4.0
+passive_name = "Failover"
+description = "If Fault would die, its duplicate dies instead: Fault teleports to the duplicate's space and gains a Shield equal to {shield_share%} of the duplicate's remaining health for {shield_duration|shieldtime} seconds."

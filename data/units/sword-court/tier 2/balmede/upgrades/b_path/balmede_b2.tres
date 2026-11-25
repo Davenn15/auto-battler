@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Disrupting Charge reaches 6 cells instead of 4."
+description = "Disrupting Charge reaches {range_cells} cells."
 gambit_bonuses = Dictionary[String, float]({
 "range_cells": 2.0
 })

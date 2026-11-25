@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "If the railgun shot kills its target, BATR.EE gets 50% of its Charge back and 20 Voltage."
+description = "If the railgun shot kills its target, Battery gets {kill_charge_share%} of its Charge back and {kill_voltage} Voltage."
 gambit_overrides = Dictionary[String, float]({
 "kill_charge_share": 0.5,
 "kill_voltage": 20.0

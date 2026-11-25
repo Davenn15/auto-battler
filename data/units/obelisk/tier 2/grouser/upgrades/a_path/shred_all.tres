@@ -7,4 +7,4 @@ script = ExtResource("1")
 highest_amount = 0.0
 all_amount = 2.0
 passive_name = "Snipped"
-description = "Hit Effect: Also reduce all of the target's wards."
+description = "Hit Effect: Also reduce all of the target's wards by {all_amount} for {duration} seconds."

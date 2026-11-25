@@ -4,9 +4,9 @@ extends ColumnWeapon
 ## normal attack, in short ticks that each roll Wrack. Things that happen once per attack
 ## (on-attack and on-hit effects, item hit effects, the damage number, the enemy's Charge
 ## from being hit) happen once per Interval's worth of beam, so items don't trigger every
-## tick. COLUMN's two beams pick different enemies when they can: beam 2 avoids beam 1's
+## tick. Column's two beams pick different enemies when they can: beam 2 avoids beam 1's
 ## target, and both fire at the same enemy only when it's the only one in range.
-## A Beam (see Beam): reads COLUMN's Beam settings each frame (range, rate, charge-up,
+## A Beam (see Beam): reads Column's Beam settings each frame (range, rate, charge-up,
 ## extra ricochets).
 
 ## Share of a normal attack's damage each Interval of beam deals.
@@ -15,7 +15,7 @@ extends ColumnWeapon
 @export var retarget_delay: float = 0.3
 ## Which beam this is (0 = first). Later beams avoid earlier beams' targets.
 @export var slot: int = 0
-## Where the beam leaves COLUMN's sprite, in the sprite's own pixels from its centre: one
+## Where the beam leaves Column's sprite, in the sprite's own pixels from its centre: one
 ## of the two green portals on his sides.
 @export var portal: Vector2 = Vector2.ZERO
 
@@ -179,7 +179,7 @@ class BeamStatusColumn extends Status:
 		return weapon.portal
 
 
-## Draws a beam for `holder` (any object with a `_visual` BeamLine field) from COLUMN to
+## Draws a beam for `holder` (any object with a `_visual` BeamLine field) from Column to
 ## `to_unit`, or hides it when that's null.
 static func show_beam(holder, unit: BattleUnit, to_unit, firing: bool, color: Color) -> void:
 	if not KeepsakeVfx.enabled():

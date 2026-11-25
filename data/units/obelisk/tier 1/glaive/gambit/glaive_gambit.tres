@@ -11,4 +11,4 @@ might_scaling = 0.2
 damage_type = 2
 gambit_name = "Rotor"
 cast_time = 0.6
-description = "Conjures an energy rotor that circles him for a while, damaging enemies it passes through. He can't gain Charge while it's out."
+description = "Conjures an energy rotor that circles him for {duration} seconds, dealing {damage+might_scaling} damage to enemies it passes through. He can't gain Charge while it's out."

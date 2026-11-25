@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_0sst3")
-description = "Kills during Starfall add extra strikes."
+description = "Each kill during Starfall adds {strikes_per_kill} strikes (up to {max_extra_strikes} more)."
 gambit_overrides = Dictionary[String, float]({
 "strikes_per_kill": 3.0
 })

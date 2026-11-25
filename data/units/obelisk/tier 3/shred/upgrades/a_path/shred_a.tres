@@ -8,7 +8,7 @@
 
 [resource]
 script = ExtResource("1")
-upgrade_name = "Fixated"
-description = "Each hit on the same target as its last gives +5 Celerity, stacking up to 15 times. Hitting a different target starts over."
+upgrade_name = "Rotary"
+description = "Each hit on the same target as its last gives +{celerity_per_stack} Celerity, stacking up to {max_stacks} times. Hitting a different target starts over."
 passives = Array[ExtResource("2")]([ExtResource("3")])
 next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

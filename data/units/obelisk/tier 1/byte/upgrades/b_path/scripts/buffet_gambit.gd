@@ -1,15 +1,15 @@
 class_name ByteBuffetGambit
 extends Gambit
-## BYTE B (Buffeting): a blast in a cone Reach Cells long and Cone Degrees wide, aimed where
-## it catches the most enemies. Each enemy in it takes Damage (+ Insight Scaling of BYTE's
+## Byte B (Buffeting): a blast in a cone Reach Cells long and Cone Degrees wide, aimed where
+## it catches the most enemies. Each enemy in it takes Damage (+ Insight Scaling of Byte's
 ## Insight), loses Might Cut of its Might for Might Cut Duration seconds, and is knocked
-## Knockback Cells away from BYTE.
+## Knockback Cells away from Byte.
 ##   B1: knocked back further (knockback_cells).
 ##   B2 (Splash Heal): for each enemy hit, a healing splash heals Splash Heal (+ Splash
-##   Insight Scaling of BYTE's Insight) to the ally (not BYTE) within Splash Range cells of
-##   BYTE with the lowest health %.
+##   Insight Scaling of Byte's Insight) to the ally (not Byte) within Splash Range cells of
+##   Byte with the lowest health %.
 ## The cone counts an enemy as in it when it's within Reach Cells and the line to it is
-## within half the cone's width of the aim. Ties for the aim go to the cone holding BYTE's
+## within half the cone's width of the aim. Ties for the aim go to the cone holding Byte's
 ## current target, then the nearest enemy, then the lower instance id.
 
 @export var reach_cells: int = 2
@@ -126,7 +126,7 @@ func _best_aim(caster: BattleUnit, in_reach: Array) -> float:
 	return best_aim
 
 
-## B2: one healing splash to the ally (not BYTE) within Splash Range with the lowest
+## B2: one healing splash to the ally (not Byte) within Splash Range with the lowest
 ## health %; ties go to the nearer, then the lower instance id.
 func _splash(caster: BattleUnit) -> void:
 	var best: BattleUnit = null
@@ -149,7 +149,7 @@ func _splash(caster: BattleUnit) -> void:
 	if best == null:
 		return
 	ByteFx.splash(caster.global_position, best)
-	best.heal(Stats.scaled(splash_heal, splash_insight_scaling, caster.get_stat(Stats.Stat.INSIGHT)), caster.get_credit_id())
+	best.heal(Stats.scaled(splash_heal, splash_insight_scaling, caster.get_stat(Stats.Stat.INSIGHT)), caster.get_credit_id(), true, true)
 	BattleUnit.gambit_affected(caster, best)
 
 

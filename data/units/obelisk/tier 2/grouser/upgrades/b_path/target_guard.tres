@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Locked On"
-description = "Grouser takes less damage from the enemy he is targeting."
+description = "Grouser takes {reduction%} less damage from the enemy he is targeting."

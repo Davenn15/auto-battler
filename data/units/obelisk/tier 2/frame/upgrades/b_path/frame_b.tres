@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Compassing"
-description = "New Gambit: Compassing. Strides into the space of the ally within 4 cells with the most Celerity and looms over it for 4 seconds: the ally gains 35% of FRAME's Celerity, and FRAME attacks whatever it attacks."
+description = "New Gambit: Compassing. Strides into the space of the ally within {reach_cells} cells with the most Celerity and looms over it for {duration} seconds: the ally gains {celerity_share%} of Frame's Celerity, and Frame attacks whatever it attacks."
 gambit = ExtResource("3")
 next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])
 placement = 2

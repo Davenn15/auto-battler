@@ -1,6 +1,6 @@
 class_name SegBounceEffect
 extends Passive
-## SEG.FAULT's hero Ascension: its Gambit's projectiles bounce off the edge of the board
+## Fault's hero Ascension: its Gambit's projectiles bounce off the edge of the board
 ## once. Ion Salvo bolts (the base Gambit and A) hit their target, fly on to the edge, bounce
 ## and can hit the first enemy on their way back. B's Ion Cannon orb bounces at the edge and
 ## flies back across the board, hitting enemies again (with B2 it detonates at both edges).

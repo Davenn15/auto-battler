@@ -15,7 +15,7 @@ amount = 30.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Bit Stacking"
-description = "Each time BYTE casts its Gambit, it gains 30 Insight for the rest of combat."
+description = "Each time Byte casts its Gambit, it gains {amount} Insight for the rest of combat."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

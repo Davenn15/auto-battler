@@ -26,25 +26,25 @@ duration = 5.0
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "Your units in the front two rows gain a Shield of 10% of their max health for 5 seconds at the start of combat."
+description = "Your units in the front {rows} rows gain a {share%|maxhp|shield} Shield for {duration|shieldtime} seconds at the start of combat."
 tier = 1
 effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "Your units in the front two rows gain a Shield of 15% of their max health for 5 seconds at the start of combat."
+description = "Your units in the front {rows} rows gain a {share%|maxhp|shield} Shield for {duration|shieldtime} seconds at the start of combat."
 tier = 2
 effect = SubResource("Effect_tier2")
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "Your units in the front two rows gain a Shield of 20% of their max health for 5 seconds at the start of combat."
+description = "Your units in the front {rows} rows gain a {share%|maxhp|shield} Shield for {duration|shieldtime} seconds at the start of combat."
 tier = 3
 effect = SubResource("Effect_tier3")
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "Your units in the front two rows gain a Shield of 25% of their max health for 5 seconds at the start of combat."
+description = "Your units in the front {rows} rows gain a {share%|maxhp|shield} Shield for {duration|shieldtime} seconds at the start of combat."
 tier = 4
 effect = SubResource("Effect_tier4")
 

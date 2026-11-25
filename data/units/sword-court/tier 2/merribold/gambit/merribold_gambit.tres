@@ -9,5 +9,5 @@ might_scaling = 0.85
 range_cells = 3
 cone_angle = 150.0
 cast_time = 1.0
-description = "Swings in a wide cone toward his current target, hitting every enemy in it."
+description = "Swings in a {cone_angle}-degree cone toward his current target, dealing {damage+might_scaling} damage to every enemy within {range_cells} cells in it."
 metadata/_custom_type_script = "uid://bwq5f08tji6qb"

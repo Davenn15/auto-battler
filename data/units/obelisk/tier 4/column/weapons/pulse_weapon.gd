@@ -1,6 +1,6 @@
 class_name ColumnPulseWeapon
 extends ColumnWeapon
-## A (Industrial): each shot pulses damage at every enemy within Radius and gives COLUMN a
+## A (Industrial): each shot pulses damage at every enemy within Radius and gives Column a
 ## shield, bigger for each enemy the pulse hit.
 ## Damage = Damage + Might Scaling x Might.
 ## Shield = max health x (Shield Share + Shield Per Enemy x enemies hit).
@@ -9,7 +9,7 @@ extends ColumnWeapon
 @export var damage: float = 40.0
 @export var might_scaling: float = 0.3
 @export_enum("Might", "Insight", "Celerity") var damage_type: int = 0
-## Shield as a share of COLUMN's max health (0.04 = 4%), and how long it lasts.
+## Shield as a share of Column's max health (0.04 = 4%), and how long it lasts.
 @export_range(0.0, 1.0, 0.01) var shield_share: float = 0.04
 ## Extra shield share for each enemy the pulse hits.
 @export_range(0.0, 1.0, 0.01) var shield_per_enemy: float = 0.02

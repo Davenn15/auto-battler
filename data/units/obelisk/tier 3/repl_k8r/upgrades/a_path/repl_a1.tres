@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Last Seed"
-description = "When a REPLK4NT dies, it plants a replication seed in the nearby ally with the lowest health that isn't a REPL\\K8R or another REPLK4NT."
+description = "When a Replicant dies, it plants a replication seed in the nearby ally with the lowest health that isn't a Replicator or another Replicant."
 gambit_overrides = Dictionary[String, float]({
 "replant_on_death": 1.0
 })

@@ -65,7 +65,7 @@ void fragment() {
 	COLOR = vec4(tint.rgb, clamp(near - alpha_at(TEXTURE, UV), 0.0, 1.0) * tint.a);
 }
 """,
-	# GATE.W(A)'s summons: an outline broken into drifting scanlines that flickers a little,
+	# Gateway's summons: an outline broken into drifting scanlines that flickers a little,
 	# like a hologram.
 	"digital_outline": """
 shader_type canvas_item;
@@ -260,7 +260,7 @@ static func lunge(unit: BattleUnit, aim: float, attack_interval: float) -> void:
 
 ## Ranged attack readability: the shooter swells briefly as it fires. It scales the unit's
 ## MeleeMotion node (never the sprite), so it can't fight effects that resize the sprite,
-## like FRAME's stretch or a unit growing big, and it always ends at exactly normal size.
+## like Frame's stretch or a unit growing big, and it always ends at exactly normal size.
 const FIRE_PULSE_SCALE := 1.15
 const FIRE_PULSE_TIME := 0.16
 const FIRE_PULSE_MAX_SHARE := 0.4   # at most this share of the attack interval
@@ -482,7 +482,7 @@ static func phase_tint(unit: BattleUnit, duration: float) -> void:
 	tween.tween_property(unit.sprite, "self_modulate", Color.WHITE, 0.15)
 
 
-## GATE.W(A)'s summons and revived allies: a faint yellow hologram outline and glow that
+## Gateway's summons and revived allies: a faint yellow hologram outline and glow that
 ## get brighter (and the outline thicker) with each of its boosts. 0 boosts = just summoned.
 static func gate_glow(unit: BattleUnit, boosts: int, color: Color) -> void:
 	if not enabled() or not is_instance_valid(unit) or unit.sprite == null:
@@ -590,7 +590,7 @@ static func rally_aura(unit: BattleUnit, radius_cells: int, gives_insight: bool 
 	_range_aura(unit, "VfxRally", radius_cells, false, RALLY_INSIGHT_COLOR if gives_insight else RALLY_COLOR, RALLY_STRENGTH)
 
 
-## BATR.EE's Power Grid: a crackling purple ring at the passive's reach. Made once per
+## Battery's Power Grid: a crackling purple ring at the passive's reach. Made once per
 ## unit; call clear(unit, "VfxGrid") first to redraw it at a new size.
 static func grid_aura(unit: BattleUnit, radius_cells: int, color: Color) -> void:
 	if not enabled():
@@ -751,7 +751,7 @@ static func claw_snip(target: BattleUnit) -> void:
 	claw.rotation = target.global_rotation
 
 
-## VE5TIBULE's gift: the item's icon flies from him to the ally, then pops.
+## Vestibule's gift: the item's icon flies from him to the ally, then pops.
 static func gift_icon(from: Vector2, to_unit: BattleUnit, item: Keepsake) -> void:
 	if not enabled() or not is_instance_valid(to_unit) or item == null:
 		return
@@ -838,7 +838,7 @@ static func bleed_badge(unit: BattleUnit, amount: float, pop: bool = false) -> v
 		badge.pop = 0.0
 
 
-## BAR.RAJ's missiles: a round explosion, bright in the middle and fading outwards, that
+## Barrage's missiles: a round explosion, bright in the middle and fading outwards, that
 ## grows to the size of the blast.
 static func missile_blast(parent: Node, at: Vector2, radius: float, color: Color) -> void:
 	if not enabled() or parent == null:
@@ -1133,7 +1133,7 @@ class RangeAura extends Follower:
 			draw_line(center - dir, center + dir, Color(color, alpha), 1.2, true)
 
 
-## BATR.EE's Power Grid: a faint purple disc whose edge is a crackling ring of little
+## Battery's Power Grid: a faint purple disc whose edge is a crackling ring of little
 ## lightning arcs that jump to new shapes several times a second, with a few sparks.
 class StaticAura extends Follower:
 	const ARCS := 14          # pieces the edge is broken into

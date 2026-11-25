@@ -37,8 +37,8 @@ func fire(unit: BattleUnit) -> bool:
 	return true
 
 
-## The bomb: a lob from COLUMN to its target (or where the target last was, if it dies),
-## then a burst. Independent of COLUMN, so it still lands if COLUMN dies.
+## The bomb: a lob from Column to its target (or where the target last was, if it dies),
+## then a burst. Independent of Column, so it still lands if Column dies.
 ## Its node sits at the ground point under the bomb; the bomb itself is drawn `height`
 ## above that, with a shadow on the ground.
 class Bomb extends Node2D:

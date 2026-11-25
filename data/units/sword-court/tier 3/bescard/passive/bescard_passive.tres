@@ -6,4 +6,4 @@
 script = ExtResource("1_bpass")
 amount = 60.0
 passive_name = "Unruly"
-description = "Bescard has 60 Grit."
+description = "Bescard has {amount} Grit."

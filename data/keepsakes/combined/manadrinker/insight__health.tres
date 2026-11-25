@@ -1,15 +1,35 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://tt2e5kk7mnke"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://dn62lhfhb6sf6" path="res://data/keepsakes/combined/manadrinker/insight__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_71mgq"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/manadrinker/insight__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_kfney"]
+
+[sub_resource type="Resource" id="Resource_jv54d"]
+script = ExtResource("2_71mgq")
+shard = 4
+description = "Allies gain {charge} Charge."
+effect_overrides = {
+"charge": 15.0
+}
+
+[sub_resource type="Resource" id="Resource_xhoop"]
+script = ExtResource("2_71mgq")
+shard = 6
+description = "Your Gambit's heals and shields are {support_bonus%} bigger and last {duration_bonus%} longer."
+effect_overrides = {
+"duration_bonus": 0.5,
+"support_bonus": 0.2
+}
 
 [resource]
 script = ExtResource("1_keep")
-keepsake_name = "Manadrinker"
+keepsake_name = "Manalyzer"
 first_shard = 4
 second_shard = 6
 insight = 20.0
 health = 200.0
 effect = ExtResource("2_effect")
-description = "Whenever you gain Charge, you Heal for 2x the Charge gained."
+description = "Whenever your Gambit heals or shields a unit, it gains {charge} Charge ({self_charge} if it's you), each unit at most once every {cooldown} seconds."
+empowerments = Array[ExtResource("2_71mgq")]([SubResource("Resource_jv54d"), SubResource("Resource_xhoop")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

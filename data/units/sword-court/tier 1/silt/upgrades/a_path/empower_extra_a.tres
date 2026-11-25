@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 extra_attacks = 2
-description = "2 more empowered attacks after each Gambit."
+description = "{extra_attacks} more empowered attacks after each Gambit."

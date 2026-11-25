@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The bubble keeps building a Shield on allies inside it."
+description = "The bubble keeps building a Shield on allies inside it: {shield_per_second|shield} per second."
 gambit_overrides = Dictionary[String, float]({
 "shield_per_second": 20.0
 })

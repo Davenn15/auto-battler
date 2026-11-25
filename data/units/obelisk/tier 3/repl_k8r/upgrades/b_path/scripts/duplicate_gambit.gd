@@ -1,22 +1,22 @@
 class_name DuplicateGambit
 extends Gambit
-## REPL\K8R B (Exponential) duplicates itself: Health Share of its current and max health is split evenly
+## Replicator B (Exponential) duplicates itself: Health Share of its current and max health is split evenly
 ## between it and its duplicates, and its keepsakes are shared out at random between them.
 ## Duplicates have Charge and can cast this too.
 ##   Share Keepsakes (on in its .tres): every duplicate gets all of its keepsakes.
 ##   B1: one more duplicate.
 
-## How many REPL\K8Rs there are after the split, counting itself (2 = one duplicate).
+## How many Replicators there are after the split, counting itself (2 = one duplicate).
 @export var copies: int = 2
 ## How much of its current and max health is shared out between it and its duplicates,
 ## evenly (1.2 = 120%: two copies get 60% each). Upgrades can raise it.
 @export var health_share: float = 1.2
 ## 1 = every duplicate gets all of its keepsakes; 0 = they're split at random.
 @export_range(0, 1) var share_keepsakes: int = 0
-## Max Charge every REPL\K8R on the team gains each time any of them casts this (see
+## Max Charge every Replicator on the team gains each time any of them casts this (see
 ## _raise_cost). 0 = no rising cost.
 @export var charge_per_cast: float = 15.0
-## Meta key on each REPL\K8R: how many times its team has cast Replicate this combat.
+## Meta key on each Replicator: how many times its team has cast Replicate this combat.
 const CASTS_META := "repl_casts"
 
 
@@ -36,7 +36,7 @@ func execute(caster: BattleUnit) -> void:
 	var new_max := caster.max_health * health_share / total
 	var new_hp := caster.health * health_share / total
 
-	# Who gets which keepsake: index 0 is REPL\K8R itself.
+	# Who gets which keepsake: index 0 is Replicator itself.
 	var shares: Array = []
 	for i in total:
 		shares.append([])
@@ -70,7 +70,7 @@ func execute(caster: BattleUnit) -> void:
 
 
 ## A safety measure: every cast (the moment Charge is spent, not when it plays) makes
-## Replicate cost more for every REPL\K8R on the team, so splitting can't run away. Each
+## Replicate cost more for every Replicator on the team, so splitting can't run away. Each
 ## cast so far adds Charge Per Cast to their max Charge, for the rest of combat; the new
 ## copies start at the raised cost (see _apply_cost).
 func on_cast(caster: BattleUnit) -> void:

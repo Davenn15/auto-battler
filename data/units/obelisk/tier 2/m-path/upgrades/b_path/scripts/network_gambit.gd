@@ -1,6 +1,6 @@
 class_name NetworkGambit
 extends Gambit
-## M-PATH B (Networked): lays a rectangular field where it covers the most allies. For the
+## M-Path B (Networked): lays a rectangular field where it covers the most allies. For the
 ## duration it keeps evening out the health of every ally inside (see NetworkField).
 ##   B1: allies inside have more Might.  B2: allies inside have more health regen and Insight Ward.
 
@@ -50,7 +50,7 @@ func _size(caster: BattleUnit) -> Vector2:
 
 
 ## Tries centring the field on each ally and between each pair of allies, and keeps the one
-## that holds the most; ties go to the one nearest M-PATH. {"rect", "count"}.
+## that holds the most; ties go to the one nearest M-Path. {"rect", "count"}.
 func _best_rect(caster: BattleUnit) -> Dictionary:
 	var allies: Array[BattleUnit] = []
 	for node in caster.get_tree().get_nodes_in_group("units"):

@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Repurposed"
 cast_time = 0.8
-description = "Brings back a copy of the last ally that died, with part of its health. The copy takes ramping damage until it dies, and Recycloid gains no Charge while it lives."
+description = "Brings back a copy of the last ally that died, with {health_fraction%} of its health. The copy takes ramping damage until it dies, and Recycloid gains no Charge while it lives."

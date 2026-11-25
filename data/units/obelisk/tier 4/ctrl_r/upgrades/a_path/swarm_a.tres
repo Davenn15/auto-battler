@@ -6,4 +6,4 @@
 script = ExtResource("1")
 kind = 0
 passive_name = "Bore Drones"
-description = "Every siphon drone launch also sends two bore drones at the enemies in range with the most wards. Each deals 30 damage and drills 7 off all three of its enemy's wards for the rest of combat, bringing them back to CTRL(R)."
+description = "Every siphon drone launch also sends {bores_per_siphon} bore drones at the enemies in range with the most wards. Each deals {bore_damage} damage and drills {ward_steal} off all three of its enemy's wards for the rest of combat, bringing them back to Controller."

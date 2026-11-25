@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Each Volt hit takes 5 Insight Ward from the enemy for 4 seconds. Hits stack."
+description = "Each Volt hit takes {insight_ward_shred} Insight Ward from the enemy for {shred_duration} seconds. Hits stack."
 gambit_overrides = Dictionary[String, float]({
 "insight_ward_shred": 5.0,
 "shred_duration": 4.0

@@ -1,6 +1,6 @@
 class_name BarrageMissile
 extends Node2D
-## One of BAR.RAJ's missiles: waits `delay` seconds, then arcs from where it was fired to a
+## One of Barrage's missiles: waits `delay` seconds, then arcs from where it was fired to a
 ## point on the ground and explodes, damaging every enemy within `blast_radius` pixels: its
 ## target for full damage, everyone else for SPLASH_SHARE of it. (If the target died in
 ## flight, the enemy nearest where it lands counts as the target.)

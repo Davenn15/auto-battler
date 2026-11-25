@@ -1,6 +1,6 @@
 class_name WindupGambit
 extends Gambit
-## MALLET B (Pinpoint): gains a shield and winds up, spinning faster and faster. When the
+## Mallet B (Pinpoint): gains a shield and winds up, spinning faster and faster. When the
 ## shield breaks, or Max Windup runs out, it flies to the enemy with the highest Insight
 ## and smashes it, dealing massive damage and stunning it. Any shield left ends at launch.
 ## Damage = (Damage + Might Scaling x Might) x (1 + Bonus Per Second x seconds wound up).
@@ -32,7 +32,7 @@ func can_use(caster: BattleUnit) -> bool:
 func execute(caster: BattleUnit) -> void:
 	if not _alive(caster):
 		return
-	caster.add_shield(caster.max_health * shield_share, max_windup + 1.0, caster.get_instance_id(), true)
+	caster.add_shield(caster.max_health * shield_share, max_windup + 1.0, caster.get_instance_id(), true, true)
 	var shield: ShieldStatus = null
 	if not caster.statuses.is_empty() and caster.statuses.back() is ShieldStatus:
 		shield = caster.statuses.back()
@@ -118,7 +118,7 @@ func _landing_cell(caster: BattleUnit, target: BattleUnit) -> Vector2i:
 	return cells[0]
 
 
-## MALLET's whole body spinning, faster and faster as it winds up (SPIN_START to SPIN_END
+## Mallet's whole body spinning, faster and faster as it winds up (SPIN_START to SPIN_END
 ## radians a second). It turns the unit's MeleeMotion node, which nothing else turns, so
 ## it never fights other animations; shots still hit it as it stands (SpriteEdge).
 const SPIN_START := 3.0
@@ -136,7 +136,7 @@ func _alive(unit) -> bool:
 	return is_instance_valid(unit) and unit.alive
 
 
-## Crimson arcs whirling around MALLET, faster and brighter as it winds up.
+## Crimson arcs whirling around Mallet, faster and brighter as it winds up.
 class WindupSpin extends Node2D:
 	var progress := 0.0
 	var _angle := 0.0

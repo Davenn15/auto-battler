@@ -1,6 +1,6 @@
 class_name PulseDroneEffect
 extends Passive
-## CTRL(R)'s hero Ascension: the first time each combat it drops below Health Trigger of its
+## Controller's hero Ascension: the first time each combat it drops below Health Trigger of its
 ## max health, it launches a pulse drone that flies over the spot catching the most enemies
 ## and detonates: every enemy within Radius Cells is stunned for Stun seconds, and every
 ## ally there gains a Shield of Shield for Shield Duration seconds.
@@ -46,7 +46,7 @@ class WatchStatus extends Status:
 		drone.global_position = unit.global_position
 		unit.show_float_text("Pulse Drone", CtrlDrones.LIGHT)
 
-	## The enemy cell whose blast would catch the most enemies (nearest to CTRL(R) on ties),
+	## The enemy cell whose blast would catch the most enemies (nearest to Controller on ties),
 	## or null if there are no enemies.
 	func _best_spot(unit: BattleUnit) -> Variant:
 		var enemies: Array = []

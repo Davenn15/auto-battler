@@ -6,4 +6,4 @@
 script = ExtResource("1")
 kind = 1
 passive_name = "Fast Patch"
-description = "CTRL(R) receives 40% more healing from all sources."
+description = "Controller receives {healing_bonus%} more healing from all sources."

@@ -13,7 +13,7 @@ share = 0.3
 [resource]
 script = ExtResource("1")
 ascension_name = "Split Beam"
-description = "BEAM.NG's attack Beam and its Gambit's Beam each split off 2 more Beams at 30% strength, aimed at other targets when there are any."
+description = "Beam's attack Beam and its Gambit's Beam each split off {extra_beams} more Beams at {share%} strength, aimed at other targets when there are any."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

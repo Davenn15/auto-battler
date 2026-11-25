@@ -7,7 +7,7 @@
 script = ExtResource("1")
 empowers = ExtResource("empowers_prev")
 ascension_name = "Court Finesse"
-description = "PLACEHOLDER. All your units gain 15 Celerity and 15 Might Ward."
+description = "PLACEHOLDER. All your units gain {celerity} Celerity and {might_ward} Might Ward."
 tier = 2
 celerity = 15.0
 might_ward = 15.0

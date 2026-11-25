@@ -8,4 +8,4 @@ damage = 20.0
 might_scaling = 0.2
 radius = 2
 passive_name = "Shrapnel"
-description = "Hit Effect: fire a shrapnel blast at a random other enemy within 2 cells of the target, dealing 20 (+20% Might) Might damage."
+description = "Hit Effect: fire a shrapnel blast at a random other enemy within {radius} cells of the target, dealing {damage+might_scaling} Might damage."

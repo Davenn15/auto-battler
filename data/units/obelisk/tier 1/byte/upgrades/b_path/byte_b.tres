@@ -9,6 +9,6 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Buffeting"
-description = "New Gambit: Buffeting. Blasts a cone 2 cells long and 90 degrees wide where it catches the most enemies: 60 (+30% Insight) Insight damage, 30% less Might for 3 seconds, and knocked back 1 cell."
+description = "New Gambit: Buffeting. Blasts a cone {reach_cells} cells long and {cone_degrees} degrees wide where it catches the most enemies: {damage+insight_scaling} Insight damage, {might_cut%} less Might for {might_cut_duration} seconds, and knocked back {knockback_cells} cells."
 gambit = ExtResource("3")
 next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

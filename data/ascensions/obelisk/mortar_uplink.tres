@@ -11,7 +11,7 @@ script = ExtResource("2")
 [resource]
 script = ExtResource("1")
 ascension_name = "Mortar Uplink"
-description = "The first time BAR.RAJ plays his Gambit each combat, a Mortar Drone appears beside him for the rest of combat. It has 30% of his max health and his Wards, never moves or attacks, and every 5 seconds fires a volley of 3 of his Gambit's missiles at 70% damage."
+description = "The first time Barrage plays his Gambit each combat, a Mortar Drone appears beside him for the rest of combat. It has {health_share%|maxhp} health and his Wards, never moves or attacks, and every {volley_interval} seconds fires a volley of {volley_missiles} of his Gambit's missiles at {damage_share%} damage."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

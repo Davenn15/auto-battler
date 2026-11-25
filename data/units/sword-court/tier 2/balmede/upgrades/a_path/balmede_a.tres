@@ -3,12 +3,13 @@
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 2/balmede/upgrades/a_path/balmede_a1.tres" id="2"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 2/balmede/upgrades/a_path/balmede_a2.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="4_15g6l"]
 
 [resource]
 script = ExtResource("1")
 upgrade_name = "Planted"
-description = "80 Immovability while Planted."
+description = "{immovability} Immovability while Planted."
+next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])
 gambit_overrides = Dictionary[String, float]({
 "immovability": 80.0
 })
-next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])

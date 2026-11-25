@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_bevif")
-description = "Vere gains Wrack Chance."
+description = "Vere gains +{amount%} Wrack Chance."
 passives = Array[ExtResource("2_xdu80")]([ExtResource("3_xdu80")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

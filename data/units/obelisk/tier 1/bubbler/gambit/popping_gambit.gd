@@ -80,8 +80,12 @@ func _shield(ally: BattleUnit, caster_id: int, team: int, damage: float) -> void
 	# Like BattleUnit.add_shield (Wracked healing, shield boosts), but with a bubble that pops.
 	var amount := shield_amount
 	var giver: BattleUnit = instance_from_id(caster_id) as BattleUnit if is_instance_id_valid(caster_id) else null
+	var duration := shield_duration
 	if giver != null:
-		amount *= giver.effect_wrack_multiplier(giver.roll_effect_wrack(Stats.EffectKind.HEALING), Stats.EffectKind.HEALING)
+		var level := giver.roll_effect_wrack(Stats.EffectKind.HEALING)
+		amount *= giver.effect_wrack_multiplier(level, Stats.EffectKind.HEALING)
+		amount = giver.outgoing_support(ally, amount, true, true, level)   # a Gambit shield
+		duration = giver.support_duration(ally, duration, true)
 	for status in ally.statuses:
 		amount = status.modify_shield_received(ally, amount)
 	if amount <= 0.0:
@@ -94,11 +98,11 @@ func _shield(ally: BattleUnit, caster_id: int, team: int, damage: float) -> void
 		else:               # a fresh bubble in place of the old one
 			held.shield = maxf(held.shield, amount)
 			held.pop_damage = maxf(held.pop_damage, damage)
-		held.time_left = maxf(held.time_left, shield_duration)
+		held.time_left = maxf(held.time_left, duration)
 		held.pop_stun = maxf(held.pop_stun, pop_stun)
 		ally.get_tree().call_group("damage_tracker", "record_shielding", caster_id, amount)
 		return
-	var bubble := BubbleShieldStatus.new(amount, shield_duration)
+	var bubble := BubbleShieldStatus.new(amount, duration)
 	bubble.caster_id = caster_id
 	bubble.team = team
 	bubble.pop_damage = damage

@@ -1,6 +1,6 @@
 class_name CodeShockEffect
 extends Passive
-## MOTHER-CHIP's hero Ascension: the first time her Gambit gives Mono-Virus to an enemy
+## Mother-Chip's hero Ascension: the first time her Gambit gives Mono-Virus to an enemy
 ## (the code spiral, on the base Gambit and A) or takes it off one (B's Harvest), that
 ## enemy is knocked up for Knock Up seconds. Once per enemy per combat. Her Gambits call
 ## touch().
@@ -14,7 +14,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(marker)
 
 
-## Her Gambit just gave Mono-Virus to (or took it off) `enemy`. `caster_id`: MOTHER-CHIP.
+## Her Gambit just gave Mono-Virus to (or took it off) `enemy`. `caster_id`: Mother-Chip.
 static func touch(caster_id: int, enemy: BattleUnit) -> void:
 	if not is_instance_id_valid(caster_id) or not is_instance_valid(enemy) or not enemy.alive:
 		return

@@ -22,7 +22,7 @@ func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive or not caster.is_inside_tree():
 		return
 	var insight := caster.get_stat(Stats.Stat.INSIGHT)
-	caster.add_shield(Stats.scaled(shield, shield_insight_scaling, insight), shield_duration, caster.get_credit_id(), true)
+	caster.add_shield(Stats.scaled(shield, shield_insight_scaling, insight), shield_duration, caster.get_credit_id(), true, true)
 	var lifted := _enemies_near(caster)
 	for enemy in lifted:
 		enemy.stun(lift_time, caster)

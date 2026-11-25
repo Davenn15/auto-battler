@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The bladehook reaches 2 cells farther."
+description = "The bladehook reaches {range_cells} cells."
 gambit_bonuses = Dictionary[String, float]({
 "range_cells": 2.0
 })

@@ -1,6 +1,6 @@
 class_name FourthEdgeEffect
 extends Passive
-## SHRED's hero Ascension: its attack is split into Strikes strikes instead of 3 (each a
+## Shred's hero Ascension: its attack is split into Strikes strikes instead of 3 (each a
 ## 1/Strikes share of an attack and of its Charge), and it gains Vampirism as its health
 ## drops: none at full health, rising evenly to Max Vampirism near 0.
 

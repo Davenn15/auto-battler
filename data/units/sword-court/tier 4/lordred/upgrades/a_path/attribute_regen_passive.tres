@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_a65nw")
 scaling = 0.1
-description = "Regeneration based on his attributes."
+description = "Regeneration of {scaling} per second for each point of Might, Insight and Celerity."
 metadata/_custom_type_script = "uid://c8c2l1ljdsu3t"

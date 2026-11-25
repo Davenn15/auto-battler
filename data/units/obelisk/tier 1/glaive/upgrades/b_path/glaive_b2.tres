@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Spin hits make enemies bleed."
+description = "Spin hits make enemies bleed {bleed_percent%} of their max health per second for {bleed_duration} seconds."
 gambit_overrides = Dictionary[String, float]({
 "bleed_percent": 0.004
 })

@@ -12,3 +12,9 @@ extends Resource
 ## Attach statuses here with unit.add_status().
 func on_battle_start(_unit: BattleUnit) -> void:
 	pass
+
+
+## Keepsake Empowering: how many more empowered Keepsakes than the usual one a unit with
+## this passive may carry. For unit mechanics that allow more.
+func extra_empowered_keepsakes() -> int:
+	return 0

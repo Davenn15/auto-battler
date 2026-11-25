@@ -11,7 +11,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "FRAME"
+display_name = "Frame"
 tier = 2
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 max_health = 900.0

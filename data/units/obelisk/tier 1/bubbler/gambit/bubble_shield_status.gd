@@ -86,12 +86,17 @@ func _pop(unit: BattleUnit) -> void:
 		return
 	_popped = true
 	unit.remove_status(self)
-	KeepsakeVfx.burst(unit, BubbleZone.BUBBLE_COLOR)
 	var caster: BattleUnit = instance_from_id(caster_id) as BattleUnit if is_instance_id_valid(caster_id) else null
+	var hit: Array = []
 	for node in unit.get_tree().get_nodes_in_group("units"):
 		var enemy := node as BattleUnit
-		if enemy == null or not enemy.alive or enemy.team == team \
-				or unit.grid.get_distance(unit.cell, enemy.cell) > pop_radius_cells:
+		if enemy != null and enemy.alive and enemy.team != team \
+				and unit.grid.get_distance(unit.cell, enemy.cell) <= pop_radius_cells:
+			hit.append(enemy)
+	BubblePopFx.play(unit, pop_radius_cells)   # shows the whole area it hits
+	for target in hit:
+		var enemy: BattleUnit = target
+		if not enemy.alive:
 			continue
 		var dealt := enemy.take_damage(pop_damage, 0, damage_type, false, caster)
 		BattleUnit.gambit_damage_dealt(caster, enemy, dealt)   # Gambit damage (see BattleUnit)

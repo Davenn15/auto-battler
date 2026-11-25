@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Siphon Drones"
 cast_time = 0.4
-description = "Launches two siphon drones at the enemies within 3 cells with the most health. Each drains 8% of its enemy's max health for the rest of combat, then flies back and heals CTRL(R) that much."
+description = "Launches {drones} siphon drones at the enemies within {range_cells} cells with the most health. Each drains {drain_share%} of its enemy's max health for the rest of combat, then flies back and heals Controller that much."

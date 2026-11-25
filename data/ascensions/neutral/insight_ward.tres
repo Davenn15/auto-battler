@@ -5,25 +5,25 @@
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 15 Insight Ward."
+description = "PLACEHOLDER. All your units gain {insight_ward} Insight Ward."
 tier = 1
 insight_ward = 15.0
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 25 Insight Ward."
+description = "PLACEHOLDER. All your units gain {insight_ward} Insight Ward."
 tier = 2
 insight_ward = 25.0
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 40 Insight Ward."
+description = "PLACEHOLDER. All your units gain {insight_ward} Insight Ward."
 tier = 3
 insight_ward = 40.0
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 50 Insight Ward."
+description = "PLACEHOLDER. All your units gain {insight_ward} Insight Ward."
 tier = 4
 insight_ward = 50.0
 

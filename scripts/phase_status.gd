@@ -1,8 +1,8 @@
 class_name PhaseStatus
 extends Status
 ## Phased: taken out of the fight for a while. The unit can't act and can't be targeted or
-## hit, tinted see-through blue. Every Phase in the game goes through phase() here (VE5TIBULE,
-## the Phase Button keepsake, MALLET, BATR.EE).
+## hit, tinted see-through blue. Every Phase in the game goes through phase() here (Vestibule,
+## the Phase Button keepsake, Mallet, Battery).
 ##
 ## A unit Phased while none of its teammates are still fighting (every other one is dead or
 ## Phased too) only stays Phased for LONE_SHARE of the time. That includes a Phase already

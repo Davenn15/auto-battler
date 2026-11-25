@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bv0rhdmv2ufcj"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://b8md0s7vyhga7"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_4rkg5"]
 [ext_resource type="Resource" uid="uid://efyewglqhvxa" path="res://data/units/sword-court/tier 2/merribold/upgrades/b_path/bellow_gambit.tres" id="1_kqhge"]
@@ -8,7 +8,8 @@
 
 [resource]
 script = ExtResource("1_4rkg5")
-description = "New Gambit: Bellow. Nearby allies gain Might; nearby enemies lose Might and take damage."
+upgrade_name = "Bellowing"
+description = "New Gambit: Bellow. Allies within {range_cells} cells gain {ally_might_bonus} Might; enemies lose {enemy_might_reduction} Might and take {damage+might_scaling} damage."
 gambit = ExtResource("1_kqhge")
 next_choices = Array[ExtResource("1_4rkg5")]([ExtResource("3_ve2bf"), ExtResource("4_g4l5t")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

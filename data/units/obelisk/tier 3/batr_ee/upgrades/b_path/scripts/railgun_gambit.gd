@@ -1,12 +1,12 @@
 class_name RailgunGambit
 extends Gambit
-## BATR.EE B (Magnetic): charges up for the cast time, building its own Voltage at Charge
+## Battery B (Magnetic): charges up for the cast time, building its own Voltage at Charge
 ## Voltage Multiplier times the normal rate meanwhile (see GridPassive), then spends all its
 ## Voltage on one railgun shot at the enemy within its attack range with the highest Might,
 ## dealing Insight damage. Damage = Damage + Voltage spent x (Per Voltage + Per Voltage
 ## Insight x Insight).
 ##   B1 (Max Health Share): the shot deals that share of the target's max health on top.
-##   B2 (Kill Charge Share, Kill Voltage): if the shot kills, BATR.EE gets that share of its
+##   B2 (Kill Charge Share, Kill Voltage): if the shot kills, Battery gets that share of its
 ##   Charge back right away and that much Voltage once the Gambit is over.
 
 @export var damage: float = 160.0
@@ -48,7 +48,7 @@ func execute(caster: BattleUnit) -> void:
 	if dealt > 0.0 and not target.alive and (kill_charge_share > 0.0 or kill_voltage > 0.0):
 		caster.charge = minf(caster.charge + caster.max_charge * kill_charge_share, caster.max_charge)
 		caster._update_charge_bar()
-		voltage.after_gambit += kill_voltage
+		voltage.add_after_gambit(kill_voltage)
 		caster.show_float_text("Overcharge", COLOR)
 
 
@@ -66,7 +66,7 @@ func _strongest_enemy(caster: BattleUnit) -> BattleUnit:
 	return best
 
 
-## A bright straight beam from BATR.EE to the target that fades fast (looks only).
+## A bright straight beam from Battery to the target that fades fast (looks only).
 func _beam(caster: BattleUnit, target: BattleUnit) -> void:
 	if not KeepsakeVfx.enabled():
 		return

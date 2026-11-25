@@ -1,6 +1,6 @@
 class_name ShredFixationPassive
 extends Passive
-## SHRED A: each of its attacks that hits the same target as the last one adds a stack of
+## Shred A: each of its attacks that hits the same target as the last one adds a stack of
 ## +Celerity Per Stack Celerity, up to Max Stacks. Hitting a different target starts over
 ## at one stack.
 

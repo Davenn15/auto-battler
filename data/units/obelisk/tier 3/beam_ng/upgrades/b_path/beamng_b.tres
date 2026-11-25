@@ -9,7 +9,8 @@
 
 [resource]
 script = ExtResource("1")
-description = "Its Beams trigger effects 30% more often. New Gambit: Focus Beam, a damaging Beam at the enemy its allies are attacking most; their attacks on it deal extra max-health damage."
+upgrade_name = "Bored"
+description = "Its Beams trigger effects {bonus%} more often. New Gambit: Focus Beam, a damaging Beam at the enemy its allies are attacking most; their attacks on it deal {mark_share%} of its max health on top."
 passives = Array[ExtResource("2")]([ExtResource("3")])
 gambit = ExtResource("4")
 next_choices = Array[ExtResource("1")]([ExtResource("5"), ExtResource("6")])

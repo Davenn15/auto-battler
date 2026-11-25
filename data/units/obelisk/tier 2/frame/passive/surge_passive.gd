@@ -1,6 +1,6 @@
 class_name FrameSurgePassive
 extends Passive
-## FRAME: after it casts its Gambit (either path's), it gains Celerity and each Ward for
+## Frame: after it casts its Gambit (either path's), it gains Celerity and each Ward for
 ## Duration seconds. Casting again starts the timer over.
 
 @export var celerity: float = 40.0

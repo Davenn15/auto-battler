@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_gm5k1")
 share = 1.2
-description = "Gains 120% of the permanent stats his allies gain."
+description = "Gains {share%} of the permanent stats his allies gain."
 metadata/_custom_type_script = "uid://ch7avldltm8m6"

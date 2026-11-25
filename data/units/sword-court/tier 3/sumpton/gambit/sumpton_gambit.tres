@@ -8,5 +8,5 @@ blades = 8
 toss_interval = 0.2
 gambit_name = null
 cast_time = 1.0
-description = "Tosses blades to nearby allies. Each blade gives an attribute and its matching Ward for the rest of combat."
+description = "Tosses {blades} blades to allies within {range_cells} cells. Each blade gives +{attribute_bonus} to an attribute and +{ward_bonus} to its matching Ward for the rest of combat."
 metadata/_custom_type_script = "uid://d4b6a1x4xixwq"

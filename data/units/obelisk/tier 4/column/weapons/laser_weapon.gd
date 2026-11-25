@@ -11,7 +11,7 @@ extends ColumnWeapon
 @export var duration: float = 2.5
 ## Flat damage per second to each enemy in the beam.
 @export var damage_per_second: float = 50.0
-## Extra damage per second for each point of COLUMN's Insight (0.3 = +30 per 100 Insight).
+## Extra damage per second for each point of Column's Insight (0.3 = +30 per 100 Insight).
 @export var insight_scaling: float = 0.3
 ## Share of each enemy's max health dealt per second, on top (0.06 = 6%).
 @export_range(0.0, 1.0, 0.01) var share_per_second: float = 0.06
@@ -62,8 +62,8 @@ class LaserStatus extends Status:
 			if is_instance_valid(node):
 				node.queue_free()
 
-	## Starts the beam, and its highlighted cells, from COLUMN's cell: the same place its
-	## damage is measured from. Updated if COLUMN moves to a new cell.
+	## Starts the beam, and its highlighted cells, from Column's cell: the same place its
+	## damage is measured from. Updated if Column moves to a new cell.
 	func _follow(unit: BattleUnit) -> void:
 		if unit.cell == _from_cell:
 			return

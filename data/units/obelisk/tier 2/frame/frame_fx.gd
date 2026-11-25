@@ -1,12 +1,12 @@
 class_name FrameFx
 extends RefCounted
-## FRAME's look: dark teal-green.
+## Frame's look: dark teal-green.
 
 const COLOR := Color(0.12, 0.5, 0.44)        # dark teal-green
 const LIGHT := Color(0.35, 0.8, 0.7)
 
 
-## FRAME's legs extending: its sprite stretches up to `height` times as tall (a touch
+## Frame's legs extending: its sprite stretches up to `height` times as tall (a touch
 ## thinner), feet staying planted, over STRETCH_TIME. stretch(unit, 1.0) brings it back.
 const STRETCH_TIME := 0.25
 const STRETCH_META := &"frame_stretch_base"
@@ -30,7 +30,7 @@ static func stretch(unit: BattleUnit, height: float) -> void:
 	tween.tween_property(sprite, "position", to_pos, STRETCH_TIME)
 
 
-## Compassing: a teal line from FRAME to the ally it's following, gone when the follow ends.
+## Compassing: a teal line from Frame to the ally it's following, gone when the follow ends.
 static func follow_line(frame: BattleUnit, ally: BattleUnit, status: Status) -> void:
 	if not KeepsakeVfx.enabled() or not is_instance_valid(frame) or not frame.is_inside_tree():
 		return

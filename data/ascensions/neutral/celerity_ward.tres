@@ -5,25 +5,25 @@
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 15 Celerity Ward."
+description = "PLACEHOLDER. All your units gain {celerity_ward} Celerity Ward."
 tier = 1
 celerity_ward = 15.0
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 25 Celerity Ward."
+description = "PLACEHOLDER. All your units gain {celerity_ward} Celerity Ward."
 tier = 2
 celerity_ward = 25.0
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 40 Celerity Ward."
+description = "PLACEHOLDER. All your units gain {celerity_ward} Celerity Ward."
 tier = 3
 celerity_ward = 40.0
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 50 Celerity Ward."
+description = "PLACEHOLDER. All your units gain {celerity_ward} Celerity Ward."
 tier = 4
 celerity_ward = 50.0
 

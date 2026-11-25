@@ -9,10 +9,10 @@
 
 [resource]
 script = ExtResource("1")
-upgrade_name = "Close Dance"
-description = "New Gambit: Thorn Waltz. Twirls his barbed blades around him, dealing 150 (+60% Celerity) Celerity damage to every enemy within 1 cell. -2 attack range. Healing past his max health becomes Shield, up to 30% of his max health."
+upgrade_name = "Dripping"
+description = "New Gambit: Thorn Waltz. Twirls his barbed blades around him, dealing {damage+celerity_scaling} Celerity damage to every enemy within {radius_cells} cells. {attack_range_bonus} attack range. Healing past his max health becomes Shield, up to {cap_share%|maxhp}."
+passives = Array[ExtResource("2")]([ExtResource("4")])
 gambit = ExtResource("3")
+next_choices = Array[ExtResource("1")]([ExtResource("5"), ExtResource("6")])
 attack_range_bonus = -2
 placement = 1
-passives = Array[ExtResource("2")]([ExtResource("4")])
-next_choices = Array[ExtResource("1")]([ExtResource("5"), ExtResource("6")])

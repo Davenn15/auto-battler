@@ -11,7 +11,7 @@ script = ExtResource("2")
 [resource]
 script = ExtResource("1")
 ascension_name = "Empathic Pulse"
-description = "M-PATH's passive returns 30% of the damage he takes as healing, instead of 15%. Every 3 seconds, allies within 2 cells are healed for 50% of the healing he received in that time."
+description = "M-Path has {mend_share%} Scar in all, instead of 15%. Every {pulse_interval} seconds, allies within {pulse_cells} cells are healed for {pulse_share%|heal} of the healing he received in that time."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

@@ -14,7 +14,7 @@ angle = 60.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Lord's Reach"
-description = "Lordred's attacks, his Cleave included, gain the Hit Effect: enemies in a cone up to 2 cells past the target take 50% of the damage it took."
+description = "Lordred's attacks, his Cleave included, gain the Hit Effect: enemies in a cone up to {reach} cells past the target take {share%} of the damage it took."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

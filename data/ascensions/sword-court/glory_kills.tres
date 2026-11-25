@@ -11,6 +11,6 @@ count = 3
 [resource]
 script = ExtResource("1")
 ascension_name = "Glory Hound"
-description = "The first time each combat a unit in your army kills 3 enemies, it gains Glory."
+description = "Once per combat: the first unit in your army to kill {count} enemies gains Glory."
 tier = 1
 effect = SubResource("Effect")

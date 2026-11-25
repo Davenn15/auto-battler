@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Whenever Grouser reduces an enemy's ward, he gains that much of that ward for a while."
+description = "Whenever Grouser reduces an enemy's ward, he gains that much of that ward for {duration} seconds."
 passives = Array[ExtResource("2")]([ExtResource("3")])

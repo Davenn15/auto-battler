@@ -14,13 +14,13 @@ regen = 30.0
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "While shielded, your units have +15 health regen."
+description = "While shielded, your units have +{regen} health regen."
 tier = 1
 effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "While shielded, your units have +30 health regen."
+description = "While shielded, your units have +{regen} health regen."
 tier = 2
 effect = SubResource("Effect_tier2")
 

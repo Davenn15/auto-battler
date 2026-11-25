@@ -65,7 +65,7 @@ class Wave extends Node2D:
 		var x := reach * minf(t * 1.25, 1.0)
 		var fade := clampf((1.0 - t) * 1.6, 0.0, 1.0)
 		var half := width * 0.5
-		# The trail: a faint band from COLUMN to the front.
+		# The trail: a faint band from Column to the front.
 		draw_rect(Rect2(0, -half * 0.8, x, half * 1.6), Color(NEON, 0.08 * fade))
 		# The front: a curved wall of short bars, each a scanline, bowing forward.
 		var rows := 14

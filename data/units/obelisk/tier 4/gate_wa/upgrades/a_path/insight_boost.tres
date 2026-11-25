@@ -6,4 +6,4 @@
 script = ExtResource("1")
 amount = 50.0
 passive_name = "Gatekeeper's Insight"
-description = "+50 Insight."
+description = "+{amount} Insight."

@@ -7,5 +7,5 @@ script = ExtResource("1_ulvui")
 health_fraction = 0.1
 clone_duration = 4.0
 cast_time = 1.0
-description = "Creates a copy of Bremes next to her. It has her stats, less health, extra dodge and no Gambit, and vanishes after a few seconds."
+description = "Creates {clone_count} copies of Bremes next to her. Each has her stats, {health_fraction%} of her health, +{extra_dodge%} dodge and no Gambit, and vanishes after {clone_duration} seconds."
 metadata/_custom_type_script = "uid://bmb0u304lym60"

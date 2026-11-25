@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Allies inside the field have +25 Might."
+description = "Allies inside the field have +{might_bonus} Might."
 gambit_bonuses = Dictionary[String, float]({
 "might_bonus": 25.0
 })

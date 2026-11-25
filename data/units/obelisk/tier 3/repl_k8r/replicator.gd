@@ -1,9 +1,9 @@
 class_name Replicator
 extends RefCounted
-## Shared helpers for REPL\K8R: telling REPL\K8Rs apart and making duplicates of one.
+## Shared helpers for Replicator: telling Replicators apart and making duplicates of one.
 ## Duplicates are full units (upgrades, Gambit, the items they're given) that count as
 ## summons: they don't count toward surviving Aura, and their damage is credited to the
-## REPL\K8R that started it all.
+## Replicator that started it all.
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 const COLOR := Color(0.05, 0.62, 0.45)       # deep phthalo green
@@ -12,7 +12,7 @@ const LIGHT := Color(0.35, 0.95, 0.72)       # the same green, bright enough for
 const FULL_HEALTH_META := "repl_full_health"
 
 
-## True for REPL\K8R and its duplicates (they all carry its passive).
+## True for Replicator and its duplicates (they all carry its passive).
 static func is_replk8r(unit: BattleUnit) -> bool:
 	if unit == null:
 		return false

@@ -12,7 +12,7 @@ share = 0.5
 [resource]
 script = ExtResource("1")
 ascension_name = "Closed Loop"
-description = "Recycloid heals for 50% of his Gambit damage, and for 50% of the damage his revived ally deals."
+description = "Recycloid heals for {share%} of his Gambit damage, and for {share%} of the damage his revived ally deals."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

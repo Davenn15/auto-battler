@@ -6,4 +6,4 @@
 script = ExtResource("1")
 kind = 2
 passive_name = "Docking Shield"
-description = "Whenever a drone returns to CTRL(R), it gains a 120 Shield for 4 seconds."
+description = "Whenever a drone returns to Controller, it gains a {shield|shield} Shield for {shield_duration|shieldtime} seconds."

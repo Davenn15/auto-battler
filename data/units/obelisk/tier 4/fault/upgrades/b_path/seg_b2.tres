@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+
+[resource]
+script = ExtResource("1")
+description = "The orb detonates when it reaches the edge of the board, dealing {edge_share%} of its damage to enemies within {edge_radius} cells."
+gambit_overrides = Dictionary[String, float]({
+"edge_radius": 2.0,
+"edge_share": 0.5
+})

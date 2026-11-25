@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Attacks gain Wrack chance against enemies with Mono-Virus."
+description = "Attacks gain +{bonus_chance%} Wrack chance against enemies with Mono-Virus."
 passives = Array[ExtResource("2")]([ExtResource("3")])

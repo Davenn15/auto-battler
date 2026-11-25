@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_vdg5c")
-description = "Sleeping enemies have lower Wards."
+description = "Sleeping enemies have {ward_cut%} lower Wards."
 gambit_overrides = Dictionary[String, float]({
 "ward_cut": 0.3
 })

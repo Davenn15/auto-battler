@@ -7,5 +7,5 @@ script = ExtResource("1_8h70k")
 might_scaling = 0.6
 shield_per_enemy = 85.0
 cast_time = 0.75
-description = "Slashes every adjacent enemy, then gains a shield for each enemy hit."
+description = "Slashes every adjacent enemy for {damage+might_scaling} damage, then gains a {shield_per_enemy} shield for each enemy hit, for {shield_duration|shieldtime} seconds."
 metadata/_custom_type_script = "uid://dk5bp784egc0u"

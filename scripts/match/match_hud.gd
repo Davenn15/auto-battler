@@ -155,6 +155,7 @@ func _build_unit_tip() -> void:
 	_unit_tip_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_unit_tip_text.custom_minimum_size = Vector2(UNIT_TIP_WIDTH, 0)
 	_unit_tip_text.add_theme_font_size_override("normal_font_size", 13)
+	Keyphrases.style_label(_unit_tip_text, 13)
 	_unit_tip_text.add_theme_font_size_override("bold_font_size", 13)
 	_unit_tip.add_child(_unit_tip_text)
 
@@ -169,11 +170,7 @@ func show_unit_tip(button: Control, data: UnitData) -> void:
 func show_item_tip(button: Control, item: Keepsake, prefix: String = "") -> void:
 	if item == null:
 		return
-	var lines := ItemToolbox.describe(item).split("\n")
-	var text := prefix + "[b]%s[/b]" % lines[0]
-	if lines.size() > 1:
-		text += "\n" + Keyphrases.format("\n".join(lines.slice(1)))
-	_show_tip(button, text)
+	_show_tip(button, ItemToolbox.describe_rich(item, prefix))
 
 
 ## The popup beside the shop, level with `button`, showing `bbcode`. It hides when the
@@ -212,6 +209,7 @@ func _fit_font(panel: Control, labels: Array, sizes: Array) -> void:
 			if label is RichTextLabel:
 				label.add_theme_font_size_override("normal_font_size", font_size)
 				label.add_theme_font_size_override("bold_font_size", font_size)
+				Keyphrases.style_label(label, font_size)
 			else:
 				label.add_theme_font_size_override("font_size", font_size)
 		panel.reset_size()
@@ -240,27 +238,46 @@ static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
 			choices = choices[pick].next_choices
 	for upgrade in chosen:
 		passives.append_array(upgrade.passives)
-		if upgrade.gambit != null:
-			gambit = upgrade.gambit
+	gambit = Upgrade.gambit_after(data, chosen)   # with its upgrades' bonuses, for the numbers
 	var lines := PackedStringArray()
-	var title := "[b]%s[/b]   [color=#9a9aa5]tier %d[/color]" % [data.display_name.capitalize(), data.tier]
+	var title := "[b]%s[/b]   [color=#9a9aa5]tier %d[/color]" % [data.get_title(), data.tier]
 	if owned != null:
 		title += "   [color=#66a6ff]yours: %s[/color]" % owned.label()
 	lines.append(title)
 	for passive in passives:
-		lines.append(_ability_text("Passive", UnitInfoPanel._ability_name(passive, passive.passive_name, "Passive"), passive.description))
+		lines.append(_ability_text("Passive", UnitInfoPanel._ability_name(passive, passive.passive_name, "Passive"), passive.description,
+				_unit_context(DescriptionContext.of(passive), data, owned, false)))
 	if gambit != null:
-		lines.append(_ability_text("Gambit", UnitInfoPanel._ability_name(gambit, gambit.gambit_name, "Gambit"), gambit.description))
+		lines.append(_ability_text("Gambit", UnitInfoPanel._ability_name(gambit, gambit.gambit_name, "Gambit"), gambit.description,
+				_unit_context(DescriptionContext.of(gambit), data, owned, true)))
 	if owned != null:
 		lines.append("")
 		lines.append("[b]You own it:[/b] buying it buffs its stats (upgrade it from its own menu).")
 	return "\n".join(lines)
 
 
-static func _ability_text(kind: String, ability_name: String, description: String) -> String:
+## `ctx` with stats for a shop unit: an owned one's figure on the board when it has one,
+## otherwise the unit's own stats at its level and buffs (level 0 for one not owned).
+static func _unit_context(ctx: DescriptionContext, data: UnitData, owned: ArmyUnit, gambit: bool) -> DescriptionContext:
+	var shown: BattleUnit = _board_unit(owned)
+	if shown != null:
+		return ctx.with_unit(shown, gambit)
+	return ctx.with_base_stats(data, owned.level() if owned != null else 0, owned.buffs if owned != null else 0, gambit)
+
+
+## The figure standing for `army_unit` on the planning board, or null.
+static func _board_unit(army_unit: ArmyUnit) -> BattleUnit:
+	if army_unit == null:
+		return null
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := tree.get_first_node_in_group("match_game") if tree != null else null
+	return game.board_unit_of(army_unit) if game != null else null
+
+
+static func _ability_text(kind: String, ability_name: String, description: String, ctx: DescriptionContext = null) -> String:
 	var line := "[b]%s:[/b] %s" % [kind, ability_name]
 	if description != "":
-		line += "\n[color=#cccccc]%s[/color]" % Keyphrases.format(description)
+		line += "\n[color=#cccccc]%s[/color]" % Keyphrases.format(description, ctx)
 	return line
 
 
@@ -486,7 +503,7 @@ func _build_table_window() -> void:
 	_table_result.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_table_result.mouse_filter = Control.MOUSE_FILTER_STOP
 	_wire_item(_table_result, func(): return {"from": "table_result"}, Callable())   # drag it out to combine
-	_table_result.mouse_entered.connect(func(): show_item_tip(_table_result, game.table_preview(), "Makes "))
+	_table_result.mouse_entered.connect(func(): show_item_tip(_table_result, game.table_preview(), "Empowers into " if game.is_empowering_on_table() else "Makes "))
 	_table_result.mouse_exited.connect(hide_unit_tip)
 	column.add_child(_table_result)
 	_combine = Button.new()
@@ -494,6 +511,55 @@ func _build_table_window() -> void:
 	_combine.add_theme_font_size_override("font_size", 11)
 	_combine.pressed.connect(func(): game.combine_table())
 	column.add_child(_combine)
+	# Empowered Keepsakes the army owns / may own, once Empowering is open.
+	_empower_count = _label("", 11, EMPOWER_GOLD)
+	_empower_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_empower_count.mouse_filter = Control.MOUSE_FILTER_STOP
+	_empower_count.tooltip_text = "Empowered Keepsakes your army has / the most it can have.\nThe limit grows by 1 after each Neutral Encounter."
+	column.add_child(_empower_count)
+
+
+## Gold, for Keepsake Empowering (the table's counter, the unlock banner).
+const EMPOWER_GOLD := Color(1.0, 0.8, 0.25)
+var _empower_count: Label
+
+
+## A banner across the middle of the screen: `title` in gold over `body`. It fades in,
+## holds for a couple of seconds, then fades out. Clicks pass through it.
+func announce(title: String, body: String) -> void:
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.07, 0.05, 0.92)
+	style.border_color = EMPOWER_GOLD
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	style.set_content_margin_all(18)
+	panel.add_theme_stylebox_override("panel", style)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(column)
+	var heading := _label("★  %s  ★" % title.to_upper(), 20, EMPOWER_GOLD)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(heading)
+	var text := _label(body, 13, Color(0.9, 0.88, 0.82))
+	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(text)
+	for label in [heading, text]:
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF   # one line each: the banner sizes to them
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	panel.reset_size()
+	# Centred over the board: the screen minus the side panel on the right.
+	var board_width := _side.global_position.x if _side != null else size.x
+	panel.position = Vector2((board_width - panel.size.x) / 2.0, size.y * 0.32 - panel.size.y / 2.0)
+	panel.modulate.a = 0.0
+	var tween := panel.create_tween()
+	tween.tween_property(panel, "modulate:a", 1.0, 0.25)
+	tween.tween_interval(2.5)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.6)
+	tween.tween_callback(panel.queue_free)
 
 
 func _centered_label(text: String) -> Label:
@@ -581,8 +647,8 @@ func _item_drag(_at: Vector2, control: Control, source: Callable) -> Variant:
 		return null
 	var from: Dictionary = source.call()
 	var item := game.item_at(from) if not from.is_empty() else null
-	if item == null or (from["from"] == "unit" and not item.is_shard):
-		return null
+	if item == null or (from["from"] == "unit" and not item.is_shard and not game.table_accepts(item)):
+		return null   # Keepsakes stay on their unit, except to go to the table to be empowered
 	control.set_drag_preview(_drag_preview(item))
 	return {"item_source": from}
 
@@ -785,7 +851,7 @@ func show_encounter(title: String) -> void:
 		elif not ascension.affected_units.is_empty():
 			for_text = "  [color=#c8b46e]For %s[/color]" % ascension.affected_names()
 		var for_units := "[center][color=#9a9aa5]Tier %s[/color]%s[/center]" % [ascension.tier_text(), for_text]
-		text.text = "[center][b]%s[/b][/center]%s\n%s" % [ascension.get_display_name(), for_units, Keyphrases.format(ascension.description)]
+		text.text = "[center][b]%s[/b][/center]%s\n%s" % [ascension.get_display_name(), for_units, Keyphrases.format(ascension.description, ascension.description_context())]
 		card.add_child(text)
 		# The card, with its own reroll button under it (all share one rising price).
 		var stack := VBoxContainer.new()
@@ -868,7 +934,7 @@ func _build_unit_pick() -> void:
 
 func show_unit_pick(ascension: Ascension, bench: Array) -> void:
 	var lines := PackedStringArray(["[b]Choose a unit for %s[/b]: click it on the board." % ascension.get_display_name()])
-	lines.append(Keyphrases.format(ascension.description))
+	lines.append(Keyphrases.format(ascension.description, ascension.description_context()))
 	if not bench.is_empty():
 		lines.append("[color=#9a9aa5]Or one on your bench:[/color]")
 	_unit_pick_text.text = "\n".join(lines)
@@ -951,7 +1017,7 @@ func _ascension_badge(ascension: Ascension, index: int, holder: ArmyUnit = null)
 		lines.append("[color=#c8b46e]For Beams[/color]")
 	elif not ascension.affected_units.is_empty():
 		lines.append("[color=#c8b46e]For %s[/color]" % ascension.affected_names())
-	lines.append(Keyphrases.format(ascension.description))
+	lines.append(Keyphrases.format(ascension.description, ascension.description_context()))
 	badge.tooltip_text = "\n".join(lines)
 	# A faction's Ascension: its emblem peeking over the badge's top edge.
 	var faction := ascension.faction_name()
@@ -1094,9 +1160,16 @@ func _upgrade_card(unit: ArmyUnit, choice: Dictionary, short: bool) -> PanelCont
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_theme_font_size_override("normal_font_size", 11)
 	text.add_theme_font_size_override("bold_font_size", 12)
+	Keyphrases.style_label(text, 11)
 	var label := RandomTeams.path_label(path)
 	var name_part := " " + upgrade.upgrade_name if upgrade.upgrade_name not in ["", "Upgrade"] else ""
-	var body := Keyphrases.format(upgrade.description) if upgrade.description != "" else describe_upgrade(upgrade)
+	var ctx := DescriptionContext.for_upgrade(unit.data, path)   # its numbers: the totals once taken
+	var shown := _board_unit(unit)
+	if shown != null:
+		ctx.with_unit_at_level(shown, path.size(), Upgrade.touches_gambit(upgrade))
+	else:
+		ctx.with_base_stats(unit.data, path.size(), unit.buffs, Upgrade.touches_gambit(upgrade))
+	var body := Keyphrases.format(upgrade.description, ctx) if upgrade.description != "" else describe_upgrade(upgrade)
 	text.text = "[b][color=#%s]%s[/color]%s[/b]
 %s" % [UPGRADE_CYAN.lightened(0.3).to_html(false), label, name_part, body]
 	if short:
@@ -1172,7 +1245,8 @@ static func describe_upgrade(upgrade: Upgrade) -> String:
 		return "\n".join(parts)
 	for passive in upgrade.passives:
 		var line := passive.passive_name if passive.passive_name != "Passive" else passive.resource_path.get_file().get_basename().capitalize()
-		parts.append(line + (": " + passive.description if passive.description != "" else ""))
+		var text := Keyphrases.plain(passive.description, DescriptionContext.of(passive)) if passive.description != "" else ""
+		parts.append(line + (": " + text if text != "" else ""))
 	if upgrade.gambit != null:
 		var gambit_name := upgrade.gambit.gambit_name
 		if gambit_name == "Gambit":
@@ -1281,7 +1355,7 @@ func _refresh_shop() -> void:
 		button.add_child(picture)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.add_theme_font_size_override("font_size", 10)
-		var title := "%s (T%d)" % [data.display_name.capitalize(), data.tier]
+		var title := "%s (T%d)" % [data.get_title(), data.tier]
 		var cost := ""
 		match info["kind"]:
 			"buy":
@@ -1462,7 +1536,7 @@ func _intro_side(player_name: String, picks: Array[Ascension], color: Color) -> 
 		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		text.custom_minimum_size = Vector2(230, 0)
 		text.add_theme_font_size_override("normal_font_size", 11)
-		text.text = Keyphrases.format(ascension.description)
+		text.text = Keyphrases.format(ascension.description, ascension.description_context())
 		side.add_child(text)
 	return side
 
@@ -1620,7 +1694,7 @@ func refresh_selected() -> void:
 		row.add_child(_label("(none)", 11, Color(0.55, 0.55, 0.6)))
 	for i in unit.items.size():
 		var button := _item_button(unit.items[i])
-		button.disabled = not unit.items[i].is_shard
+		button.disabled = not unit.items[i].is_shard and not game.table_accepts(unit.items[i])
 		var item: Keepsake = unit.items[i]
 		button.pressed.connect(func(): game.shard_to_inventory({"from": "unit", "unit": unit, "index": i}))
 		_on_right_click(button, func(): game.shard_to_table({"from": "unit", "unit": unit, "index": i}))
@@ -1629,16 +1703,32 @@ func refresh_selected() -> void:
 
 
 func _refresh_table() -> void:
+	var empowering := MatchRules.empowering_open(game.round_number)
+	_empower_count.visible = empowering
+	if empowering:
+		var owned := MatchRules.empowered_owned(game.player)
+		var limit := MatchRules.empowered_limit(game.round_number)
+		_empower_count.text = "★ %d/%d" % [owned, limit]
+		_empower_count.add_theme_color_override("font_color", EMPOWER_GOLD if owned < limit else EMPOWER_GOLD.darkened(0.35))
 	for slot in 2:
 		var item: Keepsake = game.table[slot]
 		_table_slots[slot].icon = item.get_icon() if item != null else null
 		_table_slots[slot].text = "" if item != null else "+"
-		_table_slots[slot].tooltip_text = "" if item != null else "Drag a Shard here"
+		var empty_tip := "Drag a Shard or Keepsake here" if empowering else "Drag a Shard here"
+		_table_slots[slot].tooltip_text = "" if item != null else empty_tip
+		# An equipped Keepsake on the table is only pointed at: it stays on its unit.
+		_table_slots[slot].modulate = Color(1, 1, 1, 0.75) if game.table_links[slot] != null else Color.WHITE
 	var result := game.table_preview()
+	_combine.text = "Empower" if game.is_empowering_on_table() else "Combine"
 	_combine.disabled = result == null
 	_table_result.texture = result.get_icon() if result != null else null
-	_table_result.tooltip_text = "" if result != null \
-			else "Drag two Shards onto the table to see what they make."
+	var hint := "Drag two Shards onto the table to see what they make."
+	if empowering:
+		hint = "Drag two Shards onto the table to see what they make, or a Keepsake and one of its Shards to empower it."
+	var problem: String = game.empower_problem()
+	if problem != "":
+		hint = problem
+	_table_result.tooltip_text = "" if result != null else hint
 	_place_table_window.call_deferred()   # once the side panel has laid itself out
 
 

@@ -1,6 +1,6 @@
 class_name ExtraBeamsEffect
 extends Passive
-## BEAM.NG's hero Ascension: its attack Beam and its Gambit's Beam (Shield Beam or Focus
+## Beam's hero Ascension: its attack Beam and its Gambit's Beam (Shield Beam or Focus
 ## Beam) each get Extra Beams more Beams from it, at Share of their damage or shielding,
 ## each at another target when there is one (see Beam.Settings.extra_beams).
 

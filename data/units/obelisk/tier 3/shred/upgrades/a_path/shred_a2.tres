@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "When SHRED kills an enemy, there's a 35% chance you gain a random Shard from among the ones making up its Keepsakes."
+description = "When Shred kills an enemy, there's a {chance%} chance you gain a random Shard from among the ones making up its Keepsakes."
 passives = Array[ExtResource("2")]([ExtResource("3")])

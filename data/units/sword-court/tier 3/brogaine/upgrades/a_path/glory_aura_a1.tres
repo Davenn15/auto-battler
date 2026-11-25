@@ -6,4 +6,4 @@
 script = ExtResource("1")
 per_glory = 0.15
 passive_name = "Toast of the Court"
-description = "Hearty's aura and Regeneration share are each increased by 15% for every Glory he has."
+description = "Hearty's aura and Regeneration share are each increased by {per_glory%} for every Glory he has."

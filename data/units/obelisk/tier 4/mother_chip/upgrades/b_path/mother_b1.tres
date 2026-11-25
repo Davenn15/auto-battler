@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Firewall"
-description = "Harvest also gives her 5 Voltage, plus 2 for each stack consumed."
+description = "Harvest also gives her {voltage} Voltage, plus {voltage_per_stack} for each stack consumed."
 gambit_overrides = Dictionary[String, float]({
 "voltage": 5.0,
 "voltage_per_stack": 2.0

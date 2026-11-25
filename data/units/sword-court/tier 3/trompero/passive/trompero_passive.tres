@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_wkh2a")
 insight_scaling = 0.8
-description = "Trompero's attacks deal Insight damage and scale with Insight."
+description = "Trompero's attacks deal Insight damage and scale with Insight ({insight_scaling%})."
 metadata/_custom_type_script = "uid://dsk5yxo18euw6"

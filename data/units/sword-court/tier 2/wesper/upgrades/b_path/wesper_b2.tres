@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_jtmab")
-description = "Reflected projectiles are more likely to Wrack."
+description = "Reflected projectiles have +{reflect_wrack_bonus%} Wrack Chance."
 gambit_bonuses = Dictionary[String, float]({
 "reflect_wrack_bonus": 0.5
 })

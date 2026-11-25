@@ -5,25 +5,25 @@
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "Your units gain 10% Wrack Damage."
+description = "Your units gain {wrack_damage%} Wrack Damage."
 tier = 1
 wrack_damage = 0.1
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "Your units gain 15% Wrack Damage."
+description = "Your units gain {wrack_damage%} Wrack Damage."
 tier = 2
 wrack_damage = 0.15
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "Your units gain 25% Wrack Damage."
+description = "Your units gain {wrack_damage%} Wrack Damage."
 tier = 3
 wrack_damage = 0.25
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "Your units gain 35% Wrack Damage."
+description = "Your units gain {wrack_damage%} Wrack Damage."
 tier = 4
 wrack_damage = 0.35
 

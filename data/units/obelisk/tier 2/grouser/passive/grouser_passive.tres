@@ -7,4 +7,4 @@ script = ExtResource("1")
 highest_amount = 10.0
 duration = 6.0
 passive_name = "Shred"
-description = "Hit Effect: Reduce the target's highest ward for a few seconds. Stacks."
+description = "Hit Effect: Reduce the target's highest ward by {highest_amount} for {duration} seconds. Stacks."

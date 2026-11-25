@@ -1,29 +1,29 @@
 class_name MalletSlamGambit
 extends Gambit
-## MALLET leaps to the spot that hits the most enemies and slams down, hurting every enemy
+## Mallet leaps to the spot that hits the most enemies and slams down, hurting every enemy
 ## within Radius. Damage is highest next to where it lands and falls off towards the edge.
 ## Damage = Damage + Might Scaling x Might, times the falloff share.
 ##   A (Devastating): the slam also stuns, longer closer to the center.
-##   A1: MALLET Phases for a while after landing.
+##   A1: Mallet Phases for a while after landing.
 ##   A2: the slam ignores a share of enemy wards.
 
-## How far MALLET can leap, in hex cells.
+## How far Mallet can leap, in hex cells.
 @export var leap_range_cells: int = 4
 ## How far the slam reaches from where it lands, in hex cells.
 @export var radius_cells: int = 2
-## Seconds MALLET spends in the air (untargetable).
+## Seconds Mallet spends in the air (untargetable).
 @export var air_time: float = 0.6
 ## How high it flies on screen, in pixels.
 @export var leap_height: float = 48.0
 @export var damage: float = 140.0
 @export var might_scaling: float = 1.0
 @export_enum("Might", "Insight", "Celerity") var damage_type: int = 0
-## Share of the damage enemies at the edge take (0.5 = half). Enemies next to MALLET take all of it.
+## Share of the damage enemies at the edge take (0.5 = half). Enemies next to Mallet take all of it.
 @export_range(0.0, 1.0, 0.05) var edge_share: float = 0.5
-## A: stun seconds next to MALLET and at the edge. 0 = no stun.
+## A: stun seconds next to Mallet and at the edge. 0 = no stun.
 @export var stun_center: float = 0.0
 @export var stun_edge: float = 0.0
-## A1: seconds MALLET Phases after landing. 0 = none.
+## A1: seconds Mallet Phases after landing. 0 = none.
 @export var phase_after: float = 0.0
 ## A2: share of enemy wards the slam ignores (0.4 = 40%).
 @export_range(0.0, 1.0, 0.05) var ward_ignore: float = 0.0
@@ -58,7 +58,7 @@ func execute(caster: BattleUnit) -> void:
 	MalletFx.self_phase(caster, phase_after)
 
 
-## 0 next to MALLET, 1 at the edge of the slam.
+## 0 next to Mallet, 1 at the edge of the slam.
 func falloff(distance: int) -> float:
 	if radius_cells <= 1:
 		return 0.0
@@ -92,7 +92,7 @@ func enemies_in_reach(caster: BattleUnit) -> Array[BattleUnit]:
 	return result
 
 
-## The cell within leap range (or MALLET's own) whose slam hits the most enemies. Ties go
+## The cell within leap range (or Mallet's own) whose slam hits the most enemies. Ties go
 ## to the one with more enemies near the center, then to the nearest.
 ## Returns {"cell": Vector2i, "count": enemies it would hit}.
 func _best_cell(caster: BattleUnit) -> Dictionary:

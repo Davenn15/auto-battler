@@ -14,4 +14,4 @@ might_cut_duration = 3.0
 knockback_cells = 1.0
 gambit_name = "Buffeting"
 cast_time = 0.5
-description = "Blasts a cone 2 cells long and 90 degrees wide, aimed where it catches the most enemies. Each enemy in it takes 60 (+30% Insight) Insight damage, has 30% less Might for 3 seconds, and is knocked back 1 cell."
+description = "Blasts a cone {reach_cells} cells long and {cone_degrees} degrees wide, aimed where it catches the most enemies. Each enemy in it takes {damage+insight_scaling} Insight damage, has {might_cut%} less Might for {might_cut_duration} seconds, and is knocked back {knockback_cells} cells."

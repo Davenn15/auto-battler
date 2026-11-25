@@ -7,5 +7,5 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Fabricator"
-description = "New weapon, Fabricator: every 10 seconds, manufactures a random full keepsake and magnetizes it to the nearest ally with an open slot, equipping it for the rest of combat and giving them a 150 Shield."
+description = "New weapon, Fabricator: every {interval} seconds, manufactures a random full keepsake and magnetizes it to the nearest ally with an open slot, equipping it for the rest of combat and giving them a {shield|shield} Shield."
 passives = Array[ExtResource("2")]([ExtResource("3")])

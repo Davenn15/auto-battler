@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Radar Pulse"
 cast_time = 0.4
-description = "Emanates a radar pulse. Every enemy within 3 cells loses 25 Celerity for 5 seconds, or 50 if it was targeting CTRL(R)."
+description = "Emanates a radar pulse. Every enemy within {radius_cells} cells loses {celerity_cut} Celerity for {duration} seconds, or twice that if it was targeting Controller."

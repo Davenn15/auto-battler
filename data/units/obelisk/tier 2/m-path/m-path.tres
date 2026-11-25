@@ -11,7 +11,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "M-PATH"
+display_name = "M-Path"
 placement = 0
 tier = 2
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])

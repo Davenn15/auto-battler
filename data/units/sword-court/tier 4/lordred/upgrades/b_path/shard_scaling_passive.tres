@@ -6,5 +6,5 @@
 script = ExtResource("1_xhilf")
 share = 0.4
 passive_name = null
-description = "Blade shards deal part of the attack's damage back."
+description = "Blade shards deal {share%} of the attack's damage back."
 metadata/_custom_type_script = "uid://ce5grkw1dboi"

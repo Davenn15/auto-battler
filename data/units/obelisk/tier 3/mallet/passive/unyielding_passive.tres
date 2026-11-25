@@ -6,4 +6,4 @@
 script = ExtResource("1")
 immovability = 40.0
 passive_name = "Unyielding"
-description = "MALLET has 40 Immovability."
+description = "Mallet has {immovability} Immovability."

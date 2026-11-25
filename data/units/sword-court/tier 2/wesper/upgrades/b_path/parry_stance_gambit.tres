@@ -9,5 +9,5 @@ ward_bonus = 35.0
 celerity_bonus = 40.0
 reflect_chance = 0.8
 cast_time = 0.5
-description = "Takes a stance for a while: extra Wards and Celerity, and a chance to reflect incoming projectiles."
+description = "Takes a stance for {duration} seconds: +{ward_bonus} Wards, +{celerity_bonus} Celerity, and a {reflect_chance%} chance to reflect incoming projectiles."
 metadata/_custom_type_script = "uid://bunkcbjqogkmm"

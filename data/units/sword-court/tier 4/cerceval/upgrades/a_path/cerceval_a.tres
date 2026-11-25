@@ -3,12 +3,13 @@
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/cerceval/upgrades/a_path/cerceval_a1.tres" id="2"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/cerceval/upgrades/a_path/cerceval_a2.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="4_wfotp"]
 
 [resource]
 script = ExtResource("1")
-upgrade_name = "Fanned Blades"
-description = "During Barbed Frenzy, each attack also throws two smaller barbed blades fanning out 12 degrees to either side, dealing 40% damage."
+upgrade_name = "Barbed"
+description = "During Barbed Frenzy, each attack also throws two smaller barbed blades fanning out {side_blade_angle} degrees to either side, dealing {side_blade_share%} damage."
+next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])
 gambit_overrides = Dictionary[String, float]({
 "side_blade_share": 0.4
 })
-next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])

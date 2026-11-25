@@ -7,4 +7,4 @@ script = ExtResource("1")
 ward_per_targeter = 7.0
 max_targeters = 5
 passive_name = "Bulwark"
-description = "Balmede's Wards rise by 7 for each enemy targeting her (up to 5 enemies, +35)."
+description = "Balmede's Wards rise by {ward_per_targeter} for each enemy targeting her (up to {max_targeters} enemies)."

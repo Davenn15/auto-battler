@@ -92,7 +92,7 @@ func _land(blade: Polygon2D, ally, kind: int) -> void:
 	ally.add_status(BladeBuffStatus.new(stats[0], stats[1], attribute_bonus, ward_bonus))
 	ally.show_float_text("+" + Stats.STAT_NAMES[stats[0]], Stats.damage_color(kind))
 	if blade_shield > 0.0:
-		ally.add_shield(blade_shield, blade_shield_duration, blade.get_meta("caster_id"))
+		ally.add_shield(blade_shield, blade_shield_duration, blade.get_meta("caster_id"), false, true)
 	if blade_charge > 0.0:
 		ally.gain_charge(blade_charge)
 

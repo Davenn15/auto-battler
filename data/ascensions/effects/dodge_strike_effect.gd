@@ -1,8 +1,8 @@
 class_name DodgeStrikeEffect
 extends Passive
-## FRAME's hero Ascension (with +10% dodge chance from the Ascension's own stats): whenever
+## Frame's hero Ascension (with +10% dodge chance from the Ascension's own stats): whenever
 ## it dodges, its next attack gains a Hit Effect dealing Share of the target's max health as
-## bonus damage. On B, the attacks FRAME makes alongside the ally it follows count too.
+## bonus damage. On B, the attacks Frame makes alongside the ally it follows count too.
 
 ## 0.05 = 5% of the target's max health.
 @export var share: float = 0.05

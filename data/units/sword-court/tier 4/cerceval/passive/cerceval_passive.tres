@@ -7,4 +7,4 @@ script = ExtResource("1")
 bleed_share = 0.5
 heal_share = 0.5
 passive_name = "Bloodletter"
-description = "Cerceval's attack and Gambit damage also inflict Bleed for 50% of the damage dealt. He heals for 100% of all Bleed damage taken by enemies within his attack range."
+description = "Cerceval's attack and Gambit damage also inflict Bleed for {bleed_share%} of the damage dealt. He heals for {heal_share%} of all Bleed damage taken by enemies within his attack range."

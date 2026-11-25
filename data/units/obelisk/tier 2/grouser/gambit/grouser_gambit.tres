@@ -7,4 +7,4 @@ script = ExtResource("1")
 interval = 0.5
 gambit_name = "Snip"
 cast_time = 0.3
-description = "Snips the target with his claw twice. Each snip is an attack that deals bonus damage equal to a share of the target's max health."
+description = "Snips the target with his claw {snips} times. Each snip is an attack that deals bonus damage equal to {max_health_damage%} of the target's max health."

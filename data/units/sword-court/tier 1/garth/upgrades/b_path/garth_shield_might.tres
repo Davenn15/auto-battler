@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_rrnlu")
 might = 35.0
-description = "Bonus Might while shielded."
+description = "+{might} Might while shielded."
 metadata/_custom_type_script = "uid://7hwunw5jowq4"

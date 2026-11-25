@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Backstep makes SHRED untargetable for 1 second."
+description = "Backstep makes Shred untargetable for {untargetable_time} seconds."
 gambit_overrides = Dictionary[String, float]({
 "untargetable_time": 1.0
 })

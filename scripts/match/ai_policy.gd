@@ -234,6 +234,8 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 			stats["combines"] += 1
 		else:
 			break
+	if MatchRules.empowering_open(combat_number * 2):   # combat n is round 2n
+		stats["empowers"] = empower_all(p, combat_number * 2)
 	# Items go out best first, each to a unit picked by how well it suits them.
 	var order: Array = range(p.inventory.size())
 	var item_scores := {}
@@ -248,7 +250,7 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 		if handling == ShardHandling.HOLD and p.inventory[i].is_shard:
 			continue   # a lone Shard waits loose for a partner
 		var item: Keepsake = p.inventory[i]
-		open = open.filter(func(u): return Keepsake.allowed_with(item, u.items))   # no second copy
+		open = open.filter(func(u): return u.accepts(item))   # no second copy, nor too many empowered
 		if open.is_empty():
 			continue
 		if randf() < g["equip_rate"]:
@@ -263,6 +265,36 @@ func make_plan(p: PlayerState, combat_number: int, variant: int) -> Dictionary:
 		lay_out(p, g)
 	MatchRules.auto_place_bench(p)
 	return stats
+
+
+## Keepsake Empowering, the simple rule: every loose Shard that can empower a Keepsake
+## does (up to the army's limit), Keepsakes already on a unit (with room for another
+## empowered one) first, then loose ones. Returns how many it empowered.
+static func empower_all(p: PlayerState, round_number: int) -> int:
+	var done := 0
+	var progress := true
+	while progress:
+		progress = false
+		for shard in p.inventory.duplicate():
+			if not shard.is_shard:
+				continue
+			var target := _empower_target(p, shard, round_number)
+			if target != null and MatchRules.empower(p, target, shard, round_number) != null:
+				done += 1
+				progress = true
+				break   # the inventory changed: look again
+	return done
+
+
+static func _empower_target(p: PlayerState, shard: Keepsake, round_number: int) -> Keepsake:
+	for unit in p.units:
+		for item in unit.items:
+			if MatchRules.can_empower(item, shard, unit, round_number, p):
+				return item
+	for item in p.inventory:
+		if MatchRules.can_empower(item, shard, null, round_number, p):
+			return item
+	return null
 
 
 ## How well `item` suits the best unit in the army that still has a free slot (KeepsakeSense

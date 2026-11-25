@@ -1,10 +1,10 @@
 class_name LinkGambit
 extends Gambit
-## M-PATH links himself to the nearby ally that has taken the most damage this combat. While
+## M-Path links himself to the nearby ally that has taken the most damage this combat. While
 ## linked, both have more health regen and each passes a share of the damage it takes to the other.
 ##   Bonded (A): the link also raises both units' Might Ward and Celerity Ward.
 ##   A1: the link also raises both units' Insight.
-##   A2: once per link, if the linked ally would die, M-PATH gives up a share of his max
+##   A2: once per link, if the linked ally would die, M-Path gives up a share of his max
 ##       health instead and heals it for the same amount.
 
 ## How close the ally must be, in hex cells.
@@ -18,7 +18,7 @@ extends Gambit
 @export var ward_bonus: float = 0.0
 ## A1: Insight both linked units gain. 0 = none.
 @export var insight_bonus: float = 0.0
-## A2: share of M-PATH's max health he gives up (and heals the ally for) when the ally
+## A2: share of M-Path's max health he gives up (and heals the ally for) when the ally
 ## would die. He never drops below 1 health from it. 0 = he doesn't.
 @export_range(0.0, 1.0, 0.05) var sacrifice_share: float = 0.0
 

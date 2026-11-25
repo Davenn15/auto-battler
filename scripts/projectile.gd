@@ -145,7 +145,7 @@ func speed_scale() -> float:
 
 
 ## The speed factor for any shot from `team` at `point` (1 = full speed), for shots that
-## aren't Projectiles but should be slowed the same way (SEG.FAULT's ion bolts and orb).
+## aren't Projectiles but should be slowed the same way (Fault's ion bolts and orb).
 ## `node` is any node in the scene tree.
 static func slow_at(node: Node, point: Vector2, team: int) -> float:
 	var factor := 1.0

@@ -69,7 +69,7 @@ func _hit_along(from: Vector2, to: Vector2) -> void:
 		if unit.team == team:
 			if ally_shield > 0.0 and unit.get_instance_id() != thrower_id:
 				_hit_ids[unit.get_instance_id()] = true
-				unit.add_shield(ally_shield, ally_shield_duration, thrower_id)
+				unit.add_shield(ally_shield, ally_shield_duration, thrower_id, false, true)
 			continue
 		_hit_ids[unit.get_instance_id()] = true
 		var dealt := unit.take_damage(BattleUnit.damage_bonus(thrower_id, unit, damage), wrack_level, damage_type, ignore_ward)
@@ -81,5 +81,5 @@ func _hit_along(from: Vector2, to: Vector2) -> void:
 
 func _caught(thrower: BattleUnit) -> void:
 	if thrower != null and thrower.alive:
-		thrower.add_shield(catch_shield, catch_shield_duration, thrower_id)
+		thrower.add_shield(catch_shield, catch_shield_duration, thrower_id, false, true)
 	queue_free()

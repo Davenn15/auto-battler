@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Gatling Cannon"
-description = "Fires small shots at the nearest enemy in range for 8 + 0.18x Celerity damage each. Shots come faster the longer it fires at the same enemy, from 0.8 down to 0.15 seconds apart."
+description = "Fires small shots at the nearest enemy in range for {damage+celerity_scaling} Might damage each. Shots come faster the longer it fires at the same enemy, from {start_gap} down to {min_gap} seconds apart."

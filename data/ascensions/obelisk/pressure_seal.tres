@@ -11,7 +11,7 @@ script = ExtResource("2")
 [resource]
 script = ExtResource("1")
 ascension_name = "Pressure Seal"
-description = "Allies inside Bubbler's bubbles (from either Gambit) gain 20 to each Ward and take 25% less damage from projectiles."
+description = "Allies inside Bubbler's bubbles (from either Gambit) gain {ward_bonus} to each Ward and take {projectile_cut%} less damage from projectiles."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

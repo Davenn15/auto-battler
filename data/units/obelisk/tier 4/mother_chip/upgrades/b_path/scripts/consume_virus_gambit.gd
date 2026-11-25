@@ -1,6 +1,6 @@
 class_name ConsumeVirusGambit
 extends Gambit
-## MOTHER-CHIP B: pulls every Mono-Virus stack off every enemy and turns each one into a
+## Mother-Chip B: pulls every Mono-Virus stack off every enemy and turns each one into a
 ## new Chip.
 ##   B1: she gains Voltage, more for each stack consumed.
 
@@ -40,6 +40,6 @@ func execute(caster: BattleUnit) -> void:
 		chips.add_chips(consumed)
 	if voltage > 0.0 or voltage_per_stack > 0.0:
 		var gained := voltage + voltage_per_stack * consumed
-		VoltageStatus.ensure(caster).after_gambit += gained
+		VoltageStatus.ensure(caster).add_after_gambit(gained)
 		caster.show_float_text("+%d Voltage" % floori(gained), VoltageStatus.LIGHT)
 	caster.show_float_text("+%d Chips" % consumed, ChipPassive.LIGHT)

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Enemies inside the bubble lose Celerity."
+description = "Enemies inside the bubble lose {enemy_celerity_cut} Celerity."
 gambit_overrides = Dictionary[String, float]({
 "enemy_celerity_cut": 25.0
 })

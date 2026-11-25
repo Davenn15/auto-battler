@@ -6,5 +6,5 @@
 script = ExtResource("1_r82vb")
 stat = 6
 amount = 0.5
-description = "Bonus Wrack Chance."
+description = "+{amount%} Wrack Chance."
 metadata/_custom_type_script = "uid://sdo6eme3alib"

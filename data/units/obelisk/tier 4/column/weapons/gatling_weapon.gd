@@ -2,7 +2,7 @@ class_name ColumnGatlingWeapon
 extends ColumnWeapon
 ## B1: a gatling cannon that fires small shots at the nearest enemy in range. Each shot at
 ## the same enemy as the last comes faster, down to a minimum gap; switching enemies spins
-## it back down. Gaps also shrink and grow with COLUMN's attack speed.
+## it back down. Gaps also shrink and grow with Column's attack speed.
 ## Damage per shot = Damage + Celerity Scaling x Celerity.
 
 ## Seconds between the first shots (at 100 Celerity).
@@ -11,7 +11,7 @@ extends ColumnWeapon
 @export_range(0.0, 0.9, 0.01) var spin_up: float = 0.15
 ## The shortest gap it reaches (at 100 Celerity).
 @export var min_gap: float = 0.15
-## Damage each shot deals, plus this much per point of COLUMN's Celerity.
+## Damage each shot deals, plus this much per point of Column's Celerity.
 @export var damage: float = 8.0
 @export var celerity_scaling: float = 0.18
 

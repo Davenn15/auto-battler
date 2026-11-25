@@ -108,7 +108,7 @@ static func reserve_from(gains: Dictionary, team: int) -> int:
 	return int(gains.get("reserve", {}).get(team, 0))
 
 
-## Shards a team's units earned this fight (SHRED A2), paid into its inventory afterwards.
+## Shards a team's units earned this fight (Shred A2), paid into its inventory afterwards.
 ## Like Reserve, only real combats pay: the computer's test battles never collect them.
 static var _shards_earned := {}
 

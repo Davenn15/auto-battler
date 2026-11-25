@@ -1,6 +1,6 @@
 class_name InjectorMissile
 extends Node2D
-## One of BAR.RAJ's injector missiles: flies straight for `reach` pixels and hits the first
+## One of Barrage's injector missiles: flies straight for `reach` pixels and hits the first
 ## enemy it touches (or the first `hits_left` with B1's pierce), dealing damage and giving
 ## each one Mono-Virus stacks. Copied in at fire time, so it keeps flying if he dies.
 

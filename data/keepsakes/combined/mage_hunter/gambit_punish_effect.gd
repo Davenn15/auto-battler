@@ -3,19 +3,23 @@ extends Passive
 ## Whenever an enemy within range starts its Gambit, the unit attacks it.
 
 @export var range_cells: int = 1
+## Might Empower: its attacks also stun for this long. 0 = no stun.
+@export var stun_time: float = 0.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
-	unit.add_status(Vigil.new(range_cells))
+	unit.add_status(Vigil.new(range_cells, stun_time))
 
 
 class Vigil extends Status:
 	var range_cells: int
+	var stun_time: float
 	var _unit: BattleUnit
 	var _watching: Array[BattleUnit] = []
 
-	func _init(p_range: int) -> void:
+	func _init(p_range: int, p_stun: float = 0.0) -> void:
 		range_cells = p_range
+		stun_time = p_stun
 
 	func on_applied(unit: BattleUnit) -> void:
 		_unit = unit
@@ -38,5 +42,7 @@ class Vigil extends Status:
 			_unit.hide_next_swing = KeepsakeVfx.enabled()
 			_unit.bonus_attack(enemy)
 			_unit.hide_next_swing = false
+			if stun_time > 0.0 and is_instance_valid(enemy) and enemy.alive:
+				enemy.stun(stun_time, _unit)
 			if KeepsakeVfx.enabled():
 				KeepsakeVfx.swing(_unit, (enemy.global_position - _unit.global_position).angle(), Color(0.3, 0.55, 1.0))

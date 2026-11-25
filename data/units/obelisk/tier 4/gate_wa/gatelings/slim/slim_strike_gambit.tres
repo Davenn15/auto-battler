@@ -8,4 +8,4 @@ damage = 75.0
 celerity_scaling = 0.5
 gambit_name = "Finishing Cut"
 cast_time = 0.4
-description = "Strikes its target for 75 + 50% of Celerity as Celerity damage, up to 2.5x as much the more hurt the target is."
+description = "Strikes its target for {damage+celerity_scaling} Celerity damage, up to +{execute_bonus%} more the more hurt the target is."
