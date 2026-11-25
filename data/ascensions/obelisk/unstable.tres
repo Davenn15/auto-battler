@@ -13,7 +13,7 @@ stun = 1.5
 [resource]
 script = ExtResource("1")
 ascension_name = "Unstable"
-description = "BATR.EE gains 50 Insight and 30 Celerity, but after each of its Gambits it takes 15% of its max health as Pure Damage and is stunned for 1.5 seconds."
+description = "Battery gains {insight} Insight and {celerity} Celerity, but after each of its Gambits it takes {self_damage%|maxhp} as Pure Damage and is stunned for {stun} seconds."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 celerity = 30.0

@@ -9,5 +9,5 @@ taunt_time = 3.0
 ward_per_taunt = 25.0
 ward_time = 3.5
 cast_time = 0.75
-description = "Taunts nearby enemies into attacking him, and gains Wards for each one taunted."
+description = "Taunts enemies within {range_cells} cells into attacking him for {taunt_time|cc} seconds, and gains {ward_per_taunt} Wards for each one taunted, for {ward_time} seconds."
 metadata/_custom_type_script = "uid://csx1sbsldjj8r"

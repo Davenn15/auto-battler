@@ -1,16 +1,39 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/exploding_top/insight__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_ww075"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_8k1ca"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/stat_on_wrack_effect.gd" id="4_8jm5i"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/wrack_burst_effect.gd" id="5_vn8ax"]
+
+[sub_resource type="Resource" id="Resource_dfft4"]
+script = ExtResource("4_8jm5i")
+
+[sub_resource type="Resource" id="Resource_j0hpg"]
+script = ExtResource("2_ww075")
+shard = 4
+description = "Whenever you Wrack, gain {extra.amount} Insight for {extra.duration} seconds."
+extra_effects = Array[ExtResource("3_8k1ca")]([SubResource("Resource_dfft4")])
+
+[sub_resource type="Resource" id="Resource_epgff"]
+script = ExtResource("5_vn8ax")
+
+[sub_resource type="Resource" id="Resource_tfbwq"]
+script = ExtResource("2_ww075")
+shard = 7
+description = "When your Gambit damage Wracks, the target explodes, dealing {extra.share%} of that damage to enemies within {extra.radius_cells} cells."
+extra_effects = Array[ExtResource("3_8k1ca")]([SubResource("Resource_epgff")])
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Exploding Top"
 first_shard = 4
 second_shard = 7
-effect = ExtResource("2_effect")
 insight = 20.0
 wrack_chance = 0.15
 wrack_damage = 0.15
-description = "Your Gambit damage can Wrack. If it already could, gain an additional 20% Wrack Damage."
+effect = ExtResource("2_effect")
+description = "Your Gambit damage can Wrack. If it already could, gain an additional {gambit_bonus%} Wrack Damage."
+empowerments = Array[ExtResource("2_ww075")]([SubResource("Resource_j0hpg"), SubResource("Resource_tfbwq")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

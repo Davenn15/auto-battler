@@ -6,4 +6,4 @@
 script = ExtResource("1")
 cap_share = 0.3
 passive_name = "Thorned Hide"
-description = "Healing past his max health becomes Shield, up to 30% of his max health."
+description = "Healing past his max health becomes Shield, up to {cap_share%|maxhp}."

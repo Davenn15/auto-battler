@@ -1,6 +1,6 @@
 class_name MissileAttackPassive
 extends Passive
-## BAR.RAJ A: each of his attacks also fires a missile at a random enemy within his attack
+## Barrage A: each of his attacks also fires a missile at a random enemy within his attack
 ## range, which follows it and explodes on it. Damage = Damage + Might Scaling x Might.
 ## The blast is the same size as his Barrage missiles (so A1 grows both).
 

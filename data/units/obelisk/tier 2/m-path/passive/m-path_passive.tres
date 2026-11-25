@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Recompile"
-description = "15% of the damage M-PATH takes comes back as healing after a short delay."
+description = "M-Path has {share%} Scar."

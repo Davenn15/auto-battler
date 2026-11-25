@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Disrupting Charge"
 cast_time = 0.3
-description = "Charges through the farthest enemy within 4 cells. Every enemy she passes takes 60 (+50% Might) damage and is stunned for 0.75 seconds."
+description = "Charges through the farthest enemy within {range_cells} cells. Every enemy she passes takes {damage+might_scaling} damage and is stunned for {stun_duration|cc} seconds."

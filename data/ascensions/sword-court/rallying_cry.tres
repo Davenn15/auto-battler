@@ -12,7 +12,7 @@ amount = 15.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Rallying Cry"
-description = "Units affected by Lunck's Gambit gain 15 Celerity for the rest of combat. Stacks."
+description = "Units affected by Lunck's Gambit gain {amount} Celerity for the rest of combat. Stacks."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

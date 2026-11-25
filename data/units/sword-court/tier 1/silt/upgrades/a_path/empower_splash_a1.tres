@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 splash_radius = 1
-description = "Empowered attacks' Insight damage hits every enemy within 1 hex of the target."
+description = "Empowered attacks' Insight damage hits every enemy within {splash_radius} hex of the target."

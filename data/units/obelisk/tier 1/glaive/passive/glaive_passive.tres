@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Whirling"
-description = "Glaive gains Celerity for each enemy near him."
+description = "Glaive gains {celerity_per_enemy} Celerity for each enemy within {range_cells} cells."

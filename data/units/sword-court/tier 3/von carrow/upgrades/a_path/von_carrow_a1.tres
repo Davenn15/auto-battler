@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_w2na2")
-description = "Her explosive shot heals her for part of its damage."
+description = "Her explosive shot heals her for {lifesteal%} of its damage."
 gambit_overrides = Dictionary[String, float]({
 "lifesteal": 0.5
 })

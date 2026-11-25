@@ -1,6 +1,6 @@
 class_name BeamLinks
 extends RefCounted
-## The beams of a BEAM.NG Gambit drawn on screen as a chain: from BEAM.NG to its target,
+## The beams of a Beam Gambit drawn on screen as a chain: from Beam to its target,
 ## then from each target to the next one it ricochets to. Also the target picking its
 ## Gambits share.
 
@@ -12,7 +12,7 @@ func _init(caster: BattleUnit) -> void:
 	_caster = caster
 
 
-## Draws BEAM.NG -> chain[0] -> chain[1] -> ...
+## Draws Beam -> chain[0] -> chain[1] -> ...
 func show(chain: Array, color: Color) -> void:
 	if not KeepsakeVfx.enabled() or not is_instance_valid(_caster) or not _caster.is_inside_tree():
 		return

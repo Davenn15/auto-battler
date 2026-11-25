@@ -16,14 +16,14 @@ ricochet_share = 0.5
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "Your Beams ricochet to 1 more target, at 50% strength."
+description = "Your Beams ricochet to {extra_ricochets} more target, at {ricochet_share%} strength."
 tier = 2
 favors_beams = true
 effect = SubResource("Effect_tier2")
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "Your Beams ricochet to 2 more targets, each at 50% strength."
+description = "Your Beams ricochet to {extra_ricochets} more targets, each at {ricochet_share%} strength."
 tier = 4
 favors_beams = true
 effect = SubResource("Effect_tier4")

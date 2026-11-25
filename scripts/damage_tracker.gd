@@ -220,7 +220,7 @@ func set_planning(on: bool) -> void:
 
 ## Adds a unit to the meter (at 0) so it shows even if it never deals damage.
 func register(unit: BattleUnit) -> void:
-	var unit_name: String = unit.data.display_name.capitalize() if unit.data != null else str(unit.name)
+	var unit_name: String = unit.data.get_title() if unit.data != null else str(unit.name)
 	_stats[unit.get_instance_id()] = {"name": unit_name, "team": unit.team, "damage": 0.0,
 			"healing": 0.0, "shielding": 0.0, "types": {}}
 	_refresh()

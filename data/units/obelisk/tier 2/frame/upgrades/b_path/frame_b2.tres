@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "FRAME can gain Charge and cast Compassing again while following."
+description = "Frame can gain Charge and cast Compassing again while following."
 gambit_overrides = Dictionary[String, float]({
 "can_charge": 1.0
 })

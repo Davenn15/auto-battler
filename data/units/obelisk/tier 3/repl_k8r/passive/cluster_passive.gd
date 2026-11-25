@@ -1,6 +1,6 @@
 class_name ClusterPassive
 extends Passive
-## REPL\K8R gains Celerity for each ally near it (its duplicates count).
+## Replicator gains Celerity for each ally near it (its duplicates count).
 
 ## Celerity it gains per nearby ally.
 @export var celerity_per_ally: float = 6.0

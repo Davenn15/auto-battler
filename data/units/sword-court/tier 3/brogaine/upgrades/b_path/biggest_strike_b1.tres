@@ -6,4 +6,4 @@
 script = ExtResource("1")
 share = 0.03
 passive_name = "Bigger They Are"
-description = "His attacks against the enemy with the most max health gain Hit Effect: deal 3% of its max health as bonus Might damage."
+description = "His attacks against the enemy with the most max health gain Hit Effect: deal {share%} of its max health as bonus Might damage."

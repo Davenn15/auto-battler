@@ -1,6 +1,6 @@
 class_name BeamngPassive
 extends Passive
-## BEAM.NG's passive. Its attack is a continuous beam (like Scour's), and its damage and
+## Beam's passive. Its attack is a continuous beam (like Scour's), and its damage and
 ## shielding grow the farther it is from its target: Bonus Per Cell for every cell past
 ## the first.
 ## Its B path makes its beams trigger once-per-attack effects more often (see
@@ -21,7 +21,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(beam)
 
 
-## What BEAM.NG's damage or shielding at `target` is multiplied by, from the distance.
+## What Beam's damage or shielding at `target` is multiplied by, from the distance.
 static func distance_multiplier(unit: BattleUnit, target: BattleUnit) -> float:
 	if not is_instance_valid(target):
 		return 1.0

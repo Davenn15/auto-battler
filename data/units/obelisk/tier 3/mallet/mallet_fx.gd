@@ -1,6 +1,6 @@
 class_name MalletFx
 extends RefCounted
-## MALLET's look, shared by its Gambits: a pinkish crimson, its leaps and its landings.
+## Mallet's look, shared by its Gambits: a pinkish crimson, its leaps and its landings.
 
 const COLOR := Color(0.86, 0.12, 0.33)
 const LIGHT := Color(1.0, 0.5, 0.64)
@@ -26,7 +26,7 @@ static func leap(unit: BattleUnit, dest: Vector2i, time: float, height: float) -
 		unit.remove_status(airborne)
 
 
-## Pinpoint Strike's launch: MALLET turns to point at `target` and rockets to `dest` in a
+## Pinpoint Strike's launch: Mallet turns to point at `target` and rockets to `dest` in a
 ## straight line over `time`, speeding up as it goes, trailing exhaust. If it's already
 ## next to the target (dest is its own cell) it rockets into it and recoils back.
 ## Untargetable while flying. Await it. The flight path is the same in sims (only the turn

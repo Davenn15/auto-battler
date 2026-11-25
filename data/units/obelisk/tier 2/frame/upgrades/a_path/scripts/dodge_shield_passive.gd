@@ -1,6 +1,6 @@
 class_name DodgeShieldPassive
 extends Passive
-## FRAME A2: whenever it dodges a hit, it gains a Shield worth Share of the damage the hit
+## Frame A2: whenever it dodges a hit, it gains a Shield worth Share of the damage the hit
 ## would have dealt (after its Wards), for Duration seconds.
 
 @export_range(0.0, 2.0, 0.05) var share: float = 0.5

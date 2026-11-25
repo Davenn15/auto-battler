@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_bhu4r")
-description = "She can't be targeted for a moment after each combo strike."
+description = "She can't be targeted for {untargetable_time} seconds after each combo strike."
 gambit_overrides = Dictionary[String, float]({
 "untargetable_time": 1.0
 })

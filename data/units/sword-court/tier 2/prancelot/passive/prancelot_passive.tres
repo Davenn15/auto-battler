@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_keumu")
 heal_per_second = 25.0
-description = "Every other attack sends a healing note to the most hurt nearby ally."
+description = "Every {every} attacks, sends a healing note to the most hurt ally within {range_cells} cells, healing {heal_per_second|heal} per second for {duration} seconds."
 metadata/_custom_type_script = "uid://vojb006fd1q6"

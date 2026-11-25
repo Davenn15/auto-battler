@@ -8,6 +8,8 @@ extends Passive
 @export var flat: float = 0.0
 ## Each stat is multiplied by 1 + this while active (0.3 = +30%).
 @export var percent: float = 0.0
+## Regeneration while active, as a share of max health per second (0.02 = 2%).
+@export var regen_share: float = 0.0
 ## Share of max health that switches it (0.5 = half).
 @export_range(0.0, 1.0, 0.05) var threshold: float = 0.5
 ## True: active while above the threshold. False: active while below it.
@@ -47,6 +49,11 @@ class Threshold extends Status:
 		if effect.flat != 0.0 and stat in effect.stats and _active(unit):
 			return value + effect.flat
 		return value
+
+	func modify_health_regen(unit: BattleUnit, regen: float) -> float:
+		if effect.regen_share > 0.0 and _active(unit):
+			return regen + unit.max_health * effect.regen_share
+		return regen
 
 	## Percentages go in the final pass, so they boost the stat after every flat bonus.
 	func modify_final_stat(unit: BattleUnit, stat: Stats.Stat, value: float) -> float:

@@ -1,6 +1,6 @@
 class_name ColumnPassive
 extends Passive
-## COLUMN can't gain Charge and has 100 Immovability (immune to crowd control). It walks like a normal unit,
+## Column can't gain Charge and has 100 Immovability (immune to crowd control). It walks like a normal unit,
 ## but never makes normal attacks: everything it does comes from its weapons (ColumnWeapon
 ## passives), each on its own timer. Its base weapons are two continuous beams at two
 ## different enemies.

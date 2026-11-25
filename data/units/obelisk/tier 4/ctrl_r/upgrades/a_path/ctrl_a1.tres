@@ -7,5 +7,5 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Fast Patch"
-description = "CTRL(R) receives 40% more healing from all sources."
+description = "Controller receives {healing_bonus%} more healing from all sources."
 passives = Array[ExtResource("2")]([ExtResource("3")])

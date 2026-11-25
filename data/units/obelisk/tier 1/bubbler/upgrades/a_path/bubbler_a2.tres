@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Popping bubbles briefly stun the enemies they hit."
+description = "Popping bubbles stun the enemies they hit for {pop_stun|cc} seconds."
 gambit_overrides = Dictionary[String, float]({
 "pop_stun": 0.5
 })

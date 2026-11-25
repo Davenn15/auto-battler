@@ -1,16 +1,37 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/equalizer/celerity_ward__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_xpaqm"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_pw8dd"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/wracker_stun_effect.gd" id="4_ckur6"]
+
+[sub_resource type="Resource" id="Resource_qie31"]
+script = ExtResource("4_ckur6")
+
+[sub_resource type="Resource" id="Resource_5fs8x"]
+script = ExtResource("2_xpaqm")
+shard = 3
+description = "An enemy that Wracks you is stunned for {extra.stun|cc} seconds (each enemy at most once every {extra.cooldown} seconds)."
+extra_effects = Array[ExtResource("3_pw8dd")]([SubResource("Resource_qie31")])
+
+[sub_resource type="Resource" id="Resource_j1x35"]
+script = ExtResource("2_xpaqm")
+shard = 7
+description = "You take {reduction%} less damage from Wracks."
+effect_overrides = {
+"reduction": 0.5
+}
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Equalizer"
 first_shard = 3
 second_shard = 7
-effect = ExtResource("2_effect")
 celerity_ward = 35.0
 wrack_chance = 0.15
 wrack_damage = 0.15
-description = "You take 30% less damage from Wracks."
+effect = ExtResource("2_effect")
+description = "You take {reduction%} less damage from Wracks."
+empowerments = Array[ExtResource("2_xpaqm")]([SubResource("Resource_5fs8x"), SubResource("Resource_j1x35")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

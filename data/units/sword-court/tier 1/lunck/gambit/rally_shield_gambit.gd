@@ -21,7 +21,7 @@ func execute(caster: BattleUnit) -> void:
 		return
 	# Allies may have moved or died during the Act time, so look again now.
 	for ally in _targets(caster):
-		ally.add_shield(shield_amount, duration, caster.get_instance_id())
+		ally.add_shield(shield_amount, duration, caster.get_instance_id(), false, true)
 		BattleUnit.gambit_affected(caster, ally)
 		KeepsakeVfx.head_icon(ally, "VfxRallyFlag", KeepsakeVfx.HeadIcon.FLAG, KeepsakeVfx.LUNCK_ORANGE, duration)
 

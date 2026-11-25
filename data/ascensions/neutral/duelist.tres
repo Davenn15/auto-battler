@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 ascension_name = "Neutral Duelist"
-description = "PLACEHOLDER. Choose one of your units: it gains 30 Celerity and 15% dodge chance."
+description = "PLACEHOLDER. Choose one of your units: it gains {celerity} Celerity and {dodge_chance%} dodge chance."
 tier = 1
 target = 1
 celerity = 30.0

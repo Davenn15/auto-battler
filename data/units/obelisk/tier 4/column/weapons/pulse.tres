@@ -8,4 +8,4 @@ shield_share = 0.07
 timer_color = Color(0.62, 1, 0.2, 1)
 interval = 4.0
 passive_name = "Pulse"
-description = "Every 4 seconds: 40 + 0.3x Might damage to every enemy within 1 cell, and a shield worth 7% of max health, plus 2% for each enemy hit, for 3 seconds."
+description = "Every {interval} seconds: {damage+might_scaling} damage to every enemy within {radius_cells} cells, and a shield worth {shield_share%|maxhp|shield}, plus {shield_per_enemy%|maxhp|shield} for each enemy hit, for {shield_duration|shieldtime} seconds."

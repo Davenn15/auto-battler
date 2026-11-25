@@ -7,4 +7,4 @@ script = ExtResource("1")
 bonus_damage = 40.0
 insight_scaling = 0.2
 attack_count = 3
-description = "After playing his Gambit, Silt's next 3 attacks gain the Hit Effect: deal 40 (+20% Insight) Insight damage."
+description = "After playing his Gambit, Silt's next {attack_count} attacks gain the Hit Effect: deal {bonus_damage+insight_scaling} Insight damage."

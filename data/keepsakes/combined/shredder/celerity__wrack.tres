@@ -1,16 +1,35 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/shredder/celerity__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_fqn5m"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_i4rl2"]
+
+[sub_resource type="Resource" id="Resource_po4t5"]
+script = ExtResource("2_fqn5m")
+shard = 2
+description = "The reduction lasts {duration} seconds."
+effect_overrides = {
+"duration": 7.0
+}
+
+[sub_resource type="Resource" id="Resource_v8x6b"]
+script = ExtResource("2_fqn5m")
+shard = 7
+description = "Hits that Wrack remove {wrack_amount} instead."
+effect_overrides = {
+"wrack_amount": 10.0
+}
 
 [resource]
 script = ExtResource("1_keep")
-keepsake_name = "Shredder"
+keepsake_name = "Starshredder"
 first_shard = 2
 second_shard = 7
-effect = ExtResource("2_effect")
 celerity = 20.0
 wrack_chance = 0.15
 wrack_damage = 0.15
-description = "Hit Effect: Reduce the target's Wards by 2."
+effect = ExtResource("2_effect")
+description = "Hit Effect: Reduce the target's highest Ward by {amount} for {duration} seconds. Stacks."
+empowerments = Array[ExtResource("2_fqn5m")]([SubResource("Resource_po4t5"), SubResource("Resource_v8x6b")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

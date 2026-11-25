@@ -1,7 +1,25 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://c5uuvm27fel"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://cqs5fdehkqksu" path="res://data/keepsakes/combined/blizzard/insight_ward__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/blizzard/insight_ward__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_s1af4"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_0atb5"]
+
+[sub_resource type="Resource" id="Resource_eaj4h"]
+script = ExtResource("2_s1af4")
+shard = 5
+description = "Enemies in the aura receive {support_cut%} less healing and shielding."
+effect_overrides = {
+"support_cut": 0.3
+}
+
+[sub_resource type="Resource" id="Resource_pfdgt"]
+script = ExtResource("2_s1af4")
+shard = 6
+description = "The aura reaches {radius_cells} cells."
+effect_overrides = {
+"radius_cells": 2
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -11,5 +29,6 @@ second_shard = 6
 insight_ward = 35.0
 health = 200.0
 effect = ExtResource("2_effect")
-description = "You are surrounded by an icy aura that deals 35 Insight damage to nearby enemies every second."
+description = "You are surrounded by an icy aura that deals {damage} Insight damage to enemies within {radius_cells} cells every second."
+empowerments = Array[ExtResource("2_s1af4")]([SubResource("Resource_eaj4h"), SubResource("Resource_pfdgt")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

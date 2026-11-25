@@ -1,15 +1,34 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_5a2r3"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/finisher/might_ward__celerity_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_cxpy6"]
+
+[sub_resource type="Resource" id="Resource_v8nq4"]
+script = ExtResource("2_5a2r3")
+shard = 1
+description = "The bonus also applies while you are below {threshold%} of your own Maximum Health."
+effect_overrides = {
+"also_when_self_low": true
+}
+
+[sub_resource type="Resource" id="Resource_vewlb"]
+script = ExtResource("2_5a2r3")
+shard = 2
+description = "You deal {bonus%} increased damage."
+effect_overrides = {
+"bonus": 0.4
+}
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Finisher"
 first_shard = 1
 second_shard = 2
-effect = ExtResource("2_effect")
 might_ward = 35.0
 celerity = 20.0
-description = "You deal 25% increased damage to enemies beneath half of their Maximum Health."
+effect = ExtResource("2_effect")
+description = "You deal {bonus%} increased damage to enemies beneath {threshold%} of their Maximum Health."
+empowerments = Array[ExtResource("2_5a2r3")]([SubResource("Resource_v8nq4"), SubResource("Resource_vewlb")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Grouser gains a large amount of Celerity."
+description = "Grouser gains {amount} Celerity."
 passives = Array[ExtResource("2")]([ExtResource("3")])

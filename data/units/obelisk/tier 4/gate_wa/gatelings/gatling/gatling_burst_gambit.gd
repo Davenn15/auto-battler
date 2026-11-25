@@ -16,7 +16,7 @@ func execute(caster: BattleUnit) -> void:
 	if not is_instance_valid(caster) or not caster.alive or not caster.is_inside_tree():
 		return
 	var insight := caster.get_stat(Stats.Stat.INSIGHT)
-	caster.add_shield(Stats.scaled(shield, shield_insight_scaling, insight), shield_duration, caster.get_credit_id(), true)
+	caster.add_shield(Stats.scaled(shield, shield_insight_scaling, insight), shield_duration, caster.get_credit_id(), true, true)
 	caster.add_status(BurstStatus.new(Stats.scaled(hit_damage, hit_insight_scaling, insight), duration, caster.get_credit_id()))
 	KeepsakeVfx.pulse_glow(caster, "VfxGatlingBurst", GateRules.COLOR, duration)
 	caster.show_float_text("Overdrive", GateRules.LIGHT)

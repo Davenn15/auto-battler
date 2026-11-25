@@ -1,6 +1,6 @@
 class_name ShardGiftGambit
 extends Gambit
-## VE5TIBULE B: sends temporary Shards to nearby allies. An ally holding a Shard gets one
+## Vestibule B: sends temporary Shards to nearby allies. An ally holding a Shard gets one
 ## that combines with it, and the two become their keepsake on the spot; an ally without one
 ## gets a random Shard in a free slot. Everything given is taken back when combat ends.
 ## Allies who can combine are picked first, then the nearest.

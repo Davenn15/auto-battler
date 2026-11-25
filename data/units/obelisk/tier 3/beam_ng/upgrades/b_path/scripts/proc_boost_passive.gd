@@ -1,6 +1,6 @@
 class_name ProcBoostPassive
 extends Passive
-## BEAM.NG B: its continuous beams trigger once-per-attack effects (items, on-hit effects)
+## Beam B: its continuous beams trigger once-per-attack effects (items, on-hit effects)
 ## more often. Bonus 0.3 = 30% more often. Several add up.
 
 @export var bonus: float = 0.3

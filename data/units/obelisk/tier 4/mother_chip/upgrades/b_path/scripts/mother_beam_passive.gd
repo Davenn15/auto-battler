@@ -1,6 +1,6 @@
 class_name MotherBeamPassive
 extends Passive
-## MOTHER-CHIP B: her attacks become a continuous beam (MotherBeamStatus), and her Chips
+## Mother-Chip B: her attacks become a continuous beam (MotherBeamStatus), and her Chips
 ## beam her target alongside her. The beam deals more the lower its target's health.
 
 ## Seconds the beam charges up after switching targets before it deals damage.

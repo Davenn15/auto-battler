@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://s1w4u6lvptgy"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bujcte1v8dt63"]
 
 [ext_resource type="Resource" uid="uid://bfdo3yq5uo12e" path="res://data/units/sword-court/tier 3/trompero/upgrades/b_path/arcane_blades_gambit.tres" id="1_ghstt"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_kyifo"]
@@ -8,7 +8,8 @@
 
 [resource]
 script = ExtResource("1_kyifo")
-description = "New Gambit: Arcane Blades. Summons blades that orbit him and fire along with his attacks."
+upgrade_name = "Imbued"
+description = "New Gambit: Arcane Blades. Summons {blades_per_cast} blades that orbit him and fire along with his attacks for {blade_damage+blade_insight_scaling} Insight damage."
 gambit = ExtResource("1_ghstt")
 next_choices = Array[ExtResource("1_kyifo")]([ExtResource("3_v3omy"), ExtResource("4_7rma4")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

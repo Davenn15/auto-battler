@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_tc1f8")
-description = "His regeneration grows with his attributes."
+description = "His regeneration grows with his attributes: {scaling} per second for each point of Might, Insight and Celerity."
 passives = Array[ExtResource("2_4hha5")]([ExtResource("3_4hha5")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

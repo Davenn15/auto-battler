@@ -1,8 +1,7 @@
-[gd_resource type="Resource" script_class="BurstFirePassive" format=3]
+[gd_resource type="Resource" script_class="ChargeOnHitPassive" format=3]
 
-[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/passive/burst_fire_passive.gd" id="1"]
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/passive/charge_on_hit_passive.gd" id="1_psep8"]
 
 [resource]
-script = ExtResource("1")
-passive_name = "Burst Fire"
-description = "Each attack comes out as a burst of 3 shots, each dealing a third of the damage."
+script = ExtResource("1_psep8")
+description = "Attacks gain the Hit Effect: Vestibule gains {charge} Charge."

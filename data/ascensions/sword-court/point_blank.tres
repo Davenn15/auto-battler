@@ -14,7 +14,7 @@ shield_duration = 4.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Point Blank"
-description = "Crommel loses 2 range, but gains 40 Might, 40 Insight and 30 of each Ward, and a Shield of 30% of his max health for 4 seconds when he plays his Gambit."
+description = "Crommel loses {range_loss} range, but gains {might} Might, {insight} Insight and {might_ward} of each Ward, and a {shield_share%|maxhp|shield} Shield for {shield_duration|shieldtime} seconds when he plays his Gambit."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 might = 40.0

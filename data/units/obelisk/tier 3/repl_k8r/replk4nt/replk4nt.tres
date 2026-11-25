@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "REPLK4NT"
+display_name = "Replicant"
 summon_only = true
 tier = 3
 max_health = 175.0

@@ -5,6 +5,10 @@ extends Passive
 
 @export var per_stack: float = 0.01
 @export var max_stacks: int = 10
+## Might Empower: each stack makes the enemy take this much more again.
+@export var extra_taken_per_stack: float = 0.0
+## Celerity Ward Empower: each stack makes the enemy deal this much less again.
+@export var extra_guard_per_stack: float = 0.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
@@ -24,7 +28,7 @@ class Grudge extends Status:
 
 	func modify_incoming_damage(unit: BattleUnit, damage: float) -> float:
 		var mark := RevengeMark.find(unit.incoming_attacker, unit)
-		return damage * (1.0 - effect.per_stack * mark.stacks) if mark != null else damage
+		return damage * (1.0 - (effect.per_stack + effect.extra_guard_per_stack) * mark.stacks) if mark != null else damage
 
 	## Reduces damage, so Pure Damage skips it (see Status.reduces_damage).
 	func reduces_damage(_unit: BattleUnit) -> bool:
@@ -65,6 +69,6 @@ class RevengeMark extends Status:
 			for status in wearer.statuses:
 				if status is Grudge:
 					grudge = status
-			mark = RevengeMark.new(wearer, grudge.effect.per_stack if grudge != null else 0.01)
+			mark = RevengeMark.new(wearer, grudge.effect.per_stack + grudge.effect.extra_taken_per_stack if grudge != null else 0.01)
 			enemy.add_status(mark)
 		return mark

@@ -1,6 +1,6 @@
 class_name BarrageGambit
 extends Gambit
-## BAR.RAJ launches a barrage of missiles. Each one picks a random enemy within Range Cells,
+## Barrage launches a barrage of missiles. Each one picks a random enemy within Range Cells,
 ## follows it, and explodes on it, damaging every enemy within Blast Cells of where it lands.
 ## Damage per missile per enemy = Damage + Might Scaling x Might.
 ##   A2: more missiles.  A1: bigger blasts.

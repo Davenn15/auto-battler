@@ -9,5 +9,5 @@ might_scaling = 0.8
 range_cells = 3
 cone_angle = 45.0
 cast_time = 0.5
-description = "Fires an explosive shot in a cone at her target. Enemies closer to her take more damage."
+description = "Fires an explosive shot in a {cone_angle}-degree cone at her target, dealing {damage+might_scaling} damage. Enemies closer to her take more ({close_multiplier%} up close, {far_multiplier%} at {range_cells} cells)."
 metadata/_custom_type_script = "uid://clopy65v0opx"

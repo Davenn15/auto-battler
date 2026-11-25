@@ -6,29 +6,35 @@ extends Passive
 ## Insight as Insight damage (it never Wracks), so Ghost Strike has a Hit Effect to echo
 ## even when it's the unit's only one.
 
-@export var every: int = 3
+@export var every: int = 4
 @export var bolt_damage: float = 20.0
 @export var bolt_insight_scaling: float = 0.2
+## Might Empower: the bolt also scales with Might.
+@export var bolt_might_scaling: float = 0.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
-	unit.add_status(Echo.new(every, bolt_damage, bolt_insight_scaling))
+	unit.add_status(Echo.new(every, bolt_damage, bolt_insight_scaling, bolt_might_scaling))
 
 
 class Echo extends Status:
 	var every: int
 	var bolt_damage: float
 	var bolt_scaling: float
+	var bolt_might_scaling: float
 	var _count := 0
 	var _echo := false   # this attack is the one that echoes
 
-	func _init(p_every: int, p_bolt_damage: float, p_bolt_scaling: float) -> void:
+	func _init(p_every: int, p_bolt_damage: float, p_bolt_scaling: float, p_might_scaling: float = 0.0) -> void:
 		every = p_every
 		bolt_damage = p_bolt_damage
 		bolt_scaling = p_bolt_scaling
+		bolt_might_scaling = p_might_scaling
 
 	func get_hit_effect(unit: BattleUnit) -> HitEffect:
-		return BoltHit.new(unit, Stats.scaled(bolt_damage, bolt_scaling, unit.get_stat(Stats.Stat.INSIGHT)))
+		var damage := Stats.scaled(bolt_damage, bolt_scaling, unit.get_stat(Stats.Stat.INSIGHT))
+		damage = Stats.scaled(damage, bolt_might_scaling, unit.get_stat(Stats.Stat.MIGHT))
+		return BoltHit.new(unit, damage)
 
 	func on_attack(_unit: BattleUnit) -> void:
 		_count += 1

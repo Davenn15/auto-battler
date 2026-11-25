@@ -1,7 +1,28 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://dmuf8esptsx7j"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://jd0108sb3y4b" path="res://data/keepsakes/combined/quickscar/might_ward__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/quickscar/might_ward__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_scobs"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_kkm7h"]
+[ext_resource type="Script" path="res://scripts/grit_passive.gd" id="4_rvia6"]
+
+[sub_resource type="Resource" id="Resource_ikgaw"]
+script = ExtResource("4_rvia6")
+amount = 15.0
+
+[sub_resource type="Resource" id="Resource_lcima"]
+script = ExtResource("2_scobs")
+shard = 1
+description = "You have {extra.amount}% Grit."
+extra_effects = Array[ExtResource("3_kkm7h")]([SubResource("Resource_ikgaw")])
+
+[sub_resource type="Resource" id="Resource_0dhyp"]
+script = ExtResource("2_scobs")
+shard = 6
+description = "You have {share%} Scar."
+effect_overrides = {
+"share": 0.3
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -11,5 +32,6 @@ second_shard = 6
 might_ward = 35.0
 health = 200.0
 effect = ExtResource("2_effect")
-description = "Whenever you take damage, you Heal for 15% of it after a 3 second delay."
+description = "You have {share%} Scar."
+empowerments = Array[ExtResource("2_scobs")]([SubResource("Resource_lcima"), SubResource("Resource_0dhyp")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

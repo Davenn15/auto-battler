@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Cluster"
-description = "Gains 6 Celerity for each ally within 2 cells (its duplicates count)."
+description = "Gains {celerity_per_ally} Celerity for each ally within {radius_cells} cells (its duplicates count)."

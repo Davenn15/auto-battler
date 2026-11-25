@@ -6,24 +6,24 @@
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 100 Health."
+description = "PLACEHOLDER. All your units gain {health} Health."
 health = 100.0
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 175 Health."
+description = "PLACEHOLDER. All your units gain {health} Health."
 tier = 2
 health = 175.0
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 250 Health."
+description = "PLACEHOLDER. All your units gain {health} Health."
 tier = 3
 health = 250.0
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "PLACEHOLDER. All your units gain 350 Health."
+description = "PLACEHOLDER. All your units gain {health} Health."
 tier = 4
 health = 350.0
 

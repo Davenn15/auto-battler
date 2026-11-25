@@ -6,4 +6,4 @@
 script = ExtResource("1")
 cast_voltage_share = 0.1
 passive_name = "Charged Grid"
-description = "Whenever a unit in its aura casts its Gambit, BATR.EE gains Voltage equal to 10% of that unit's max Charge."
+description = "Whenever a unit in its aura casts its Gambit, Battery gains Voltage equal to {cast_voltage_share%} of that unit's max Charge."

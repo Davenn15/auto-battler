@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The railgun shot also deals 20% of its target's max health."
+description = "The railgun shot also deals {max_health_share%} of its target's max health."
 gambit_overrides = Dictionary[String, float]({
 "max_health_share": 0.2
 })

@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Jamming"
-description = "The pulse also cuts Charge gain by 40% for 5 seconds. Enemies that were targeting CTRL(R) gain no Charge at all for that time."
+description = "The pulse also cuts Charge gain by {charge_cut%} for {duration} seconds. Enemies that were targeting Controller gain no Charge at all for that time."
 gambit_bonuses = Dictionary[String, float]({
 "charge_cut": 0.4
 })

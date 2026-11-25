@@ -1,7 +1,25 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://bmegoou70suqa"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/momentum/celerity__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_tuo6v"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_jx1kh"]
+
+[sub_resource type="Resource" id="Resource_5cnxi"]
+script = ExtResource("2_tuo6v")
+shard = 2
+description = "You gain {flat} Celerity above the threshold."
+effect_overrides = {
+"flat": 30.0
+}
+
+[sub_resource type="Resource" id="Resource_ewqdt"]
+script = ExtResource("2_tuo6v")
+shard = 6
+description = "Regeneration of {regen_share%|maxhp} above the threshold."
+effect_overrides = {
+"regen_share": 0.03
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -11,5 +29,6 @@ second_shard = 6
 celerity = 20.0
 health = 200.0
 effect = ExtResource("2_effect")
-description = "You gain 25 Celerity while above 50% of your Maximum Health."
+description = "While above {threshold%} of your Maximum Health, you gain {flat} Celerity and Regeneration of {regen_share%|maxhp} per second."
+empowerments = Array[ExtResource("2_tuo6v")]([SubResource("Resource_5cnxi"), SubResource("Resource_ewqdt")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

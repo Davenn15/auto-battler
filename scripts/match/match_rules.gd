@@ -628,7 +628,10 @@ static func buy_keepsake_offer(player: PlayerState) -> bool:
 # ---------- Items ----------
 
 static func sell_value(item: Keepsake) -> int:
-	return SHARD_SELL if item.is_shard else floori(item.get_reserve_value() * KEEPSAKE_SELL_SHARE)
+	if item.is_shard:
+		return SHARD_SELL
+	var value := floori(item.base_keepsake().get_reserve_value() * KEEPSAKE_SELL_SHARE)
+	return value + (SHARD_SELL if item.is_empowered() else 0)   # empowered: its Shard too
 
 
 ## Sells a Shard or keepsake from the inventory (keepsakes on a unit stay on it).
@@ -666,12 +669,96 @@ static func combine(player: PlayerState, index_a: int, index_b: int) -> bool:
 	return true
 
 
+# ---------- Keepsake Empowering ----------
+
+## Players can empower Keepsakes from this round on (round 9 is the second Neutral
+## Encounter, so the first chance is the planning before round 10's combat).
+const EMPOWER_ROUND := 9
+
+
+static func empowering_open(round_number: int) -> bool:
+	return round_number >= EMPOWER_ROUND
+
+
+## How many empowered Keepsakes an army may own in round `round_number` (on its units and
+## loose): none before EMPOWER_ROUND, then 1, plus 1 after each later Neutral Encounter.
+static func empowered_limit(round_number: int) -> int:
+	if not empowering_open(round_number):
+		return 0
+	var limit := 1
+	for r in range(EMPOWER_ROUND + 1, round_number + 1):
+		if is_encounter_round(r) and encounter_kind(encounter_number(r)) == EncounterKind.NEUTRAL:
+			limit += 1
+	return limit
+
+
+## Empowered Keepsakes the player owns: on its units and in its inventory.
+static func empowered_owned(player: PlayerState) -> int:
+	var count := 0
+	for unit in player.units:
+		count += unit.empowered_count()
+	for item in player.inventory:
+		if item != null and item.is_empowered():
+			count += 1
+	return count
+
+
+## The empowered Keepsake a finished Keepsake and a Shard make (in either order), or null.
+## Rules about the round and the unit wearing it are checked by can_empower.
+static func empower_result(a: Keepsake, b: Keepsake) -> Keepsake:
+	if a == null or b == null or a.is_shard == b.is_shard:
+		return null
+	var keepsake := b if a.is_shard else a
+	var shard := a if a.is_shard else b
+	return keepsake.empowered(shard.first_shard)
+
+
+## True if `keepsake` (worn by `wearer`, or null if it's loose) may be empowered by `shard`
+## in round `round_number`. The wearer may carry only so many empowered Keepsakes, and the
+## army only empowered_limit in all (`player`; null skips that check).
+static func can_empower(keepsake: Keepsake, shard: Keepsake, wearer: ArmyUnit, round_number: int, player: PlayerState = null) -> bool:
+	if not empowering_open(round_number) or empower_result(keepsake, shard) == null:
+		return false
+	if player != null and empowered_owned(player) >= empowered_limit(round_number):
+		return false
+	return wearer == null or wearer.empowered_count() < wearer.empowered_cap()
+
+
+## Empowers `keepsake` with `shard`, both found in the player's inventory or on their units.
+## The Shard is used up; the empowered copy takes the Keepsake's place. Returns that copy,
+## or null if it couldn't be done.
+static func empower(player: PlayerState, keepsake: Keepsake, shard: Keepsake, round_number: int) -> Keepsake:
+	var wearer := wearer_of(player, keepsake)
+	if not can_empower(keepsake, shard, wearer, round_number, player):
+		return null
+	if not player.inventory.has(shard):
+		return null   # only loose Shards: one on a unit comes off first
+	var result := empower_result(keepsake, shard)
+	if wearer != null:
+		wearer.items[wearer.items.find(keepsake)] = result
+	else:
+		var at := player.inventory.find(keepsake)
+		if at == -1:
+			return null
+		player.inventory[at] = result
+	player.inventory.remove_at(player.inventory.find(shard))
+	return result
+
+
+## The unit carrying `item`, or null if none does.
+static func wearer_of(player: PlayerState, item: Keepsake) -> ArmyUnit:
+	for unit in player.units:
+		if unit.items.has(item):
+			return unit
+	return null
+
+
 ## Moves an item from the inventory onto a unit. Keepsakes stay on for good.
 static func equip(player: PlayerState, unit: ArmyUnit, index: int) -> bool:
 	if index < 0 or index >= player.inventory.size() or unit.items.size() >= unit.keepsake_slots():
 		return false
-	if not Keepsake.allowed_with(player.inventory[index], unit.items):
-		return false   # never two of the same completed Keepsake on one unit
+	if not unit.accepts(player.inventory[index]):
+		return false   # never two of the same completed Keepsake, nor too many empowered ones
 	unit.items.append(player.inventory[index])
 	player.inventory.remove_at(index)
 	return true

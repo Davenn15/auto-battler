@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://dqcbwj2ir563c"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://b20xslexte4ql"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_ylaip"]
 [ext_resource type="Resource" uid="uid://f80owoq1pait" path="res://data/units/sword-court/tier 1/garth/upgrades/a_path/garth_a1.tres" id="2_u1bc4"]
@@ -8,7 +8,8 @@
 
 [resource]
 script = ExtResource("1_ylaip")
-description = "Every shield Garth receives is bigger."
+upgrade_name = "Stalwart"
+description = "Every shield Garth receives is {bonus%} bigger."
 passives = Array[ExtResource("4_h2w64")]([ExtResource("5_ywlc7")])
 next_choices = Array[ExtResource("1_ylaip")]([ExtResource("2_u1bc4"), ExtResource("3_x8b10")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

@@ -80,7 +80,7 @@ func _on_carrier_died(dead: BattleUnit) -> void:
 	if heir == null:
 		return
 	KeepsakeVfx.virus_jump(dead.global_position, heir)
-	# MOTHER-CHIP's A2 makes every stack jump, not just the usual share.
+	# Mother-Chip's A2 makes every stack jump, not just the usual share.
 	var share := 1.0 if VirusRotPassive.full_transfer_against(dead) else SETTINGS.transfer_share
 	infect(heir, maxi(floori(stacks * share), 1), credit_id)
 

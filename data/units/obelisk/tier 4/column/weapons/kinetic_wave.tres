@@ -7,4 +7,4 @@ script = ExtResource("1")
 timer_color = Color(0.35, 0.85, 1, 1)
 interval = 6.0
 passive_name = "Kinetic Wave"
-description = "Every 6 seconds: a wave along the line that hits the most enemies (4 cells, 1.5 cells wide), dealing 30 + 0.4x Might damage and stunning each for 1 second."
+description = "Every {interval} seconds: a wave along the line that hits the most enemies ({length_cells} cells, {width_cells} cells wide), dealing {damage+might_scaling} Might damage and stunning each for {stun_time|cc} seconds."

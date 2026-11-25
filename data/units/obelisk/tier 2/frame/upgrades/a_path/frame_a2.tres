@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Whenever FRAME dodges, it gains a Shield of 50% of the damage it would have taken, for 4 seconds."
+description = "Whenever Frame dodges, it gains a Shield of {share%} of the damage it would have taken, for {passive.duration} seconds."
 passives = Array[ExtResource("2")]([ExtResource("3")])

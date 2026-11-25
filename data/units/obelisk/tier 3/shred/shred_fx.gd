@@ -1,6 +1,6 @@
 class_name ShredFx
 extends RefCounted
-## SHRED's look: a slightly pinkish coral red.
+## Shred's look: a slightly pinkish coral red.
 
 const COLOR := Color(0.97, 0.42, 0.46)
 const LIGHT := Color(1.0, 0.72, 0.72)

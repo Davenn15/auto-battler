@@ -6,4 +6,4 @@
 script = ExtResource("1")
 step = 10.0
 passive_name = "Scent of Blood"
-description = "+1% Wrack Chance for every 50 Bleed on enemies within his attack range (up to +30%)."
+description = "+{per_step%} Wrack Chance for every {step} Bleed on enemies within his attack range (up to +{cap%})."

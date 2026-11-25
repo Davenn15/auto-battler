@@ -7,4 +7,4 @@ script = ExtResource("1")
 shield = 450.0
 gambit_name = "Plant"
 cast_time = 0.5
-description = "Plants herself where she stands for 4 seconds, gaining a 300 Shield and +40 to all three Wards. She can't move while planted."
+description = "Plants herself where she stands for {duration|shieldtime} seconds, gaining a {shield|shield} Shield and +{ward_bonus} to all three Wards. She can't move while planted."

@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_tsu3m")
-description = "Adds a Jolting Note: gives Wrack Chance to the nearby ally who has dealt the most damage."
+description = "Adds a Jolting Note: every {every} attacks, gives +{amount%} Wrack Chance for {duration} seconds to the nearby ally who has dealt the most damage."
 passives = Array[ExtResource("2_e5f67")]([ExtResource("3_e5f67")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

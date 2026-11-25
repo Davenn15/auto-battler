@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_0utdy")
 max_bonus_regen = 35.0
-description = "The lower Merribold's health, the faster he regenerates."
+description = "The lower Merribold's health, the faster he regenerates: up to +{max_bonus_regen} health per second."
 metadata/_custom_type_script = "uid://dsdg5fwt82r75"

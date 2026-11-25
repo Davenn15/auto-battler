@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Toll"
-description = "Whenever an ally dies, gains 20 Charge."
+description = "Whenever an ally dies, gains {charge} Charge."

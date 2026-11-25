@@ -58,7 +58,7 @@ func execute(caster: BattleUnit) -> void:
 	var stun := landing_stun * caster.wrack_effect_multiplier(Stats.EffectKind.CONTROL) if landing_stun > 0.0 else 0.0
 	var bag := _find_bag(caster)
 	if bag != null:
-		bag.heal(bag.max_health * recast_heal_fraction, caster.get_instance_id())
+		bag.heal(bag.max_health * recast_heal_fraction, caster.get_instance_id(), true, true)
 		await bag.dash_to(spot["cell"], flight_time)   # leap to the new spot
 	else:
 		var first_throw := not _has_thrown(caster)

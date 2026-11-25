@@ -4,10 +4,11 @@
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/rowdy_gambit.tres" id="2"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/brogaine_b1.tres" id="3"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 3/brogaine/upgrades/b_path/brogaine_b2.tres" id="4"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="5_jxgfg"]
 
 [resource]
 script = ExtResource("1")
 upgrade_name = "Rowdy"
-description = "New Gambit: Called Out. Singles out the enemy with the most max health and charges at it. For 5 seconds, Brogaine and that enemy can only attack each other, can't gain Charge, and take 75% less damage from anyone else. Brogaine gains +40 Celerity for the duel."
+description = "New Gambit: Called Out. Singles out the enemy with the most max health and charges at it. For {duration} seconds, Brogaine and that enemy can only attack each other, can't gain Charge, and take {reduction%} less damage from anyone else. Brogaine gains +{celerity_bonus} Celerity for the duel."
 gambit = ExtResource("2")
 next_choices = Array[ExtResource("1")]([ExtResource("3"), ExtResource("4")])

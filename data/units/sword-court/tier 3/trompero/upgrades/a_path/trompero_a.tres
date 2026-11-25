@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://bldl0lw287n8g"]
+[gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c2wpyo0h7dwnf"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_vgg6c"]
 [ext_resource type="Resource" uid="uid://drcljvl0scfme" path="res://data/units/sword-court/tier 3/trompero/upgrades/a_path/trompero_a1.tres" id="2_7c2f4"]
@@ -7,7 +7,8 @@
 
 [resource]
 script = ExtResource("1_vgg6c")
-description = "The ring is bigger and can Wrack."
+upgrade_name = "Sorcerous"
+description = "The ring is bigger ({radius_cells} cells) and can Wrack."
 next_choices = Array[ExtResource("1_vgg6c")]([ExtResource("2_7c2f4"), ExtResource("3_yb7m6")])
 gambit_bonuses = Dictionary[String, float]({
 "radius_cells": 1.0

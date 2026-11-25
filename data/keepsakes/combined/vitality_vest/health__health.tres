@@ -1,7 +1,17 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://c3mths44naewa"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/vitality_vest/health__health_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_n3he5"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_w0vec"]
+
+[sub_resource type="Resource" id="Resource_mc648"]
+script = ExtResource("2_n3he5")
+shard = 6
+description = "Regeneration increased by {share%|maxhp}."
+effect_overrides = {
+"share": 0.025
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -10,5 +20,6 @@ first_shard = 6
 second_shard = 6
 health = 400.0
 effect = ExtResource("2_effect")
-description = "Your Regeneration is increased by 1.5% of your Maximum Health."
+description = "Your Regeneration is increased by {share%|maxhp}."
+empowerments = Array[ExtResource("2_n3he5")]([SubResource("Resource_mc648")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

@@ -7,4 +7,4 @@ script = ExtResource("1")
 projectile_slow = 0.1
 gambit_name = "Warding"
 cast_time = 0.5
-description = "Blows a protective bubble around himself that stays where it was played for a while. Allies inside gain Wards, and enemy projectiles inside move more slowly."
+description = "Blows a protective bubble {radius_cells} cells wide around himself that stays where it was played for {duration} seconds. Allies inside gain {ward_bonus} Wards, and enemy projectiles inside move at {projectile_slow%} speed."

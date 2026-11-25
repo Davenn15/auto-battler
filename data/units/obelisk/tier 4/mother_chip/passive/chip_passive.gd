@@ -1,6 +1,6 @@
 class_name ChipPassive
 extends Passive
-## MOTHER-CHIP's passive. Her attacks give a stack of Mono-Virus, and she's orbited by
+## Mother-Chip's passive. Her attacks give a stack of Mono-Virus, and she's orbited by
 ## Chips: untargetable drones that shoot her target every time she attacks, each for Chip
 ## Share of her attack. With her B path (MotherBeamPassive) her attacks are a beam, and the
 ## Chips beam her target alongside her instead (see MotherBeamStatus).
@@ -19,7 +19,7 @@ func on_battle_start(unit: BattleUnit) -> void:
 	unit.add_status(ChipStatus.new(self))
 
 
-## MOTHER-CHIP's Chips, or null.
+## Mother-Chip's Chips, or null.
 static func of(unit: BattleUnit) -> ChipStatus:
 	if unit == null:
 		return null
@@ -78,7 +78,7 @@ class ChipStatus extends Status:
 			unit.get_parent().add_child(shot)
 			shot.global_position = unit.global_position + chip_offset(i, unit)
 
-	## Where Chip `i` is, relative to MOTHER-CHIP: rings of orbiting Chips, more rings as
+	## Where Chip `i` is, relative to Mother-Chip: rings of orbiting Chips, more rings as
 	## she gains more.
 	func chip_offset(i: int, unit: BattleUnit) -> Vector2:
 		var time := _time   # battle time, so shots start from the same spot on every machine

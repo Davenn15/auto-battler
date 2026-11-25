@@ -32,6 +32,43 @@ func keepsake_slots() -> int:
 	return slots
 
 
+## Keepsake Empowering: how many empowered Keepsakes the unit may carry. One, plus any its
+## passives (and its upgrades') or Ascensions allow.
+func empowered_cap() -> int:
+	var cap := 1
+	for ascension in ascensions:
+		if ascension != null:
+			cap += ascension.empowered_keepsakes
+	for passive in _passives():
+		if passive != null:
+			cap += passive.extra_empowered_keepsakes()
+	return maxi(cap, 0)
+
+
+func empowered_count() -> int:
+	return items.filter(func(k): return k != null and k.is_empowered()).size()
+
+
+## The unit's passives: its own and those of the upgrades on its path.
+func _passives() -> Array:
+	var list: Array = data.passives.duplicate()
+	var choices := data.upgrades
+	for index in path:
+		if index < 0 or index >= choices.size():
+			break
+		list.append_array(choices[index].passives)
+		choices = choices[index].next_choices
+	return list
+
+
+## True if `item` may go on this unit, slots aside: never two of the same completed
+## Keepsake, and no more empowered Keepsakes than empowered_cap.
+func accepts(item: Keepsake) -> bool:
+	if not Keepsake.allowed_with(item, items):
+		return false
+	return item == null or not item.is_empowered() or empowered_count() < empowered_cap()
+
+
 func level() -> int:
 	return path.size()
 
@@ -50,7 +87,7 @@ func next_buff_cost() -> int:
 
 
 func display_name() -> String:
-	return data.display_name.capitalize()
+	return data.get_title()
 
 
 ## "Garth A1": name and path.
@@ -76,7 +113,7 @@ func copy() -> ArmyUnit:
 func to_dict() -> Dictionary:
 	return {
 		"unit": data.resource_path, "path": Array(path), "placed": placed,
-		"cell": [cell.x, cell.y], "items": items.map(func(k): return k.resource_path), "buffs": buffs,
+		"cell": [cell.x, cell.y], "items": items.map(func(k): return k.to_ref()), "buffs": buffs,
 		"ascensions": ascensions_to_array(ascensions),
 		"match_stats": _stats_to_dict(match_stats), "glory": glory,
 	}
@@ -89,7 +126,7 @@ static func from_dict(d: Dictionary) -> ArmyUnit:
 	unit.placed = d["placed"]
 	unit.cell = Vector2i(int(d["cell"][0]), int(d["cell"][1]))
 	for item_path in d["items"]:
-		unit.items.append(load(item_path) as Keepsake)
+		unit.items.append(Keepsake.from_ref(item_path))
 	unit.buffs = int(d["buffs"])
 	unit.ascensions = ascensions_from_array(d.get("ascensions", []))
 	var stats: Dictionary = d.get("match_stats", {})

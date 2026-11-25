@@ -1,17 +1,17 @@
 class_name FocusBeamGambit
 extends Gambit
-## BEAM.NG B: channels a damaging beam at the enemy in range that the most of its allies are
+## Beam B: channels a damaging beam at the enemy in range that the most of its allies are
 ## attacking (ties go to the nearest). Over each attack interval the beam deals Damage Share
 ## of a normal attack, with its passive's distance bonus, and triggers on-hit effects like
 ## its normal beam does. While the beam is on it, allied attacks on that enemy also deal
 ## Mark Share of its max health. If the target dies before the beam ends, it moves on to the
 ## next best target (picked the same way) for the time left, taking the mark with it.
-##   B1: each target that dies during the beam gives BEAM.NG a burst of Charge.
+##   B1: each target that dies during the beam gives Beam a burst of Charge.
 ##   B2: the beam ricochets to one more nearby enemy.
-## A Beam (see Beam): BEAM.NG's Beam settings add range to the first target, speed up the
+## A Beam (see Beam): Beam's Beam settings add range to the first target, speed up the
 ## damage, and add extra ricochets (at their reduced share) after its own.
 
-## Seconds BEAM.NG channels the beam.
+## Seconds Beam channels the beam.
 @export var duration: float = 4.0
 ## Share of a normal attack each attack interval of beam deals (1.5 = one and a half).
 @export var damage_share: float = 1.5
@@ -40,7 +40,7 @@ func execute(caster: BattleUnit) -> void:
 	var mark := FocusMarkStatus.new(caster, mark_share)
 	target.add_status(mark)
 	var links := BeamLinks.new(caster)
-	var fan := Beam.FanLines.new()   # extra Beams (BEAM.NG's hero Ascension)
+	var fan := Beam.FanLines.new()   # extra Beams (Beam's hero Ascension)
 	var beams := {}   # enemy instance id -> its BeamngBeamStatus (used as a damage helper)
 	var kills := 0
 	var elapsed := 0.0
@@ -147,7 +147,7 @@ func _alive(unit) -> bool:
 	return is_instance_valid(unit) and unit.alive
 
 
-## On the Focus Beam's target: BEAM.NG's allies' attacks on it deal a share of its max
+## On the Focus Beam's target: Beam's allies' attacks on it deal a share of its max
 ## health on top.
 class FocusMarkStatus extends Status:
 	var caster   # untyped: may be freed

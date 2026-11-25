@@ -13,7 +13,7 @@ range_cells = 2
 [resource]
 script = ExtResource("1")
 ascension_name = "Bloodline"
-description = "While Cerceval is alive, whenever an enemy dies with Bleed left, 50% of it passes to that enemy's nearest ally within 2 hexes."
+description = "While Cerceval is alive, whenever an enemy dies with Bleed left, {share%} of it passes to that enemy's nearest ally within {range_cells} hexes."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

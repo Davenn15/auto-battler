@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="VoltageBoostPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/a_path/scripts/voltage_boost_passive.gd" id="1_gp4br"]
+
+[resource]
+script = ExtResource("1_gp4br")
+passive_name = "Amplified"
+description = "All Voltage Vestibule gains is {bonus%} higher."

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The followed ally has 50 Immovability while FRAME follows it."
+description = "The followed ally has {immovability} Immovability while Frame follows it."
 gambit_overrides = Dictionary[String, float]({
 "immovability": 50.0
 })

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_lk0fj")
-description = "Lullaby reaches farther."
+description = "Lullaby reaches {length_cells} cells."
 gambit_bonuses = Dictionary[String, float]({
 "length_cells": 1.0
 })

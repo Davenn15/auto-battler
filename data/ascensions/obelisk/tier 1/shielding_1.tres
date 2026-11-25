@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 ascension_name = "Obelisk Shielding"
-description = "PLACEHOLDER. All your units gain 10 Insight Ward and 10 Celerity Ward."
+description = "PLACEHOLDER. All your units gain {insight_ward} Insight Ward and {celerity_ward} Celerity Ward."
 tier = 1
 insight_ward = 10.0
 celerity_ward = 10.0

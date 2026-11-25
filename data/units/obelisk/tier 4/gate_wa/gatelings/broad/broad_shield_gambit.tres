@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Bulwark"
 cast_time = 0.3
-description = "Shields the most hurt nearby ally and every ally next to it for 4 seconds: 120 + 80% of Insight."
+description = "Shields the most hurt ally within {range_cells} cells and every ally next to it for {shield+shield_insight_scaling|shield} for {duration|shieldtime} seconds."

@@ -3,12 +3,13 @@
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 3/brogaine/upgrades/a_path/brogaine_a1.tres" id="2"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 3/brogaine/upgrades/a_path/brogaine_a2.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="4_y5wlr"]
 
 [resource]
 script = ExtResource("1")
 upgrade_name = "Glorious"
 description = "The first time Brogaine uses Flex each combat, he gains Glory."
+next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])
 gambit_overrides = Dictionary[String, float]({
 "first_cast_glory": 1.0
 })
-next_choices = Array[ExtResource("1")]([ExtResource("2"), ExtResource("3")])

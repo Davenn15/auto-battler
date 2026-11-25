@@ -1,9 +1,9 @@
 class_name GateSequenceGambit
 extends Gambit
-## GATE.W(A)'s base Gambit: each of its first casts summons a different Gateling beside it,
+## Gateway's base Gambit: each of its first casts summons a different Gateling beside it,
 ## in order (Broad, then two Slims, then Gatling, and with A1 a Chosen). Casts after the
 ## last one summon nothing; like every cast they still heal and boost its Gatelings
-## (GatePassive). Each Gateling has its own stats plus a share of GATE.W(A)'s.
+## (GatePassive). Each Gateling has its own stats plus a share of Gateway's.
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 
@@ -13,9 +13,9 @@ const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 @export var counts: Array[int] = [1, 2, 1, 1]
 ## How many of the steps it uses. A1 adds one.
 @export var casts: int = 3
-## Share of GATE.W(A)'s max health each Gateling adds to its own (0.2 = 20%).
+## Share of Gateway's max health each Gateling adds to its own (0.2 = 20%).
 @export_range(0.0, 1.0, 0.05) var health_share: float = 0.2
-## Share of GATE.W(A)'s attributes and wards each Gateling adds to its own.
+## Share of Gateway's attributes and wards each Gateling adds to its own.
 @export_range(0.0, 2.0, 0.05) var stat_share: float = 0.3
 
 const SHARED_STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY,
@@ -39,7 +39,7 @@ func execute(caster: BattleUnit) -> void:
 		caster.show_float_text(profile.display_name if cells.size() == 1 else "%s x%d" % [profile.display_name, cells.size()], GateRules.LIGHT)
 
 
-## Casts so far this battle, kept on GATE.W(A)'s passive status (cleared every battle).
+## Casts so far this battle, kept on Gateway's passive status (cleared every battle).
 static func _casts_done(caster: BattleUnit) -> int:
 	for status in caster.statuses:
 		if status is GatePassive.GateStatus:

@@ -8,4 +8,4 @@ damage = 120.0
 might_scaling = 0.6
 gambit_name = "Bladehook"
 cast_time = 0.5
-description = "Throws his bladehook at the farthest enemy within 4 cells, dealing damage, dragging it 2 cells closer and stunning it briefly."
+description = "Throws his bladehook at the farthest enemy within {range_cells} cells, dealing {damage+might_scaling} damage, dragging it {pull_cells} cells closer and stunning it for {stun_duration|cc} seconds."

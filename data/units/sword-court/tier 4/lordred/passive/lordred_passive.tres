@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_0w7qu")
 max_bonus = 75.0
-description = "Lordred gains Might, Insight and Celerity as his health falls."
+description = "Lordred gains Might, Insight and Celerity as his health falls, up to +{max_bonus} each."
 metadata/_custom_type_script = "uid://cdfg2v65k6x30"

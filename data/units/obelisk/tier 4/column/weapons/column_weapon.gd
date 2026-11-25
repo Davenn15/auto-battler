@@ -1,9 +1,9 @@
 class_name ColumnWeapon
 extends Passive
-## One of COLUMN's weapons. Each weapon is a passive with its own attack timer, so an
+## One of Column's weapons. Each weapon is a passive with its own attack timer, so an
 ## upgrade adds a weapon by adding its passive. The timer runs at Interval seconds at
-## normal attack speed, and faster or slower with COLUMN's Celerity, the same way normal
-## attacks do. Weapons rest while COLUMN is stunned or Phased.
+## normal attack speed, and faster or slower with Column's Celerity, the same way normal
+## attacks do. Weapons rest while Column is stunned or Phased.
 ## Subclasses override fire(); continuous weapons (beams) override make_status() instead.
 
 const COLOR := Color(0.62, 1.0, 0.2)   # lime green
@@ -11,7 +11,7 @@ const LIGHT := Color(0.85, 1.0, 0.6)
 
 ## Seconds between shots at normal attack speed (100 Celerity).
 @export var interval: float = 3.0
-## The colour of this weapon's timer bar on COLUMN's plate (one thin bar per timed weapon,
+## The colour of this weapon's timer bar on Column's plate (one thin bar per timed weapon,
 ## filling as it winds up; Beams and the Gatling Cannon have none).
 @export var timer_color: Color = COLOR
 
@@ -29,17 +29,17 @@ func fire(_unit: BattleUnit) -> bool:
 	return false
 
 
-## How much COLUMN's attack speed stretches or shrinks a timer (0.5 = twice as fast).
+## How much Column's attack speed stretches or shrinks a timer (0.5 = twice as fast).
 static func speed_scale(unit: BattleUnit) -> float:
 	return unit.get_attack_cooldown() / Stats.BASE_ATTACK_COOLDOWN
 
 
-## True while COLUMN can use its weapons: in combat, alive, not stunned or Phased.
+## True while Column can use its weapons: in combat, alive, not stunned or Phased.
 static func can_act(unit: BattleUnit) -> bool:
 	return unit.active and unit.alive and unit._stunned_time <= 0.0 and not PhaseStatus.is_phased(unit)
 
 
-## Living, targetable enemies within `range_cells` of COLUMN, nearest first.
+## Living, targetable enemies within `range_cells` of Column, nearest first.
 static func enemies_in_range(unit: BattleUnit, range_cells: int) -> Array[BattleUnit]:
 	var result: Array[BattleUnit] = []
 	for node in unit.get_tree().get_nodes_in_group("units"):
@@ -51,7 +51,7 @@ static func enemies_in_range(unit: BattleUnit, range_cells: int) -> Array[Battle
 	return result
 
 
-## The living ally (not COLUMN, not out of combat) with the lowest share of its max health
+## The living ally (not Column, not out of combat) with the lowest share of its max health
 ## within `range_cells`, or null. With `hurt_only`, only allies below full health.
 static func lowest_ally(unit: BattleUnit, range_cells: int, hurt_only: bool) -> BattleUnit:
 	var best: BattleUnit = null
@@ -70,7 +70,7 @@ static func lowest_ally(unit: BattleUnit, range_cells: int, hurt_only: bool) -> 
 
 
 ## For weapons that fire in a straight line (A1's wave, B2's laser): the direction, in the
-## world (as from cell_to_world), of the line from COLUMN that hits the most enemies within `length_cells`
+## world (as from cell_to_world), of the line from Column that hits the most enemies within `length_cells`
 ## (aimed at each enemy in reach in turn). Vector2.ZERO if no enemy is in reach.
 static func best_line(unit: BattleUnit, length_cells: int, width_cells: float = 1.1) -> Vector2:
 	var best := Vector2.ZERO
@@ -84,7 +84,7 @@ static func best_line(unit: BattleUnit, length_cells: int, width_cells: float = 
 	return best
 
 
-## Living, targetable enemies on the line from COLUMN along `dir` (world space, as from cell_to_world), up to
+## Living, targetable enemies on the line from Column along `dir` (world space, as from cell_to_world), up to
 ## `length_cells` long and `width_cells` wide (1.1 = a little over one cell).
 static func enemies_on_line(unit: BattleUnit, dir: Vector2, length_cells: int, width_cells: float = 1.1) -> Array[BattleUnit]:
 	var result: Array[BattleUnit] = []

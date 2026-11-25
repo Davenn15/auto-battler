@@ -91,7 +91,7 @@ func _max_selected() -> void:
 	while unit.upgrade_path.size() < MatchRules.max_level(unit.data):
 		unit.upgrade_path.append(0)
 	unit.refresh_setup()
-	_status.text = "%s is now %s." % [unit.data.display_name.capitalize(), RandomTeams.path_label(unit.upgrade_path)]
+	_status.text = "%s is now %s." % [unit.data.get_title(), RandomTeams.path_label(unit.upgrade_path)]
 
 
 func _give() -> void:
@@ -103,11 +103,11 @@ func _give() -> void:
 		var as_army := ArmyUnit.new(unit.data)
 		as_army.path.assign(unit.upgrade_path)
 		if not ascension.can_pick(as_army):
-			_status.text = "%s can't take %s." % [unit.data.display_name.capitalize(), ascension.get_display_name()]
+			_status.text = "%s can't take %s." % [unit.data.get_title(), ascension.get_display_name()]
 			return
 		unit.ascensions.append(ascension)
 		unit.refresh_setup()
-		_status.text = "%s gave %s." % [ascension.get_display_name(), unit.data.display_name.capitalize()]
+		_status.text = "%s gave %s." % [ascension.get_display_name(), unit.data.get_title()]
 		return
 	for node in unit.get_tree().get_nodes_in_group("units"):
 		var ally := node as BattleUnit

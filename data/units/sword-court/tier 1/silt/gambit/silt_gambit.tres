@@ -7,4 +7,4 @@ script = ExtResource("1")
 celerity = 25.0
 gambit_name = "Gambit"
 cast_time = 0.5
-description = "Gains 25 Celerity for the rest of combat."
+description = "Gains {celerity} Celerity for the rest of combat."

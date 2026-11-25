@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="SegGrudgePassive" format=3 uid="uid://u8a8hewsipdj"]
-
-[ext_resource type="Script" uid="uid://ccxsiiov8a4wu" path="res://data/units/obelisk/tier 4/seg_fault/passive/grudge_passive.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-share = 0.05
-passive_name = "Core Dump"
-description = "SEG.FAULT's attacks deal bonus Pure Damage equal to 2% of the damage its target has dealt this combat."

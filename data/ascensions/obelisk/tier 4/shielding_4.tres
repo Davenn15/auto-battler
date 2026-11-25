@@ -7,7 +7,7 @@
 script = ExtResource("1")
 empowers = ExtResource("empowers_prev")
 ascension_name = "Obelisk Placeholder 4D"
-description = "PLACEHOLDER. All your units gain 30 Insight Ward and 30 Celerity Ward."
+description = "PLACEHOLDER. All your units gain {insight_ward} Insight Ward and {celerity_ward} Celerity Ward."
 tier = 4
 insight_ward = 30.0
 celerity_ward = 30.0

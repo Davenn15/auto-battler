@@ -1,12 +1,11 @@
 [gd_resource type="Resource" script_class="HealthThresholdStatEffect" format=3]
 
-[ext_resource type="Script" uid="uid://dv1cv2m4fbawt" path="res://data/keepsakes/effects/health_threshold_stat_effect.gd" id="1_eff"]
+[ext_resource type="Script" path="res://data/keepsakes/effects/health_threshold_stat_effect.gd" id="1_eff"]
 
 [resource]
 script = ExtResource("1_eff")
+flat = 20.0
+regen_share = 0.02
+threshold = 0.6
 visual = 1
-stats = Array[int]([2])
-flat = 25.0
-threshold = 0.5
-while_above = true
 metadata/_custom_type_script = "uid://dv1cv2m4fbawt"

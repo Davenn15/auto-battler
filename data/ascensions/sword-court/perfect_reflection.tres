@@ -14,7 +14,7 @@ duration = 6.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Perfect Reflection"
-description = "Whenever Bremes casts her Gambit, a duplicate of her appears beside her with her Keepsakes. It has 25% of her health, extra dodge and no Gambit, and vanishes after 6 seconds."
+description = "Whenever Bremes casts her Gambit, a duplicate of her appears beside her with her Keepsakes. It has {health_fraction%|maxhp} health, +{extra_dodge%} dodge and no Gambit, and vanishes after {duration} seconds."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

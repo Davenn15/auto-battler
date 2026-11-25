@@ -1,14 +1,25 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_1rn80"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/frailty_frame/might_ward__might_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_xl0tm"]
+
+[sub_resource type="Resource" id="Resource_x8eyc"]
+script = ExtResource("2_1rn80")
+shard = 1
+description = "No single hit can take more than {cap%} of your health."
+effect_overrides = {
+"cap": 0.15
+}
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Frailty Frame"
 first_shard = 1
 second_shard = 1
-effect = ExtResource("2_effect")
 might_ward = 60.0
-description = "You can't take more than 25% of your health from one instance of damage."
+effect = ExtResource("2_effect")
+description = "You can't take more than {cap%} of your health from one instance of damage."
+empowerments = Array[ExtResource("2_1rn80")]([SubResource("Resource_x8eyc")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

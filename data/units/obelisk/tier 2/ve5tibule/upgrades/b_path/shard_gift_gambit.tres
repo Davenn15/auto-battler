@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1")
+range_cells = 4
 gambit_name = "Gift"
 cast_time = 0.3
-description = "Sends nearby allies a temporary Shard. If an ally already holds a Shard, the new one combines with it into a keepsake. Everything given is taken back when combat ends."
+description = "Sends {targets} allies within {range_cells} cells a temporary Shard. If an ally already holds a Shard, the new one combines with it into a keepsake. Everything given is taken back when combat ends."

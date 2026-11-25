@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3]
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2_afbf8"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/b_path/third_play_shard.tres" id="3_1yn2i"]
 
 [resource]
 script = ExtResource("1")
-description = "+2 Gambit range."
-gambit_bonuses = Dictionary[String, float]({
-"range_cells": 2.0
-})
+description = "Once Vestibule has played his Gambit {play_count} times in a combat, you gain a random Shard in your Keepsake inventory after it."
+passives = Array[ExtResource("2_afbf8")]([ExtResource("3_1yn2i")])

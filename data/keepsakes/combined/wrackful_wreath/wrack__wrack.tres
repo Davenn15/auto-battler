@@ -1,6 +1,15 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://d3bu2nqww66q3"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="1_iibcs"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2_noyx1"]
+
+[sub_resource type="Resource" id="Resource_lb6a4"]
+script = ExtResource("1_iibcs")
+shard = 7
+description = "An extra +20% Wrack Chance and +15% Wrack Damage."
+wrack_chance = 0.2
+wrack_damage = 0.15
 
 [resource]
 script = ExtResource("1_keep")
@@ -10,4 +19,5 @@ second_shard = 7
 wrack_chance = 0.6
 wrack_damage = 0.15
 description = "An exorbitant amount of Wrack Chance."
+empowerments = Array[ExtResource("1_iibcs")]([SubResource("Resource_lb6a4")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

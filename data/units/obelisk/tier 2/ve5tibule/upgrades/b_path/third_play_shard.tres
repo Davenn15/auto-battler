@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ThirdPlayShardPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/b_path/scripts/third_play_shard_passive.gd" id="1_oeyvt"]
+
+[resource]
+script = ExtResource("1_oeyvt")
+passive_name = "Surplus"
+description = "Once Vestibule has played his Gambit {play_count} times in a combat, you gain a random Shard in your Keepsake inventory after it."

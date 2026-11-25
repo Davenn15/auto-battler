@@ -1,6 +1,6 @@
 class_name ColumnMissileWeapon
 extends ColumnWeapon
-## COLUMN's hero Ascension: a new weapon (on its own timer, like its others). It launches
+## Column's hero Ascension: a new weapon (on its own timer, like its others). It launches
 ## Missiles seeking missiles into the air, where they spend Triangulate seconds picking
 ## their targets (lines show what they're locking onto), then dive at the lowest-health
 ## enemies in its attack range, each at a different one when it can. Each deals Damage +
@@ -32,7 +32,7 @@ func fire(unit: BattleUnit) -> bool:
 
 
 ## All of one launch's missiles: up, hover while triangulating, then dive. Independent of
-## COLUMN, so they still land if it dies.
+## Column, so they still land if it dies.
 class Swarm extends Node2D:
 	const RISE := 0.35
 	const SPEED := 420.0
@@ -61,7 +61,7 @@ class Swarm extends Node2D:
 			var slot := _origin + Vector2((i - (count - 1) / 2.0) * 13.0, -58.0 - absf(i - (count - 1) / 2.0) * -4.0)
 			_missiles.append({"pos": _origin, "slot": slot, "target": null, "done": false, "heading": Vector2.UP})
 
-	## The lowest-health enemies in range of where COLUMN fired from (anywhere, if none are
+	## The lowest-health enemies in range of where Column fired from (anywhere, if none are
 	## left in range), lowest first.
 	func _candidates() -> Array:
 		var in_range: Array = []

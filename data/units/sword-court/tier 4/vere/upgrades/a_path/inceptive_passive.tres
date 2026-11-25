@@ -6,5 +6,5 @@
 script = ExtResource("1_bkffr")
 bonus_chance = 0.35
 bonus_damage = 0.35
-description = "Stronger Wracks against healthy enemies."
+description = "+{bonus_chance%} Wrack Chance and +{bonus_damage%} Wrack Damage against enemies above {threshold%} health."
 metadata/_custom_type_script = "uid://ctsi77n1utgdl"

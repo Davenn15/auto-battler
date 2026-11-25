@@ -12,7 +12,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "COLUMN"
+display_name = "Column"
 tier = 4
 upgrades = Array[ExtResource("3")]([ExtResource("7"), ExtResource("8")])
 max_health = 1250.0

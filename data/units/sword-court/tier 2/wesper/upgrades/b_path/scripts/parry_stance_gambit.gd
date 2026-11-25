@@ -28,4 +28,4 @@ func execute(caster: BattleUnit) -> void:
 	stance.deflect_to_target = deflect_to_target > 0.0
 	caster.add_status(stance)
 	if shield_amount > 0.0:
-		caster.add_shield(shield_amount, duration, caster.get_instance_id(), true)
+		caster.add_shield(shield_amount, duration, caster.get_instance_id(), true, true)

@@ -8,4 +8,4 @@ penetration = 20.0
 duration = 4.0
 gambit_name = "Pounce"
 cast_time = 0.3
-description = "Dashes to the enemy with the highest Celerity and locks onto it for 4 seconds, gaining 20 flat Ward penetration for 4 seconds."
+description = "Dashes to the enemy with the highest Celerity and locks onto it, gaining {penetration} flat Ward penetration for {duration} seconds."

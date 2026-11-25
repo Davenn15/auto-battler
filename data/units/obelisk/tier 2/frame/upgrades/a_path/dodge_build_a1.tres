@@ -7,4 +7,4 @@ script = ExtResource("1")
 per_hit = 0.08
 max_bonus = 1.0
 passive_name = "Steadying"
-description = "Each time FRAME takes damage, it gains 8% dodge chance until it dodges."
+description = "Each time Frame takes damage, it gains {per_hit%} dodge chance until it dodges."

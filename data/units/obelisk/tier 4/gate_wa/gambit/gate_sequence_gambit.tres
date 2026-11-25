@@ -12,4 +12,4 @@ script = ExtResource("1")
 steps = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])
 gambit_name = "Open Gate"
 cast_time = 0.4
-description = "The first three times, it summons a different Gateling beside it: a Broad Gateling (tank, shields allies), then two Slim Gatelings (assassins that bleed and execute), then a Gatling Gateling (ranged, spins up on one target). Each has its own stats plus 20% of GATE.W(A)'s max health and 30% of its attributes and wards. After that, it summons nothing."
+description = "The first {casts} times, it summons a different Gateling beside it: a Broad Gateling (tank, shields allies), then two Slim Gatelings (assassins that bleed and execute), then a Gatling Gateling (ranged, spins up on one target). Each has its own stats plus {health_share%} of Gateway's max health and {stat_share%} of its attributes and wards. After that, it summons nothing."

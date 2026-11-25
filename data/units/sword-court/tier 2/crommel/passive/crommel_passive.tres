@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_5u2sx")
-description = "Crommel's Wracks deal more damage."
+description = "Crommel's Wracks deal +{bonus_wrack_damage%} damage."
 metadata/_custom_type_script = "uid://ckaefi8m6xiy7"

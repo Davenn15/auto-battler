@@ -6,4 +6,4 @@
 script = ExtResource("1")
 chance = 0.35
 passive_name = "Scavenge"
-description = "When SHRED kills an enemy, there's a 35% chance you gain a random Shard from among the ones making up its Keepsakes."
+description = "When Shred kills an enemy, there's a {chance%} chance you gain a random Shard from among the ones making up its Keepsakes."

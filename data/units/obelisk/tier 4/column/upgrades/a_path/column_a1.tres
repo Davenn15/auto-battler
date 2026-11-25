@@ -7,5 +7,5 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Kinetic Wave"
-description = "New weapon, Kinetic Wave: every 6 seconds, a wave along a line that damages and stuns every enemy it hits."
+description = "New weapon, Kinetic Wave: every {interval} seconds, a wave along a line that deals {damage+might_scaling} Might damage and stuns every enemy it hits for {stun_time|cc} seconds."
 passives = Array[ExtResource("2")]([ExtResource("3")])

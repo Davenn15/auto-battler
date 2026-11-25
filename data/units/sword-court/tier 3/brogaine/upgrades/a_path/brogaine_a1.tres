@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Hearty's aura and Regeneration share are each increased by 15% for every Glory he has."
+description = "Hearty's aura and Regeneration share are each increased by {per_glory%} for every Glory he has."
 passives = Array[ExtResource("2")]([ExtResource("3")])

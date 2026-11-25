@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 ascension_name = "Obelisk Firewall"
-description = "PLACEHOLDER. All your units gain 10 Insight and 10 Insight Ward."
+description = "PLACEHOLDER. All your units gain {insight} Insight and {insight_ward} Insight Ward."
 tier = 1
 insight = 10.0
 insight_ward = 10.0

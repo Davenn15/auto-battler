@@ -31,7 +31,7 @@ func execute(caster: BattleUnit) -> void:
 	if include_self:
 		recipients.append(caster)
 	for unit in recipients:
-		unit.add_shield(shield_amount, duration, caster.get_instance_id())
+		unit.add_shield(shield_amount, duration, caster.get_instance_id(), false, true)
 		BattleUnit.gambit_affected(caster, unit)
 		unit.add_status(AdoredStatus.new(caster.get_instance_id(), wrack_chance, charge_on_kill, duration))
 		KeepsakeVfx.head_icon(unit, "VfxAdoreHeart", KeepsakeVfx.HeadIcon.HEART, KeepsakeVfx.LUNCK_ORANGE, duration)

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_ku6qp")
-description = "The knife also gives Insight Ward."
+description = "The knife also gives {insight_ward_bonus} Insight Ward."
 gambit_bonuses = Dictionary[String, float]({
 "insight_ward_bonus": 60.0
 })

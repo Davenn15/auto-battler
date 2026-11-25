@@ -1,6 +1,6 @@
 class_name PhaseGambit
 extends Gambit
-## VE5TIBULE phases the enemy within range that has dealt the most damage this combat: it's
+## Vestibule phases the enemy within range that has dealt the most damage this combat: it's
 ## stunned and untargetable for a while, taken out of the fight.
 
 ## How close the enemy must be, in hex cells.

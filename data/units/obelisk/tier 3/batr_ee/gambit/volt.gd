@@ -1,6 +1,6 @@
 class_name Volt
 extends Node2D
-## A purple bolt that flies to a unit and runs `on_hit` (if any) when it gets there: BATR.EE's
+## A purple bolt that flies to a unit and runs `on_hit` (if any) when it gets there: Battery's
 ## Volts at enemies, and the small jolts allies send it when they give it Voltage.
 ## Drawn as a jagged line that flickers, trailing back towards where it was fired.
 
@@ -10,8 +10,8 @@ const TRAIL := 28.0    # pixels of zigzag behind the head
 var target   # untyped: may be freed in flight
 var color: Color = VoltageStatus.COLOR
 var on_hit: Callable   # (target: BattleUnit) -> void
-## Whatever on_hit belongs to (BATR.EE's own copy of its Gambit), kept alive so a Volt
-## still in flight when BATR.EE dies can land.
+## Whatever on_hit belongs to (Battery's own copy of its Gambit), kept alive so a Volt
+## still in flight when Battery dies can land.
 var _hit_owner: Variant
 var _delay := 0.0
 var _flicker := 0.0

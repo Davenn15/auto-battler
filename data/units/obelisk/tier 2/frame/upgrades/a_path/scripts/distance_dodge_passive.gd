@@ -1,6 +1,6 @@
 class_name DistanceDodgePassive
 extends Passive
-## FRAME A (Highswinging): extra dodge chance against hits from attackers farther away:
+## Frame A (Highswinging): extra dodge chance against hits from attackers farther away:
 ## Per Hex for every hex past the first, up to Max Bonus. Hits with no attacker (Gambit
 ## blasts, damage over time) get none.
 

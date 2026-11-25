@@ -7,6 +7,6 @@
 
 [resource]
 script = ExtResource("1_mfw47")
-description = "Empowered attacks' Insight damage hits every enemy within 1 hex of the target."
+description = "Empowered attacks' Insight damage hits every enemy within {splash_radius} hex of the target."
 passives = Array[ExtResource("2_1j1fl")]([ExtResource("t_tuning")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

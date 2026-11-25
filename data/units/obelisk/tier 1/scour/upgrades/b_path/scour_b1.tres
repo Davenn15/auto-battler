@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The explosion's radius is bigger."
+description = "The explosion's radius grows to {radius_cells} cells."
 gambit_bonuses = Dictionary[String, float]({
 "radius_cells": 1.0
 })

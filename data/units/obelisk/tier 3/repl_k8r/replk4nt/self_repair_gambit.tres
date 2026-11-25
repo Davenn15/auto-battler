@@ -6,4 +6,4 @@
 script = ExtResource("1")
 gambit_name = "Self-Repair"
 cast_time = 0.3
-description = "Heals itself for 30% of its max health."
+description = "Heals itself for {heal_share%|maxhp|heal}."

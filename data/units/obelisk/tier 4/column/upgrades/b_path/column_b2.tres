@@ -7,5 +7,5 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Laser"
-description = "New weapon, Laser: every 10 seconds, a laser along a line that burns every enemy in it for 65 + 0.4x Insight + 6% of their max health per second for 2.5 seconds."
+description = "New weapon, Laser: every {interval} seconds, a laser along a line that burns every enemy in it for {damage_per_second+insight_scaling} plus {share_per_second%} of their max health per second for {duration} seconds."
 passives = Array[ExtResource("2")]([ExtResource("3")])

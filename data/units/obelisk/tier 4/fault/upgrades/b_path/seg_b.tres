@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Upgrade" format=3]
+
+[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Resource" uid="uid://cljjgd5w623o2" path="res://data/units/obelisk/tier 4/fault/upgrades/b_path/cannon_gambit.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/fault/upgrades/b_path/seg_b1.tres" id="4"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 4/fault/upgrades/b_path/seg_b2.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+upgrade_name = "Ionic"
+description = "New Gambit: Ion Cannon. Charges for {cast_time} seconds, then fires a giant ion orb through its target to the edge of the board, dealing {damage+insight_scaling} Insight damage to every enemy it passes through."
+gambit = ExtResource("3")
+next_choices = Array[ExtResource("1")]([ExtResource("4"), ExtResource("5")])

@@ -1,8 +1,6 @@
-[gd_resource type="Resource" script_class="WrackPermissionEffect" format=3]
+[gd_resource type="Resource" script_class="HauntingIdolEffect" format=3]
 
-[ext_resource type="Script" uid="uid://cmlbb8exfbf6y" path="res://data/keepsakes/effects/wrack_permission_effect.gd" id="1_eff"]
+[ext_resource type="Script" path="res://data/keepsakes/combined/haunting_idol/haunting_idol_effect.gd" id="1_f5c8q"]
 
 [resource]
-script = ExtResource("1_eff")
-kind = 1
-metadata/_custom_type_script = "uid://cmlbb8exfbf6y"
+script = ExtResource("1_f5c8q")

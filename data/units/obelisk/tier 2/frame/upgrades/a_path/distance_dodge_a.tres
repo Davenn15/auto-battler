@@ -7,4 +7,4 @@ script = ExtResource("1")
 per_hex = 0.08
 max_bonus = 0.32
 passive_name = "Highswinging"
-description = "+8% dodge chance for each hex an attacker is away past the first (up to +32%)."
+description = "+{per_hex%} dodge chance for each hex an attacker is away past the first (up to +{max_bonus%})."

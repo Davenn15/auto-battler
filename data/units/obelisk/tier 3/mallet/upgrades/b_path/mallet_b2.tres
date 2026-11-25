@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Its Gambit deals +25% damage per equipped Keepsake, and the hit consumes a random equipped Keepsake for the rest of the battle."
+description = "Its Gambit deals +{keepsake_bonus%} damage per equipped Keepsake, and the hit consumes a random equipped Keepsake for the rest of the battle."
 gambit_overrides = Dictionary[String, float]({
 "consume_keepsake": 1.0,
 "keepsake_bonus": 0.25

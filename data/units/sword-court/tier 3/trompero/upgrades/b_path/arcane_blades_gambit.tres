@@ -10,5 +10,5 @@ blade_damage = 25.0
 blade_insight_scaling = 0.2
 shield_duration = 6.0
 cast_time = 0.5
-description = "Summons arcane blades that orbit him for the rest of combat. Each attack, every blade fires a shot too. Each time adds more."
+description = "Summons {blades_per_cast} arcane blades that orbit him for the rest of combat (up to {max_blades}). Each attack, every blade fires a shot too, for {blade_damage+blade_insight_scaling} Insight damage. Each time adds more."
 metadata/_custom_type_script = "uid://c10t1o5gixjc0"

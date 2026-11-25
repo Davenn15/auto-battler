@@ -1,6 +1,6 @@
 class_name ByteRegenPassive
 extends Passive
-## BYTE A2: Regeneration is higher by Regen (health per second).
+## Byte A2: Regeneration is higher by Regen (health per second).
 
 @export var regen: float = 10.0
 

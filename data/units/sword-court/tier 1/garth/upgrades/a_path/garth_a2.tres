@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_tpi5a")
-description = "Garth gains even more Wards while shielded."
+description = "Garth gains another {might_ward} Might Ward, {insight_ward} Insight Ward and {celerity_ward} Celerity Ward while shielded."
 passives = Array[ExtResource("2_utl85")]([ExtResource("3_utl85")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

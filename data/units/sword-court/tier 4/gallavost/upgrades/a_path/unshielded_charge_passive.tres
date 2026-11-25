@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_ulqq2")
 per_second = 5.0
-description = "Gains Charge over time while unshielded."
+description = "Gains {per_second} Charge per second while unshielded."
 metadata/_custom_type_script = "uid://wv0vssk6ykcg"

@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_w022x")
 bonus = 0.25
-description = "Shields he receives, from any source, are bigger."
+description = "Shields he receives, from any source, are {bonus%} bigger."
 metadata/_custom_type_script = "uid://wguuhklcbqok"

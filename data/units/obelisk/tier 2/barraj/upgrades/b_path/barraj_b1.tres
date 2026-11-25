@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Injector missiles pierce the first enemy hit and can hit a second."
+description = "Injector missiles pierce {pierce} enemy and can hit the next."
 gambit_bonuses = Dictionary[String, float]({
 "pierce": 1.0
 })

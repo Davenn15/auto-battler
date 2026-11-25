@@ -5,6 +5,8 @@ extends Passive
 @export var damage: float = 30.0
 @export var radius_cells: int = 2
 @export_enum("Might", "Insight", "Celerity") var damage_type: int = 1
+## Insight Ward Empower: enemies in the aura receive this much less healing and shielding.
+@export var support_cut: float = 0.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
@@ -35,6 +37,8 @@ class Chill extends Status:
 			var enemy := node as BattleUnit
 			if enemy != null and enemy.alive and enemy.team != unit.team \
 					and unit.grid.get_distance(unit.cell, enemy.cell) <= effect.radius_cells:
+				if effect.support_cut > 0.0:
+					SupportCutStatus.apply(enemy, "blizzard_%d" % unit.get_instance_id(), effect.support_cut, 1.25)
 				var dealt := enemy.take_damage(BattleUnit.damage_bonus(unit, enemy, effect.damage), 0, effect.damage_type, false, null, false)
 				enemy.add_running_damage("icy_%d" % unit.get_instance_id(), dealt, Stats.damage_color(effect.damage_type), 0, 1.25)
 				unit.get_tree().call_group("damage_tracker", "record_damage", unit.get_instance_id(), dealt)

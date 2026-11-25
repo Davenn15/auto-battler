@@ -10,4 +10,4 @@ ward_shred = 10.0
 shred_duration = 6.0
 gambit_name = "Clamp"
 cast_time = 0.2
-description = "Clamps his claw on his target, dealing damage and reducing its wards. Neither of them can attack, move or cast until it lets go."
+description = "Clamps his claw on his target, dealing {damage+might_scaling} damage and reducing its wards by {ward_shred} for {shred_duration} seconds. Neither of them can attack, move or cast until it lets go after {hold_time|cc} seconds."

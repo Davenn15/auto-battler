@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "+25% max health, and +25% Regeneration from all sources."
+description = "+{health_share%} max health, and +{regen_share%} Regeneration from all sources."
 passives = Array[ExtResource("2")]([ExtResource("3")])

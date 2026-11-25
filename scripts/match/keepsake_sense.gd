@@ -52,7 +52,7 @@ static func _score(keepsake: Keepsake, data: UnitData, path: Array, carried: Arr
 	var table := lift_table()
 	if table == null:
 		return from_data
-	var entry: Array = table.get_lift(data.display_name.capitalize(), keepsake.get_display_name())
+	var entry: Array = table.get_lift(data.get_title(), keepsake.get_display_name())
 	if int(entry[1]) <= 0:
 		return from_data
 	# The sims' average counts as far as it's reliable (more battles, more trust).

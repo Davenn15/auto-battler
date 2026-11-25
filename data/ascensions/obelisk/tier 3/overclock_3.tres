@@ -7,7 +7,7 @@
 script = ExtResource("1")
 empowers = ExtResource("empowers_prev")
 ascension_name = "Obelisk Placeholder 3C"
-description = "PLACEHOLDER. All your units gain 20 Celerity and 100 Health."
+description = "PLACEHOLDER. All your units gain {celerity} Celerity and {health} Health."
 tier = 3
 celerity = 20.0
 health = 100.0

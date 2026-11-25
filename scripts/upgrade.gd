@@ -6,6 +6,9 @@ extends Resource
 
 @export var upgrade_name: String = "Upgrade"
 @export_multiline var description: String = ""
+## Shown in italics before the unit's name once this upgrade is taken ("Mystical Bremes").
+## Paths (the first upgrades) use their Upgrade Name instead; set this on the later ones.
+@export var adjective: String = ""
 ## Passives this upgrade adds to the unit. New mechanics go here.
 @export var passives: Array[Passive] = []
 ## If set, replaces the unit's Gambit (a stronger version, or a different one entirely).
@@ -30,3 +33,57 @@ extends Resource
 ## upgrade's choice for a level 2 upgrade, otherwise the unit's own Placement.
 enum Placement { INHERIT, FRONT, SECOND_ROW, BACK, RANGED }
 @export var placement: Placement = Placement.INHERIT
+
+
+## True if the upgrade gives or changes the Gambit (its numbers then get Gambit-only boosts).
+static func touches_gambit(upgrade: Upgrade) -> bool:
+	return upgrade.gambit != null or not upgrade.gambit_bonuses.is_empty() or not upgrade.gambit_overrides.is_empty()
+
+
+## The upgrades along `path` (choice indices, from the unit's first upgrades), in order.
+static func along(data: UnitData, path: Array) -> Array[Upgrade]:
+	var chosen: Array[Upgrade] = []
+	var choices := data.upgrades if data != null else ([] as Array[Upgrade])
+	for index in path:
+		if index < 0 or index >= choices.size():
+			break
+		chosen.append(choices[index])
+		choices = choices[index].next_choices
+	return chosen
+
+
+## The unit's Gambit once `chosen` (upgrades, in order) are taken: the last new Gambit
+## among them (or the unit's own), with the Gambit bonuses and overrides that came after
+## it applied. The shared file never changes: a changed Gambit is a copy.
+static func gambit_after(data: UnitData, chosen: Array) -> Gambit:
+	var gambit: Gambit = data.gambit if data != null else null
+	var bonuses := {}
+	var overrides := {}
+	for upgrade in chosen:
+		if upgrade.gambit != null:
+			gambit = upgrade.gambit
+			bonuses.clear()   # earlier bonuses were for the old Gambit
+			overrides.clear()
+		for property in upgrade.gambit_bonuses:
+			bonuses[property] = bonuses.get(property, 0.0) + upgrade.gambit_bonuses[property]
+		overrides.merge(upgrade.gambit_overrides, true)
+	if gambit == null or (bonuses.is_empty() and overrides.is_empty()):
+		return gambit
+	return changed_gambit(gambit, bonuses, overrides)
+
+
+## A copy of `base` with `bonuses` added to and `overrides` set on its properties.
+static func changed_gambit(base: Gambit, bonuses: Dictionary, overrides: Dictionary) -> Gambit:
+	var copy := base.duplicate() as Gambit
+	for property in bonuses:
+		if property in copy:
+			var current = copy.get(property)
+			copy.set(property, current + type_convert(bonuses[property], typeof(current)))
+		else:
+			push_warning("Upgrade changes unknown Gambit property '%s'." % property)
+	for property in overrides:
+		if property in copy:
+			copy.set(property, type_convert(overrides[property], typeof(copy.get(property))))
+		else:
+			push_warning("Upgrade sets unknown Gambit property '%s'." % property)
+	return copy

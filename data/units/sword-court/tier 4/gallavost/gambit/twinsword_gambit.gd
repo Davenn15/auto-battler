@@ -115,7 +115,7 @@ func _twirl(caster: BattleUnit, dir: Vector2) -> void:
 		caster.global_position = caster.grid.cell_to_world(caster.cell)   # back where it started
 		caster.remove_status(twirl)
 		if twirl.banked > 0.0:
-			caster.add_shield(twirl.banked, INF, caster.get_instance_id())
+			caster.add_shield(twirl.banked, INF, caster.get_instance_id(), false, true)
 
 
 ## A white ring with a gap, spinning around the caster while it twirls. It's as wide as
@@ -146,7 +146,7 @@ func _twirl_hits(caster: BattleUnit, from: Vector2, to: Vector2, amount: float, 
 		hit[unit.get_instance_id()] = true
 		if unit.team == caster.team:
 			if ally_shield > 0.0:
-				unit.add_shield(ally_shield, ally_shield_duration, caster.get_instance_id())
+				unit.add_shield(ally_shield, ally_shield_duration, caster.get_instance_id(), false, true)
 			continue
 		var dealt := unit.take_damage(BattleUnit.damage_bonus(caster, unit, amount), wrack, caster.get_attack_damage_type(), caster.ignores_wards())
 		BattleUnit.gambit_damage_dealt(caster, unit, dealt)   # Gambit damage (see BattleUnit)

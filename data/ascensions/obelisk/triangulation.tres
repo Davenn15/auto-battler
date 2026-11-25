@@ -17,7 +17,7 @@ might_scaling = 0.5
 [resource]
 script = ExtResource("1")
 ascension_name = "Triangulation"
-description = "New weapon: every 10 seconds, COLUMN launches 5 seeking missiles that hang in the air for 2 seconds triangulating, then dive at the lowest-health enemies in range (a different one each, when it can), dealing 90 + 0.5x Might damage each."
+description = "New weapon: every {interval} seconds, Column launches {missiles} seeking missiles that hang in the air for {triangulate} seconds triangulating, then dive at the lowest-health enemies in range (a different one each, when it can), dealing {damage+might_scaling} damage each."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

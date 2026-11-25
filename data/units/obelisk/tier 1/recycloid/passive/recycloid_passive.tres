@@ -6,4 +6,4 @@
 script = ExtResource("1")
 share = 0.1
 passive_name = "Recycling"
-description = "When any unit dies near Recycloid, he takes a share of its max health and heals the most hurt ally near him with it (a random nearby ally if everyone is at full health)."
+description = "When any unit dies within {range_cells} cells of Recycloid, he takes {share%} of its max health and heals the most hurt ally near him with it (a random nearby ally if everyone is at full health)."

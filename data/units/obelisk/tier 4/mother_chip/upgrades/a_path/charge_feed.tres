@@ -6,4 +6,4 @@
 script = ExtResource("1")
 charge_per_stack = 0.1
 passive_name = "Data Feed"
-description = "Your team gains 0.1 Charge per second for each Mono-Virus stack on enemies."
+description = "Your team gains {charge_per_stack} Charge per second for each Mono-Virus stack on enemies."

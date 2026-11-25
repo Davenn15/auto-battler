@@ -12,7 +12,7 @@ percent = 0.06
 [resource]
 script = ExtResource("1")
 ascension_name = "Open Wounds"
-description = "Bescard's attacks gain the Hit Effect: Bleed for 6% of the target's max health."
+description = "Bescard's attacks gain the Hit Effect: Bleed for {percent%} of the target's max health."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

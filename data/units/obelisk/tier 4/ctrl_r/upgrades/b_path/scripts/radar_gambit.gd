@@ -1,18 +1,18 @@
 class_name CtrlRadarGambit
 extends Gambit
-## CTRL(R) B: a radar pulse. Every enemy within Radius loses Celerity for a while, twice as
-## much if it was targeting CTRL(R) when the pulse hit.
+## Controller B: a radar pulse. Every enemy within Radius loses Celerity for a while, twice as
+## much if it was targeting Controller when the pulse hit.
 ##   B1: the pulse also cuts their Charge gain, and stops it entirely on enemies that were
-##       targeting CTRL(R).
+##       targeting Controller.
 ##   B2: a bigger radius.
 
 ## How far the pulse reaches, in hex cells.
 @export var radius_cells: int = 3
-## Celerity taken from each enemy hit (doubled on ones targeting CTRL(R)), and for how long.
+## Celerity taken from each enemy hit (doubled on ones targeting Controller), and for how long.
 @export var celerity_cut: float = 25.0
 @export var duration: float = 5.0
 ## B1: share of Charge gain taken away for the same time (0.4 = 40% less); enemies
-## targeting CTRL(R) gain none. 0 = no Charge effect.
+## targeting Controller gain none. 0 = no Charge effect.
 @export_range(0.0, 1.0, 0.05) var charge_cut: float = 0.0
 
 const COLOR := CtrlDrones.COLOR
@@ -66,7 +66,7 @@ class ChargeJam extends Status:
 			unit.remove_status(self)
 
 
-## The pulse on screen: a bright wavefront rolling out from CTRL(R) to the edge of its
+## The pulse on screen: a bright wavefront rolling out from Controller to the edge of its
 ## reach, with fainter echoes trailing behind it, fading as it goes. Purely visual.
 class RadarPulse extends Node2D:
 	const LIFE := 0.65          # seconds for the front to reach the edge

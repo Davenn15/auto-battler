@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 ascension_name = "Neutral Sage"
-description = "PLACEHOLDER. Choose one of your units: it gains 30 Insight and 15% Wrack Chance."
+description = "PLACEHOLDER. Choose one of your units: it gains {insight} Insight and {wrack_chance%} Wrack Chance."
 tier = 1
 target = 1
 insight = 30.0

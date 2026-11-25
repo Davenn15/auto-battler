@@ -6,4 +6,4 @@
 script = ExtResource("1")
 ward_share = 0.4
 passive_name = "Weighted Blows"
-description = "Her attacks deal extra damage equal to 40% of her three Wards added together."
+description = "Her attacks deal extra damage equal to {ward_share%} of her three Wards added together."

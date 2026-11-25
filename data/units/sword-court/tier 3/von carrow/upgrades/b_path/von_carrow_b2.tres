@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_pajb0")
-description = "While shielded, her attacks gain the Hit Effect: deal bonus max-health damage."
+description = "While shielded, her attacks gain the Hit Effect: deal {percent%} of the target's max health."
 passives = Array[ExtResource("2_6m4oq")]([ExtResource("3_6m4oq")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

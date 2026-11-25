@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Attacks gain Hit Effect: fire a shrapnel blast at a random other enemy within 2 cells of the target, dealing 20 (+20% Might) Might damage."
+description = "Attacks gain Hit Effect: fire a shrapnel blast at a random other enemy within {radius} cells of the target, dealing {damage+might_scaling} Might damage."
 passives = Array[ExtResource("2")]([ExtResource("3")])

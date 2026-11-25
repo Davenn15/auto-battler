@@ -34,11 +34,11 @@ var _progress := 0.0        # share of an attack delivered since the last full o
 var _dealt := 0.0           # damage dealt since the last full attack
 var _best_wrack := 0        # highest Wrack level since the last full attack
 var _visual: BeamLine = null
-## Seconds since the last tick (for visuals that pulse with it, like MOTHER-CHIP's Chips).
+## Seconds since the last tick (for visuals that pulse with it, like Mother-Chip's Chips).
 var pulse_age := 99.0
 var _range_given := 0   # Beam range bonus currently added to the unit's attack range
 var _ricochet_lines := Beam.RicochetLines.new()
-var _fan_lines := Beam.FanLines.new()   # extra Beams (BEAM.NG's hero Ascension)
+var _fan_lines := Beam.FanLines.new()   # extra Beams (Beam's hero Ascension)
 
 
 func _init(p_retarget_delay: float) -> void:
@@ -144,7 +144,7 @@ func _fire_tick(unit: BattleUnit, enemy: BattleUnit, share: float) -> void:
 		_flush(unit)
 
 
-## Hooks for beams built on this one (BEAM.NG). Scour leaves them as they are.
+## Hooks for beams built on this one (Beam). Scour leaves them as they are.
 ## Multiplies each tick's damage.
 func damage_multiplier(_unit: BattleUnit, _enemy: BattleUnit) -> float:
 	return 1.0
@@ -223,7 +223,7 @@ class BeamLine extends Node2D:
 	var color := Color.WHITE
 	var time := 0.0
 	## Where on the owner's sprite the beam starts, in the sprite's own pixels from its
-	## centre (e.g. COLUMN's portals). Null = the default spot just above the unit.
+	## centre (e.g. Column's portals). Null = the default spot just above the unit.
 	var sprite_point = null
 	var _pulses: Array = []   # seconds since each recent tick's pulse set off
 

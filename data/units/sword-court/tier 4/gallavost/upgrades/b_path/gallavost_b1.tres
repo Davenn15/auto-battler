@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_qqx8n")
-description = "Shatter deals more damage."
+description = "Shatter deals {base_damage} damage plus {damage_share%} of the shield it uses."
 gambit_bonuses = Dictionary[String, float]({
 "base_damage": 100.0,
 "damage_share": 0.2

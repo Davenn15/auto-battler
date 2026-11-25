@@ -25,7 +25,7 @@ func fire(unit: BattleUnit) -> bool:
 	return true
 
 
-## The living ally (not COLUMN) nearest to it; with `need_slot`, only ones with a free
+## The living ally (not Column) nearest to it; with `need_slot`, only ones with a free
 ## keepsake slot. Ties go to the lower instance id, so it's the same on every machine.
 func _nearest_ally(unit: BattleUnit, need_slot: bool) -> BattleUnit:
 	var best: BattleUnit = null

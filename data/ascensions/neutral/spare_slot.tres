@@ -5,7 +5,7 @@
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "Choose one of your units: it can carry 1 more Keepsake."
+description = "Choose one of your units: it can carry {keepsake_slots} more Keepsake."
 tier = 2
 target = 1
 keepsake_slots = 1

@@ -40,7 +40,7 @@ func execute(caster: BattleUnit) -> void:
 		caster.get_tree().call_group("damage_tracker", "record_damage", caster.get_instance_id(), dealt)
 		total += dealt
 	if lifesteal > 0.0:
-		caster.heal(total * lifesteal, caster.get_instance_id())
+		caster.heal(total * lifesteal, caster.get_instance_id(), true, true)
 	if might_per_cast > 0.0:
 		caster.add_status(PermanentStatStatus.new(Stats.Stat.MIGHT, might_per_cast))
 

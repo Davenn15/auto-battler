@@ -12,5 +12,5 @@ count = 12
 [resource]
 script = ExtResource("1")
 ascension_name = "Relentless"
-description = "The first time each combat a unit in your army attacks 12 times, it gains Glory."
+description = "Once per combat: the first unit in your army to attack {count} times gains Glory."
 effect = SubResource("Effect")

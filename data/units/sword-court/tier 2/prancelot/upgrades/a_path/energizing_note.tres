@@ -6,5 +6,5 @@
 script = ExtResource("1_lm3rr")
 amount = 40.0
 duration = 6.0
-description = "Every few attacks, gives Celerity to the nearby ally with the least Celerity."
+description = "Every {every} attacks, gives {amount} Celerity for {duration} seconds to the ally within {range_cells} cells with the least Celerity."
 metadata/_custom_type_script = "uid://b2kle04pd2vts"

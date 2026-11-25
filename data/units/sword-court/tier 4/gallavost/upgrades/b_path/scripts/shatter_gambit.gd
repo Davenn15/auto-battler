@@ -59,7 +59,7 @@ func _wants_rebuild(caster: BattleUnit) -> bool:
 # ---------- Shielded: shatter ----------
 
 func _shatter(caster: BattleUnit) -> void:
-	caster.add_shield(shield_gain, INF, caster.get_instance_id())
+	caster.add_shield(shield_gain, INF, caster.get_instance_id(), false, true)
 	caster.lock_for(channel_time)
 	await caster.get_tree().create_timer(channel_time, true, true).timeout
 	if not _alive(caster) or not caster.active:

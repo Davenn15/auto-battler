@@ -11,4 +11,4 @@ knock_up = 0.75
 heal_share = 0.08
 gambit_name = "Concussive Ripple"
 cast_time = 0.5
-description = "Creates a concussive ripple under its current target, dealing 90 (+50% Insight) Insight damage and knocking it up for 0.75 seconds. BYTE heals itself for 8% of its max health."
+description = "Creates a concussive ripple under its current target, dealing {damage+insight_scaling} Insight damage and knocking it up for {knock_up} seconds. Byte heals itself for {heal_share%|maxhp|heal}."

@@ -69,3 +69,22 @@ func get_base_stat(stat: Stats.Stat) -> float:
 		Stats.Stat.WRACK_CHANCE: return wrack_chance
 		Stats.Stat.WRACK_DAMAGE: return wrack_damage
 	return 0.0
+
+
+## The name as players see it: as written when it has capitals ("M-Path", "Mother-Chip"),
+## otherwise capitalized ("von carrow" -> "Von Carrow").
+func get_title() -> String:
+	return display_name if display_name != display_name.to_lower() else display_name.capitalize()
+
+
+## The adjective for a unit on `chosen` (its upgrades, in order): the deepest one's own
+## Adjective if it has one, otherwise its path's name (the first upgrade's). "" with none.
+static func path_adjective(chosen: Array) -> String:
+	for i in range(chosen.size() - 1, -1, -1):
+		var upgrade: Upgrade = chosen[i]
+		if upgrade.adjective != "":
+			return upgrade.adjective
+	if chosen.is_empty():
+		return ""
+	var first: Upgrade = chosen[0]
+	return first.upgrade_name if first.upgrade_name not in ["", "Upgrade"] else ""

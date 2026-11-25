@@ -10,4 +10,4 @@ vampirism = 0.2
 pierce_share = 0.6
 gambit_name = "Barbed Frenzy"
 cast_time = 0.3
-description = "For 5 seconds, gains +50 Celerity and 20% Vampirism, and his attacks become blades that fly twice his attack range, piercing every enemy in their path and dealing 60% damage after the first enemy hit."
+description = "For {duration} seconds, gains +{celerity} Celerity and {vampirism%} Vampirism, and his attacks become blades that fly twice his attack range, piercing every enemy in their path and dealing {pierce_share%} damage after the first enemy hit."

@@ -14,5 +14,5 @@ blade_interval = 0.9
 blade_might_scaling = 0.2
 recast_heal_fraction = 0.2
 cast_time = 0.75
-description = "Throws the blade bag where the most enemies are. It damages them on landing, then fires blades at nearby enemies until destroyed. Doing it again makes the bag jump to a new spot."
+description = "Throws the blade bag where the most enemies are. It deals {landing_damage+landing_might_scaling} Might damage on landing, then fires blades at enemies within {blade_range_cells} cells for {blade_damage+blade_might_scaling} Might damage every {blade_interval} seconds until destroyed. Doing it again makes the bag jump to a new spot."
 metadata/_custom_type_script = "uid://bqx3vg5bjvlm1"

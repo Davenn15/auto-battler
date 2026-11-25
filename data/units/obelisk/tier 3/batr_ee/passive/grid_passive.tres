@@ -6,5 +6,5 @@
 script = ExtResource("1")
 range_cells = 2
 voltage_per_second = 2.0
-description = "BATR.EE and allies within 2 cells build 2 Voltage per second. Each Voltage gives 2 Insight and 2 Celerity. A unit keeps its Voltage when it leaves, until it plays its Gambit, which clears it all."
+description = "Battery and allies within {range_cells} cells build {voltage_per_second} Voltage per second. Each Voltage gives 2 Insight and 2 Celerity. A unit keeps its Voltage when it leaves, until it plays its Gambit, which clears it all."
 passive_name = "Power Grid"

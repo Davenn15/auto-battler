@@ -1,7 +1,27 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://c5pxlfuoey3mh"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://caa625fahlggv" path="res://data/keepsakes/combined/spellshield/insight__insight_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/spellshield/insight__insight_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_j3fif"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_8b4hm"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/shielded_stat_effect.gd" id="4_s2chm"]
+
+[sub_resource type="Resource" id="Resource_d4wuj"]
+script = ExtResource("4_s2chm")
+
+[sub_resource type="Resource" id="Resource_mju5o"]
+script = ExtResource("2_j3fif")
+shard = 4
+description = "+{extra.amount} Insight while you have a shield."
+extra_effects = Array[ExtResource("3_8b4hm")]([SubResource("Resource_d4wuj")])
+
+[sub_resource type="Resource" id="Resource_3ninv"]
+script = ExtResource("2_j3fif")
+shard = 5
+description = "The shield is {charge_multiplier} times your Maximum Charge."
+effect_overrides = {
+"charge_multiplier": 3.5
+}
 
 [resource]
 script = ExtResource("1_keep")
@@ -11,5 +31,6 @@ second_shard = 5
 insight = 20.0
 insight_ward = 35.0
 effect = ExtResource("2_effect")
-description = "Whenever you cast your Gambit, gain Shield equal to 2.5 times your Maximum Charge."
+description = "Whenever you cast your Gambit, gain Shield equal to {charge_multiplier} times your Maximum Charge for {duration|shieldtime} seconds."
+empowerments = Array[ExtResource("2_j3fif")]([SubResource("Resource_mju5o"), SubResource("Resource_3ninv")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

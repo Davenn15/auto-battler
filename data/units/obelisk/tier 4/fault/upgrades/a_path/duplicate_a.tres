@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SegDuplicatePassive" format=3]
+
+[ext_resource type="Script" uid="uid://brtd7q6toexbg" path="res://data/units/obelisk/tier 4/fault/upgrades/a_path/scripts/duplicate_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+share = 0.6
+passive_name = "Forked"
+description = "The first time Fault plays its Gambit, it leaves a duplicate of itself where it teleported from, with its Keepsakes and {share%} of its health and stats. The duplicate gains Charge and uses its Gambit too, but never makes duplicates."

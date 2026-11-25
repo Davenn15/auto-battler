@@ -7,4 +7,4 @@ script = ExtResource("1")
 share_keepsakes = 1
 gambit_name = "Replicate"
 cast_time = 0.75
-description = "Duplicates itself into two identical copies. 120% of its current and max health is split evenly between them, and every copy gets all of its keepsakes. Copies have Charge and can use it too. Each time any REPLK8R casts it, every REPLK8R's max Charge rises by 15."
+description = "Duplicates itself into {copies} identical copies. {health_share%} of its current and max health is split evenly between them, and every copy gets all of its keepsakes. Copies have Charge and can use it too. Each time any Replicator casts it, every Replicator's max Charge rises by {charge_per_cast}."

@@ -12,7 +12,7 @@ regen = 25.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Renewal"
-description = "Gallavost gains 25 health regen. While she has a shield, her health regen restores it too, up to the shield she started combat with."
+description = "Gallavost gains {regen} health regen. While she has a shield, her health regen restores it too, up to the shield she started combat with."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

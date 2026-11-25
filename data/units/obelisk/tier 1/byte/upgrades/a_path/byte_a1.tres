@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The ripple's damage and Knock-up time grow with the target's current health %, up to +50% against a full-health target."
+description = "The ripple's damage and Knock-up time grow with the target's current health %, up to +{health_scaling%} against a full-health target."
 gambit_overrides = Dictionary[String, float]({
 "health_scaling": 0.5
 })

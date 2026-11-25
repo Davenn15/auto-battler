@@ -5,7 +5,7 @@ extends Status
 ## crowd control: Immovability shortens it, 100 or more ignores it, and an item that lets control
 ## effects wrack lengthens it. Silencing a unit that's already Silenced keeps whichever silence
 ## is longer, and counts as a new silence (Codger's passive watches for it). Prancelot's
-## Silencing Note and BATR.EE's A2 Volts both use it.
+## Silencing Note and Battery's A2 Volts both use it.
 
 const COLOR := Color(0.75, 0.6, 1.0)   # violet
 

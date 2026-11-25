@@ -1,35 +1,35 @@
 class_name SeedGambit
 extends Gambit
-## REPL\K8R's base Gambit: plants a replication seed in the nearby ally (not a REPL\K8R)
+## Replicator's base Gambit: plants a replication seed in the nearby ally (not a Replicator)
 ## with the lowest health. The seed hatches after Gestation seconds, or sooner if that ally
-## dies, and a REPLK4NT (a summon with its own Gambit) spawns next to it. The longer the
-## seed gestates, the more of its health the REPLK4NT starts with.
+## dies, and a Replicant (a summon with its own Gambit) spawns next to it. The longer the
+## seed gestates, the more of its health the Replicant starts with.
 ##   A (Infectious): the seed raises its host's health regen.
-##   A1: a REPLK4NT that dies plants a new seed in the nearby ally with the lowest health.
-##   A2: REPLK4NT attacks give Mono-Virus.
+##   A1: a Replicant that dies plants a new seed in the nearby ally with the lowest health.
+##   A2: Replicant attacks give Mono-Virus.
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 
-## The REPLK4NT that hatches: its own look, stats and Gambit.
+## The Replicant that hatches: its own look, stats and Gambit.
 @export var profile: UnitData
 ## How close the ally must be, in hex cells.
 @export var range_cells: int = 3
 ## Seconds until the seed hatches on its own.
 @export var gestation: float = 8.0
-## REPLK4NTs per seed.
+## Replicants per seed.
 @export var hatch_count: int = 1
-## Share of REPL\K8R's max health the REPLK4NT adds to its own, and of its attributes and wards.
+## Share of Replicator's max health the Replicant adds to its own, and of its attributes and wards.
 @export_range(0.0, 1.0, 0.05) var health_share: float = 0.2
 @export_range(0.0, 1.0, 0.05) var stat_share: float = 0.2
-## Share of its max health the REPLK4NT starts with: Min if it hatches at once, rising to
+## Share of its max health the Replicant starts with: Min if it hatches at once, rising to
 ## 1 (full) at full gestation.
 @export_range(0.0, 1.0, 0.05) var min_start_health: float = 0.3
 @export_group("Infectious (A)")
 ## A: health regen the seed's host gains while it carries it. 0 = none.
 @export var seed_regen: float = 0.0
-## A1: 1 = a REPLK4NT that dies plants a new seed.
+## A1: 1 = a Replicant that dies plants a new seed.
 @export var replant_on_death: float = 0.0
-## A2: Mono-Virus stacks each REPLK4NT attack gives. 0 = none.
+## A2: Mono-Virus stacks each Replicant attack gives. 0 = none.
 @export var virus_stacks: int = 0
 
 const SHARED_STATS := [Stats.Stat.MIGHT, Stats.Stat.INSIGHT, Stats.Stat.CELERITY,
@@ -46,8 +46,8 @@ func execute(caster: BattleUnit) -> void:
 	plant(caster, snapshot(caster), caster.cell)
 
 
-## What a REPLK4NT needs from REPL\K8R, taken now so a seed planted later (A1, by a dying
-## REPLK4NT) still has it after REPL\K8R is gone.
+## What a Replicant needs from Replicator, taken now so a seed planted later (A1, by a dying
+## Replicant) still has it after Replicator is gone.
 func snapshot(caster: BattleUnit) -> Dictionary:
 	var stats := {}
 	for stat in SHARED_STATS:
@@ -56,9 +56,9 @@ func snapshot(caster: BattleUnit) -> Dictionary:
 			"max_health": caster.max_health, "stats": stats}
 
 
-## Plants a seed from `unit` (REPL\K8R or a dying REPLK4NT) in the best host near `from`,
-## carrying `owner` (a snapshot). With `replanting` (A1, from a dying REPLK4NT) it never
-## picks another REPLK4NT, so seeds can't chain through REPLK4NTs alone.
+## Plants a seed from `unit` (Replicator or a dying Replicant) in the best host near `from`,
+## carrying `owner` (a snapshot). With `replanting` (A1, from a dying Replicant) it never
+## picks another Replicant, so seeds can't chain through Replicants alone.
 ## Returns false if there was nobody to plant it in.
 func plant(unit: BattleUnit, owner: Dictionary, from: Vector2i, replanting: bool = false) -> bool:
 	var host := pick_host(unit, from, range_cells, profile if replanting else null)
@@ -111,8 +111,8 @@ func _spawn(owner: Dictionary, parent: Node, cell: Vector2i, start_share: float)
 	KeepsakeVfx.missile_blast(parent, replicant.global_position, 34.0, Replicator.COLOR)
 
 
-## The ally near `from` with the lowest health that isn't a REPL\K8R (nor, if `skip` is
-## given, a unit made from that profile: the REPLK4NT), preferring ones without a seed
+## The ally near `from` with the lowest health that isn't a Replicator (nor, if `skip` is
+## given, a unit made from that profile: the Replicant), preferring ones without a seed
 ## already. Null if there's none.
 static func pick_host(unit: BattleUnit, from: Vector2i, reach: int, skip: UnitData = null) -> BattleUnit:
 	var best: BattleUnit = null
@@ -132,7 +132,7 @@ static func pick_host(unit: BattleUnit, from: Vector2i, reach: int, skip: UnitDa
 	return best
 
 
-## A2: a REPLK4NT's attacks have the Hit Effect: give Mono-Virus.
+## A2: a Replicant's attacks have the Hit Effect: give Mono-Virus.
 class ReplicantVirusStatus extends Status:
 	var stacks: int
 
@@ -143,7 +143,7 @@ class ReplicantVirusStatus extends Status:
 		return ChipPassive.VirusHit.new(stacks, unit.get_credit_id())
 
 
-## A1: when this REPLK4NT dies, it plants a new seed nearby.
+## A1: when this Replicant dies, it plants a new seed nearby.
 class ReplantStatus extends Status:
 	var gambit: SeedGambit
 	var owner: Dictionary

@@ -1,9 +1,6 @@
-[gd_resource type="Resource" script_class="WardWearEffect" format=3]
+[gd_resource type="Resource" script_class="StarshredderEffect" format=3]
 
-[ext_resource type="Script" uid="uid://c054v3sdjpxhd" path="res://data/keepsakes/combined/shredder/ward_wear_effect.gd" id="1_eff"]
+[ext_resource type="Script" path="res://data/keepsakes/combined/shredder/starshredder_effect.gd" id="1_td33l"]
 
 [resource]
-script = ExtResource("1_eff")
-per_hit = 2.0
-cap = 0.0
-metadata/_custom_type_script = "uid://c054v3sdjpxhd"
+script = ExtResource("1_td33l")

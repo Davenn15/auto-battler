@@ -17,7 +17,7 @@ charge_on_kill = 30.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Partners in Crime"
-description = "If you have both Sumpton and Von Carrow: when Sumpton plays his Gambit, Von Carrow gains a 300 Shield for 4 seconds, and when Von Carrow gets a kill, Sumpton gains 30 Charge."
+description = "If you have both Sumpton and Von Carrow: when Sumpton plays his Gambit, Von Carrow gains a {shield|shield} Shield for {shield_duration|shieldtime} seconds, and when Von Carrow gets a kill, Sumpton gains {charge_on_kill} Charge."
 tier = 3
 affected_units = Array[ExtResource("5")]([ExtResource("3"), ExtResource("4")])
 needs_all_affected = true

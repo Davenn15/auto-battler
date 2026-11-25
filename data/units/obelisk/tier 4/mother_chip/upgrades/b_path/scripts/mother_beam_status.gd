@@ -1,13 +1,13 @@
 class_name MotherBeamStatus
 extends BeamStatus
-## MOTHER-CHIP's B beam: Scour's continuous beam (BeamStatus) in bluish purple, dealing
+## Mother-Chip's B beam: Scour's continuous beam (BeamStatus) in bluish purple, dealing
 ## more the lower its target's health, with every Chip adding a thinner beam of its own at
 ## the same target (each Chip Share of the beam's damage, from ChipPassive).
 
 var execute_bonus := 1.0
 
 
-## MOTHER-CHIP's beam, or null.
+## Mother-Chip's beam, or null.
 static func of(unit: BattleUnit) -> MotherBeamStatus:
 	if unit == null:
 		return null

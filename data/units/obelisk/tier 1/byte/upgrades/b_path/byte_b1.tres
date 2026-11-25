@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Buffeting knocks enemies back 2 cells."
+description = "Buffeting knocks enemies back {knockback_cells} cells."
 gambit_overrides = Dictionary[String, float]({
 "knockback_cells": 2.0
 })

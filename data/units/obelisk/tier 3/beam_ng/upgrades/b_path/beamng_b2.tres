@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The Focus Beam ricochets to one more enemy within 2 cells of its target."
+description = "The Focus Beam ricochets to {bounces} more enemies within {bounce_range_cells} cells of its target."
 gambit_bonuses = Dictionary[String, float]({
 "bounces": 1.0
 })

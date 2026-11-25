@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Her attacks deal extra damage equal to 40% of her three Wards added together."
+description = "Her attacks deal extra damage equal to {ward_share%} of her three Wards added together."
 passives = Array[ExtResource("2")]([ExtResource("3")])

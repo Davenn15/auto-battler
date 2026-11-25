@@ -12,4 +12,4 @@ damage = 80.0
 might_scaling = 0.3
 gambit_name = "Barrage"
 cast_time = 0.7
-description = "Launches a barrage of missiles. Each one flies at a random enemy within 4 cells, following it, and explodes on it: full damage to its target, half to everyone else nearby."
+description = "Launches a barrage of {missiles} missiles. Each one flies at a random enemy within {range_cells} cells, following it, and explodes on it: {damage+might_scaling} damage to its target, half to everyone else within {blast_cells} cells."

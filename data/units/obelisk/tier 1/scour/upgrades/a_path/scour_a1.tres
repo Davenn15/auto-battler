@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "The Beam's Wrack chance ramps up with sustained fire."
+description = "The Beam's Wrack chance ramps up by {wrack_ramp_per_second%} per second of sustained fire (up to +{max_wrack_ramp%})."
 passives = Array[ExtResource("2")]([ExtResource("3")])

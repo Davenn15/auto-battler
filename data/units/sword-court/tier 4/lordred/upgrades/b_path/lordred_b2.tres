@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_6xn10")
-description = "His blade shards also deal part of the attacker's damage."
+description = "His blade shards also deal {share%} of the attacker's damage."
 passives = Array[ExtResource("2_k2ybf")]([ExtResource("3_k2ybf")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

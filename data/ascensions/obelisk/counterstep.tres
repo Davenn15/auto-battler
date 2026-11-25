@@ -12,7 +12,7 @@ share = 0.05
 [resource]
 script = ExtResource("1")
 ascension_name = "Counterstep"
-description = "FRAME gains 10% dodge chance. Whenever it dodges, its next attack gains the Hit Effect: deal 5% of the target's max health as bonus damage."
+description = "Frame gains {dodge_chance%} dodge chance. Whenever it dodges, its next attack gains the Hit Effect: deal {share%} of the target's max health as bonus damage."
 tier = 2
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 dodge_chance = 0.1

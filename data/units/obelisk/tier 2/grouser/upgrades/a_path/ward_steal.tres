@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 passive_name = "Ward Steal"
-description = "Whenever Grouser reduces an enemy's ward, he gains that much of it for a while."
+description = "Whenever Grouser reduces an enemy's ward, he gains that much of it for {duration} seconds."

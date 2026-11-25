@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_maqfg")
 duration = 1.5
-description = "Brief dodge chance after gaining a shield."
+description = "{bonus_dodge%} dodge chance for {duration} seconds after gaining a shield."
 metadata/_custom_type_script = "uid://0fcpdc1pb5u0"

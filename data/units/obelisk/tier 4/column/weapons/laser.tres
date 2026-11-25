@@ -9,4 +9,4 @@ insight_scaling = 0.4
 timer_color = Color(1, 0.3, 0.45, 1)
 interval = 10.0
 passive_name = "Laser"
-description = "Every 10 seconds: a laser along the line that hits the most enemies (6 cells long, 1.5 cells wide) for 2.5 seconds, dealing 65 + 0.4x Insight + 6% of each enemy's max health per second as Insight damage."
+description = "Every {interval} seconds: a laser along the line that hits the most enemies ({length_cells} cells long, {width_cells} cells wide) for {duration} seconds, dealing {damage_per_second+insight_scaling} plus {share_per_second%} of each enemy's max health per second as Insight damage."

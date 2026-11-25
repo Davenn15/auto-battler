@@ -9,5 +9,5 @@ stun_time = 0.5
 sword_size = 2.0
 twirl_might_scaling = 0.45
 cast_time = 0.75
-description = "Shielded: throws her twinsword out and back, hitting and stunning enemies, and gains a shield when she catches it. Unshielded: twirls through the enemy line and back, hitting everything she passes."
+description = "Shielded: throws her twinsword {length_cells} cells out and back, hitting enemies for {throw_damage+throw_might_scaling} and stunning them for {stun_time|cc} seconds, and gains a {catch_shield|shield} shield when she catches it. Unshielded: twirls through the enemy line and back, hitting everything she passes for {twirl_damage+twirl_might_scaling}."
 metadata/_custom_type_script = "uid://tnetpdu0vr2u"

@@ -6,5 +6,5 @@
 
 [resource]
 script = ExtResource("1")
-description = "Enemies within 1 hex of SHRED receive 30% less healing and Shield."
+description = "Enemies within {radius} hex of Shred receive {cut%} less healing and Shield."
 passives = Array[ExtResource("2")]([ExtResource("3")])

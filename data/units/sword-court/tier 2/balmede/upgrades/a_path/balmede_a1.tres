@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "While planted, she has a 35% chance to reflect incoming projectiles back at their shooter."
+description = "While planted, she has a {reflect_chance%} chance to reflect incoming projectiles back at their shooter."
 gambit_overrides = Dictionary[String, float]({
 "reflect_chance": 0.35
 })

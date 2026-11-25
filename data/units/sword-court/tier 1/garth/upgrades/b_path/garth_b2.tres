@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_kva63")
-description = "Cleave briefly stuns the enemies it hits."
+description = "Cleave stuns the enemies it hits for {stun_duration|cc} seconds."
 gambit_bonuses = Dictionary[String, float]({
 "stun_duration": 0.5
 })

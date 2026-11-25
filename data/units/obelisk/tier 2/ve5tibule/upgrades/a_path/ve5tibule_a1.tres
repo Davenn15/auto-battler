@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
-[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/a_path/phased_ally_regen.tres" id="3"]
+[ext_resource type="Resource" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/a_path/voltage_boost.tres" id="3_s3v17"]
 
 [resource]
 script = ExtResource("1")
-description = "His allies gain Charge over time while phased."
-passives = Array[ExtResource("2")]([ExtResource("3")])
+description = "All Voltage Vestibule gains is {bonus%} higher."
+passives = Array[ExtResource("2")]([ExtResource("3_s3v17")])

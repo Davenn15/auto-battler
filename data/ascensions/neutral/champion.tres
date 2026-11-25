@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 ascension_name = "Neutral Champion"
-description = "PLACEHOLDER. Choose one of your units: it gains 40 Might and 300 Health."
+description = "PLACEHOLDER. Choose one of your units: it gains {might} Might and {health} Health."
 tier = 1
 target = 1
 might = 40.0

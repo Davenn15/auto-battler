@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 upgrade_name = "Mass Return"
-description = "Revives one more ally."
+description = "Revives {count} allies."
 gambit_bonuses = Dictionary[String, float]({
 "count": 1.0
 })

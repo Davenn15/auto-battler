@@ -6,4 +6,4 @@
 script = ExtResource("1")
 stat = 8
 amount = 0.1
-description = "Bonus Vampirism."
+description = "+{amount%} Vampirism."

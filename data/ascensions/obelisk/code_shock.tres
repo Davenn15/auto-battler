@@ -12,7 +12,7 @@ knock_up = 0.75
 [resource]
 script = ExtResource("1")
 ascension_name = "Code Shock"
-description = "The first time MOTHER-CHIP's Gambit gives Mono-Virus to an enemy, or takes it off one, that enemy is knocked up for 0.75 seconds."
+description = "The first time Mother-Chip's Gambit gives Mono-Virus to an enemy, or takes it off one, that enemy is knocked up for {knock_up} seconds."
 tier = 4
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

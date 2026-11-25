@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "Rotor casts faster and needs less Charge."
+description = "Rotor casts faster (in {cast_time} seconds) and needs less Charge ({change})."
 passives = Array[ExtResource("2")]([ExtResource("3")])
 gambit_bonuses = Dictionary[String, float]({
 "cast_time": -0.3

@@ -11,7 +11,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "MALLET"
+display_name = "Mallet"
 tier = 3
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 passives = Array[ExtResource("2")]([ExtResource("4")])

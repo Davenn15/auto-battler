@@ -1,6 +1,6 @@
 class_name TwinBootEffect
 extends Passive
-## REPLK8R's hero Ascension: at the start of combat it becomes two units. Each has Share of
+## Replicator's hero Ascension: at the start of combat it becomes two units. Each has Share of
 ## its max health, health and stats (its attributes and wards) and all of its Keepsakes;
 ## the second is a copy beside it that keeps its upgrades and Gambit. Copies (summons) never
 ## split again.

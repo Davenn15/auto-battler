@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 gambit_name = "Overdrive"
-description = "Shields itself for 100 + 60% of Insight, and for 6 seconds its attacks gain the Hit Effect: deal an extra 25 + 30% of Insight as Insight damage."
+description = "Shields itself for {shield+shield_insight_scaling|shield}, and for {duration} seconds its attacks gain the Hit Effect: deal an extra {hit_damage+hit_insight_scaling} Insight damage."

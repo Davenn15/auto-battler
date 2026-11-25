@@ -10,4 +10,4 @@ damage = 30.0
 insight_scaling = 0.4
 gambit_name = "Discharge"
 cast_time = 0.5
-description = "For every 10 Voltage it has, spends them and fires a Volt at a random enemy within 3 cells, dealing 90 (+60% Insight) Insight damage."
+description = "For every {voltage_per_volt} Voltage it has, spends them and fires a Volt at a random enemy within {range_cells} cells, dealing {damage+insight_scaling} Insight damage."

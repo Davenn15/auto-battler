@@ -7,4 +7,4 @@ script = ExtResource("1")
 celerity_per_stack = 5.0
 max_stacks = 15
 passive_name = "Fixated"
-description = "Each hit on the same target as its last gives +5 Celerity, stacking up to 15 times (+75). Hitting a different target starts over."
+description = "Each hit on the same target as its last gives +{celerity_per_stack} Celerity, stacking up to {max_stacks} times. Hitting a different target starts over."

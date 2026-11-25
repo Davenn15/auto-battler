@@ -143,8 +143,55 @@ static func describe(keepsake: Keepsake) -> String:
 	if not is_zero_approx(keepsake.health):
 		lines.append("+%s Health" % _number(keepsake.health))
 	if keepsake.description != "":
-		lines.append(keepsake.description)
+		lines.append(Keyphrases.resolve_plain(keepsake.description, keepsake.description_context()))
+	if keepsake.is_empowered():
+		lines.append("Empowered (%s): %s" % [Shard.NAMES[keepsake.empowered_with],
+				Keyphrases.resolve_plain(keepsake.empowerment_text, keepsake.description_context())])
 	return "\n".join(lines)
+
+
+## The keepsake as BBCode for the popups: its name in bold, its stats, its description with
+## numbers and keyphrases, its Empowerment if it has one, and (a plain Keepsake) what each
+## Shard would empower it into, each with that Empowerment's numbers.
+static func describe_rich(keepsake: Keepsake, prefix: String = "", unit: BattleUnit = null) -> String:
+	var lines := describe_stats_only(keepsake)
+	var text := prefix + "[b]%s[/b]" % lines[0]
+	if lines.size() > 1:
+		text += "\n" + Keyphrases.format("\n".join(lines.slice(1)))
+	var ctx := keepsake.description_context().with_unit(unit)
+	if keepsake.description != "":
+		text += "\n" + Keyphrases.format(keepsake.description, ctx)
+	if keepsake.is_empowered():
+		text += "\n[color=#ffd04a]Empowered (%s):[/color] %s" % [Shard.NAMES[keepsake.empowered_with],
+				Keyphrases.format(keepsake.empowerment_text, ctx)]
+	elif not keepsake.is_shard:
+		for empowerment in keepsake.empowerments:
+			if empowerment == null or empowerment.description == "":
+				continue
+			var copy := keepsake.empowered(empowerment.shard)
+			if copy == null:
+				continue
+			text += "\n[color=#9a8a5a]Empower with %s:[/color] [color=#a8a8b0]%s[/color]" % [
+					Shard.NAMES[empowerment.shard], Keyphrases.format(empowerment.description, copy.description_context().with_unit(unit))]
+	return text
+
+
+## The name and stat lines only (no description).
+static func describe_stats_only(keepsake: Keepsake) -> PackedStringArray:
+	var lines: PackedStringArray = [keepsake.get_display_name()]
+	var bonuses := keepsake.get_stat_bonuses()
+	for stat in bonuses:
+		var amount: float = bonuses[stat]
+		if is_zero_approx(amount):
+			continue
+		var stat_name: String = Stats.STAT_NAMES.get(stat, str(stat))
+		if stat in [Stats.Stat.WRACK_CHANCE, Stats.Stat.WRACK_DAMAGE, Stats.Stat.VAMPIRISM]:
+			lines.append("+%s%% %s" % [_number(amount * 100.0), stat_name])
+		else:
+			lines.append("+%s %s" % [_number(amount), stat_name])
+	if not is_zero_approx(keepsake.health):
+		lines.append("+%s Health" % _number(keepsake.health))
+	return lines
 
 
 ## "20" for whole numbers, "2.5" otherwise.
@@ -188,7 +235,7 @@ func _refresh() -> void:
 	if _unit == null:
 		_status.text = "Click a unit to give it items."
 	else:
-		var unit_name := _unit.data.display_name.capitalize() if _unit.data != null else str(_unit.name)
+		var unit_name := _unit.data.get_title() if _unit.data != null else str(_unit.name)
 		var count := _unit.keepsakes.size()
 		_status.text = "%s (team %d): %d / %d items" % [unit_name, _unit.team, count, _unit.max_keepsakes()]
 		if _locked:

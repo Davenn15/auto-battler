@@ -1,13 +1,13 @@
 class_name NetworkField
 extends Node2D
-## M-PATH's Networked field (see NetworkGambit): a rectangle that, while it lasts, keeps
+## M-Path's Networked field (see NetworkGambit): a rectangle that, while it lasts, keeps
 ## evening out the health of every ally inside it. Health moves from the healthiest to the
 ## most hurt (by share of max health), so the total stays the same. B1 gives allies inside
 ## more Might, B2 more health regen and Insight Ward.
 
 const COLOR := PathLink.COLOR
 
-var source   # M-PATH; untyped because he may be freed
+var source   # M-Path; untyped because he may be freed
 var team: int
 var credit_id: int
 var rect: Rect2   # in world space
@@ -20,7 +20,7 @@ var insight_ward_bonus: float
 var _bonus := {}   # instance id -> FieldStatus on allies inside, for B1/B2
 var _time := 0.0
 var _inside: Array[BattleUnit] = []
-var _lock: Status = null   # ChargeLock on M-PATH while the field lasts
+var _lock: Status = null   # ChargeLock on M-Path while the field lasts
 
 
 func _physics_process(delta: float) -> void:
@@ -77,7 +77,7 @@ func _remove_bonus(id: int) -> void:
 	_bonus.erase(id)
 
 
-## M-PATH gains no Charge while his field is up. Call once when the field is laid.
+## M-Path gains no Charge while his field is up. Call once when the field is laid.
 func lock_charge(caster: BattleUnit) -> void:
 	_lock = ChargeLock.new()
 	caster.add_status(_lock)
@@ -117,7 +117,7 @@ func _draw() -> void:
 	draw_circle(middle, 4.0, Color(COLOR, 0.9 * fade))
 
 
-## On M-PATH while his field lasts: no Charge gain.
+## On M-Path while his field lasts: no Charge gain.
 class ChargeLock extends Status:
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return true

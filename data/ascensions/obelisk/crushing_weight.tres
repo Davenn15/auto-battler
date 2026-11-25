@@ -13,7 +13,7 @@ gambit_share = 0.15
 [resource]
 script = ExtResource("1")
 ascension_name = "Crushing Weight"
-description = "MALLET's attacks deal an extra 5% of the target's current health, and its Gambit deals an extra 15% of each target's current health."
+description = "Mallet's attacks deal an extra {attack_share%} of the target's current health, and its Gambit deals an extra {gambit_share%} of each target's current health."
 tier = 3
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

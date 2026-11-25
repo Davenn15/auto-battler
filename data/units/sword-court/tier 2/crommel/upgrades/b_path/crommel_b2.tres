@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_4otbc")
-description = "Precise Shot bounces to a nearby enemy for part of its damage."
+description = "Precise Shot bounces to an enemy within {ricochet_range_cells} cells for {ricochet_share%} of its damage."
 gambit_overrides = Dictionary[String, float]({
 "ricochet_share": 0.2
 })

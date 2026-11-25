@@ -14,7 +14,7 @@ duration = 3.0
 [resource]
 script = ExtResource("1")
 ascension_name = "Bulwark Strikes"
-description = "Garth's attacks gain the Hit Effect: Garth gains a Shield of 3% of his max health (up to 15%, lasting 3 seconds after the latest hit)."
+description = "Garth's attacks gain the Hit Effect: Garth gains a {share%|maxhp|shield} Shield (up to {cap%|maxhp|shield}, lasting {duration|shieldtime} seconds after the latest hit)."
 tier = 1
 affected_units = Array[ExtResource("4")]([ExtResource("3")])
 effect = SubResource("Effect")

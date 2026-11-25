@@ -7,4 +7,4 @@ script = ExtResource("1")
 ward_bonus = 20.0
 health_threshold = 0.6
 passive_name = "Hard Shell"
-description = "While above 60% health, BYTE has +20 to each Ward."
+description = "While above {health_threshold%} health, Byte has +{ward_bonus} to each Ward."

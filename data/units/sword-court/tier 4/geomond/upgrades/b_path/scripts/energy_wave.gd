@@ -50,7 +50,7 @@ func _physics_process(delta: float) -> void:
 			_hit_unit(unit)
 		elif ally_shield > 0.0 and unit.get_instance_id() != shooter_id:
 			_touched[unit.get_instance_id()] = true
-			unit.add_shield(ally_shield, ally_shield_duration, credit_id)
+			unit.add_shield(ally_shield, ally_shield_duration, credit_id, false, true)
 	global_position = to
 	remaining -= step
 	if remaining <= 0.0:

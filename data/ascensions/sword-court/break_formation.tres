@@ -22,25 +22,25 @@ bonus = 0.25
 
 [sub_resource type="Resource" id="Ascension_tier1"]
 script = ExtResource("2")
-description = "Your units deal 10% more damage to enemies with no adjacent allies."
+description = "Your units deal {bonus%} more damage to enemies with no adjacent allies."
 tier = 1
 effect = SubResource("Effect_tier1")
 
 [sub_resource type="Resource" id="Ascension_tier2"]
 script = ExtResource("2")
-description = "Your units deal 15% more damage to enemies with no adjacent allies."
+description = "Your units deal {bonus%} more damage to enemies with no adjacent allies."
 tier = 2
 effect = SubResource("Effect_tier2")
 
 [sub_resource type="Resource" id="Ascension_tier3"]
 script = ExtResource("2")
-description = "Your units deal 20% more damage to enemies with no adjacent allies."
+description = "Your units deal {bonus%} more damage to enemies with no adjacent allies."
 tier = 3
 effect = SubResource("Effect_tier3")
 
 [sub_resource type="Resource" id="Ascension_tier4"]
 script = ExtResource("2")
-description = "Your units deal 25% more damage to enemies with no adjacent allies."
+description = "Your units deal {bonus%} more damage to enemies with no adjacent allies."
 tier = 4
 effect = SubResource("Effect_tier4")
 

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The link also raises both units' Insight."
+description = "The link also gives both units +{insight_bonus} Insight."
 gambit_bonuses = Dictionary[String, float]({
 "insight_bonus": 30.0
 })

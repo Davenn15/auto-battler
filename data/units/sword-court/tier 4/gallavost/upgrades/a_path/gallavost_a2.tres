@@ -6,6 +6,6 @@
 
 [resource]
 script = ExtResource("1_240n4")
-description = "While unshielded, she gains Charge over time."
+description = "While unshielded, she gains {per_second} Charge per second."
 passives = Array[ExtResource("2_5befk")]([ExtResource("3_5befk")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

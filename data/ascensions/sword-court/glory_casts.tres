@@ -11,5 +11,5 @@ trigger = 2
 [resource]
 script = ExtResource("1")
 ascension_name = "Encore"
-description = "The first time each combat a unit in your army plays its Gambit for the third time, it gains Glory."
+description = "Once per combat: the first unit in your army to play its Gambit for the third time gains Glory."
 effect = SubResource("Effect")

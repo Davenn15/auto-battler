@@ -8,5 +8,5 @@ kind = 1
 every = 4
 amount = 0.35
 duration = 6.0
-description = "Every few attacks, gives Wrack Chance to the nearby ally who has dealt the most damage."
+description = "Every {every} attacks, gives +{amount%} Wrack Chance for {duration} seconds to the ally within {range_cells} cells who has dealt the most damage."
 metadata/_custom_type_script = "uid://b2kle04pd2vts"

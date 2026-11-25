@@ -1,7 +1,26 @@
-[gd_resource type="Resource" script_class="Keepsake" format=3 uid="uid://btpelym77b3mt"]
+[gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
-[ext_resource type="Resource" uid="uid://q5vbblu2nnrj" path="res://data/keepsakes/combined/opportunist/might__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_bq818"]
+[ext_resource type="Resource" path="res://data/keepsakes/combined/opportunist/might__wrack_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_q8tf7"]
+[ext_resource type="Script" path="res://data/keepsakes/empower/wrack_support_cut_effect.gd" id="4_briqv"]
+
+[sub_resource type="Resource" id="Resource_lmi4f"]
+script = ExtResource("2_bq818")
+description = "Your Wracks ignore {ignored%} of the target's Wards."
+effect_overrides = {
+"ignored": 0.5
+}
+
+[sub_resource type="Resource" id="Resource_uuepw"]
+script = ExtResource("4_briqv")
+
+[sub_resource type="Resource" id="Resource_xhxgo"]
+script = ExtResource("2_bq818")
+shard = 7
+description = "Enemies you Wrack receive {extra.cut%} less healing and shielding for {extra.duration} seconds."
+extra_effects = Array[ExtResource("3_q8tf7")]([SubResource("Resource_uuepw")])
 
 [resource]
 script = ExtResource("1_keep")
@@ -11,5 +30,6 @@ might = 20.0
 wrack_chance = 0.15
 wrack_damage = 0.15
 effect = ExtResource("2_effect")
-description = "Your Wracks ignore 30% of the target's Wards."
+description = "Your Wracks ignore {ignored%} of the target's Wards."
+empowerments = Array[ExtResource("2_bq818")]([SubResource("Resource_lmi4f"), SubResource("Resource_xhxgo")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

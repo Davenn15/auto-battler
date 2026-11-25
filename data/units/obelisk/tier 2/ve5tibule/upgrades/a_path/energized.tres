@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnergizedPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/obelisk/tier 2/ve5tibule/upgrades/a_path/scripts/energized_passive.gd" id="1_umoo5"]
+
+[resource]
+script = ExtResource("1_umoo5")
+passive_name = "Energized"
+description = "Each time Vestibule plays his Gambit, he gains {voltage} Voltage (after that Gambit clears his Voltage, so he keeps it for the next one)."

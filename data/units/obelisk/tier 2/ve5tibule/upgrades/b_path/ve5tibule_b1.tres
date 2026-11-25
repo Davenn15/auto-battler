@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-description = "The Gambit gifts one more ally."
+description = "The Gambit gifts {targets} allies."
 gambit_bonuses = Dictionary[String, float]({
 "targets": 1.0
 })

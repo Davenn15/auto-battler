@@ -1,8 +1,8 @@
 class_name ShredTriplePassive
 extends Passive
-## SHRED: three separate attacks on three separate attack timers. Each timer runs at the
+## Shred: three separate attacks on three separate attack timers. Each timer runs at the
 ## normal attack speed, a third of an interval apart, and each attack deals 1/Attacks of
-## a normal attack. So SHRED attacks three times as often for the same damage. Each one
+## a normal attack. So Shred attacks three times as often for the same damage. Each one
 ## is a full attack for on-hit effects and Hit Effects, but gives only 1/Attacks of the
 ## Charge an attack gives, so Charge builds at the normal rate.
 ## (The three staggered timers are run as one timer ticking three times as fast: the same

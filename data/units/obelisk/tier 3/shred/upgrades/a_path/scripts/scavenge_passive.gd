@@ -1,6 +1,6 @@
 class_name ShredScavengePassive
 extends Passive
-## SHRED A2: whenever SHRED kills an enemy with direct damage (attacks, Gambit hits), there's
+## Shred A2: whenever Shred kills an enemy with direct damage (attacks, Gambit hits), there's
 ## a Chance its player gains one of that enemy's Shards after the combat: picked at random
 ## from the Shards making up its Keepsakes (two per combined Keepsake, one per Shard).
 ## Nothing if it has no Keepsakes. Only real combats pay out (see ArmySpawner.earn_shard).

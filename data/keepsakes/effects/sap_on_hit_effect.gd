@@ -4,6 +4,9 @@ extends Passive
 
 @export var stat: Stats.Stat = Stats.Stat.INSIGHT
 @export var amount: float = 1.0
+## A second stat Sapped by the same hit (Brain Syringe's Insight Ward). 0 = none.
+@export var second_stat: Stats.Stat = Stats.Stat.INSIGHT_WARD
+@export var second_amount: float = 0.0
 
 
 func on_battle_start(unit: BattleUnit) -> void:
@@ -32,5 +35,7 @@ class SapHit extends HitEffect:
 		if not target.alive or not is_instance_valid(attacker):
 			return   # the Sapped stat goes to the attacker, so it needs one
 		# An item can let debuffs wrack, Sapping more.
-		var amount: float = effect.amount * attacker.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
-		Sap.stat(attacker, target, effect.stat, amount)
+		var multiplier: float = attacker.wrack_effect_multiplier(Stats.EffectKind.CONTROL, false, target)
+		Sap.stat(attacker, target, effect.stat, effect.amount * multiplier)
+		if effect.second_amount > 0.0:
+			Sap.stat(attacker, target, effect.second_stat, effect.second_amount * multiplier)

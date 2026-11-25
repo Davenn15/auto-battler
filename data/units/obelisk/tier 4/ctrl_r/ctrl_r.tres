@@ -7,11 +7,11 @@
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 4/ctrl_r/gambit/siphon_gambit.tres" id="5"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 4/ctrl_r/upgrades/a_path/ctrl_a.tres" id="6"]
 [ext_resource type="Resource" path="res://data/units/obelisk/tier 4/ctrl_r/upgrades/b_path/ctrl_b.tres" id="7"]
-[ext_resource type="Texture2D" uid="uid://cbr154g1a4l4l" path="res://assets/CTRL(R).png" id="8"]
+[ext_resource type="Texture2D" uid="uid://cbr154g1a4l4l" path="res://assets/Controller.png" id="8"]
 
 [resource]
 script = ExtResource("1")
-display_name = "CTRL(R)"
+display_name = "Controller"
 tier = 4
 upgrades = Array[ExtResource("3")]([ExtResource("6"), ExtResource("7")])
 max_health = 1250.0

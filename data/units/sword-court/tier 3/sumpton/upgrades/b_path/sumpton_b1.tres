@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_pav0f")
-description = "The bag's landing stuns."
+description = "The bag's landing stuns for {landing_stun|cc} seconds."
 gambit_overrides = Dictionary[String, float]({
 "landing_stun": 0.75
 })

@@ -1,8 +1,8 @@
 class_name BeamngBeamStatus
 extends BeamStatus
-## BEAM.NG's beam: Scour's continuous beam (BeamStatus), in pale orange, stronger the
+## Beam's beam: Scour's continuous beam (BeamStatus), in pale orange, stronger the
 ## farther its target is, and triggering effects more often with its B path.
-## Its B Gambit also uses copies of this, not attached to BEAM.NG, to fire extra beams.
+## Its B Gambit also uses copies of this, not attached to Beam, to fire extra beams.
 
 var bonus_per_cell: float = 0.1
 ## Extra multiplier for beams fired by its Gambit (1 = a normal attack's worth).

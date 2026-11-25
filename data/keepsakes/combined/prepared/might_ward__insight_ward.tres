@@ -1,15 +1,35 @@
 [gd_resource type="Resource" script_class="Keepsake" format=3]
 
-[ext_resource type="Script" uid="uid://c24ieqfh48rkj" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/keepsake.gd" id="1_keep"]
+[ext_resource type="Script" path="res://data/keepsakes/scripts/empowerment.gd" id="2_3y24s"]
 [ext_resource type="Resource" path="res://data/keepsakes/combined/prepared/might_ward__insight_ward_effect.tres" id="2_effect"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="3_6xte2"]
+
+[sub_resource type="Resource" id="Resource_8glxp"]
+script = ExtResource("2_3y24s")
+shard = 1
+description = "When the shield breaks, enemies within {break_radius} cells are stunned for {break_stun|cc} seconds."
+effect_overrides = {
+"break_radius": 1,
+"break_stun": 1.0
+}
+
+[sub_resource type="Resource" id="Resource_6sdr0"]
+script = ExtResource("2_3y24s")
+shard = 5
+description = "The shield is {amount|shield}."
+effect_overrides = {
+"amount": 650.0
+}
 
 [resource]
 script = ExtResource("1_keep")
 keepsake_name = "Prepared"
 first_shard = 1
 second_shard = 5
-effect = ExtResource("2_effect")
 might_ward = 35.0
 insight_ward = 35.0
-description = "You start combat with a 400 health shield."
+effect = ExtResource("2_effect")
+description = "You start combat with a {amount|shield} health shield."
+empowerments = Array[ExtResource("2_3y24s")]([SubResource("Resource_8glxp"), SubResource("Resource_6sdr0")])
 metadata/_custom_type_script = "uid://c24ieqfh48rkj"

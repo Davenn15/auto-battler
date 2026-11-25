@@ -400,6 +400,7 @@ func _build_hover_tip() -> void:
 	_hover_text.custom_minimum_size = Vector2(230, 0)
 	_hover_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hover_text.add_theme_font_size_override("normal_font_size", 11)
+	Keyphrases.style_label(_hover_text, 11)
 	_hover_text.add_theme_font_size_override("bold_font_size", 11)
 	_hover_tip.add_child(_hover_text)
 	_hover_tip.hide()
@@ -418,11 +419,7 @@ func _update_hover_tip() -> void:
 		return
 	if index != _hover_index:
 		_hover_index = index
-		var lines := ItemToolbox.describe(_unit.keepsakes[index]).split("\n")
-		var text := "[b]%s[/b]" % lines[0]
-		if lines.size() > 1:
-			text += "\n" + Keyphrases.format("\n".join(lines.slice(1)))
-		_hover_text.text = text
+		_hover_text.text = ItemToolbox.describe_rich(_unit.keepsakes[index], "", _unit)
 		_hover_tip.size = Vector2.ZERO   # shrink to the new text
 	_hover_tip.show()
 	var mouse := get_global_mouse_position()
@@ -458,6 +455,7 @@ func _set_tab(t: Tab) -> void:
 func _set_text_size(index: int) -> void:
 	_size_index = index
 	_text.add_theme_font_size_override("normal_font_size", TEXT_SIZES[index])
+	Keyphrases.style_label(_text, TEXT_SIZES[index])
 	_text.add_theme_font_size_override("bold_font_size", TEXT_SIZES[index])
 
 
@@ -483,12 +481,15 @@ func _fit() -> void:
 func _abilities_text(u: BattleUnit) -> String:
 	var lines: PackedStringArray = []
 	for passive in u.passives:
-		lines.append(_ability_line("Passive", _ability_name(passive, passive.passive_name, "Passive"), passive.description))
-	if u.gambit != null:
-		lines.append(_ability_line("Gambit", _ability_name(u.gambit, u.gambit.gambit_name, "Gambit"), u.gambit.description))
+		lines.append(_ability_line("Passive", _ability_name(passive, passive.passive_name, "Passive"), passive.description,
+				DescriptionContext.of(passive).with_unit(u)))
+	if u.gambit != null:   # the unit's own Gambit: its upgrades' bonuses are already in it
+		lines.append(_ability_line("Gambit", _ability_name(u.gambit, u.gambit.gambit_name, "Gambit"), u.gambit.description,
+				DescriptionContext.of(u.gambit).with_unit(u, true)))
 	for ascension in u.ascensions:
 		if ascension.is_chosen():
-			lines.append(_ability_line("Ascension", ascension.get_display_name(), ascension.description))
+			lines.append(_ability_line("Ascension", ascension.get_display_name(), ascension.description,
+					ascension.description_context().with_unit(u)))
 	return "\n".join(lines).strip_edges()
 
 
@@ -501,15 +502,16 @@ func _upgrades_text(u: BattleUnit) -> String:
 	var lines: PackedStringArray = []
 	for first in u.data.upgrades.size():
 		var upgrade := u.data.upgrades[first]
-		lines.append(_upgrade_line([first], upgrade, owned.has(upgrade), 0))
+		lines.append(_upgrade_line(u, [first], upgrade, owned.has(upgrade), 0))
 		for second in upgrade.next_choices.size():
 			var final := upgrade.next_choices[second]
-			lines.append(_upgrade_line([first, second], final, owned.has(final), 1))
+			lines.append(_upgrade_line(u, [first, second], final, owned.has(final), 1))
 		lines.append("")
 	return "\n".join(lines).strip_edges()
 
 
-func _upgrade_line(path: Array, upgrade: Upgrade, has: bool, depth: int) -> String:
+func _upgrade_line(u: BattleUnit, path: Array, upgrade: Upgrade, has: bool, depth: int) -> String:
+	var data := u.data
 	var color := OWNED if has else NOT_OWNED
 	var title := upgrade.upgrade_name if upgrade.upgrade_name != "Upgrade" else ""
 	var head := "[indent]" if depth > 0 else ""
@@ -517,14 +519,23 @@ func _upgrade_line(path: Array, upgrade: Upgrade, has: bool, depth: int) -> Stri
 	var line := "%s[color=%s][b]%s%s[/b]%s[/color]" % [head, color, "✓ " if has else "", RandomTeams.path_label(path),
 			("  " + title) if title != "" else ""]
 	if upgrade.description != "":
-		var text := Keyphrases.format(upgrade.description) if has else Keyphrases.plain(upgrade.description)
+		# Its numbers: the totals once taken, from the unit's stats (as if at that level).
+		var ctx := DescriptionContext.for_upgrade(data, path)
+		if has:
+			ctx.with_unit(u, Upgrade.touches_gambit(upgrade))
+		else:
+			ctx.with_unit_at_level(u, path.size(), Upgrade.touches_gambit(upgrade))
+		var text := Keyphrases.format(upgrade.description, ctx) if has else Keyphrases.plain(upgrade.description, ctx)
 		line += "\n[color=%s]%s[/color]" % [DESCRIPTION if has else NOT_OWNED, text]
 	return line + tail
 
 
 func _refresh_header(u: BattleUnit) -> void:
 	_portrait.texture = u.data.sprite if u.data != null else null
-	var title := u.data.display_name.capitalize() if u.data != null else str(u.name)
+	var title := u.data.get_title() if u.data != null else str(u.name)
+	var adjective := UnitData.path_adjective(u.get_chosen_upgrades()) if u.data != null else ""
+	if adjective != "":   # "Mystical Bremes": the upgrade path's word, in the upgrade button's cyan
+		title = "[i][color=%s]%s[/color][/i] %s" % [MatchHud.UPGRADE_CYAN.to_html(false), adjective, title]
 	var line := "[font_size=17][b]%s[/b][/font_size]" % title
 	if u.is_summon:
 		line += "  [color=%s](summon)[/color]" % DIM
@@ -577,6 +588,8 @@ func _stat_table(u: BattleUnit) -> String:
 		extra.append([Stats.STAT_NAMES[Stats.Stat.IMMOVABILITY], _stat_value(u, Stats.Stat.IMMOVABILITY)])
 	if _shown_stat(u, Stats.Stat.GRIT) > 0.0:
 		extra.append([Stats.STAT_NAMES[Stats.Stat.GRIT], _stat_value(u, Stats.Stat.GRIT)])
+	if _shown_stat(u, Stats.Stat.SCAR) > 0.0:
+		extra.append([Stats.STAT_NAMES[Stats.Stat.SCAR], "%d%%" % roundi(_shown_stat(u, Stats.Stat.SCAR))])
 	extra.append(["Damage", _attack_type_text(u)])
 	extra.append(["Range", "[b]%d[/b]" % u.attack_range])
 	extra.append(["Attack every", "[b]%.2fs[/b]" % u.get_attack_cooldown()])
@@ -598,7 +611,7 @@ func _stat_table(u: BattleUnit) -> String:
 
 
 ## The kind of damage the unit's attacks deal (after anything changing it), in that damage
-## type's colour; "None" for a unit that never attacks (GATE.W(A)).
+## type's colour; "None" for a unit that never attacks (Gateway).
 func _attack_type_text(u: BattleUnit) -> String:
 	if u.data != null and u.data.passives.any(func(p): return p is GatePassive):
 		return "[b]None[/b]"
@@ -694,10 +707,10 @@ static func _format(stat: Stats.Stat, value: float, bare: bool = false) -> Strin
 	return str(roundi(value))
 
 
-static func _ability_line(kind: String, ability_name: String, description: String) -> String:
+static func _ability_line(kind: String, ability_name: String, description: String, ctx: DescriptionContext = null) -> String:
 	var line := "[color=%s]%s[/color]  [b]%s[/b]" % [DIM, kind.to_upper(), ability_name]
 	if description != "":
-		line += "\n[color=%s]%s[/color]" % [DESCRIPTION, Keyphrases.format(description)]
+		line += "\n[color=%s]%s[/color]" % [DESCRIPTION, Keyphrases.format(description, ctx)]
 	return line + "\n"
 
 

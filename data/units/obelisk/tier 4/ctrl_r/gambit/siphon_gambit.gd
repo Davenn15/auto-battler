@@ -1,8 +1,8 @@
 class_name CtrlSiphonGambit
 extends Gambit
-## CTRL(R)'s base Gambit: launches siphon drones at the enemies in range with the most
+## Controller's base Gambit: launches siphon drones at the enemies in range with the most
 ## health, one each (doubling up if there are fewer enemies). Each beams away a share of
-## its enemy's max health, then flies back and heals CTRL(R) that much (see CtrlDrones).
+## its enemy's max health, then flies back and heals Controller that much (see CtrlDrones).
 
 ## Drones per cast.
 @export var drones: int = 2
