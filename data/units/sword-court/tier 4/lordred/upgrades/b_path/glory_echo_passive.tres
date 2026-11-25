@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="GloryEchoPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/lordred/upgrades/b_path/scripts/glory_echo_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+description = "The first time each combat an ally gains Glory, Lordred gains Glory too."

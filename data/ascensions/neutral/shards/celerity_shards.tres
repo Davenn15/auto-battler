@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/shard_boost_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect"]
+script = ExtResource("3")
+shard_kind = 2
+wrack_chance = 0.05
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "Each Celerity Shard your units hold, alone or as part of a Keepsake, also gives {wrack_chance%} Wrack Chance. You get a Celerity Shard."
+tier = 1
+granted_shards = 1
+shard_kind = 2
+effect = SubResource("Effect")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Each Celerity Shard your units hold, alone or as part of a Keepsake, also gives {wrack_chance%} Wrack Chance. You get two Celerity Shards."
+tier = 2
+granted_shards = 2
+shard_kind = 2
+effect = SubResource("Effect")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Each Celerity Shard your units hold, alone or as part of a Keepsake, also gives {wrack_chance%} Wrack Chance. You get three Celerity Shards."
+tier = 3
+granted_shards = 3
+shard_kind = 2
+effect = SubResource("Effect")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Each Celerity Shard your units hold, alone or as part of a Keepsake, also gives {wrack_chance%} Wrack Chance. You get four Celerity Shards."
+tier = 4
+granted_shards = 4
+shard_kind = 2
+effect = SubResource("Effect")
+
+[resource]
+script = ExtResource("1")
+family_name = "Celerity Shards"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

@@ -377,6 +377,25 @@ func is_permanent_stat_gain() -> bool:
 	return false
 
 
+## Called on each of the unit's statuses after it gains a Shield (BattleUnit.add_shield),
+## with the amount it gained.
+func on_shield_gained(_unit: BattleUnit, _amount: float) -> void:
+	pass
+
+## Called on each of the unit's statuses after it spends Voltage: its Gambit clearing it,
+## or a Gambit using it (Battery's Discharge and Railgun). See VoltageStatus.
+func on_voltage_spent(_unit: BattleUnit, _amount: float) -> void:
+	pass
+
+## Called on each of the unit's statuses after it creates Shards or Keepsakes during combat
+## (KeepsakeForge.created): `pieces` is 1 per Shard and 2 per Keepsake.
+func on_keepsake_created(_unit: BattleUnit, _pieces: int) -> void:
+	pass
+
+## Called on each of the unit's statuses when it Revives (Revive.start).
+func on_revived(_unit: BattleUnit) -> void:
+	pass
+
 ## Called on each of the unit's statuses whenever it gains permanent stats, from any
 ## source: a permanent-gain status being added, or a stacking gain (Keepsakes, Silt's
 ## passive, Sap, Rallying Cry...) going up. `gains` is {Stats.Stat: amount gained now}.

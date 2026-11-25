@@ -8,12 +8,8 @@ extends Gambit
 
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
 
-## Share of max health the copy comes back with (0.4 = 40%).
+## Share of max health the copy comes back with (0.4 = 40%). It then decays (see Revive).
 @export var health_fraction: float = 0.4
-## Damage it takes per second at first, as a share of its max health (0.02 = 2%)...
-@export var decay_start: float = 0.02
-## ...growing by this much more every second.
-@export var decay_ramp: float = 0.02
 ## B2: Celerity the copy gains. 0 = none.
 @export var celerity_bonus: float = 0.0
 
@@ -48,10 +44,13 @@ func execute(caster: BattleUnit) -> void:
 	# Built as a normal unit (so it keeps its own stats and Gambit), then made a summon.
 	copy.is_summon = true
 	copy._summoner_id = caster.get_credit_id()
+	Revive.mark(copy)
 	caster.get_tree().call_group("battle_manager", "add_summon", copy)
+	if not is_instance_valid(copy) or copy.is_queued_for_deletion():
+		return
 	# After add_summon: start_combat clears statuses.
-	copy.set_health(copy.max_health * health_fraction)
-	copy.add_status(RevivedStatus.new(decay_start, decay_ramp, celerity_bonus))
+	copy.add_status(RevivedStatus.new(celerity_bonus))
+	Revive.start(copy, copy.max_health * health_fraction)
 	caster.add_status(RevivedLinkStatus.new(copy))
 	KeepsakeVfx.recycle_orb(caster.global_position, copy)
 	copy.show_float_text("Repurposed", VacuumChannel.VACUUM_COLOR)
@@ -86,30 +85,18 @@ func _spawn_cell(caster: BattleUnit, record: Dictionary) -> Vector2i:
 	return NO_CELL
 
 
-## On a revived copy: ramping damage every second (its only timer), and B2's Celerity.
+## On a revived copy: B2's Celerity (the decay is Revive's).
 class RevivedStatus extends Status:
-	var start: float
-	var ramp: float
 	var celerity_bonus: float
-	var _time := 0.0
 
-	func _init(p_start: float, p_ramp: float, p_celerity: float) -> void:
-		start = p_start
-		ramp = p_ramp
+	func _init(p_celerity: float) -> void:
 		celerity_bonus = p_celerity
 
-	func on_applied(unit: BattleUnit) -> void:
-		if unit.sprite != null:
-			unit.modulate = Color(0.75, 1.0, 0.75)   # a sickly green: it's borrowed time
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return false
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
 		return value + celerity_bonus if stat == Stats.Stat.CELERITY else value
-
-	func tick(unit: BattleUnit, delta: float) -> void:
-		if not unit.active:
-			return
-		_time += delta
-		unit.add_running_damage("self_burn", unit.take_warded_damage(unit.max_health * (start + ramp * _time) * delta, false, Stats.DamageType.PURE), Color(0.75, 0.9, 0.6))
 
 
 ## On Recycloid while his copy lives: no Charge for him.

@@ -219,7 +219,11 @@ func is_occupied(cell: Vector2i) -> bool:
 ## The unit standing in `cell`, or null. The explicit return type is what lets
 ## callers write `var unit := grid.unit_at(cell)` without a type-inference error.
 func unit_at(cell: Vector2i) -> BattleUnit:
-	return _occupants.get(cell) as BattleUnit
+	var occupant: Variant = _occupants.get(cell)
+	if occupant != null and not is_instance_valid(occupant):
+		_release(cell)   # a freed unit that never let its cell go: the cell is free
+		return null
+	return occupant as BattleUnit
 
 
 ## True if `cell` exists and nobody is standing in it.
@@ -246,8 +250,19 @@ func occupy(cell: Vector2i, unit: Node) -> void:
 func vacate(cell: Vector2i, unit: Node) -> void:
 	# Only release the cell if this unit is the one holding it.
 	if _occupants.get(cell) == unit:
-		_occupants.erase(cell)
-		_astar.set_point_disabled(_ids[cell], false)
+		_release(cell)
+
+
+## Lets go of every cell `unit` holds (when it leaves the board for good).
+func vacate_all(unit: Node) -> void:
+	for cell in _occupants.keys():
+		if _occupants[cell] == unit:
+			_release(cell)
+
+
+func _release(cell: Vector2i) -> void:
+	_occupants.erase(cell)
+	_astar.set_point_disabled(_ids[cell], false)
 
 
 ## Frees every cell, for when the whole board is cleared and set up again.

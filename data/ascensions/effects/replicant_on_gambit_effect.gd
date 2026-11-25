@@ -46,6 +46,9 @@ func spawn(unit: BattleUnit) -> void:
 		replicant.place_at(cell)
 		replicant.get_tree().call_group("battle_manager", "add_summon", replicant)
 		if is_instance_valid(replicant) and not replicant.is_queued_for_deletion():
+			if unit.gambit is SeedGambit:   # a Replicator: its Replicant upgrades apply to these too
+				var seeds := unit.gambit as SeedGambit
+				seeds.buff_replicant(replicant, seeds.snapshot(unit))
 			KeepsakeVfx.missile_blast(parent, replicant.global_position, 34.0, Replicator.COLOR)
 
 

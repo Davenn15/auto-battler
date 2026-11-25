@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/blood_oath_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+grit = 20.0
+vampirism = 0.05
+every = 3
+bleed_share = 0.1
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+grit = 35.0
+vampirism = 0.1
+every = 2
+bleed_share = 0.15
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "Choose a unit: it gains {grit} Grit and {vampirism%} Vampirism, and every {every} attacks, its attack gains the Hit Effect: Bleed for {bleed_share%} of the target's max health."
+tier = 2
+target = 1
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Choose a unit: it gains {grit} Grit and {vampirism%} Vampirism, and every {every} attacks, its attack gains the Hit Effect: Bleed for {bleed_share%} of the target's max health."
+tier = 3
+target = 1
+effect = SubResource("Effect_tier3")
+
+[resource]
+script = ExtResource("1")
+family_name = "Blood Oath"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier2"), SubResource("Ascension_tier3")])

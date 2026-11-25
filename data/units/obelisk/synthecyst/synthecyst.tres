@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="UnitData" format=3]
+
+[ext_resource type="Script" path="res://scripts/unit_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Synthecyst"
+summon_only = true
+max_health = 600.0
+placement = 0
+attack_range_cells = 1
+max_charge = 100.0
+starting_charge = 0.0
+might = 60.0
+insight = 20.0
+celerity = 40.0
+might_ward = 30.0
+insight_ward = 30.0
+celerity_ward = 30.0
+attack_damage_type = 0

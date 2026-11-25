@@ -12,6 +12,8 @@ signal wracked(unit: BattleUnit)
 signal status_added(unit: BattleUnit, status: Status)
 ## Emitted when this unit gains permanent stats (see gain_permanent_stats).
 signal permanent_stats_gained(unit: BattleUnit, gains: Dictionary, copied: bool)
+## Emitted when this unit gains a stack of Glory (see gain_glory).
+signal glory_earned(unit: BattleUnit)
 ## Emitted when this unit is stunned or silenced (Codger's passive watches for it).
 signal crowd_controlled(unit: BattleUnit)
 ## Emitted when this unit CASTS its Gambit: its Charge is full and spent, and its cast time
@@ -327,6 +329,7 @@ func gain_glory() -> bool:
 	update_glory_badge()
 	for status in statuses.duplicate():
 		status.on_glory_gained(self)
+	glory_earned.emit(self)
 	return true
 
 
@@ -2780,6 +2783,8 @@ func add_shield(amount: float, duration: float, source_id: int, locks_charge := 
 	add_status(shield)
 	place_own_shield(shield)
 	get_tree().call_group("damage_tracker", "record_shielding", source_id, amount)
+	for status in statuses.duplicate():
+		status.on_shield_gained(self, amount)
 	return amount
 
 
@@ -2941,9 +2946,7 @@ func set_max_charge(value: float) -> void:
 func _die() -> void:
 	alive = false
 	remove_from_group("units")
-	grid.vacate(cell, self)
-	if _moving and not _step_switched:
-		grid.vacate(_dest_cell, self)
+	grid.vacate_all(self)   # every cell it holds, even one a teleport mid-step left reserved
 	for status in statuses.duplicate():
 		status.on_death(self)
 	died.emit(self)

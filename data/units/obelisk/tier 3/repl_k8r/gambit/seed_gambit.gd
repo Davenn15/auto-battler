@@ -104,11 +104,18 @@ func _spawn(owner: Dictionary, parent: Node, cell: Vector2i, start_share: float)
 		return
 	# After add_summon (start_combat sets full health and clears statuses).
 	replicant.set_health(replicant.max_health * start_share)
+	buff_replicant(replicant, owner)
+	KeepsakeVfx.missile_blast(parent, replicant.global_position, 34.0, Replicator.COLOR)
+
+
+## Gives `replicant` Replicator's Replicant upgrades (A1 replanting, A2 Mono-Virus). Every
+## Replicant Replicator makes gets them, from its seeds or otherwise (Spawn Protocol).
+## `owner`: Replicator's snapshot, for the seeds A1 plants.
+func buff_replicant(replicant: BattleUnit, owner: Dictionary) -> void:
 	if virus_stacks > 0:
 		replicant.add_status(ReplicantVirusStatus.new(virus_stacks))
 	if replant_on_death > 0.0:
 		replicant.add_status(ReplantStatus.new(self, owner))
-	KeepsakeVfx.missile_blast(parent, replicant.global_position, 34.0, Replicator.COLOR)
 
 
 ## The ally near `from` with the lowest health that isn't a Replicator (nor, if `skip` is

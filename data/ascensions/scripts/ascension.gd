@@ -71,6 +71,12 @@ enum Target { ARMY, CHOSEN_UNIT }
 @export var empowered_keepsakes: int = 0
 ## Random Shards the player gets in their inventory when they take this Ascension.
 @export var random_shards: int = 0
+## Shards of Shard Kind the player gets in their inventory when they take this (Shard
+## Ascensions: as many as the tier).
+@export var granted_shards: int = 0
+## Random full Keepsakes the player gets in their inventory when they take this.
+@export var granted_keepsakes: int = 0
+@export var shard_kind: Shard.Kind = Shard.Kind.MIGHT
 
 @export_group("Effect")
 ## Run on every affected unit at battle start, like a Keepsake's effect.

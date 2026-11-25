@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/overcharge_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+start_voltage = 20.0
+refund_share = 0.5
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+start_voltage = 20.0
+refund_share = 0.75
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "Choose a unit: it starts combat with {start_voltage} Voltage, and whenever it spends Voltage, it gets {refund_share%} of it back."
+tier = 3
+target = 1
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "Choose a unit: it starts combat with {start_voltage} Voltage, and whenever it spends Voltage, it gets {refund_share%} of it back."
+tier = 4
+target = 1
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Overcharge"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

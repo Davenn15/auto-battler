@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LowHealthFuryPassive" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/scripts/low_health_fury_passive.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+max_bonus = 75.0
+boost_wards = true
+description = "Lordred gains Wards as his health falls, up to +{max_bonus} each."

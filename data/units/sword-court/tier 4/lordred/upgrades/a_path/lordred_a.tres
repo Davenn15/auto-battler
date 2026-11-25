@@ -4,12 +4,12 @@
 [ext_resource type="Script" path="res://scripts/passive.gd" id="2_i8coe"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/lordred_a1.tres" id="2_sht3d"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/lordred_a2.tres" id="3_b2wfp"]
-[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/shared_gains_passive.tres" id="5_k2fum"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/lordred/upgrades/a_path/low_health_fury_passive.tres" id="5_k2fum"]
 
 [resource]
 script = ExtResource("1_gdpk0")
 upgrade_name = "Ruinous"
-description = "Whenever an ally gains permanent stats, Lordred gains {share%} of them too."
+description = "Lordred gains Might, Insight and Celerity as his health falls, up to +{max_bonus} each."
 passives = Array[ExtResource("2_i8coe")]([ExtResource("5_k2fum")])
 next_choices = Array[ExtResource("1_gdpk0")]([ExtResource("2_sht3d"), ExtResource("3_b2wfp")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

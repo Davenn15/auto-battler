@@ -21,6 +21,7 @@ func fire(unit: BattleUnit) -> bool:
 			ally.swap_keepsake_in_combat(made)
 			ally.show_float_text(made.get_display_name(), ColumnWeapon.LIGHT)
 			KeepsakeVfx.gift_icon(unit.global_position, ally, made)
+			KeepsakeForge.created_item(unit, made)
 	ally.add_shield(shield, shield_duration, unit.get_instance_id())
 	return true
 

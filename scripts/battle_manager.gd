@@ -85,6 +85,8 @@ func add_summon(unit: BattleUnit) -> void:
 	if phase != Phase.COMBAT:
 		unit.queue_free()
 		return
+	if Synthecyst.intercept(self, unit, _team_ascensions(unit.team, unit)):
+		return   # absorbed into (or turned into) the army's Synthecyst
 	unit.died.connect(_on_unit_died)
 	unit.give_ascensions(_team_ascensions(unit.team, unit))
 	unit.start_combat()

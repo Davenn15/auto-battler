@@ -1,0 +1,58 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/volatile_shells_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+health_share = 0.15
+stun = 0.5
+radius_cells = 1
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+health_share = 0.2
+stun = 0.5
+radius_cells = 1
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+health_share = 0.25
+stun = 0.75
+radius_cells = 1
+
+[sub_resource type="Resource" id="Effect_tier4"]
+script = ExtResource("3")
+health_share = 0.3
+stun = 1.0
+radius_cells = 1
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "When one of your Constructs dies, it explodes, dealing {health_share%} of its max health as Insight damage to enemies within {radius_cells} cells and stunning them for {stun|cc} seconds."
+tier = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "When one of your Constructs dies, it explodes, dealing {health_share%} of its max health as Insight damage to enemies within {radius_cells} cells and stunning them for {stun|cc} seconds."
+tier = 2
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "When one of your Constructs dies, it explodes, dealing {health_share%} of its max health as Insight damage to enemies within {radius_cells} cells and stunning them for {stun|cc} seconds."
+tier = 3
+effect = SubResource("Effect_tier3")
+
+[sub_resource type="Resource" id="Ascension_tier4"]
+script = ExtResource("2")
+description = "When one of your Constructs dies, it explodes, dealing {health_share%} of its max health as Insight damage to enemies within {radius_cells} cells and stunning them for {stun|cc} seconds."
+tier = 4
+effect = SubResource("Effect_tier4")
+
+[resource]
+script = ExtResource("1")
+family_name = "Volatile Shells"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3"), SubResource("Ascension_tier4")])

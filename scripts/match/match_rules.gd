@@ -446,7 +446,20 @@ static func reroll_ascension(player: PlayerState, round_number: int, slot: int) 
 ## benefits or still can on its path (with Aura they'll have for its upgrades), 1/3x if
 ## they'd have to buy one they can still afford, 0 if neither. A pair (needs all): 3x
 ## with both owned, 1x with one, 1/3x with none, 0 if the missing ones can't be afforded.
+## Shard Ascensions: SHARD_ASCENSION_REPEAT_WEIGHT as likely for each one already owned.
 static func ascension_weight(player: PlayerState, ascension: Ascension) -> float:
+	var weight := _unit_weight(player, ascension)
+	if ascension.granted_shards > 0:
+		var owned := player.ascensions.filter(func(a): return a.granted_shards > 0).size()
+		weight *= pow(SHARD_ASCENSION_REPEAT_WEIGHT, owned)
+	return weight
+
+
+## Each Shard Ascension a player owns makes every other one this much as likely (1/3 each).
+const SHARD_ASCENSION_REPEAT_WEIGHT := 1.0 / 3.0
+
+
+static func _unit_weight(player: PlayerState, ascension: Ascension) -> float:
 	if not ascension.has_unit_requirement():
 		return 1.0
 	var budget := aura_budget(player)
@@ -510,6 +523,14 @@ static func take_ascension(player: PlayerState, slot: int, unit_index: int = -1)
 		var pool := shards()
 		if not pool.is_empty():
 			player.inventory.append(pool[randi() % pool.size()])
+	for i in ascension.granted_keepsakes:   # e.g. Fabrication
+		var made := keepsakes()
+		if not made.is_empty():
+			player.inventory.append(made[randi() % made.size()])
+	for i in ascension.granted_shards:   # a Shard Ascension: Shards of its own kind
+		var shard := Keepsake.shard_of(ascension.shard_kind)
+		if shard != null:
+			player.inventory.append(shard)
 	player.ascension_offers.clear()
 	# Buffs a unit they don't own yet: their next fresh shop is sure to offer it.
 	var roster := roster_for(player.faction)

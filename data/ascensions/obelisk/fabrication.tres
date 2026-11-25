@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="AscensionFamily" format=3]
+
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension_family.gd" id="1"]
+[ext_resource type="Script" path="res://data/ascensions/scripts/ascension.gd" id="2"]
+[ext_resource type="Script" path="res://data/ascensions/effects/fabrication_effect.gd" id="3"]
+
+[sub_resource type="Resource" id="Effect_tier1"]
+script = ExtResource("3")
+health = 100.0
+insight = 10.0
+
+[sub_resource type="Resource" id="Effect_tier2"]
+script = ExtResource("3")
+health = 150.0
+insight = 15.0
+
+[sub_resource type="Resource" id="Effect_tier3"]
+script = ExtResource("3")
+health = 200.0
+insight = 20.0
+
+[sub_resource type="Resource" id="Ascension_tier1"]
+script = ExtResource("2")
+description = "You get a random Keepsake. Your units holding at least one Keepsake gain {health} Health and {insight} Insight."
+tier = 1
+granted_keepsakes = 1
+effect = SubResource("Effect_tier1")
+
+[sub_resource type="Resource" id="Ascension_tier2"]
+script = ExtResource("2")
+description = "You get a random Keepsake. Your units holding at least one Keepsake gain {health} Health and {insight} Insight."
+tier = 2
+granted_keepsakes = 1
+effect = SubResource("Effect_tier2")
+
+[sub_resource type="Resource" id="Ascension_tier3"]
+script = ExtResource("2")
+description = "You get a random Keepsake. Your units holding at least one Keepsake gain {health} Health and {insight} Insight."
+tier = 3
+granted_keepsakes = 1
+effect = SubResource("Effect_tier3")
+
+[resource]
+script = ExtResource("1")
+family_name = "Fabrication"
+versions = Array[ExtResource("2")]([SubResource("Ascension_tier1"), SubResource("Ascension_tier2"), SubResource("Ascension_tier3")])

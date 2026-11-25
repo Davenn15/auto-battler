@@ -9,5 +9,6 @@ taunt_time = 3.0
 ward_per_taunt = 25.0
 ward_time = 3.5
 cast_time = 0.75
-description = "Taunts enemies within {range_cells} cells into attacking him for {taunt_time|cc} seconds, and gains {ward_per_taunt} Wards for each one taunted, for {ward_time} seconds."
+glory_on_survive = true
+description = "Taunts enemies within {range_cells} cells into attacking him for {taunt_time|cc} seconds, and gains {ward_per_taunt} Wards for each one taunted, for {ward_time} seconds. The first time each combat he is still alive when those Wards end, he gains Glory."
 metadata/_custom_type_script = "uid://csx1sbsldjj8r"
