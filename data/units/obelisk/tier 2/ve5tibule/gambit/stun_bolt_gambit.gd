@@ -1,7 +1,7 @@
 class_name StunBoltGambit
 extends Gambit
-## Vestibule's Gambit: sends spiralling stun bolts at the enemies within Range Cells that
-## have dealt the most damage this combat (one bolt each; with fewer enemies, fewer bolts).
+## Vestibule's Gambit: sends spiralling stun bolts at the nearest enemies within Range
+## Cells (one bolt each; with fewer enemies, fewer bolts).
 ## Each deals Damage + Insight Scaling x Insight and stuns for Stun Time.
 ## A2: the bolts also apply his Hit Effects.
 
@@ -40,8 +40,8 @@ func execute(caster: BattleUnit) -> void:
 		bolt.start = caster.global_position
 
 
-## The enemies in range that have dealt the most damage this combat (ties go to the nearest),
-## up to Bolts of them, skipping any that can't be targeted.
+## The nearest enemies in range (ties go to whoever has dealt more damage this combat), up
+## to Bolts of them, skipping any that can't be targeted.
 func _targets(caster: BattleUnit) -> Array:
 	var found: Array = []
 	for node in caster.get_tree().get_nodes_in_group("units"):
@@ -50,10 +50,12 @@ func _targets(caster: BattleUnit) -> Array:
 				and caster.grid.get_distance(caster.cell, unit.cell) <= range_cells:
 			found.append(unit)
 	found.sort_custom(func(a, b):
-		if a.damage_dealt != b.damage_dealt:
-			return a.damage_dealt > b.damage_dealt
-		return caster.grid.get_distance(caster.cell, a.cell) < caster.grid.get_distance(caster.cell, b.cell))
-	return found.slice(0, maxi(bolts, 0))
+		var da: int = caster.grid.get_distance(caster.cell, a.cell)
+		var db: int = caster.grid.get_distance(caster.cell, b.cell)
+		if da != db:
+			return da < db
+		return a.damage_dealt > b.damage_dealt)
+	return found.slice(0, maxi(bolts + ExtraVolleyEffect.extra_on(caster), 0))   # Redundancy: one more
 
 
 ## The bolt landing: damage (it can Wrack as Gambit damage), a stun, and with A2 his Hit Effects.

@@ -1,15 +1,21 @@
 [gd_resource type="Resource" script_class="SlamGambit" format=3 uid="uid://chkqrbk021e4s"]
 
-[ext_resource type="Script" uid="uid://doce5a42gfcuu" path="res://data/units/sword-court/tier 4/geomond/gambit/slam_gambit.gd" id="1_xcgv2"]
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/geomond/gambit/slam_gambit.gd" id="1"]
 
 [resource]
-script = ExtResource("1_xcgv2")
-description = "Dashes into position, gains a {shield_amount|shield} shield, then winds up for {channel_time} seconds and slams a line {length_cells} cells long, dealing {damage+might_scaling} damage plus {max_health_percent%} of each enemy's max health."
-dash_time = 0.3
-shield_amount = 450.0
-shield_duration = 2.5
-channel_time = 2.5
-lava_damage = 25.0
-lava_insight_scaling = 0.1
+script = ExtResource("1")
+leap_cells = 3
+shield_share = 0.12
+shield_per_insight = 0.0006
+ward_amount = 20.0
+ward_might_scaling = 0.15
+support_duration = 5.0
+damage = 120.0
+might_scaling = 0.8
+max_health_percent = 0.06
+length_cells = 4
+width_cells = 2.0
+stun_time = 1.0
+gambit_name = "Earthsplitter"
 cast_time = 0.5
-metadata/_custom_type_script = "uid://doce5a42gfcuu"
+description = "Leaps to the ally within {leap_cells} cells with the lowest health. Both gain a Shield of {shield_share%} of their max health (+{shield_per_insight%} per Insight) and +{ward_amount+ward_might_scaling} to each Ward for {support_duration} seconds. Then he flips into the air and slams the line {length_cells} cells long and {width_cells} wide that hits the most enemies, dealing {damage+might_scaling} damage plus {max_health_percent%} of each enemy's max health and stunning them for {stun_time|cc} seconds."

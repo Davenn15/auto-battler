@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c8blompxkhd76"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_ybfrl"]
 
 [resource]
 script = ExtResource("1")
-description = "Once per link, if the linked ally would die, M-Path gives up {sacrifice_share%|maxhp} instead (never dropping below 1) and heals it for the same amount."
-gambit_bonuses = Dictionary[String, float]({
+description = "Whenever the linked ally would die, M-Path gives up {sacrifice_share%} of his current health (never dropping below 1) and heals it for the same amount."
+gambit_overrides = Dictionary[String, float]({
 "sacrifice_share": 0.3
 })

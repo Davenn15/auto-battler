@@ -127,71 +127,114 @@ func _find_info_panel(node: Node) -> UnitInfoPanel:
 	return null
 
 
-## The text shown when hovering an item: its name, its stats, then its effect.
+## The text shown when hovering an item: its name, its stats, then its effect, then (an
+## empowered Keepsake) any effect its Empowerment added.
 static func describe(keepsake: Keepsake) -> String:
 	var lines: PackedStringArray = [keepsake.get_display_name()]
-	var bonuses := keepsake.get_stat_bonuses()
-	for stat in bonuses:
-		var amount: float = bonuses[stat]
-		if is_zero_approx(amount):
-			continue
-		var stat_name: String = Stats.STAT_NAMES.get(stat, str(stat))
-		if stat in [Stats.Stat.WRACK_CHANCE, Stats.Stat.WRACK_DAMAGE, Stats.Stat.VAMPIRISM]:
-			lines.append("+%s%% %s" % [_number(amount * 100.0), stat_name])
-		else:
-			lines.append("+%s %s" % [_number(amount), stat_name])
-	if not is_zero_approx(keepsake.health):
-		lines.append("+%s Health" % _number(keepsake.health))
+	for line in _stat_lines(keepsake):
+		lines.append(line[0])
 	if keepsake.description != "":
 		lines.append(Keyphrases.resolve_plain(keepsake.description, keepsake.description_context()))
-	if keepsake.is_empowered():
-		lines.append("Empowered (%s): %s" % [Shard.NAMES[keepsake.empowered_with],
-				Keyphrases.resolve_plain(keepsake.empowerment_text, keepsake.description_context())])
+	var added := _added_effect_text(keepsake)
+	if added != "":
+		lines.append(Keyphrases.resolve_plain(added, keepsake.description_context()))
 	return "\n".join(lines)
 
 
+## Gold, for everything an Empowerment gave a Keepsake.
+const EMPOWERED_GOLD := "#ffd04a"
+
+
 ## The keepsake as BBCode for the popups: its name in bold, its stats, its description with
-## numbers and keyphrases, its Empowerment if it has one, and (a plain Keepsake) what each
-## Shard would empower it into, each with that Empowerment's numbers.
+## numbers and keyphrases, and (a plain Keepsake) what each Shard would empower it into.
+## An empowered Keepsake shows what its Empowerment gave it in gold instead of repeating
+## it: a gold name, gold stat lines for raised stats, its effect text in gold if the
+## Empowerment changed that effect, and any effect it added, in gold.
 static func describe_rich(keepsake: Keepsake, prefix: String = "", unit: BattleUnit = null) -> String:
-	var lines := describe_stats_only(keepsake)
-	var text := prefix + "[b]%s[/b]" % lines[0]
-	if lines.size() > 1:
-		text += "\n" + Keyphrases.format("\n".join(lines.slice(1)))
+	var empowered := keepsake.is_empowered()
+	var name_text := keepsake.get_display_name()
+	var text := prefix + ("[b][color=%s]%s[/color][/b]" % [EMPOWERED_GOLD, name_text] if empowered else "[b]%s[/b]" % name_text)
+	for line in _stat_lines(keepsake):
+		text += "\n" + (_gold(Keyphrases.format(line[0])) if line[1] else Keyphrases.format(line[0]))
 	var ctx := keepsake.description_context().with_unit(unit)
+	var empowerment := _empowerment_of(keepsake)
 	if keepsake.description != "":
-		text += "\n" + Keyphrases.format(keepsake.description, ctx)
-	if keepsake.is_empowered():
-		text += "\n[color=#ffd04a]Empowered (%s):[/color] %s" % [Shard.NAMES[keepsake.empowered_with],
-				Keyphrases.format(keepsake.empowerment_text, ctx)]
-	elif not keepsake.is_shard:
-		for empowerment in keepsake.empowerments:
-			if empowerment == null or empowerment.description == "":
+		if empowerment != null and _changes_effect(empowerment):
+			text += "\n" + _gold(Keyphrases.format(keepsake.description, ctx))
+		else:
+			text += "\n" + Keyphrases.format(keepsake.description, ctx)
+	var added := _added_effect_text(keepsake)
+	if added != "":
+		text += "\n" + _gold(Keyphrases.format(added, ctx))
+	if not empowered and not keepsake.is_shard:
+		for option in keepsake.empowerments:
+			if option == null or option.description == "":
 				continue
-			var copy := keepsake.empowered(empowerment.shard)
+			var copy := keepsake.empowered(option.shard)
 			if copy == null:
 				continue
 			text += "\n[color=#9a8a5a]Empower with %s:[/color] [color=#a8a8b0]%s[/color]" % [
-					Shard.NAMES[empowerment.shard], Keyphrases.format(empowerment.description, copy.description_context().with_unit(unit))]
+					Shard.NAMES[option.shard], Keyphrases.format(option.description, copy.description_context().with_unit(unit))]
 	return text
 
 
 ## The name and stat lines only (no description).
 static func describe_stats_only(keepsake: Keepsake) -> PackedStringArray:
 	var lines: PackedStringArray = [keepsake.get_display_name()]
+	for line in _stat_lines(keepsake):
+		lines.append(line[0])
+	return lines
+
+
+## Each stat line, as [text, raised]: raised is true when it's an empowered Keepsake's stat
+## that its Empowerment increased (or added).
+static func _stat_lines(keepsake: Keepsake) -> Array:
+	var base: Keepsake = keepsake.empowered_from if keepsake.is_empowered() else null
+	var base_bonuses: Dictionary = base.get_stat_bonuses() if base != null else {}
+	var result: Array = []
 	var bonuses := keepsake.get_stat_bonuses()
 	for stat in bonuses:
 		var amount: float = bonuses[stat]
 		if is_zero_approx(amount):
 			continue
 		var stat_name: String = Stats.STAT_NAMES.get(stat, str(stat))
+		var line: String
 		if stat in [Stats.Stat.WRACK_CHANCE, Stats.Stat.WRACK_DAMAGE, Stats.Stat.VAMPIRISM]:
-			lines.append("+%s%% %s" % [_number(amount * 100.0), stat_name])
+			line = "+%s%% %s" % [_number(amount * 100.0), stat_name]
 		else:
-			lines.append("+%s %s" % [_number(amount), stat_name])
+			line = "+%s %s" % [_number(amount), stat_name]
+		var raised: bool = base != null and amount > float(base_bonuses.get(stat, 0.0)) + 0.0001
+		result.append([line, raised])
 	if not is_zero_approx(keepsake.health):
-		lines.append("+%s Health" % _number(keepsake.health))
-	return lines
+		result.append(["+%s Health" % _number(keepsake.health), base != null and keepsake.health > base.health + 0.0001])
+	return result
+
+
+## The Empowerment an empowered Keepsake got, or null.
+static func _empowerment_of(keepsake: Keepsake) -> Empowerment:
+	if not keepsake.is_empowered() or keepsake.empowered_from == null:
+		return null
+	return keepsake.empowered_from.empowerment_for(keepsake.empowered_with)
+
+
+## True if `empowerment` changes the Keepsake's own effect (its numbers, or the effect itself).
+static func _changes_effect(empowerment: Empowerment) -> bool:
+	return not empowerment.effect_bonuses.is_empty() or not empowerment.effect_overrides.is_empty() \
+			or empowerment.replace_effect != null
+
+
+## The text of an effect an Empowerment added (its description), or "" if it added none.
+static func _added_effect_text(keepsake: Keepsake) -> String:
+	var empowerment := _empowerment_of(keepsake)
+	if empowerment == null or empowerment.extra_effects.is_empty():
+		return ""
+	return empowerment.description
+
+
+## `text` (BBCode) all in gold: its own colours are taken out, its icons kept.
+static func _gold(text: String) -> String:
+	var plain := RegEx.create_from_string("\\[/?color[^\\]]*\\]").sub(text, "", true)
+	return "[color=%s]%s[/color]" % [EMPOWERED_GOLD, plain]
 
 
 ## "20" for whole numbers, "2.5" otherwise.

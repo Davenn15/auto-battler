@@ -4,7 +4,7 @@ extends Gambit
 ## within Radius. Damage is highest next to where it lands and falls off towards the edge.
 ## Damage = Damage + Might Scaling x Might, times the falloff share.
 ##   A (Devastating): the slam also stuns, longer closer to the center.
-##   A1: Mallet Phases for a while after landing.
+##   A1: Mallet gains Ward Boost to all three Wards for a while after landing.
 ##   A2: the slam ignores a share of enemy wards.
 
 ## How far Mallet can leap, in hex cells.
@@ -23,8 +23,10 @@ extends Gambit
 ## A: stun seconds next to Mallet and at the edge. 0 = no stun.
 @export var stun_center: float = 0.0
 @export var stun_edge: float = 0.0
-## A1: seconds Mallet Phases after landing. 0 = none.
-@export var phase_after: float = 0.0
+## A1: Might, Insight and Celerity Ward Mallet gains after landing, for Ward Boost Time
+## seconds. 0 = none.
+@export var ward_boost: float = 0.0
+@export var ward_boost_time: float = 0.0
 ## A2: share of enemy wards the slam ignores (0.4 = 40%).
 @export_range(0.0, 1.0, 0.05) var ward_ignore: float = 0.0
 
@@ -55,7 +57,10 @@ func execute(caster: BattleUnit) -> void:
 		var stun := lerpf(stun_center, stun_edge, t)
 		if stun > 0.0 and dealt > 0.0 and enemy.alive:
 			enemy.stun(stun, caster)
-	MalletFx.self_phase(caster, phase_after)
+	if ward_boost > 0.0 and ward_boost_time > 0.0:
+		for ward in [Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD]:
+			caster.add_status(TimedStatStatus.new(ward, ward_boost, ward_boost_time))
+		caster.show_float_text("Braced", MalletFx.LIGHT)
 
 
 ## 0 next to Mallet, 1 at the edge of the slam.

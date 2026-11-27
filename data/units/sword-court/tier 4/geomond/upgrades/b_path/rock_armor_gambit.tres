@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="RockArmorGambit" format=3]
+
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/scripts/rock_armor_gambit.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+duration = 8.0
+shield_share = 0.25
+shield_insight_scaling = 1.0
+ward_bonus = 100.0
+pulse_interval = 0.75
+pulse_radius = 2
+pulse_damage = 40.0
+pulse_insight_scaling = 0.3
+gambit_name = "Rock Armor"
+cast_time = 0.5
+description = "Shields himself in rocky armor for {duration} seconds: a Shield of {shield_share%} of his max health plus {shield_insight_scaling%} of his Insight, and +{ward_bonus} Might Ward and Insight Ward. While the Shield holds, he pulses seismic waves every {pulse_interval} seconds, dealing {pulse_damage+pulse_insight_scaling} Might damage to enemies within {pulse_radius} cells."

@@ -1,10 +1,11 @@
 class_name Synthecyst
 extends RefCounted
 ## The Synthecyst (Obelisk Ascension): the first summon an army makes becomes the Synthecyst
-## instead, a slow melee brawler that absorbs a share of that summon's max health, attributes
-## and Wards. While it lives, every later summon is absorbed into it instead of appearing. If
-## it's dead when a summon happens, it Revives where the summon would have appeared, with the
-## health it absorbs plus a share of its base health, keeping everything absorbed before.
+## instead, a slow melee brawler that absorbs a share of that summon's max health, and a
+## smaller share of its attributes and Wards. While it lives, every later summon is absorbed
+## into it instead of appearing. If it's dead when a summon happens, it Revives where the
+## summon would have appeared, with the health it absorbs plus a share of its base health,
+## keeping everything absorbed before.
 
 const PROFILE := preload("res://data/units/obelisk/synthecyst/synthecyst.tres")
 const UNIT_SCENE := preload("uid://b3w2tay7iu387")   # scenes/battle_unit.tscn
@@ -29,7 +30,7 @@ static func intercept(manager: Node, summon: BattleUnit, ascensions: Array) -> b
 	var health := summon.max_health * effect.absorb_share
 	var stats := {}
 	for stat in STATS:
-		stats[stat] = summon.base_stats.get(stat, 0.0) * effect.absorb_share
+		stats[stat] = summon.base_stats.get(stat, 0.0) * effect.stat_share
 	var cell := summon.cell
 	var parent := summon.get_parent()
 	var credit := summon.get_summoner_id()
@@ -49,6 +50,10 @@ static func intercept(manager: Node, summon: BattleUnit, ascensions: Array) -> b
 	made.auto_place = false
 	made.is_summon = true
 	made._summoner_id = credit
+	# A summon takes its health and stats from these, not its profile: start from its own.
+	made._summon_max_health = PROFILE.max_health
+	for stat in Stats.Stat.values():
+		made._summon_stats[stat] = PROFILE.get_base_stat(stat)
 	parent.add_child(made)
 	made.place_at(cell)
 	if reviving:

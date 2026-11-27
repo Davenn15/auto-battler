@@ -6,4 +6,4 @@
 script = ExtResource("1_5q2mu")
 gambit_name = "Stun Bolts"
 cast_time = 0.3
-description = "Sends out {bolts} spiralling stun bolts at the enemies within {range_cells} cells who have dealt the most damage this combat, one each. Each deals {damage+insight_scaling} Insight damage and stuns its target for {stun_time|cc} seconds."
+description = "Sends out {bolts} spiralling stun bolts at the nearest enemies within {range_cells} cells, one each. Each deals {damage+insight_scaling} Insight damage and stuns its target for {stun_time|cc} seconds."

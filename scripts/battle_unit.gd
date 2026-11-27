@@ -1055,17 +1055,17 @@ func record_damage(unit_id: int, amount: float, lifesteal: bool = true) -> void:
 static var _direct_target_id := 0
 static var _direct_amount := -1.0
 
-static func _note_direct_damage(target: BattleUnit, dealt: float, direct: bool) -> void:
-	_direct_target_id = target.get_instance_id() if direct else 0
+static func _note_direct_damage(hit_target: BattleUnit, dealt: float, direct: bool) -> void:
+	_direct_target_id = hit_target.get_instance_id() if direct else 0
 	_direct_amount = dealt if direct else -1.0
 
 static func _direct_target_for(amount: float) -> BattleUnit:
 	if _direct_target_id == 0 or amount <= 0.0 or not is_equal_approx(amount, _direct_amount):
 		return null
-	var target := instance_from_id(_direct_target_id) as BattleUnit
+	var found := instance_from_id(_direct_target_id) as BattleUnit
 	_direct_target_id = 0
 	_direct_amount = -1.0
-	return target
+	return found
 
 
 func record_healing(_unit_id: int, _amount: float) -> void:
@@ -1769,8 +1769,10 @@ func _attack(enemy: BattleUnit, extra_damage: float = 0.0, extra_wrack_chance: f
 		hit_effects = repeat_hit_effects(hit_effects)
 	var hit_damage := base_damage * Stats.wrack_multiplier(wrack_level, get_wrack_damage_against(enemy))
 	if ranged or projectile != null:
+		play_sound(Sfx.RANGED_ATTACK)
 		_fire_projectile(enemy, hit_damage, wrack_level, shot_color, hit_effects, projectile)
 		return wrack_level
+	play_sound(Sfx.MELEE_ATTACK)
 	_play_melee_swing(enemy.global_position)
 	KeepsakeVfx.hit_mark(enemy, (enemy.global_position - global_position).angle(), team_color(team))
 	var dealt := enemy.take_damage(hit_damage, wrack_level, get_attack_damage_type(), ignores_wards(), self)
@@ -1814,13 +1816,13 @@ func ignores_wards() -> bool:
 ## (Status.modify_damage_against). take_damage does this itself when given an attacker;
 ## damage dealt without one (Gambits, Hit Effects, damage over time...) passes its amount
 ## through this first. `source` may be the unit, its instance id, or a freed unit.
-static func damage_bonus(source, target: BattleUnit, amount: float) -> float:
+static func damage_bonus(source, p_target: BattleUnit, amount: float) -> float:
 	if source is int:
 		source = instance_from_id(source) if source != 0 else null
-	if not is_instance_valid(source) or not source is BattleUnit or not is_instance_valid(target):
+	if not is_instance_valid(source) or not source is BattleUnit or not is_instance_valid(p_target):
 		return amount
 	for status in source.statuses:
-		amount = status.modify_damage_against(source, target, amount)
+		amount = status.modify_damage_against(source, p_target, amount)
 	return amount
 
 
@@ -1829,33 +1831,33 @@ static func damage_bonus(source, target: BattleUnit, amount: float) -> float:
 ## after dealing damage, so `caster`'s statuses hear of it (Status.on_gambit_damage).
 ## `caster` may be the unit, its instance id, or a freed unit (then nothing happens).
 ## New Gambits that deal damage should call it too.
-static func gambit_damage_dealt(caster, target: BattleUnit, dealt: float) -> void:
+static func gambit_damage_dealt(caster, p_target: BattleUnit, dealt: float) -> void:
 	if caster is int:
 		caster = instance_from_id(caster)
-	if dealt <= 0.0 or not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(target):
+	if dealt <= 0.0 or not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(p_target):
 		return
 	# Extra Gambit damage (Voltaic Rings): a share of what landed, dealt again as it was
 	# (Wards already applied), and not counted as Gambit damage itself.
 	var bonus := 0.0
 	for status in caster.statuses:
 		bonus += status.gambit_damage_bonus(caster)
-	if bonus > 0.0 and target.alive:
-		target.take_damage(dealt * bonus, 0, target.last_damage_type, true, null, true, true)
+	if bonus > 0.0 and p_target.alive:
+		p_target.take_damage(dealt * bonus, 0, p_target.last_damage_type, true, null, true, true)
 	# A Wracking Gambit hit (one with no attacker) counts as the caster Wracking.
-	if target.last_hit_attacker == null and target.incoming_wrack_level > 0:
-		BattleUnit.note_wrack(caster, target)
+	if p_target.last_hit_attacker == null and p_target.incoming_wrack_level > 0:
+		BattleUnit.note_wrack(caster, p_target)
 	for status in caster.statuses.duplicate():
-		status.on_gambit_damage(caster, target, dealt)
+		status.on_gambit_damage(caster, p_target, dealt)
 
 
 ## Gambits that affect units (shields, buffs) call this for each unit they affect, so the
 ## caster's statuses hear of it (Status.on_gambit_target). Lunck's Rally Shield and
 ## Adoration do; new ally-affecting Gambits should too.
-static func gambit_affected(caster, target: BattleUnit) -> void:
-	if not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(target):
+static func gambit_affected(caster, p_target: BattleUnit) -> void:
+	if not is_instance_valid(caster) or not caster is BattleUnit or not is_instance_valid(p_target):
 		return
 	for status in caster.statuses.duplicate():
-		status.on_gambit_target(caster, target)
+		status.on_gambit_target(caster, p_target)
 
 
 ## `effects` with each one listed again for every extra run this unit's statuses ask for
@@ -2185,10 +2187,10 @@ func wrack_effect_multiplier(kind: Stats.EffectKind, already_can: bool = false, 
 	if kind == Stats.EffectKind.CONTROL:
 		for status in statuses:
 			multiplier = status.modify_control_power(self, multiplier)
-		var target := at as BattleUnit
-		if target != null and target != self and target.team != team:
+		var controlled := at as BattleUnit
+		if controlled != null and controlled != self and controlled.team != team:
 			for status in statuses.duplicate():
-				status.on_control_applied(self, target)
+				status.on_control_applied(self, controlled)
 	return multiplier
 
 ## Stops the unit from moving, attacking, or using its Gambit for `duration` seconds.
@@ -2270,14 +2272,14 @@ class StunSwirl extends Control:
 			var at := center + Vector2(cos(a) * RADIUS.x, sin(a) * RADIUS.y)
 			_star(at, lerpf(2.0, 3.2, front), Color(COLOR, lerpf(0.55, 1.0, front)), a * 1.5)
 
-	func _star(at: Vector2, size: float, color: Color, turn: float) -> void:
+	func _star(at: Vector2, p_size: float, color: Color, turn: float) -> void:
 		var points := PackedVector2Array()
 		for i in 8:
-			var r := size if i % 2 == 0 else size * 0.45
+			var r := p_size if i % 2 == 0 else p_size * 0.45
 			points.append(at + Vector2.from_angle(turn + TAU * i / 8.0) * r)
 		var outline := PackedVector2Array()
 		for i in 8:
-			var r := (size if i % 2 == 0 else size * 0.45) + 0.8
+			var r := (p_size if i % 2 == 0 else p_size * 0.45) + 0.8
 			outline.append(at + Vector2.from_angle(turn + TAU * i / 8.0) * r)
 		draw_colored_polygon(outline, OUTLINE)
 		draw_colored_polygon(points, color)
@@ -2375,34 +2377,34 @@ var last_hit_attacker: BattleUnit = null
 
 ## `source` Wracked `target` with damage: both sides' statuses hear of it
 ## (Status.on_wrack_landed, Status.on_wracked_by).
-static func note_wrack(source: BattleUnit, target: BattleUnit) -> void:
-	if not is_instance_valid(source) or not is_instance_valid(target):
+static func note_wrack(source: BattleUnit, p_target: BattleUnit) -> void:
+	if not is_instance_valid(source) or not is_instance_valid(p_target):
 		return
 	for status in source.statuses.duplicate():
-		status.on_wrack_landed(source, target)
-	if target.alive:
-		for status in target.statuses.duplicate():
-			status.on_wracked_by(target, source)
+		status.on_wrack_landed(source, p_target)
+	if p_target.alive:
+		for status in p_target.statuses.duplicate():
+			status.on_wracked_by(p_target, source)
 
 
 ## A heal or shield `target` gets from this unit, after its statuses change it
 ## (Status.modify_outgoing_support); tells them it happened (on_support_given, and
 ## on_support_wracked if it Wracked).
-func outgoing_support(target: BattleUnit, amount: float, is_shield: bool, from_gambit: bool, wrack_level: int = 0) -> float:
+func outgoing_support(p_target: BattleUnit, amount: float, is_shield: bool, from_gambit: bool, wrack_level: int = 0) -> float:
 	for status in statuses:
-		amount = status.modify_outgoing_support(self, target, amount, is_shield, from_gambit)
+		amount = status.modify_outgoing_support(self, p_target, amount, is_shield, from_gambit)
 	if amount > 0.0:
 		for status in statuses.duplicate():
-			status.on_support_given(self, target, is_shield, from_gambit)
+			status.on_support_given(self, p_target, is_shield, from_gambit)
 			if wrack_level > 0:
-				status.on_support_wracked(self, target, amount, is_shield)
+				status.on_support_wracked(self, p_target, amount, is_shield)
 	return amount
 
 
 ## How long a shield this unit gives `target` lasts, after its statuses change it.
-func support_duration(target: BattleUnit, duration: float, from_gambit: bool) -> float:
+func support_duration(p_target: BattleUnit, duration: float, from_gambit: bool) -> float:
 	for status in statuses:
-		duration = status.modify_support_duration(self, target, duration, from_gambit)
+		duration = status.modify_support_duration(self, p_target, duration, from_gambit)
 	return duration
 
 ## Damage that has already been through wards, such as damage released over time.
@@ -2463,6 +2465,10 @@ func _apply_damage(amount: float, number_color: Color, wrack_level: int, show_nu
 			KeepsakeVfx.hit_flash(self)   # a direct hit: a quick white flash (steady ticks don't strobe)
 	if amount > 0.0:
 		damage_taken += minf(amount, maxf(health, 0.0))
+	# The damage meter's Tank tab: health lost plus shield soaked.
+	var taken := maxf(shield_before - get_shield(), 0.0) + minf(maxf(amount, 0.0), maxf(health, 0.0))
+	if taken > 0.0 and is_inside_tree():
+		get_tree().call_group("damage_tracker", "record_taken", get_instance_id(), taken, incoming_damage_type)
 	health -= amount
 	_update_health_bar()
 	_update_pending_bar()
@@ -2844,6 +2850,7 @@ func _ready_to_gambit() -> bool:
 ## Runs the Action and marks any statuses it attached, so they block charge gain.
 func _run_gambit() -> void:
 	# The Gambit is played: its cast time is over and it starts now.
+	play_sound(Sfx.GAMBIT_PLAY)
 	gambit_played.emit(self)
 	for status in statuses.duplicate():
 		status.on_gambit_played(self)
@@ -2874,8 +2881,9 @@ func _begin_gambit() -> void:
 		status.on_gambit(self)
 	gambit.on_cast(self)
 	if gambit.cast_time <= 0.0:
-		_run_gambit()
+		_run_gambit()   # no cast time: only the play sound
 		return
+	play_sound(Sfx.GAMBIT_CAST)
 	_casting = true
 	_cast_timer = gambit.cast_time
 	_cast_total = gambit.cast_time
@@ -2943,6 +2951,13 @@ func set_max_charge(value: float) -> void:
 		charge_bar.max_value = max_charge
 	_update_charge_bar()
 
+## Plays a sound effect for this unit (see Sfx), unless it's only the planner's preview.
+func play_sound(stream: AudioStream) -> void:
+	if previewing or not is_inside_tree():
+		return
+	Sfx.play(get_tree(), stream)
+
+
 func _die() -> void:
 	alive = false
 	remove_from_group("units")
@@ -2951,4 +2966,5 @@ func _die() -> void:
 		status.on_death(self)
 	died.emit(self)
 	ArmySpawner.bank_fallen(self)   # after died: a Glory earned from its own death still counts
+	play_sound(Sfx.UNIT_DEATH)
 	queue_free()

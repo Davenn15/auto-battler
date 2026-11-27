@@ -7,6 +7,7 @@ script = ExtResource("1")
 ascension_name = "Convergence"
 description = "Choose a fully upgraded unit: it also gains the other final upgrade of its path."
 tier = 4
+also_offered_at = Array[int]([3])
 target = 1
 requires_max_level = true
 grants_other_final_upgrade = true

@@ -7,4 +7,4 @@ script = ExtResource("1")
 duration = 3.0
 gambit_name = "Code Spiral"
 cast_time = 0.6
-description = "Calls down a corrupted code spiral on the spot within her range that covers the most enemies ({radius_cells} cells around it). For {duration} seconds, every enemy inside gets {stacks_per_second} stacks of Mono-Virus each second."
+description = "Calls down a corrupted code spiral on the spot within her range that covers the most enemies ({radius_cells} cells around it). For {duration} seconds, every enemy inside takes {damage+insight_scaling} Insight damage every {damage_interval} seconds and gets {stacks_per_second} stacks of Mono-Virus each second. She can't gain Charge while it lasts."

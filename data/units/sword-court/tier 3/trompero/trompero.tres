@@ -6,8 +6,8 @@
 [ext_resource type="Resource" uid="uid://ls162aiejabo" path="res://data/units/sword-court/tier 3/trompero/passive/trompero_passive.tres" id="3_ohhtv"]
 [ext_resource type="Texture2D" uid="uid://dkfg4qkjjumhl" path="res://assets/trompero.png" id="5_12hl1"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_46rfb"]
-[ext_resource type="Resource" uid="uid://bldl0lw287n8g" path="res://data/units/sword-court/tier 3/trompero/upgrades/a_path/trompero_a.tres" id="7_htyim"]
-[ext_resource type="Resource" uid="uid://s1w4u6lvptgy" path="res://data/units/sword-court/tier 3/trompero/upgrades/b_path/trompero_b.tres" id="8_l4lbu"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/trompero/upgrades/a_path/trompero_a.tres" id="7_htyim"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/trompero/upgrades/b_path/trompero_b.tres" id="8_l4lbu"]
 
 [resource]
 script = ExtResource("2_6pfn8")

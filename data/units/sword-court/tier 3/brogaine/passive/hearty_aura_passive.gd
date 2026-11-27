@@ -12,6 +12,7 @@ extends Passive
 
 ## Set while a Brogaine adds up his allies' Regeneration, so two Brogaines side by side
 ## don't count each other's share forever.
+@warning_ignore("unused_private_class_variable")
 static var _summing := false
 
 

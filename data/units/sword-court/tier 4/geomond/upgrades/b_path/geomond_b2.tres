@@ -1,12 +1,17 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://b5mv5t0y2r8gy"]
 
-[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_f3jnr"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_1f6pt"]
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/scripts/support_echo_passive.gd" id="3"]
+
+[sub_resource type="Resource" id="EchoPassive"]
+script = ExtResource("3")
+share = 0.5
+duration = 4.0
+range_cells = 3
+description = "Whenever an ally within {range_cells} cells gains a Shield or Wards, he gains {share%} of it for {duration} seconds."
 
 [resource]
-script = ExtResource("1_f3jnr")
-description = "His waves gain the Hit Effect: permanently strip {ward_shred_per_hit} of the target's Wards (up to {ward_shred_max})."
-gambit_overrides = Dictionary[String, float]({
-"ward_shred_per_hit": 10.0
-})
-metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"
+script = ExtResource("1")
+description = "Whenever an ally within {range_cells} cells gains a Shield or Wards, he gains {share%} of it for {duration} seconds."
+passives = Array[ExtResource("2")]([SubResource("EchoPassive")])

@@ -56,20 +56,20 @@ static func along(data: UnitData, path: Array) -> Array[Upgrade]:
 ## among them (or the unit's own), with the Gambit bonuses and overrides that came after
 ## it applied. The shared file never changes: a changed Gambit is a copy.
 static func gambit_after(data: UnitData, chosen: Array) -> Gambit:
-	var gambit: Gambit = data.gambit if data != null else null
+	var result: Gambit = data.gambit if data != null else null
 	var bonuses := {}
 	var overrides := {}
 	for upgrade in chosen:
 		if upgrade.gambit != null:
-			gambit = upgrade.gambit
+			result = upgrade.gambit
 			bonuses.clear()   # earlier bonuses were for the old Gambit
 			overrides.clear()
 		for property in upgrade.gambit_bonuses:
 			bonuses[property] = bonuses.get(property, 0.0) + upgrade.gambit_bonuses[property]
 		overrides.merge(upgrade.gambit_overrides, true)
-	if gambit == null or (bonuses.is_empty() and overrides.is_empty()):
-		return gambit
-	return changed_gambit(gambit, bonuses, overrides)
+	if result == null or (bonuses.is_empty() and overrides.is_empty()):
+		return result
+	return changed_gambit(result, bonuses, overrides)
 
 
 ## A copy of `base` with `bonuses` added to and `overrides` set on its properties.

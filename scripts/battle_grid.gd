@@ -93,6 +93,33 @@ func _sync_board_layer() -> void:
 	_backing.global_transform = global_transform
 
 
+## Adds `node` to the board's own layer, above the board but under the units and every
+## effect (the countdown before a fight draws there). Positions are the grid's world ones.
+func add_board_overlay(node: Node) -> void:
+	if is_instance_valid(_board_layer):
+		_board_layer.add_child(node)
+	else:
+		add_child(node)
+
+
+## The middle of the board, in world coordinates.
+func board_center() -> Vector2:
+	var corners := board_corners()
+	return (corners[0] + corners[1]) / 2.0 if corners.size() == 2 else global_position
+
+
+## Two opposite corners of the box around every cell's centre, in world coordinates.
+func board_corners() -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	if _ids.is_empty():
+		return result
+	var box := Rect2(cell_to_world(_ids.keys()[0]), Vector2.ZERO)
+	for cell in _ids:
+		box = box.expand(cell_to_world(cell))
+	result.assign([box.position, box.end])
+	return result
+
+
 func _redraw_board_layer() -> void:
 	if is_instance_valid(_drawer):
 		_drawer.queue_redraw()
@@ -219,8 +246,11 @@ func is_occupied(cell: Vector2i) -> bool:
 ## The unit standing in `cell`, or null. The explicit return type is what lets
 ## callers write `var unit := grid.unit_at(cell)` without a type-inference error.
 func unit_at(cell: Vector2i) -> BattleUnit:
-	var occupant: Variant = _occupants.get(cell)
-	if occupant != null and not is_instance_valid(occupant):
+	if not _occupants.has(cell):
+		return null
+	var occupant: Variant = _occupants[cell]
+	# (A freed object compares equal to null, so check validity, not null.)
+	if not is_instance_valid(occupant):
 		_release(cell)   # a freed unit that never let its cell go: the cell is free
 		return null
 	return occupant as BattleUnit
@@ -330,6 +360,20 @@ const BACKING_CORNER := 12
 const BACKING_Z := -10
 var _backing: Node2D
 
+## Placeholder faction borders (until hand-drawn ones exist): a coloured edge around each
+## team's half of the board, in its faction's colour. Factions without one get no edge.
+const FACTION_BORDER_COLORS := {
+	"Sword Court": Color(1.0, 0.78, 0.25),   # gold
+	"Obelisk": Color(0.25, 0.9, 1.0),        # cyan
+}
+const FACTION_BORDER_WIDTH := 3.0
+## Team (1 = bottom rows, 2 = top) -> faction name, e.g. {1: "Sword Court", 2: "Obelisk"}.
+var team_factions: Dictionary = {}:
+	set(value):
+		team_factions = value
+		if is_instance_valid(_backing):
+			_backing.queue_redraw()
+
 
 class Backing extends Node2D:
 	var grid: BattleGrid
@@ -345,7 +389,35 @@ class Backing extends Node2D:
 		backing.bg_color = BattleGrid.BACKING_COLOR
 		backing.set_corner_radius_all(BattleGrid.BACKING_CORNER)
 		backing.anti_aliasing = true
-		draw_style_box(backing, box.grow(BattleGrid.BACKING_MARGIN))
+		var outer := box.grow(BattleGrid.BACKING_MARGIN)
+		draw_style_box(backing, outer)
+		for team in grid.team_factions:
+			var color: Variant = BattleGrid.FACTION_BORDER_COLORS.get(grid.team_factions[team])
+			if color != null:
+				_half_border(outer, team == 1, color)
+
+	## The edge around one half of the backing: down its sides from the middle and along
+	## its far edge, round at the corners like the backing. Open at the middle line.
+	func _half_border(outer: Rect2, bottom: bool, color: Color) -> void:
+		var inset := BattleGrid.FACTION_BORDER_WIDTH / 2.0
+		var rect := outer.grow(-inset)
+		var radius := maxf(BattleGrid.BACKING_CORNER - inset, 0.0)
+		var mid := rect.get_center().y
+		var edge := rect.end.y if bottom else rect.position.y
+		var inward := -1.0 if bottom else 1.0   # from the far edge back toward the middle
+		var left := rect.position.x
+		var right := rect.end.x
+		var points := PackedVector2Array([Vector2(left, mid)])
+		# Left corner, then right corner, as quarter circles.
+		var steps := 8
+		for i in steps + 1:
+			var a := PI / 2.0 * i / steps
+			points.append(Vector2(left + radius - radius * cos(a), edge + inward * (radius - radius * sin(a))))
+		for i in steps + 1:
+			var a := PI / 2.0 * i / steps
+			points.append(Vector2(right - radius + radius * sin(a), edge + inward * (radius - radius * cos(a))))
+		points.append(Vector2(right, mid))
+		draw_polyline(points, color, BattleGrid.FACTION_BORDER_WIDTH, true)
 
 
 func _draw() -> void:

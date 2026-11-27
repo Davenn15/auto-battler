@@ -56,14 +56,14 @@ static func kind_of(r: int) -> Kind:
 func describe(r: int) -> String:
 	match kind_of(r):
 		Kind.OPENING:
-			return "Round %d: Opening Shop" % r
+			return "Round %d: Opening Shop" % MatchRules.display_round(r)
 		Kind.COMBAT:
-			return "Round %d: Player Combat" % r
+			return "Round %d: Player Combat" % MatchRules.display_round(r)
 		Kind.SKIPPED:
-			return "Round %d: no Encounter (all four tiers are done)" % r
+			return "Round %d: no Encounter (all four tiers are done)" % MatchRules.display_round(r)
 	var number := MatchRules.encounter_number(r)
 	var title := MatchRules.encounter_title(MatchRules.encounter_kind(number), faction)
-	return "Round %d: Tier %d %s" % [r, MatchRules.encounter_tier(number), title]
+	return "Round %d: Tier %d %s" % [MatchRules.display_round(r), MatchRules.encounter_tier(number), title]
 
 
 ## The rounds on show, oldest first (no round before the first).
@@ -137,21 +137,21 @@ static func color_of(kind: Kind, p_faction: String) -> Color:
 # ---------- The icons (drawn, so they stay crisp at any size) ----------
 
 ## Draws the icon for `kind` on `canvas`, `size` across, centred on `center`.
-static func draw_icon(canvas: CanvasItem, kind: Kind, p_faction: String, center: Vector2, size: float, color: Color) -> void:
+static func draw_icon(canvas: CanvasItem, kind: Kind, p_faction: String, center: Vector2, p_size: float, color: Color) -> void:
 	match kind:
 		Kind.OPENING:
-			_draw_bag(canvas, center, size, color)
+			_draw_bag(canvas, center, p_size, color)
 		Kind.COMBAT:
-			_draw_swords(canvas, center, size, color)
+			_draw_swords(canvas, center, p_size, color)
 		Kind.NEUTRAL:
-			_draw_ascend(canvas, center, size, color)
+			_draw_ascend(canvas, center, p_size, color)
 		Kind.FACTION:
 			if p_faction == "Obelisk":
-				_draw_eye(canvas, center, size, color)
+				_draw_eye(canvas, center, p_size, color)
 			else:
-				_draw_crown(canvas, center, size, color)
+				_draw_crown(canvas, center, p_size, color)
 		Kind.SKIPPED:
-			canvas.draw_arc(center, size * 0.18, 0.0, TAU, 16, color, 1.5, true)
+			canvas.draw_arc(center, p_size * 0.18, 0.0, TAU, 16, color, 1.5, true)
 
 
 ## Two crossed swords.

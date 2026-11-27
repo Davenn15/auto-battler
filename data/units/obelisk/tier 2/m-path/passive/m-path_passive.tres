@@ -4,5 +4,9 @@
 
 [resource]
 script = ExtResource("1")
+share = 0.2
+store_share = 0.4
+send_interval = 3.0
+send_range = 3
 passive_name = "Recompile"
-description = "M-Path has {share%} Scar."
+description = "M-Path has {share%} Scar. He stores {store_share%} of the healing and regeneration he receives (on top of what he gets), and every {send_interval} seconds sends it to the ally within {send_range} cells with the lowest health."

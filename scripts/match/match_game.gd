@@ -47,6 +47,10 @@ const MENU_SCENE := "res://scenes/main_menu.tscn"
 
 var player := PlayerState.new()
 var ai := PlayerState.new()
+## Combat music (see CombatMusic): a track for music_faction() starts with each fight.
+var combat_music: CombatMusic
+## Set to play this track in every fight instead of picking one (null = pick).
+var combat_track_override: CombatTrack = null
 var round_number := 1
 var combats_done := 0
 var phase: Phase = Phase.PLANNING
@@ -112,6 +116,8 @@ var _ai_pick_summary := ""
 var _blue_pick_summary := ""
 ## Encounter: the offer slot of a chosen-unit Ascension whose unit you're picking, or -1.
 var _picking_slot := -1
+## The unit chosen for that Ascension, waiting for Confirm (null: none yet).
+var _pick_choice: ArmyUnit = null
 var _encounter_heading := ""
 
 ## Factions picked in the menu: yours (Blue's when watching) and the computer's (Red's).
@@ -127,6 +133,8 @@ static var opponent_faction_choice := MatchRules.DEFAULT_FACTION
 
 func _ready() -> void:
 	add_to_group("match_game")   # descriptions find units on the board through it (MatchHud._board_unit)
+	combat_music = CombatMusic.new()
+	add_child(combat_music)
 	# A background test copy that booted straight into a match (the main scene isn't the
 	# menu): go to the tester instead of playing.
 	if AiPlanner.is_eval_copy():
@@ -134,12 +142,16 @@ func _ready() -> void:
 		return
 	player.player_name = "You"
 	ai.player_name = "Opponent"
+	player.plays_sounds = not spectating   # spend sounds for the person playing here
 	online = Net.is_online()
 	if not online:   # online, your faction was settled (and sent) when you connected
 		player_faction = MatchRules.resolve_faction(player_faction_choice)
 		opponent_faction = MatchRules.resolve_faction(opponent_faction_choice)
 	player.faction = player_faction
 	ai.faction = Net.opponent_faction if online else opponent_faction
+	var player_bottom := not online or Net.is_host()   # placeholder faction borders (see _start_combat)
+	grid.team_factions = {PLAYER_TEAM: player.faction if player_bottom else ai.faction,
+			ENEMY_TEAM: ai.faction if player_bottom else player.faction}
 	if spectating:
 		_setup_spectating()
 	elif online:
@@ -213,8 +225,11 @@ func add_log(text: String) -> void:
 
 # ---------- Planning ----------
 
-## True once the "Keepsake Empowering Unlocked" banner has shown this match.
-var _empowering_announced := false
+## The Round Announcement (MatchHud.announce_round): the last round it showed, the
+## Empowered Keepsake limit then, and what your last combat paid.
+var _announced_round := 0
+var _announced_empower_limit := 0
+var _round_income: Dictionary = {}
 
 
 func _begin_planning() -> void:
@@ -230,10 +245,7 @@ func _begin_planning() -> void:
 	# The last fight's meter stays up so it can inform planning (hidden before the first).
 	damage_tracker.set_planning(true)
 	_show_planning_board()
-	if MatchRules.empowering_open(round_number) and not _empowering_announced:
-		_empowering_announced = true   # the first planning it's open: say so, once a match
-		hud.announce("Keepsake Empowering Unlocked",
-				"Put a Keepsake and one of its Shards on the ritual table to empower it.")
+	_announce_round()
 	if online:
 		ai_ready = _remote_armies.has(round_number)   # they may have finished already
 		planning_left = PLANNING_TIME
@@ -246,6 +258,21 @@ func _begin_planning() -> void:
 	if spectating:
 		_blue_ready = false
 		_blue_planner.plan(player, ai.last_fielded, combat_number(), ai.last_fielded_ascensions)
+
+
+## The first planning of each round (as players count them): a banner with the round
+## number and what's new: the Aura and Reserve you just got (your starting amounts in
+## Round 1) and any new Empowered Keepsake slots.
+func _announce_round() -> void:
+	var shown := MatchRules.display_round(round_number)
+	if shown == _announced_round or spectating:
+		return
+	var aura: int = player.aura if round_number == 1 else int(_round_income.get("aura", 0))
+	var reserve: int = player.reserve if round_number == 1 else int(_round_income.get("reserve", 0))
+	var limit := MatchRules.empowered_limit(round_number)
+	hud.announce_round(shown, aura, reserve, limit - _announced_empower_limit, limit)
+	_announced_round = shown
+	_announced_empower_limit = limit
 
 
 ## Online: counts down the planning time, then readies you with the board as it stands.
@@ -500,7 +527,7 @@ func empower_problem() -> String:
 		return ""
 	var keepsake: Keepsake = table[slot]
 	if not MatchRules.empowering_open(round_number):
-		return "Keepsakes can be empowered from round %d." % MatchRules.EMPOWER_ROUND
+		return "Keepsakes can be empowered from round %d." % MatchRules.display_round(MatchRules.EMPOWER_ROUND)
 	if MatchRules.empower_result(table[0], table[1]) == null:
 		return "A %s Shard can't empower %s." % [Shard.NAMES[table[1 - slot].first_shard], keepsake.get_display_name()]
 	var limit := MatchRules.empowered_limit(round_number)
@@ -517,6 +544,7 @@ func combine_table() -> void:
 	var result := table_preview()
 	if result == null:
 		return
+	Sfx.play(get_tree(), Sfx.RITUAL, 0.0, 0.03)
 	if _table_keepsake_slot() != -1:
 		_empower_table()
 		changed()
@@ -846,7 +874,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_drag_unit.global_position = world
 
 
-## Picking a unit for a chosen-unit Ascension: left-click one of yours, right-click to go back.
+## Picking a unit for a chosen-unit Ascension: left-click one of yours to choose it (the unit
+## info panel shows it too), then Confirm in the banner; left-click empty ground to choose
+## none; right-click to go back to the cards.
 func _pick_input(event: InputEvent) -> void:
 	var button := event as InputEventMouseButton
 	if button == null or not button.pressed:
@@ -855,8 +885,28 @@ func _pick_input(event: InputEvent) -> void:
 		cancel_unit_pick()
 	elif button.button_index == MOUSE_BUTTON_LEFT:
 		var unit := _own_unit_near(get_global_mouse_position())
-		if unit != null:
-			pick_unit(_army_of(unit))
+		var army := _army_of(unit) if unit != null else null
+		if army != null and player.ascension_offers[_picking_slot].can_pick(army):
+			choose_pick_target(army)
+		elif unit == null:
+			choose_pick_target(null)
+
+
+## Chooses `unit` (or none) as the one to get the Ascension being picked for. Confirm gives
+## it (confirm_unit_pick).
+func choose_pick_target(unit: ArmyUnit) -> void:
+	if phase != Phase.ENCOUNTER or _picking_slot < 0:
+		return
+	_pick_choice = unit
+	hud.set_unit_pick_choice(unit)
+	if unit != null and not unit.placed:
+		unit_info._select(null)   # a bench unit isn't on the board: its details show in the banner's popup
+
+
+## The banner's Confirm: gives the Ascension to the chosen unit.
+func confirm_unit_pick() -> void:
+	if _pick_choice != null:
+		pick_unit(_pick_choice)
 
 
 func _press(world: Vector2) -> void:
@@ -960,6 +1010,7 @@ func press_ready() -> void:
 		return
 	if phase != Phase.PLANNING:
 		return
+	Sfx.play(get_tree(), Sfx.READY)
 	if online:
 		_submit()
 		return
@@ -1081,7 +1132,7 @@ func _on_net_message(kind: String, data: Dictionary) -> void:
 
 
 func _warn_mismatch(for_round: int, host_print: String, joiner_print: String) -> void:
-	var text := "Warning: the two computers played the round %d fight differently (%s vs %s). The host's result counts." % [for_round, host_print, joiner_print]
+	var text := "Warning: the two computers played the round %d fight differently (%s vs %s). The host's result counts." % [MatchRules.display_round(for_round), host_print, joiner_print]
 	push_warning(text)
 	add_log(text)
 	hud.refresh()
@@ -1093,7 +1144,7 @@ func _on_opponent_left() -> void:
 		return
 	phase = Phase.GAME_OVER
 	hud.hide_result()
-	hud.show_game_over("The connection to your opponent was lost.\nYou win by forfeit.")
+	hud.show_game_over("The connection to your opponent was lost.\nYou win by forfeit.", "victory")
 	hud.refresh()
 	Net.leave()
 
@@ -1103,9 +1154,9 @@ func _on_opponent_left() -> void:
 func _advance_rounds() -> void:
 	round_number += 1
 	if MatchRules.is_encounter_round(round_number):
-		add_log("Round %d: Encounter. Choose an Ascension." % round_number)
+		add_log("Round %d: Encounter. Choose an Ascension." % MatchRules.display_round(round_number))
 	else:
-		add_log("Round %d: Player Combat. Plan, then fight." % round_number)
+		add_log("Round %d: Player Combat. Plan, then fight." % MatchRules.display_round(round_number))
 
 
 # ---------- Encounters ----------
@@ -1238,6 +1289,7 @@ func choose_ascension(slot: int) -> void:
 ## are dimmed.
 func _begin_unit_pick(slot: int) -> void:
 	_picking_slot = slot
+	_pick_choice = null
 	var ascension := player.ascension_offers[slot]
 	hud.hide_encounter()
 	_clear_board()
@@ -1256,6 +1308,7 @@ func pick_unit(unit: ArmyUnit) -> void:
 	if not MatchRules.take_ascension(player, _picking_slot, index):
 		return
 	_picking_slot = -1
+	_pick_choice = null
 	_player_picked = true
 	add_log("You took %s for %s." % [player.ascensions[-1].get_display_name(), unit.label().strip_edges()])
 	hud.hide_unit_pick()
@@ -1269,6 +1322,7 @@ func cancel_unit_pick() -> void:
 	if phase != Phase.ENCOUNTER or _picking_slot < 0:
 		return
 	_picking_slot = -1
+	_pick_choice = null
 	hud.hide_unit_pick()
 	_clear_board()
 	hud.show_encounter(_encounter_heading)
@@ -1341,6 +1395,10 @@ func _start_combat() -> void:
 		p.last_fielded_ascensions = p.ascensions.duplicate()
 	_clear_board()
 	_fog.hide_fog()
+	# Placeholder faction borders around each half (team 1 is the host's army online).
+	var player_bottom := not online or Net.is_host()
+	grid.team_factions = {PLAYER_TEAM: player.faction if player_bottom else ai.faction,
+			ENEMY_TEAM: ai.faction if player_bottom else player.faction}
 	_frame_camera(my_team != PLAYER_TEAM)   # the joiner watches it turned around
 	ArmySpawner.spawn(bottom, PLAYER_TEAM, false, units_parent, bottom_ascensions)
 	ArmySpawner.spawn(top, ENEMY_TEAM, true, units_parent, top_ascensions)
@@ -1357,7 +1415,7 @@ func _start_combat() -> void:
 	await get_tree().create_timer(COMBAT_COUNTDOWN).timeout
 	if not is_inside_tree() or phase != Phase.COMBAT:
 		return
-	hud.hide_combat_intro()
+	hud.finish_combat_intro()   # "GAMBIT", fading out as the fight starts
 	await get_tree().physics_frame   # let every unit finish _ready
 	if is_instance_valid(_manager):
 		_manager.queue_free()
@@ -1367,13 +1425,24 @@ func _start_combat() -> void:
 	_manager.combat_seed = combat_seed
 	add_child(_manager)
 	_manager.battle_ended.connect(_on_battle_ended)
+	_manager.overtime_started.connect(combat_music.on_overtime)   # keeps the music's overtime part on time
 	_combat_time = 0.0
+	# Music first: a fight that ends the moment it starts (an empty army) then stops it.
+	combat_music.play(combat_track_override if combat_track_override != null else CombatMusic.pick(music_faction()))
 	_manager.start_battle()
+
+
+## Whose combat music plays in fights: your faction's (each faction can have its own tracks;
+## see CombatMusic.pick). Change this to pick by something else, such as the opponent.
+func music_faction() -> String:
+	return player.faction
 
 
 func _physics_process(delta: float) -> void:
 	if phase != Phase.COMBAT or _manager == null or _fight_over:
 		return
+	if _manager.overtime_after > 0.0 and not _manager.in_overtime:
+		combat_music.tick(_manager.overtime_after - _manager.combat_time)   # the build-up into overtime
 	_combat_time += delta
 	if _combat_time > COMBAT_HARD_LIMIT and _manager.phase == BattleManager.Phase.COMBAT:
 		push_warning("Combat passed %ds; ending it as a draw." % COMBAT_HARD_LIMIT)
@@ -1389,6 +1458,7 @@ func _on_battle_ended(winner: int) -> void:
 	if phase != Phase.COMBAT or _fight_over:
 		return
 	_fight_over = true
+	combat_music.stop()   # fades out over the result
 	_keep_match_gains()
 	var result := {"round": round_number, "winner": winner,
 			"aura_1": ArmySpawner.surviving_aura(get_tree(), PLAYER_TEAM),
@@ -1396,7 +1466,7 @@ func _on_battle_ended(winner: int) -> void:
 			"fingerprint": BattleArena.fingerprint(get_tree(), roundi(_manager.combat_time * 60.0))}
 	_my_fingerprint = result["fingerprint"]
 	if online:   # for checking both computers saw the same fight
-		print("Round %d fight: winner %d, fingerprint %s" % [round_number, winner, _my_fingerprint])
+		print("Round %d fight: winner %d, fingerprint %s" % [MatchRules.display_round(round_number), winner, _my_fingerprint])
 	if not online:
 		_apply_result(result)
 	elif Net.is_host():
@@ -1462,13 +1532,13 @@ func _apply_result(result: Dictionary) -> void:
 		hits.append(_damage_hit(true, my_team, damage, ai.hp - damage))
 		ai.hp -= damage
 		lines.append("You won! %d Aura of your units survived." % mine)
-		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, MatchRules.survivor_damage(mine)])
+		lines.append("Opponent takes %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), MatchRules.display_round(round_number), MatchRules.survivor_damage(mine)])
 	elif winner == other_team:
 		var damage := MatchRules.loss_damage(round_number, theirs)
 		hits.append(_damage_hit(false, other_team, damage, player.hp - damage))
 		player.hp -= damage
 		lines.append("You lost. %d Aura of their units survived." % theirs)
-		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), round_number, MatchRules.survivor_damage(theirs)])
+		lines.append("You take %d damage (%d for round %d + %d for survivors)." % [damage, MatchRules.round_damage(round_number), MatchRules.display_round(round_number), MatchRules.survivor_damage(theirs)])
 	else:
 		var to_player := MatchRules.draw_damage(round_number, theirs)
 		var to_ai := MatchRules.draw_damage(round_number, mine)
@@ -1481,8 +1551,9 @@ func _apply_result(result: Dictionary) -> void:
 		var paid := MatchRules.pay_income(p, round_number)
 		if p == player:
 			lines.append("Income: +%d Aura, +%d Reserve." % [paid["aura"], paid["reserve"]])
+			_round_income = paid   # for the next Round Announcement
 	combats_done += 1
-	add_log("Round %d combat: %s" % [round_number, lines[0]])
+	add_log("Round %d combat: %s" % [MatchRules.display_round(round_number), lines[0]])
 	if player.is_alive() and ai.is_alive():
 		_start_early_picks(round_number + 1)
 	# The pips and orb first (the health bars hold their old values until it hits), then
@@ -1517,18 +1588,20 @@ func continue_after_result() -> void:
 	hud.hide_result()
 	if not player.is_alive() or not ai.is_alive():
 		phase = Phase.GAME_OVER
-		var text := "Both players fell. It's a draw."
+		var text := ""   # the big VICTORY / DEFEAT / DRAW sign says it all
+		var outcome := "draw"
 		if player.is_alive():
-			text = "You win the match!"
+			outcome = "victory"
 		elif ai.is_alive():
-			text = "You were defeated."
+			outcome = "defeat"
 		if spectating:
 			text = "Both computers fell. It's a draw."
 			if player.is_alive() or ai.is_alive():
 				var champ := player if player.is_alive() else ai
 				text = "%s wins the match with %d HP left!" % [champ.player_name, champ.hp]
 			_spectate_write("%s  (%d combats)\n" % [text, combats_done])
-		hud.show_game_over(text)
+			outcome = ""   # no sign when watching two computers
+		hud.show_game_over(text, outcome)
 		hud.refresh()
 		if online:
 			Net.leave()
@@ -1621,8 +1694,8 @@ func _apply_spectate_result(result: Dictionary) -> void:
 	combats_done += 1
 	if player.is_alive() and ai.is_alive():
 		_start_early_picks(round_number + 1)
-	add_log("Round %d: %s" % [round_number, lines[0]])
-	_spectate_write("Round %d (%.0fs fight)\n  Blue: %s\n  Red:  %s\n  %s %s" % [round_number, _combat_time,
+	add_log("Round %d: %s" % [MatchRules.display_round(round_number), lines[0]])
+	_spectate_write("Round %d (%.0fs fight)\n  Blue: %s\n  Red:  %s\n  %s %s" % [MatchRules.display_round(round_number), _combat_time,
 			_army_text(player.last_fielded), _army_text(ai.last_fielded), lines[0], lines[1]])
 	# The pips and orb first (the bars hold their old values until it hits), then the result.
 	hud.hold_health(hp_before)

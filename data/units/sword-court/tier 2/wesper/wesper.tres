@@ -6,8 +6,8 @@
 [ext_resource type="Resource" uid="uid://c62sctv1e3ut4" path="res://data/units/sword-court/tier 2/wesper/passive/wesper_passive.tres" id="3_e05yv"]
 [ext_resource type="Texture2D" uid="uid://demb7srk26ilv" path="res://assets/wesper.png" id="5_3s0tb"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_cjyw8"]
-[ext_resource type="Resource" uid="uid://dd4a1o1463cnb" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_a.tres" id="7_lk86c"]
-[ext_resource type="Resource" uid="uid://cjfvuxoetv63n" path="res://data/units/sword-court/tier 2/wesper/upgrades/b_path/wesper_b.tres" id="8_t2u6e"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 2/wesper/upgrades/a_path/wesper_a.tres" id="7_lk86c"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 2/wesper/upgrades/b_path/wesper_b.tres" id="8_t2u6e"]
 
 [resource]
 script = ExtResource("2_7sw1d")

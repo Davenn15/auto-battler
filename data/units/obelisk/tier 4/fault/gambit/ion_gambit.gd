@@ -152,9 +152,9 @@ class SegVulnerability extends Status:
 		target.add_status(vuln)
 
 	## The extra Gambit damage share `target` takes from `source_id` right now.
-	static func bonus_against(target: BattleUnit, source_id: int) -> float:
+	static func bonus_against(target: BattleUnit, p_source_id: int) -> float:
 		for status in target.statuses:
-			if status is SegVulnerability and status.source_id == source_id:
+			if status is SegVulnerability and status.source_id == p_source_id:
 				return status.bonus
 		return 0.0
 

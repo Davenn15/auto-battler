@@ -1,12 +1,15 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://c1agc70oici3k"]
 
-[ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1_5p6vw"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_pb2fx"]
+[ext_resource type="Script" path="res://scripts/upgrade.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/passive.gd" id="2"]
+[ext_resource type="Script" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/scripts/stun_attacks_passive.gd" id="3"]
+
+[sub_resource type="Resource" id="StunPassive"]
+script = ExtResource("3")
+duration = 0.3
+description = "His attacks stun for {duration|cc} seconds."
 
 [resource]
-script = ExtResource("1_5p6vw")
-description = "The slam leaves a lava pool for {lava_duration} seconds that burns enemies for {lava_damage+lava_insight_scaling} per second."
-gambit_overrides = Dictionary[String, float]({
-"lava_duration": 3.0
-})
-metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"
+script = ExtResource("1")
+description = "His attacks stun for {duration|cc} seconds."
+passives = Array[ExtResource("2")]([SubResource("StunPassive")])

@@ -43,6 +43,7 @@ var _log: Label
 var _ready_button: Button
 var _popup: PanelContainer
 var _popup_text: Label
+var _popup_sign: Label   # VICTORY / DEFEAT / DRAW at the end of a match
 var _popup_buttons: VBoxContainer
 var _unit_tip: PanelContainer
 var _unit_tip_text: RichTextLabel
@@ -54,6 +55,7 @@ var _encounter_cards: HBoxContainer
 var _unit_pick: PanelContainer
 var _unit_pick_text: RichTextLabel
 var _unit_pick_bench: HBoxContainer
+var _unit_pick_confirm: Button
 var _ascension_strip: HBoxContainer
 ## The opponent's Ascensions: one row just under their health bar.
 var _enemy_ascension_strip: HBoxContainer
@@ -225,7 +227,7 @@ func hide_unit_tip() -> void:
 
 ## What a shop unit does: its passives and Gambit (as you have it, if you own it), and
 ## what buying it would do next (an upgrade's choices, or a stat buff).
-static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
+static func describe_shop_unit(data: UnitData, owned: ArmyUnit, shop_note := true) -> String:
 	var passives: Array = data.passives.duplicate()
 	var gambit: Gambit = data.gambit
 	var chosen: Array[Upgrade] = []
@@ -250,7 +252,7 @@ static func describe_shop_unit(data: UnitData, owned: ArmyUnit) -> String:
 	if gambit != null:
 		lines.append(_ability_text("Gambit", UnitInfoPanel._ability_name(gambit, gambit.gambit_name, "Gambit"), gambit.description,
 				_unit_context(DescriptionContext.of(gambit), data, owned, true)))
-	if owned != null:
+	if owned != null and shop_note:
 		lines.append("")
 		lines.append("[b]You own it:[/b] buying it buffs its stats (upgrade it from its own menu).")
 	return "\n".join(lines)
@@ -270,8 +272,8 @@ static func _board_unit(army_unit: ArmyUnit) -> BattleUnit:
 	if army_unit == null:
 		return null
 	var tree := Engine.get_main_loop() as SceneTree
-	var game := tree.get_first_node_in_group("match_game") if tree != null else null
-	return game.board_unit_of(army_unit) if game != null else null
+	var match := tree.get_first_node_in_group("match_game") if tree != null else null
+	return match.board_unit_of(army_unit) if match != null else null
 
 
 static func _ability_text(kind: String, ability_name: String, description: String, ctx: DescriptionContext = null) -> String:
@@ -549,15 +551,68 @@ func announce(title: String, body: String) -> void:
 	for label in [heading, text]:
 		label.autowrap_mode = TextServer.AUTOWRAP_OFF   # one line each: the banner sizes to them
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(panel)
-	panel.reset_size()
-	# Centred over the board: the screen minus the side panel on the right.
-	var board_width := _side.global_position.x if _side != null else size.x
-	panel.position = Vector2((board_width - panel.size.x) / 2.0, size.y * 0.32 - panel.size.y / 2.0)
+	_show_banner(panel)
+
+
+## The Round Announcement, at the start of each round's planning: the round number, then
+## what's new this round: the Aura and Reserve just received and any new Empowered
+## Keepsake slots (`empower_total` is the new limit; the first one unlocks Empowering).
+func announce_round(round_shown: int, aura: int, reserve: int, empower_gain: int, empower_total: int) -> void:
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.07, 0.05, 0.92)
+	style.border_color = EMPOWER_GOLD
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	style.set_content_margin_all(18)
+	panel.add_theme_stylebox_override("panel", style)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(column)
+	var heading := _label("ROUND %d" % round_shown, 30, EMPOWER_GOLD)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(heading)
+	var lines: Array[String] = []
+	if aura > 0:
+		lines.append("+%s Aura" % aura_text(aura, 18))
+	if reserve > 0:
+		lines.append("+%s Reserve" % reserve_text(reserve, 18))
+	if empower_gain > 0:
+		if empower_total == empower_gain:
+			lines.append("[color=#%s]Keepsake Empowering unlocked[/color]" % EMPOWER_GOLD.to_html(false))
+			lines.append("[font_size=13][color=#c8c4b8]Put a Keepsake and one of its Shards on the ritual table to empower it.[/color][/font_size]")
+		else:
+			lines.append("[color=#%s]+%d Empowered Keepsake slot%s[/color] (%d in all)" % [EMPOWER_GOLD.to_html(false), empower_gain, "" if empower_gain == 1 else "s", empower_total])
+	for line in lines:
+		var text := RichTextLabel.new()
+		text.bbcode_enabled = true
+		text.fit_content = true
+		text.scroll_active = false
+		text.autowrap_mode = TextServer.AUTOWRAP_OFF   # one line each: the banner sizes to them
+		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		text.add_theme_font_size_override("normal_font_size", 18)
+		text.text = "[center]%s[/center]" % line
+		column.add_child(text)
+	_show_banner(panel)
+
+
+## Shows a banner panel centred on the board: it fades in, holds for a few seconds, then
+## fades out. Placed a couple of frames in, once its text has its real size.
+func _show_banner(panel: Control) -> void:
 	panel.modulate.a = 0.0
+	add_child(panel)
+	for i in 2:
+		await get_tree().process_frame
+	if not is_instance_valid(panel):
+		return
+	panel.reset_size()
+	panel.position = MatchGame.board_screen_center - panel.size / 2.0
 	var tween := panel.create_tween()
 	tween.tween_property(panel, "modulate:a", 1.0, 0.25)
-	tween.tween_interval(2.5)
+	tween.tween_interval(3.0)
 	tween.tween_property(panel, "modulate:a", 0.0, 0.6)
 	tween.tween_callback(panel.queue_free)
 
@@ -778,6 +833,14 @@ func _build_popup() -> void:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	_popup.add_child(column)
+	# The big VICTORY / DEFEAT / DRAW sign at the end of a match (hidden otherwise).
+	_popup_sign = Label.new()
+	_popup_sign.add_theme_font_size_override("font_size", 72)
+	_popup_sign.add_theme_color_override("font_outline_color", Color(0.04, 0.04, 0.06))
+	_popup_sign.add_theme_constant_override("outline_size", 12)
+	_popup_sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_popup_sign.visible = false
+	column.add_child(_popup_sign)
 	_popup_text = _label("", 14)
 	column.add_child(_popup_text)
 	_popup_buttons = VBoxContainer.new()
@@ -900,7 +963,7 @@ func hide_encounter() -> void:
 
 
 ## The banner while picking the unit for a chosen-unit Ascension: what it is, any eligible
-## bench units to click, and Back.
+## bench units to click, Back, and Confirm (once a unit is chosen).
 func _build_unit_pick() -> void:
 	_unit_pick = PanelContainer.new()
 	_unit_pick.add_theme_stylebox_override("panel", _frame(10))
@@ -930,10 +993,14 @@ func _build_unit_pick() -> void:
 	back.size_flags_vertical = Control.SIZE_SHRINK_END
 	back.pressed.connect(func(): game.cancel_unit_pick())
 	row.add_child(back)
+	_unit_pick_confirm = Button.new()
+	_unit_pick_confirm.size_flags_vertical = Control.SIZE_SHRINK_END
+	_unit_pick_confirm.pressed.connect(func(): game.confirm_unit_pick())
+	row.add_child(_unit_pick_confirm)
 
 
 func show_unit_pick(ascension: Ascension, bench: Array) -> void:
-	var lines := PackedStringArray(["[b]Choose a unit for %s[/b]: click it on the board." % ascension.get_display_name()])
+	var lines := PackedStringArray(["[b]Choose a unit for %s[/b]: click it on the board, then Confirm." % ascension.get_display_name()])
 	lines.append(Keyphrases.format(ascension.description, ascension.description_context()))
 	if not bench.is_empty():
 		lines.append("[color=#9a9aa5]Or one on your bench:[/color]")
@@ -951,8 +1018,13 @@ func show_unit_pick(ascension: Ascension, bench: Array) -> void:
 		tile.clip_text = true
 		tile.add_theme_font_size_override("font_size", 9)
 		tile.custom_minimum_size = BENCH_TILE
-		tile.pressed.connect(func(): game.pick_unit(unit))
+		tile.toggle_mode = true   # pressed while it's the chosen unit
+		tile.set_meta("army_unit", unit)
+		tile.pressed.connect(func():
+			game.choose_pick_target(unit)
+			_show_pick_tip(tile, unit))   # a bench unit isn't on the board: its details pop up here
 		_unit_pick_bench.add_child(tile)
+	set_unit_pick_choice(null)
 	_unit_pick.visible = true
 	_place_unit_pick.call_deferred()
 
@@ -962,8 +1034,31 @@ func _place_unit_pick() -> void:
 	_unit_pick.position = Vector2(MatchGame.board_screen_center.x - _unit_pick.size.x / 2.0, TOP_BAR_HEIGHT + 4.0)
 
 
+## A chosen bench unit's details, in the shop's popup, just under the banner (clear of
+## its buttons).
+func _show_pick_tip(tile: Control, unit: ArmyUnit) -> void:
+	_show_tip(tile, describe_shop_unit(unit.data, unit, false))
+	await get_tree().process_frame
+	if not _unit_tip.visible:
+		return
+	_unit_tip.position = Vector2(_unit_pick.position.x, _unit_pick.position.y + _unit_pick.size.y + 6.0)
+
+
+## Shows which unit is chosen: Confirm names it (and is off with none), and its bench tile
+## (if it's on the bench) stays pressed.
+func set_unit_pick_choice(unit: ArmyUnit) -> void:
+	_unit_pick_confirm.disabled = unit == null
+	_unit_pick_confirm.text = "Confirm: %s" % unit.display_name() if unit != null else "Confirm"
+	for tile in _unit_pick_bench.get_children():
+		(tile as Button).set_pressed_no_signal(tile.get_meta("army_unit", null) == unit)
+	if unit == null or not game.player.bench_units().has(unit):
+		hide_unit_tip()
+	_place_unit_pick.call_deferred()
+
+
 func hide_unit_pick() -> void:
 	_unit_pick.visible = false
+	hide_unit_tip()
 
 
 ## The Ascension rows: a badge per Ascension under your health bar; the opponent's (as
@@ -1048,8 +1143,13 @@ static func _ascension_tint(ascension: Ascension) -> Color:
 
 
 ## Shows the pop-up with `text` and one button per [label, callable].
-func _show_popup(text: String, buttons: Array) -> void:
+func _show_popup(text: String, buttons: Array, sign_text: String = "", sign_color: Color = Color.WHITE) -> void:
 	_popup_text.text = text
+	_popup_text.visible = text != ""   # the end of a match may have only its sign
+	_popup_sign.visible = sign_text != ""
+	_popup_sign.text = sign_text
+	_popup_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if sign_text != "" else HORIZONTAL_ALIGNMENT_LEFT
+	_popup_sign.add_theme_color_override("font_color", sign_color)
 	for child in _popup_buttons.get_children():
 		_popup_buttons.remove_child(child)   # now, so the old buttons don't count toward the size
 		child.queue_free()
@@ -1066,6 +1166,13 @@ func _show_popup(text: String, buttons: Array) -> void:
 	_fit_font(_popup, labels, [14, 13, 12, 11, 10, 9])
 	_popup.position = (MatchGame.board_screen_center - _popup.size / 2.0).clamp(
 			Vector2(8, 8), size - _popup.size - Vector2(8, 8))
+	if _popup_sign.visible:   # the sign lands with a thump
+		_popup_sign.pivot_offset = _popup_sign.size / 2.0
+		_popup_sign.scale = Vector2.ONE * 1.6
+		_popup_sign.modulate.a = 0.0
+		var tween := _popup_sign.create_tween().set_parallel(true)
+		tween.tween_property(_popup_sign, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(_popup_sign, "modulate:a", 1.0, 0.2)
 
 
 func hide_result() -> void:
@@ -1095,9 +1202,30 @@ func show_result(text: String) -> void:
 	_show_popup(text, [["Continue", func(): game.continue_after_result()]])
 
 
-func show_game_over(text: String) -> void:
+## The end of the match. `outcome` is "victory", "defeat" or "draw" for the big sign over
+## the text (with its sound for a win or a loss), or "" for none (spectating).
+func show_game_over(text: String, outcome: String = "") -> void:
+	var sign_text := ""
+	var sign_color := Color.WHITE
+	match outcome:
+		"victory":
+			sign_text = "VICTORY"
+			sign_color = VICTORY_COLOR
+			Sfx.play(get_tree(), Sfx.MATCH_WIN, 0.0, 0.0)
+		"defeat":
+			sign_text = "DEFEAT"
+			sign_color = DEFEAT_COLOR
+			Sfx.play(get_tree(), Sfx.MATCH_LOSE, 0.0, 0.0)
+		"draw":
+			sign_text = "DRAW"
+			sign_color = DRAW_COLOR
 	_show_popup(text, [["New match", func(): game.new_match()],
-			["Main menu", func(): game.return_to_menu()]])
+			["Main menu", func(): game.return_to_menu()]], sign_text, sign_color)
+
+
+const VICTORY_COLOR := Color(1.0, 0.82, 0.3)
+const DEFEAT_COLOR := Color(0.85, 0.3, 0.3)
+const DRAW_COLOR := Color(0.75, 0.75, 0.8)
 
 
 ## `unit`'s upgrade choices, as two small
@@ -1327,7 +1455,7 @@ func _refresh_top() -> void:
 			phase_name += " · [color=#ffd24d]%d s left[/color]" % ceili(maxf(game.planning_left, 0.0))
 		online_bits = "   [color=#7fdc7f]Ready ✓[/color]" if game.ai_ready else "   [color=#9a9aa5]planning…[/color]"
 	# Health is on the bars by the board, money in the shop.
-	_top.text = "[b]Round %d[/b] · %s%s" % [game.round_number, phase_name, online_bits]
+	_top.text = "[b]Round %d[/b] · %s%s" % [MatchRules.display_round(game.round_number), phase_name, online_bits]
 	_money.text = "%s  %s  [font_size=10][color=#9a9aa5](%s given / %d)[/color][/font_size]" % [aura_text(p.aura, 13), reserve_text(p.reserve, 13),
 			aura_text(p.aura_received, 10), MatchRules.max_aura_received()]
 	_health_bars.show_players(p, game.ai, _next_combat_round())
@@ -1456,9 +1584,20 @@ func _refresh_bench() -> void:
 # ---------- The countdown before a fight ----------
 
 var _intro: Control = null
+var _intro_count: BoardText = null   # the countdown number on the board, which turns into "GAMBIT"
+var _intro_tween: Tween = null
+const GAMBIT_COLOR := Color(1.0, 0.85, 0.35)
+## The countdown's look on the board (in board pixels): big, and a little see-through.
+const COUNT_FONT_SIZE := 260
+const GAMBIT_FONT_SIZE := 118
+const COUNT_ALPHA := 0.35         # each number pops in at this, then fades toward COUNT_FADED
+const COUNT_FADED := 0.12
+## Space between the board's right edge and the Ascension picks beside it.
+const INTRO_PANEL_GAP := 24.0
 
-## Over the board before a fight: a big countdown (3, 2, 1, Fight!) and, when either player
-## picked an Ascension at the Encounter just before, a panel with each side's picks.
+## Before a fight: a big countdown (3, 2, 1, then GAMBIT) drawn on the board itself, under
+## the units and effects, and, for each player who picked an Ascension at the Encounter
+## just before, a panel with their picks to the right of their half of the board.
 func show_combat_intro(left_name: String, left_picks: Array[Ascension], right_name: String,
 		right_picks: Array[Ascension], seconds: float) -> void:
 	hide_combat_intro()
@@ -1466,53 +1605,102 @@ func show_combat_intro(left_name: String, left_picks: Array[Ascension], right_na
 	_intro.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_intro.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_intro)
-	var column := VBoxContainer.new()
-	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.add_theme_constant_override("separation", 10)
-	_intro.add_child(column)
-	if not left_picks.is_empty() or not right_picks.is_empty():
-		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", _frame(12))
-		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var inside := VBoxContainer.new()
-		inside.add_theme_constant_override("separation", 6)
-		var title := _label("Ascensions picked", 16, Color(0.85, 0.85, 0.9))
-		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		inside.add_child(title)
-		var sides := HBoxContainer.new()
-		sides.add_theme_constant_override("separation", 24)
-		var mine := BattleUnit.team_color(game.my_team)
-		var theirs := BattleUnit.team_color(3 - game.my_team)
-		sides.add_child(_intro_side(left_name, left_picks, mine))
-		sides.add_child(_intro_side(right_name, right_picks, theirs))
-		inside.add_child(sides)
-		panel.add_child(inside)
-		column.add_child(panel)
-	var count := Label.new()
-	count.add_theme_font_size_override("font_size", 72)
-	count.add_theme_color_override("font_color", Color.WHITE)
-	count.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08))
-	count.add_theme_constant_override("outline_size", 10)
-	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(count)
-	# Centred on the board once it has its size.
-	column.reset_size()
-	column.position = MatchGame.board_screen_center - column.get_combined_minimum_size() / 2.0
+	# Each player's picks beside their own half of the board, to its right: yours by the
+	# bottom half (your side on screen), theirs by the top.
+	var mine := BattleUnit.team_color(game.my_team)
+	var theirs := BattleUnit.team_color(3 - game.my_team)
+	var board := _board_screen_rect()
+	if not left_picks.is_empty():
+		_intro_picks_panel(left_name, left_picks, mine, board, true)
+	if not right_picks.is_empty():
+		_intro_picks_panel(right_name, right_picks, theirs, board, false)
+	var count := BoardText.new()
+	count.font_size = COUNT_FONT_SIZE
+	count.modulate.a = 0.0
+	game.grid.add_board_overlay(count)
+	count.position = game.grid.board_center()
+	count.rotation = BattleUnit.view_rotation   # upright when the view is turned around
+	_intro_count = count
 	# 3, 2, 1 one second apart (scaled to `seconds`), each popping in and fading.
 	var steps := int(round(seconds))
 	var step_time := seconds / maxi(steps, 1)
 	var tween := count.create_tween()
+	_intro_tween = tween
 	for i in steps:
 		var n := steps - i
+		var tick: AudioStream = Sfx.COUNTDOWN_TICKS[clampi(i - (steps - Sfx.COUNTDOWN_TICKS.size()), 0, Sfx.COUNTDOWN_TICKS.size() - 1)]
 		tween.tween_callback(func():
+			Sfx.play(get_tree(), tick, 0.0, 0.0)   # rising 3, 2, 1: no random pitch
 			count.text = str(n)
-			count.pivot_offset = count.size / 2.0
-			count.scale = Vector2.ONE * 1.4
-			count.modulate.a = 1.0)
+			count.scale = Vector2.ONE * 1.3
+			count.modulate.a = COUNT_ALPHA)
 		tween.tween_property(count, "scale", Vector2.ONE, step_time * 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tween.tween_property(count, "modulate:a", 0.35, step_time * 0.65)
+		tween.tween_property(count, "modulate:a", COUNT_FADED, step_time * 0.65)
+
+
+## One player's Ascension picks in a small panel just right of the board, centred on the
+## half of the board that's theirs on screen (`bottom`: the lower half).
+func _intro_picks_panel(player_name: String, picks: Array[Ascension], color: Color, board: Rect2, bottom: bool) -> void:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _frame(10))
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(_intro_side(player_name, picks, color))
+	panel.modulate.a = 0.0   # hidden until placed
+	_intro.add_child(panel)
+	# The descriptions only know their real height once they've been laid out (before
+	# that they report a huge one), so place the panel a couple of frames later.
+	for i in 2:
+		await get_tree().process_frame
+	if not is_instance_valid(panel):
+		return
+	panel.reset_size()
+	var panel_size := panel.size
+	panel.modulate.a = 1.0
+	var half_center := board.position.y + board.size.y * (0.75 if bottom else 0.25)
+	var screen := get_viewport().get_visible_rect().size
+	var x := minf(board.end.x + INTRO_PANEL_GAP, screen.x - panel_size.x - 4.0)
+	var y := clampf(half_center - panel_size.y / 2.0, 4.0, maxf(screen.y - panel_size.y - 4.0, 4.0))
+	panel.position = Vector2(x, y)
+
+
+## The board's outline on screen (the hexes' outer edges, turned or not).
+func _board_screen_rect() -> Rect2:
+	var to_screen := get_viewport().get_canvas_transform()
+	var corners := game.grid.board_corners()
+	if corners.is_empty():
+		return Rect2(MatchGame.board_screen_center, Vector2.ZERO)
+	var reach := Vector2.ONE * game.grid.hex_size   # cell centres to the hexes' edges
+	var a: Vector2 = to_screen * (corners[0] - reach)
+	var b: Vector2 = to_screen * (corners[1] + reach)
+	return Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)), (a - b).abs())
+
+
+## Big text drawn on the board's own layer (BattleGrid.add_board_overlay): centred on its
+## position, with a dark outline. Scale and modulate animate it.
+class BoardText extends Node2D:
+	var text := "":
+		set(value):
+			text = value
+			queue_redraw()
+	var color := Color.WHITE:
+		set(value):
+			color = value
+			queue_redraw()
+	var font_size := 200:
+		set(value):
+			font_size = value
+			queue_redraw()
+
+	func _draw() -> void:
+		if text == "":
+			return
+		var font := ThemeDB.fallback_font
+		var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+		var baseline := (font.get_ascent(font_size) - font.get_descent(font_size)) / 2.0
+		var at := Vector2(-width / 2.0, baseline)
+		@warning_ignore("integer_division")
+		draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, maxi(font_size / 14, 4), Color(0.05, 0.05, 0.08, 0.8))
+		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
 
 
 ## One side's column in the countdown panel: the player's name in their colour, then each
@@ -1546,6 +1734,35 @@ func hide_combat_intro() -> void:
 	if is_instance_valid(_intro):
 		_intro.queue_free()
 	_intro = null
+	if is_instance_valid(_intro_count):
+		_intro_count.queue_free()
+	_intro_count = null
+
+
+## The countdown is over: the panel goes, and the number on the board becomes "GAMBIT",
+## popping in with its sound and fading out over the start of the fight.
+func finish_combat_intro() -> void:
+	if not is_instance_valid(_intro_count):
+		hide_combat_intro()
+		return
+	if _intro_tween != null and _intro_tween.is_valid():
+		_intro_tween.kill()
+	if is_instance_valid(_intro):
+		_intro.queue_free()
+	_intro = null
+	var count := _intro_count
+	_intro_count = null   # a new intro can start while this one fades
+	count.text = "GAMBIT"
+	count.color = GAMBIT_COLOR
+	count.font_size = GAMBIT_FONT_SIZE
+	count.modulate.a = COUNT_ALPHA
+	count.scale = Vector2.ONE * 1.35
+	Sfx.play(get_tree(), Sfx.COUNTDOWN_GAMBIT, 0.0, 0.0)
+	var tween := count.create_tween()
+	tween.tween_property(count, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(0.4)
+	tween.tween_property(count, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(count.queue_free)
 
 
 ## A benched unit you can afford to upgrade: the bench's version of the board's cyan glow
@@ -1617,7 +1834,6 @@ func _refresh_items() -> void:
 		var button := _item_button(p.inventory[i])
 		if game.held.get("item", -1) == i:
 			button.modulate = HELD_COLOR
-		var item: Keepsake = p.inventory[i]
 		button.pressed.connect(func(): game.hold_item(i))
 		_on_right_click(button, func(): game.shard_to_table({"from": "inventory", "index": i}))
 		_wire_item(button, func(): return {"from": "inventory", "index": i}, func(): return {"to": "inventory"})
@@ -1695,7 +1911,6 @@ func refresh_selected() -> void:
 	for i in unit.items.size():
 		var button := _item_button(unit.items[i])
 		button.disabled = not unit.items[i].is_shard and not game.table_accepts(unit.items[i])
-		var item: Keepsake = unit.items[i]
 		button.pressed.connect(func(): game.shard_to_inventory({"from": "unit", "unit": unit, "index": i}))
 		_on_right_click(button, func(): game.shard_to_table({"from": "unit", "unit": unit, "index": i}))
 		_wire_item(button, func(): return {"from": "unit", "unit": unit, "index": i}, func(): return {"to": "unit", "unit": unit})

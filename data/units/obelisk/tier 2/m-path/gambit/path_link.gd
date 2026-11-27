@@ -1,8 +1,8 @@
 class_name PathLink
 extends Node2D
 ## A running link between M-Path and an ally (see LinkGambit). Both get a LinkStatus that
-## points back here. Ends when time runs out or either of them dies. Draws a pulsing line
-## between them.
+## points back here. Ends when time runs out (never, for a permanent one) or either of them
+## dies. Draws a pulsing line between them.
 
 const COLOR := Color(1.0, 0.45, 0.75)
 
@@ -10,12 +10,13 @@ var source: BattleUnit   # M-Path
 var ally: BattleUnit
 var time_left: float
 var regen_bonus: float
-var ward_bonus: float      # A: Might Ward and Celerity Ward
-var insight_bonus: float
+var ward_bonus: float      # all three Wards
+var might_bonus: float     # A1
+var vampirism_bonus: float # A1
 var damage_share: float
-var sacrifice_share: float
-## A2 only saves the ally once per link.
-var sacrificed := false
+var sacrifice_share: float # A2
+## A: it never runs out (and doesn't hold back M-Path's Charge, so he can cast again).
+var permanent := false
 ## True while the link is passing damage across, so it isn't passed straight back.
 var passing := false
 var _statuses: Array = []
@@ -54,15 +55,14 @@ func end() -> void:
 	queue_free()
 
 
-## A2: the ally would die. M-Path gives up Sacrifice Share of his max health (never going
-## below 1 health) and heals the ally for the same. Once per link. Returns how much he gave.
+## A2: the ally would die. M-Path gives up Sacrifice Share of his current health (never
+## going below 1 health) and heals the ally for the same. Every time. Returns how much he gave.
 func sacrifice() -> float:
-	if sacrificed or not _alive(source) or not _alive(ally):
+	if not _alive(source) or not _alive(ally):
 		return 0.0
-	var amount := minf(source.max_health * sacrifice_share, source.health - 1.0)
+	var amount := minf(source.health * sacrifice_share, source.health - 1.0)
 	if amount <= 0.0:
 		return 0.0
-	sacrificed = true
 	source.set_health(source.health - amount)
 	source.show_float_text("-%d" % roundi(amount), COLOR)
 	ally.show_float_text("Sacrifice", COLOR)
@@ -72,6 +72,34 @@ func sacrifice() -> float:
 
 static func _alive(unit) -> bool:
 	return is_instance_valid(unit) and unit.alive
+
+
+## A's recast heal on `unit`: a green ring that swells and fades (the heal shows its number).
+static func heal_ring(unit: BattleUnit) -> void:
+	if not KeepsakeVfx.enabled() or not is_instance_valid(unit):
+		return
+	var ring := HealRing.new()
+	ring.radius = KeepsakeVfx._sprite_size(unit).length() * 0.42
+	ring.z_index = 11
+	unit.add_child(ring)
+
+
+class HealRing extends Node2D:
+	const LIFE := 0.6
+	const GREEN := Color(0.37, 0.82, 0.42)
+	var radius := 24.0
+	var _age := 0.0
+
+	func _process(delta: float) -> void:
+		_age += delta
+		if _age >= LIFE:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var t := _age / LIFE
+		draw_arc(Vector2.ZERO, radius * (0.8 + 0.4 * t), 0.0, TAU, 40, Color(GREEN, 0.9 * (1.0 - t)), 3.0, true)
 
 
 func _process(delta: float) -> void:
@@ -105,16 +133,21 @@ class LinkStatus extends Status:
 		link = p_link
 		partner = p_partner
 
-	## M-Path gains no Charge while his link is up; the ally gains Charge as normal.
+	## M-Path gains no Charge while a timed link is up; the ally gains Charge as normal. A
+	## permanent link (A) never holds his Charge back, so he can cast again to heal.
 	func blocks_charge_gain(unit: BattleUnit) -> bool:
-		return is_instance_valid(link) and unit == link.source and link.is_live()
+		return is_instance_valid(link) and unit == link.source and link.is_live() and not link.permanent
 
 	func modify_stat(_unit: BattleUnit, stat: Stats.Stat, value: float) -> float:
+		if not is_instance_valid(link) or not link.is_live():
+			return value
 		match stat:
-			Stats.Stat.MIGHT_WARD, Stats.Stat.CELERITY_WARD:
+			Stats.Stat.MIGHT_WARD, Stats.Stat.INSIGHT_WARD, Stats.Stat.CELERITY_WARD:
 				return value + link.ward_bonus
-			Stats.Stat.INSIGHT:
-				return value + link.insight_bonus
+			Stats.Stat.MIGHT:
+				return value + link.might_bonus
+			Stats.Stat.VAMPIRISM:
+				return value + link.vampirism_bonus
 		return value
 
 	func modify_incoming_damage(unit: BattleUnit, amount: float) -> float:
@@ -126,7 +159,7 @@ class LinkStatus extends Status:
 			partner.take_warded_damage(passed, false, unit.incoming_damage_type)
 			link.passing = false
 			amount -= passed
-		# A2: the ally would die, so M-Path gives up health to save it (once per link).
+		# A2: the ally would die, so M-Path gives up health to save it.
 		if unit == link.ally and link.sacrifice_share > 0.0 and amount >= unit.health:
 			var survivable := maxf(unit.health - 1.0, 0.0)   # taken before the heal lands
 			if link.sacrifice() > 0.0:

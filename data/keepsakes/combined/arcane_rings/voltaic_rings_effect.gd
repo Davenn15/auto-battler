@@ -50,5 +50,5 @@ class Rings extends Status:
 	func gambit_damage_bonus(_unit: BattleUnit) -> float:
 		return _bonus
 
-	func modify_outgoing_support(_unit: BattleUnit, _target: BattleUnit, amount: float, _is_shield: bool, from_gambit: bool) -> float:
-		return amount * (1.0 + _bonus) if from_gambit else amount
+	func modify_outgoing_support(_unit: BattleUnit, _target: BattleUnit, amount: float, _is_shield: bool, by_gambit: bool) -> float:
+		return amount * (1.0 + _bonus) if by_gambit else amount

@@ -222,8 +222,8 @@ static func _with_numbers(text: String, ctx: DescriptionContext, uncoloured: boo
 		_new_gambit = RegEx.create_from_string("^New Gambit: ([^.]+)\\.\\s*")
 	var found := _new_gambit.search(text)
 	if found != null:
-		var tag := "NEW GAMBIT" if uncoloured else "[color=%s]NEW GAMBIT[/color]" % extra_color("gambit").to_html(false)
-		return "[font_size=%d]%s[/font_size]\n[b]%s[/b]\n%s" % [NEW_GAMBIT_TAG_SIZE, tag,
+		var heading := "NEW GAMBIT" if uncoloured else "[color=%s]NEW GAMBIT[/color]" % extra_color("gambit").to_html(false)
+		return "[font_size=%d]%s[/font_size]\n[b]%s[/b]\n%s" % [NEW_GAMBIT_TAG_SIZE, heading,
 				_escape(found.get_string(1)), _with_numbers(text.substr(found.get_end()), ctx, uncoloured)]
 	var out := ""
 	var at := 0
@@ -264,8 +264,8 @@ static func _evaluate(token: String, ctx: DescriptionContext) -> Dictionary:
 			scalings.append([float(value), bits[1] if bits.size() > 1 else _stat_word(bits[0])])
 	var boosts: Array = []   # [multiplier, source Keepsake or null]
 	if ctx != null:
-		for tag in tags:
-			match tag:
+		for kind in tags:
+			match kind:
 				"shield": boosts.append_array(ctx.support_boosts(true))
 				"heal": boosts.append_array(ctx.support_boosts(false))
 				"cc": boosts.append_array(ctx.control_boosts())

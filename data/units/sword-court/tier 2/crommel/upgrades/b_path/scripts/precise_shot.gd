@@ -1,12 +1,13 @@
 class_name PreciseShot
 extends Projectile
 ## Crommel's Precise attack: a normal attack projectile with its own look, which can
-## bounce once to the nearest other enemy for a share of its damage.
+## bounce once to the target's closest ally (ties: the lowest health) for a share of its
+## damage.
 
 ## Share of the damage the bounce deals (0.5 = half). 0 = no bounce.
 var ricochet_share: float = 0.0
-## How far the bounce can travel, in pixels.
-var ricochet_reach: float = 0.0
+## How far the bounce can travel, in hex cells.
+var ricochet_cells: int = 0
 
 
 func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color: Color, p_wrack_level: int = 0, p_type: int = 0, p_hit_effects: Array[HitEffect] = []) -> void:
@@ -21,7 +22,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _after_hit() -> void:
-	var next := _nearest_enemy_to(target) if ricochet_share > 0.0 else null
+	var next := _bounce_target(target) if ricochet_share > 0.0 else null
 	if next == null:
 		queue_free()
 		return
@@ -38,16 +39,21 @@ func reflect(by: BattleUnit, wrack_chance: float, to: BattleUnit = null) -> bool
 	return super.reflect(by, wrack_chance, to)
 
 
-## The living unit on `hit`'s team closest to it within ricochet reach, other than `hit`.
-func _nearest_enemy_to(hit: BattleUnit) -> BattleUnit:
+## The living, targetable unit on `hit`'s team closest to it (in hex cells) within
+## Ricochet Cells, other than `hit`. Equally close ones: the lowest current health.
+func _bounce_target(hit: BattleUnit) -> BattleUnit:
+	if not is_instance_valid(hit) or hit.grid == null:
+		return null
 	var best: BattleUnit = null
-	var best_dist := ricochet_reach
+	var best_dist := ricochet_cells + 1
 	for node in get_tree().get_nodes_in_group("units"):
 		var unit := node as BattleUnit
-		if unit == null or unit == hit or not unit.alive or unit.team != hit.team:
+		if unit == null or unit == hit or not unit.alive or unit.team != hit.team or not unit.is_targetable():
 			continue
-		var dist := hit.global_position.distance_to(unit.global_position)
-		if dist <= best_dist:
+		var dist := hit.grid.get_distance(hit.cell, unit.cell)
+		if dist > ricochet_cells:
+			continue
+		if dist < best_dist or (dist == best_dist and unit.health < best.health):
 			best_dist = dist
 			best = unit
 	return best

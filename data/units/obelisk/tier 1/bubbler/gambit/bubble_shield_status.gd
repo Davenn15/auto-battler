@@ -23,10 +23,10 @@ func _init(p_shield: float, p_duration: float) -> void:
 
 
 ## The bubble from `team` that `unit` already holds and that hasn't popped, or null.
-static func held_by(unit: BattleUnit, team: int) -> BubbleShieldStatus:
+static func held_by(unit: BattleUnit, p_team: int) -> BubbleShieldStatus:
 	for status in unit.statuses:
 		var bubble := status as BubbleShieldStatus
-		if bubble != null and bubble.team == team and not bubble._popped:
+		if bubble != null and bubble.team == p_team and not bubble._popped:
 			return bubble
 	return null
 

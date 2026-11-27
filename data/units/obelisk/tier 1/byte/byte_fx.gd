@@ -184,14 +184,13 @@ static func shell(unit: BattleUnit, on: bool, animate: bool) -> void:
 static func _shell_node(unit: BattleUnit) -> Sprite2D:
 	var node := unit.sprite.get_node_or_null(SHELL_KEY) as Sprite2D
 	if node != null:
-		node.flip_h = unit.sprite.flip_h   # follow the sprite if it turned
 		return node
 	if unit.sprite.texture == null:
 		return null
 	if _shell_shader == null:
 		_shell_shader = Shader.new()
 		_shell_shader.code = SHELL_SHADER
-	node = Sprite2D.new()
+	node = ShellSprite.new()
 	node.name = SHELL_KEY
 	node.texture = unit.sprite.texture
 	node.offset = unit.sprite.offset
@@ -207,18 +206,39 @@ static func _shell_node(unit: BattleUnit) -> Sprite2D:
 	return node
 
 
+## The shell: a copy of Byte's sprite that sits on it. It's the sprite's child, so it moves,
+## turns and scales with it; every frame it also copies the sprite's drawing offset (a
+## Knock-up lifts the sprite that way), facing and picture, so it never comes apart from it.
+class ShellSprite extends Sprite2D:
+	func _process(_delta: float) -> void:
+		var body := get_parent() as Sprite2D
+		if body == null:
+			return
+		offset = body.offset
+		flip_h = body.flip_h
+		if body.texture != null and texture != body.texture:
+			texture = body.texture
+			region_rect = Rect2(Vector2(-SHELL_MARGIN, -SHELL_MARGIN), texture.get_size() + Vector2(SHELL_MARGIN, SHELL_MARGIN) * 2)
+
+
 ## Shell pieces: flying out from Byte when it breaks (`out`), or flying in when it reforges.
+## They follow Byte's sprite while they fly (lunges, hit jolts, Knock-ups, moving).
 static func _shards(unit: BattleUnit, out: bool) -> void:
 	var burst := Shards.new()
 	burst.out = out
 	burst.radius = KeepsakeVfx._sprite_size(unit).length() * 0.32
 	burst.z_index = 9
+	burst.unit = unit
 	unit.get_tree().current_scene.add_child(burst)
 	burst.global_position = unit.global_position
+	burst.anchor_offset = unit.global_position - Shards.sprite_anchor(unit)
 
 
 class Shards extends Node2D:
 	const COUNT := 12
+	var unit   # untyped: may be freed
+	## Where the burst sits relative to the sprite's drawn centre (set when it starts).
+	var anchor_offset := Vector2.ZERO
 	var out := true
 	var radius := 22.0
 	var _time := 0.5
@@ -236,17 +256,23 @@ class Shards extends Node2D:
 		if _age >= _time:
 			queue_free()
 			return
+		if is_instance_valid(unit) and unit.sprite != null:
+			global_position = Shards.sprite_anchor(unit) + anchor_offset
 		queue_redraw()
+
+	## The centre of `unit`'s sprite as drawn, in world space.
+	static func sprite_anchor(owner_unit: BattleUnit) -> Vector2:
+		return owner_unit.sprite.to_global(owner_unit.sprite.offset)
 
 	func _draw() -> void:
 		var t := _age / _time
 		# Breaking pieces start on the shell and fly out; reforging ones come in to it.
 		var k := t if out else 1.0 - t
-		var ease := 1.0 - pow(1.0 - k, 2.0) if out else k
+		var eased := 1.0 - pow(1.0 - k, 2.0) if out else k
 		var fade := 1.0 - t if out else minf(t * 3.0, 1.0) * (1.0 - t * 0.5)
 		for piece in _pieces:
 			var dir := Vector2.from_angle(piece[0])
-			var center: Vector2 = dir * radius * (piece[1] + ease * 0.9)
+			var center: Vector2 = dir * radius * (piece[1] + eased * 0.9)
 			if out:
 				center.y += 24.0 * t * t   # they fall a little
 			var spin: float = piece[2] * k

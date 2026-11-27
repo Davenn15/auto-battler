@@ -76,6 +76,7 @@ func _coordinate() -> void:
 			"trained" if AiPolicy.has_trained() else "default", out_dir])
 	var pids: Array = []
 	for w in count:
+		@warning_ignore("integer_division")
 		var mine := total_matches / count + (1 if w < total_matches % count else 0)
 		var pid := OS.create_process(OS.get_executable_path(), ["--headless", "--fixed-fps", "60",
 				"--path", ProjectSettings.globalize_path("res://"), "res://tools/real_sim.tscn", "--",

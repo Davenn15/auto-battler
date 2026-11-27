@@ -656,7 +656,7 @@ static func note_swirl(unit: BattleUnit) -> void:
 static func upgrade_flourish(unit: BattleUnit, faction: String) -> void:
 	if not enabled() or not is_instance_valid(unit):
 		return
-	var effect: Node2D = UpgradeDigital.new() if faction == "Obelisk" else UpgradeHoly.new()
+	var effect: Node2D = (UpgradeDigital.new() as Node2D) if faction == "Obelisk" else (UpgradeHoly.new() as Node2D)
 	effect.z_index = 20
 	_spawn(unit, effect, unit.global_position)
 	effect.rotation = BattleUnit.view_rotation   # upright however the board is turned

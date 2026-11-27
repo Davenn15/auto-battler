@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CombatTrack" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat_track.gd" id="1"]
+[ext_resource type="AudioStream" path="res://music/combat_music_1.mp3" id="2"]
+
+[resource]
+script = ExtResource("1")
+stream = ExtResource("2")
+factions = Array[String]([])
+speed = 1.0
+keep_pitch = true
+overtime_at = 58.0
+buildup_at = 54.0
+loop_from = 58.0
+volume_db = 0.0

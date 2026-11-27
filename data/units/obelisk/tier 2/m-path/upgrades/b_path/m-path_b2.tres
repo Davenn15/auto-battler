@@ -1,12 +1,11 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3 uid="uid://hqexa0q42son"]
 
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="1"]
-[ext_resource type="Script" uid="uid://gxwhvxeh4j2g" path="res://scripts/passive.gd" id="2_ymyns"]
 
 [resource]
 script = ExtResource("1")
-description = "Allies inside the field have +{regen_bonus} health regen and +{insight_ward_bonus} Insight Ward."
-gambit_bonuses = Dictionary[String, float]({
-"regen_bonus": 15.0,
-"insight_ward_bonus": 25.0
+description = "The aura balances every {interval} seconds, and each ally inside heals {heal_share%} of its max health each time."
+gambit_overrides = Dictionary[String, float]({
+"interval": 1.5,
+"heal_share": 0.03
 })

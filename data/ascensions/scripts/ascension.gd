@@ -17,8 +17,11 @@ extends Resource
 
 @export var ascension_name: String = ""
 @export_multiline var description: String = ""
-## 1-4. Offered only at Encounters of this tier.
+## 1-4. Offered only at Encounters of this tier (plus Also Offered At).
 @export_range(1, 4) var tier: int = 1
+## Other Encounter tiers this is offered at too (e.g. [3] for a tier 4 one). Not for
+## unit-specific Ascensions, which go by their unit's tier.
+@export var also_offered_at: Array[int] = []
 enum Target { ARMY, CHOSEN_UNIT }
 ## Army: every (affected) unit gets it. One chosen unit: after taking it, the player picks
 ## one of their units, and only that unit gets it, for the rest of the match.
@@ -96,13 +99,17 @@ var key: String = ""
 const NUMERALS := ["", "I", "II", "III", "IV"]
 
 
-## The Encounter tiers this can be offered at. Most: just its Tier. Unit-specific ones
+## The Encounter tiers this can be offered at. Most: its Tier and Also Offered At. Unit-specific ones
 ## (Affected Units) go by their unit's tier instead, the highest one for a pair: tier 1
 ## and 2 units at tier 1-2 Encounters, tier 3 units at 2-3, tier 4 units at 3-4.
 func encounter_tiers() -> Array[int]:
 	var result: Array[int] = []
 	if affected_units.is_empty():
 		result.append(tier)
+		for extra in also_offered_at:
+			if not result.has(extra):
+				result.append(extra)
+		result.sort()
 		return result
 	var unit_tier := 1
 	for data in affected_units:

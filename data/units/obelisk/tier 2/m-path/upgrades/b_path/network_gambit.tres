@@ -4,8 +4,9 @@
 
 [resource]
 script = ExtResource("1")
-width_cells = 4.0
-duration = 6.0
+radius_cells = 1
+duration = 8.0
+interval = 3.0
 gambit_name = "Networked"
 cast_time = 0.3
-description = "Lays a field {width_cells} cells wide and {depth_rows} rows deep over the most allies. For {duration} seconds it keeps evening out the health of every ally inside."
+description = "Emanates a redistribution aura {radius_cells} hex around him for {duration} seconds. Every {interval} seconds, the allies inside (him included) share their health: each ends at the same share of its max health."

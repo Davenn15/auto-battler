@@ -6,8 +6,8 @@
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4_pcru5"]
 [ext_resource type="Texture2D" uid="uid://b548e83w8jonj" path="res://assets/garth.png" id="5_g2t55"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_rfilw"]
-[ext_resource type="Resource" uid="uid://dqcbwj2ir563c" path="res://data/units/sword-court/tier 1/garth/upgrades/a_path/garth_a.tres" id="7_pcru5"]
-[ext_resource type="Resource" uid="uid://1g3t6a82ovk0" path="res://data/units/sword-court/tier 1/garth/upgrades/b_path/garth_b.tres" id="8_g2t55"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/garth/upgrades/a_path/garth_a.tres" id="7_pcru5"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 1/garth/upgrades/b_path/garth_b.tres" id="8_g2t55"]
 
 [resource]
 script = ExtResource("4_pcru5")

@@ -1,17 +1,14 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3]
 
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1_okvlk"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2_fg6rc"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/geomond_a1.tres" id="2_u2w3d"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/a_path/geomond_a2.tres" id="3_mmcbt"]
 
 [resource]
 script = ExtResource("1_okvlk")
-upgrade_name = "Seismic"
-description = "The slam is longer and wider: {length_cells} cells long, {width_cells} cells wide."
+upgrade_name = "Tectonic"
+description = "The slam deals +{fewer_targets_bonus%} damage for each enemy it hits fewer than {fewer_targets_count}."
 next_choices = Array[ExtResource("1_okvlk")]([ExtResource("2_u2w3d"), ExtResource("3_mmcbt")])
-gambit_bonuses = Dictionary[String, float]({
-"length_cells": 1.0,
-"width_cells": 1.0
+gambit_overrides = Dictionary[String, float]({
+"fewer_targets_bonus": 0.3
 })
-metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

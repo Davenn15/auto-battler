@@ -30,8 +30,8 @@ class Analyzer extends Status:
 	func tick(_unit: BattleUnit, delta: float) -> void:
 		_time += delta
 
-	func on_support_given(unit: BattleUnit, target: BattleUnit, _is_shield: bool, from_gambit: bool) -> void:
-		if not from_gambit or not is_instance_valid(target) or not target.alive:
+	func on_support_given(unit: BattleUnit, target: BattleUnit, _is_shield: bool, by_gambit: bool) -> void:
+		if not by_gambit or not is_instance_valid(target) or not target.alive:
 			return
 		var id := target.get_instance_id()
 		if _time < float(_ready_at.get(id, -1.0)):
@@ -39,8 +39,8 @@ class Analyzer extends Status:
 		_ready_at[id] = _time + effect.cooldown
 		target.gain_charge(effect.self_charge if target == unit else effect.charge)
 
-	func modify_outgoing_support(_unit: BattleUnit, _target: BattleUnit, amount: float, _is_shield: bool, from_gambit: bool) -> float:
-		return amount * (1.0 + effect.support_bonus) if from_gambit else amount
+	func modify_outgoing_support(_unit: BattleUnit, _target: BattleUnit, amount: float, _is_shield: bool, by_gambit: bool) -> float:
+		return amount * (1.0 + effect.support_bonus) if by_gambit else amount
 
-	func modify_support_duration(_unit: BattleUnit, _target: BattleUnit, duration: float, from_gambit: bool) -> float:
-		return duration * (1.0 + effect.duration_bonus) if from_gambit else duration
+	func modify_support_duration(_unit: BattleUnit, _target: BattleUnit, duration: float, by_gambit: bool) -> float:
+		return duration * (1.0 + effect.duration_bonus) if by_gambit else duration

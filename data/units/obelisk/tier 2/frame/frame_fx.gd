@@ -21,7 +21,7 @@ static func stretch(unit: BattleUnit, height: float) -> void:
 	var base: Array = sprite.get_meta(STRETCH_META)
 	var base_scale: Vector2 = base[0]
 	var base_pos: Vector2 = base[1]
-	var tex_height: float = sprite.texture.get_height() if sprite.texture != null else 64.0
+	var tex_height: float = float(sprite.texture.get_height()) if sprite.texture != null else 64.0
 	var thin := lerpf(1.0, 0.9, clampf(height - 1.0, 0.0, 1.0))
 	var to_scale := Vector2(base_scale.x * thin, base_scale.y * height)
 	var to_pos := base_pos - Vector2(0, tex_height * base_scale.y * (height - 1.0) / 2.0)   # feet stay put

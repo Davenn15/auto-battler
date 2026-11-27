@@ -29,12 +29,12 @@ func setup(p_shooter: BattleUnit, p_target: BattleUnit, p_damage: float, p_color
 	super.setup(p_shooter, p_target, p_damage, p_color, p_wrack_level, p_type, p_hit_effects)
 	_aim(p_shooter, (p_target.global_position - p_shooter.global_position).normalized())
 	if side_share > 0.0:
-		for sign in [-1.0, 1.0]:
+		for turn_sign in [-1.0, 1.0]:
 			var side := BarbedBlade.new()
 			side.pierce_share = pierce_share
 			side.grants_charge = false
 			side.setup(p_shooter, p_target, p_damage * side_share, p_color, p_wrack_level, p_type, [])
-			side._aim(p_shooter, direction.rotated(deg_to_rad(side_angle) * sign), 0.7)
+			side._aim(p_shooter, direction.rotated(deg_to_rad(side_angle) * turn_sign), 0.7)
 			p_shooter.get_tree().current_scene.add_child(side)
 			side.global_position = p_shooter.global_position
 

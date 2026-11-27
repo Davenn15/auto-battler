@@ -1,9 +1,10 @@
 class_name DamageTracker
 extends PanelContainer
-## A damage meter: each team's units ranked by damage dealt (or healing, or shielding),
-## one bar each, biggest at the top. In Damage mode each bar is split into Might, Insight
-## and Celerity, sized by how much of each type that unit dealt. Bars are scaled to the
-## highest total on either team, so the two columns can be compared.
+## A damage meter: each team's units ranked by damage dealt (or Support given, or damage
+## taken), one bar each, biggest at the top. In Damage and Tank mode each bar is split by
+## damage type, sized by how much of each type that unit dealt or took. In Support mode it's
+## healing on the left and shielding on the right. Bars are scaled to the highest total on
+## either team, so the two columns can be compared.
 ##
 ## In a match it's docked top-left at all times (see dock_left) as a window that folds
 ## down to its title bar: click the title to expand or collapse it.
@@ -14,8 +15,11 @@ const TEAM_COLORS := {
 	2: Color(1.0, 0.4, 0.4),    # red
 }
 
-const MODES := {"damage": "Damage", "healing": "Healing", "shielding": "Shielding"}
-const MODE_COLORS := {"healing": Color(0.35, 0.8, 0.4), "shielding": Color(0.85, 0.9, 0.95)}
+const MODES := {"damage": "Damage", "support": "Support", "tank": "Tank"}
+const HEALING_COLOR := Color(0.35, 0.8, 0.4)
+const SHIELDING_COLOR := Color(0.85, 0.9, 0.95)
+## Which entry key holds the per-damage-type split for each split-by-type mode.
+const TYPE_KEYS := {"damage": "types", "tank": "taken_types"}
 
 const FRAME_COLOR := Color(0.09, 0.09, 0.11, 0.92)
 const BORDER_COLOR := Color(0.38, 0.38, 0.44)
@@ -25,11 +29,12 @@ const COLUMN_WIDTH := 190.0
 const PLANNING_COLUMN_WIDTH := 139.0
 const PLANNING_TOP := 36.0   # just under the match's top bar
 
-var _stats: Dictionary = {}     # unit instance id -> {name, team, damage, healing, shielding, types}
+var _stats: Dictionary = {}     # unit instance id -> {name, team, damage, healing, shielding, support, tank, types, taken_types}
 var _columns: Dictionary = {}   # team -> VBoxContainer of MeterRows
 var _titles: Dictionary = {}    # team -> its column's title Label
 var _waiting: Label
-var _legend: HBoxContainer
+var _legend: HBoxContainer          # damage types (Damage and Tank)
+var _support_legend: HBoxContainer  # healing and shielding (Support)
 var _header: Label    # "Last combat", shown in planning
 var _mode: String = "damage"
 var _dirty: bool = false
@@ -118,6 +123,12 @@ func _ready() -> void:
 		_legend.add_child(_legend_entry(Stats.DAMAGE_TYPE_NAMES[damage_type], Stats.DAMAGE_TYPE_COLORS[damage_type]))
 	layout.add_child(_legend)
 	_body.append(_legend)
+	_support_legend = HBoxContainer.new()
+	_support_legend.add_theme_constant_override("separation", 10)
+	_support_legend.add_child(_legend_entry("Healing", HEALING_COLOR))
+	_support_legend.add_child(_legend_entry("Shielding", SHIELDING_COLOR))
+	layout.add_child(_support_legend)
+	_body.append(_support_legend)
 	_refresh()
 
 
@@ -222,7 +233,7 @@ func set_planning(on: bool) -> void:
 func register(unit: BattleUnit) -> void:
 	var unit_name: String = unit.data.get_title() if unit.data != null else str(unit.name)
 	_stats[unit.get_instance_id()] = {"name": unit_name, "team": unit.team, "damage": 0.0,
-			"healing": 0.0, "shielding": 0.0, "types": {}}
+			"healing": 0.0, "shielding": 0.0, "support": 0.0, "tank": 0.0, "types": {}, "taken_types": {}}
 	_refresh()
 
 
@@ -237,10 +248,20 @@ func record_damage(unit_id: int, amount: float, _lifesteal: bool = true) -> void
 
 func record_healing(unit_id: int, amount: float) -> void:
 	_add_stat(unit_id, "healing", amount)
+	_add_stat(unit_id, "support", amount)
 
 
 func record_shielding(unit_id: int, amount: float) -> void:
 	_add_stat(unit_id, "shielding", amount)
+	_add_stat(unit_id, "support", amount)
+
+
+## Damage a unit took (health lost plus shield soaked), for the Tank tab.
+func record_taken(unit_id: int, amount: float, damage_type: int) -> void:
+	var entry = _stats.get(unit_id)
+	if entry != null:
+		entry["taken_types"][damage_type] = entry["taken_types"].get(damage_type, 0.0) + amount
+	_add_stat(unit_id, "tank", amount)
 
 
 func _add_stat(unit_id: int, key: String, amount: float) -> void:
@@ -274,7 +295,8 @@ func _refresh() -> void:
 			return
 	_waiting.text = "Appears once the fight starts." if not _planning else "Shows the last fight once there's been one."
 	_waiting.visible = _stats.is_empty()
-	_legend.visible = _mode == "damage" and not _stats.is_empty()
+	_legend.visible = TYPE_KEYS.has(_mode) and not _stats.is_empty()
+	_support_legend.visible = _mode == "support" and not _stats.is_empty()
 	var top := 1.0
 	for entry in _stats.values():
 		top = maxf(top, entry[_mode])
@@ -295,7 +317,8 @@ func _refresh() -> void:
 
 
 ## One bar: the unit's name on the left, its total on the right, over a bar whose length
-## is its share of the top total. In Damage mode the bar is split by damage type.
+## is its share of the top total. In Damage and Tank mode the bar is split by damage type;
+## in Support mode it's healing, then shielding.
 ## The bar and number glide toward new values rather than jumping (purely visual).
 class MeterRow extends Control:
 	const HEIGHT := 16.0
@@ -325,12 +348,14 @@ class MeterRow extends Control:
 		_targets.clear()
 		# Always the same segments in the same order (zero-length when unused), so each one
 		# eases from its own old length.
-		if mode == "damage":
+		if DamageTracker.TYPE_KEYS.has(mode):
+			var types: Dictionary = entry[DamageTracker.TYPE_KEYS[mode]]
 			for damage_type in Stats.DAMAGE_TYPE_COLORS:   # Might, Insight, Celerity
-				var amount: float = entry["types"].get(damage_type, 0.0)
+				var amount: float = types.get(damage_type, 0.0)
 				_targets.append([amount / top, Stats.DAMAGE_TYPE_COLORS[damage_type]])
-		else:
-			_targets.append([_total / top, DamageTracker.MODE_COLORS[mode]])
+		else:   # Support: healing on the left, shielding on the right
+			_targets.append([entry["healing"] / top, DamageTracker.HEALING_COLOR])
+			_targets.append([entry["shielding"] / top, DamageTracker.SHIELDING_COLOR])
 		# A different unit in this row (rankings changed) or another tab: start there at once.
 		var snap := not is_same(entry, _entry) or mode != _mode or _shown.size() != _targets.size()
 		_entry = entry

@@ -32,6 +32,7 @@ class BeamStatusColumn extends Status:
 	var _progress := 0.0
 	var _dealt := 0.0
 	var _best_wrack := 0
+	var _hum := Sfx.Loop.new(Sfx.BEAM_LOOP, BeamStatus.BEAM_HUM_GROUP, BeamStatus.BEAM_HUM_MAX)
 	var _visual: BeamStatus.BeamLine = null
 	var _ricochet_lines := Beam.RicochetLines.new()
 	var _beam: Beam.Settings
@@ -43,6 +44,7 @@ class BeamStatusColumn extends Status:
 		return false
 
 	func on_removed(_unit: BattleUnit) -> void:
+		_hum.stop()
 		if is_instance_valid(_visual):
 			_visual.queue_free()
 		_ricochet_lines.clear()
@@ -160,6 +162,7 @@ class BeamStatusColumn extends Status:
 		BattleUnit.run_hit_effects(effects, enemy, dealt, wrack)
 
 	func _show(unit: BattleUnit, enemy, firing: bool) -> void:
+		_hum.set_playing(unit, enemy != null and firing and not unit.previewing)
 		ColumnBeamWeapon.show_beam(self, unit, enemy, firing, ColumnWeapon.COLOR)
 		if is_instance_valid(_visual):
 			_visual.sprite_point = _portal(unit)

@@ -71,9 +71,9 @@ static func load_trained() -> AiPolicy:
 
 
 ## Saves `genome` as the trained strategy the game uses from now on.
-static func save_trained(genome: Dictionary) -> void:
+static func save_trained(p_genome: Dictionary) -> void:
 	var file := FileAccess.open(TRAINED_PATH, FileAccess.WRITE)
-	file.store_string(JSON.stringify(genome, "  "))
+	file.store_string(JSON.stringify(p_genome, "  "))
 	file.close()
 
 

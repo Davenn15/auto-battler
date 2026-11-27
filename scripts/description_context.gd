@@ -95,11 +95,11 @@ func _boosts(measure: Callable) -> Array:
 	var out: Array = []
 	if unit == null or not is_instance_valid(unit):
 		return out
-	var sources := unit.status_sources()
+	var by_status := unit.status_sources()
 	for status in unit.statuses:
 		var multiplier: float = measure.call(status)
 		if not is_equal_approx(multiplier, 1.0):
-			out.append([multiplier, sources.get(status)])
+			out.append([multiplier, by_status.get(status)])
 	return out
 
 

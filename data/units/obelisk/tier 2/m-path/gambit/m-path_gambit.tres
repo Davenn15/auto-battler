@@ -4,8 +4,11 @@
 
 [resource]
 script = ExtResource("1")
+range_cells = 3
+duration = 8.0
 regen_bonus = 25.0
+ward_bonus = 30.0
 damage_share = 0.4
 gambit_name = "Link"
 cast_time = 0.3
-description = "Links M-Path for {duration} seconds to the ally within {range_cells} cells that has taken the most damage this combat. While linked, both have +{regen_bonus} health regen and each takes {damage_share%} of the other's damage."
+description = "Links M-Path for {duration} seconds to the ally within {range_cells} cells that the most enemies are targeting. While linked, both have +{regen_bonus} health regen and +{ward_bonus} to each Ward, and each takes {damage_share%} of the other's damage."

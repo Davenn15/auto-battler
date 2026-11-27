@@ -4,7 +4,8 @@
 
 [resource]
 script = ExtResource("1")
-description = "Mallet Phases for {phase_after} seconds after landing from its slam."
+description = "After landing from its slam, Mallet gains {ward_boost} Might, Insight and Celerity Ward for {ward_boost_time} seconds."
 gambit_overrides = Dictionary[String, float]({
-"phase_after": 2.0
+"ward_boost": 60.0,
+"ward_boost_time": 4.0
 })

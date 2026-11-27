@@ -39,6 +39,11 @@ var pulse_age := 99.0
 var _range_given := 0   # Beam range bonus currently added to the unit's attack range
 var _ricochet_lines := Beam.RicochetLines.new()
 var _fan_lines := Beam.FanLines.new()   # extra Beams (Beam's hero Ascension)
+## The hum that plays while the beam fires (not while it charges or is idle).
+var _hum := Sfx.Loop.new(Sfx.BEAM_LOOP, BEAM_HUM_GROUP, BEAM_HUM_MAX)
+const BEAM_HUM_GROUP := &"sfx_beam_hum"
+## Most Beam hums playing at once, across both armies, so many Beams don't drone.
+const BEAM_HUM_MAX := 3
 
 
 func _init(p_retarget_delay: float) -> void:
@@ -46,6 +51,7 @@ func _init(p_retarget_delay: float) -> void:
 
 
 func on_removed(unit: BattleUnit) -> void:
+	_hum.stop()
 	if is_instance_valid(_visual):
 		_visual.queue_free()
 	_ricochet_lines.clear()
@@ -198,6 +204,7 @@ func _alive(unit) -> bool:
 
 ## The beam on screen: thin and flickering while it charges, solid while it fires.
 func _show(unit: BattleUnit, enemy, firing: bool) -> void:
+	_hum.set_playing(unit, enemy != null and firing and not unit.previewing)
 	if not KeepsakeVfx.enabled():
 		return
 	if enemy == null:

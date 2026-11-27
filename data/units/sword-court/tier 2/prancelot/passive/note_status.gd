@@ -77,7 +77,7 @@ func _send(unit: BattleUnit, target: BattleUnit, strength: float) -> void:
 	shot.strength = strength
 	shot.z_index = 15
 	var glyph := Label.new()
-	glyph.text = "♪"
+	glyph.text = "♫" if strength > 1.001 else "♪"   # empowered (Crescendo): a pair of beamed eighths
 	glyph.add_theme_font_size_override("font_size", 18)
 	glyph.add_theme_color_override("font_color", color)
 	glyph.add_theme_color_override("font_outline_color", Color.BLACK)

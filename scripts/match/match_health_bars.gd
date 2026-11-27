@@ -129,6 +129,7 @@ func _play_one(hit: Dictionary, index: int, count: int, running: Array, gather_w
 	orb.color = MINE.lerp(ORB_COLOR, 0.5) if from_mine else THEIRS.lerp(ORB_COLOR, 0.5)
 	orb.position = orb_at
 	_fx.add_child(orb)
+	Sfx.play(get_tree(), Sfx.ORB_FORM)
 	# The pips: the bar's (round damage) first, then each survivor's (its Aura).
 	var sources: Array = [{"at": bar_center(from_mine), "text": str(hit["round_damage"]), "color": ROUND_PIP}]
 	for survivor in hit["survivors"]:
@@ -154,6 +155,7 @@ func _play_one(hit: Dictionary, index: int, count: int, running: Array, gather_w
 	fly.tween_property(orb, "position", target, LAUNCH_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	await fly.finished
 	orb.burst()
+	Sfx.play(get_tree(), Sfx.ORB_HIT)
 	var hit_mine := not from_mine
 	var drain := create_tween()
 	drain.tween_method(_set_shown.bind(hit_mine), float(_shown[hit_mine]), float(maxi(hit["hp_after"], 0)), DRAIN_TIME)
@@ -204,11 +206,11 @@ func _draw_bar(mine: bool) -> void:
 	if _font == null:
 		return
 	var text := "%s   %d / %d" % [_names[mine], _shown[mine], max_hp]
-	var size := 12
-	var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
-	var at := Vector2(rect.get_center().x - width / 2.0, rect.get_center().y + size * 0.35)
-	draw_string_outline(_font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 3, Color(0, 0, 0, 0.8))
-	draw_string(_font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color.WHITE)
+	var box_size := 12
+	var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, box_size).x
+	var at := Vector2(rect.get_center().x - width / 2.0, rect.get_center().y + box_size * 0.35)
+	draw_string_outline(_font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, box_size, 3, Color(0, 0, 0, 0.8))
+	draw_string(_font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, box_size, Color.WHITE)
 
 
 ## The low-health warning: a soft red glow around the bar that slowly swells and fades.

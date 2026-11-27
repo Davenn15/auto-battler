@@ -6,8 +6,8 @@
 [ext_resource type="Script" uid="uid://cj6m3iw6d33sq" path="res://scripts/unit_data.gd" id="4_udata"]
 [ext_resource type="Texture2D" uid="uid://chx5juu24b7rm" path="res://assets/bescard.png" id="5_sprite"]
 [ext_resource type="Script" uid="uid://cf7ptbnm7a5s5" path="res://scripts/upgrade.gd" id="6_jm8m8"]
-[ext_resource type="Resource" uid="uid://cye5kemqt0x0k" path="res://data/units/sword-court/tier 3/bescard/upgrades/a_path/bescard_a.tres" id="7_cxw56"]
-[ext_resource type="Resource" uid="uid://bhkggc8vmypm8" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/bescard_b.tres" id="8_2bcig"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/bescard/upgrades/a_path/bescard_a.tres" id="7_cxw56"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 3/bescard/upgrades/b_path/bescard_b.tres" id="8_2bcig"]
 
 [resource]
 script = ExtResource("4_udata")

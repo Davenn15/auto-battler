@@ -79,7 +79,9 @@ static func first_touch(unit: BattleUnit, from: Vector2, to: Vector2, visual: bo
 		return null
 	var length := from.distance_to(to)
 	if length <= 0.0:
-		return from if contains(unit, from, visual) else null
+		if contains(unit, from, visual):
+			return from
+		return null
 	var dir := (to - from) / length
 	# Skip ahead to where the path first comes within `radius` of the unit's centre.
 	var along := clampf((unit.global_position - from).dot(dir), 0.0, length)
@@ -94,7 +96,9 @@ static func first_touch(unit: BattleUnit, from: Vector2, to: Vector2, visual: bo
 		if contains(unit, p, visual):
 			return p
 		d += MARCH_STEP
-	return to if contains(unit, to, visual) else null
+	if contains(unit, to, visual):
+		return to
+	return null
 
 
 ## Where a line from `from` toward the unit's centre first meets its sprite (the centre

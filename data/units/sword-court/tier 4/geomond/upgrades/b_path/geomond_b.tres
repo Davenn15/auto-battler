@@ -1,15 +1,13 @@
 [gd_resource type="Resource" script_class="Upgrade" format=3]
 
-[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/tectonic_gambit.tres" id="1_3jhwj"]
+[ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/rock_armor_gambit.tres" id="1_3jhwj"]
 [ext_resource type="Script" path="res://scripts/upgrade.gd" id="1_cqh4w"]
-[ext_resource type="Script" path="res://scripts/passive.gd" id="2_kkguy"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/geomond_b1.tres" id="3_g0nei"]
 [ext_resource type="Resource" path="res://data/units/sword-court/tier 4/geomond/upgrades/b_path/geomond_b2.tres" id="4_skwpk"]
 
 [resource]
 script = ExtResource("1_cqh4w")
-upgrade_name = "Tectonic"
-description = "New Gambit: Tectonic Stance. For {duration} seconds, gains +{range_bonus} range, and his attacks become waves that hit every enemy in a line and shield him for {attack_shield|shield}."
+upgrade_name = "Seismic"
+description = "New Gambit: Rock Armor. Shields himself in rocky armor ({shield_share%} of his max health plus {shield_insight_scaling%} of his Insight) with +{ward_bonus} Might Ward and Insight Ward for {duration} seconds. While the Shield holds, he pulses seismic waves for {pulse_damage+pulse_insight_scaling} Might damage around him."
 gambit = ExtResource("1_3jhwj")
 next_choices = Array[ExtResource("1_cqh4w")]([ExtResource("3_g0nei"), ExtResource("4_skwpk")])
-metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

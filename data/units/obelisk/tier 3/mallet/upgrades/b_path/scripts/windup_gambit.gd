@@ -4,8 +4,9 @@ extends Gambit
 ## shield breaks, or Max Windup runs out, it flies to the enemy with the highest Insight
 ## and smashes it, dealing massive damage and stunning it. Any shield left ends at launch.
 ## Damage = (Damage + Might Scaling x Might) x (1 + Bonus Per Second x seconds wound up).
-##   B2: +Keepsake Bonus damage per equipped Keepsake, and the hit consumes a random
-##       Keepsake for the rest of the battle.
+##   B2: if the hit deals damage, it consumes all its Keepsakes (loose Shards too) for the
+##       rest of the battle; each one adds Keepsake Bonus damage to that hit and gives
+##       Keepsake Charge back.
 
 @export_range(0.0, 1.0, 0.05) var shield_share: float = 0.3   # of max health
 ## Most seconds it winds up before launching on its own.
@@ -19,10 +20,13 @@ extends Gambit
 ## Seconds the flight takes (untargetable).
 @export var flight_time: float = 0.35
 @export var leap_height: float = 36.0
-## B2: extra damage per equipped Keepsake (0.25 = +25% each), counted before one is consumed.
+## B2: 1 = a hit that deals damage consumes all its Keepsakes (loose Shards too) for the
+## rest of the battle.
+@export var consume_keepsakes: float = 0.0
+## B2: extra damage per Keepsake consumed (0.25 = +25% each).
 @export var keepsake_bonus: float = 0.0
-## B2: 1 = the hit consumes a random equipped Keepsake for the rest of the battle.
-@export var consume_keepsake: float = 0.0
+## B2: Charge it gets back per Keepsake consumed.
+@export var keepsake_charge: float = 0.0
 
 
 func can_use(caster: BattleUnit) -> bool:
@@ -74,17 +78,28 @@ func _launch(caster: BattleUnit, wound: float) -> void:
 		return
 	var hit := Stats.scaled(damage, might_scaling, caster.get_stat(Stats.Stat.MIGHT))
 	hit *= 1.0 + bonus_per_second * wound
-	hit *= 1.0 + keepsake_bonus * caster.keepsakes.size()
+	var held := caster.keepsakes.size() if consume_keepsakes > 0.0 else 0
+	hit *= 1.0 + keepsake_bonus * held
 	var wrack := caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
 	hit *= caster.effect_wrack_multiplier(wrack, Stats.EffectKind.GAMBIT_DAMAGE)
 	KeepsakeVfx.missile_blast(caster.get_parent(), target.global_position, 40.0, MalletFx.COLOR)
 	var dealt := MalletSlamGambit.hit_enemy(caster, target, hit, wrack, damage_type, 0.0)
 	if dealt > 0.0 and target.alive and stun_time > 0.0:
 		target.stun(stun_time, caster)
-	if dealt > 0.0 and consume_keepsake > 0.0 and not caster.keepsakes.is_empty():
-		var eaten: Keepsake = CombatRng.pick(caster.keepsakes)
-		caster.swap_keepsake_in_combat(null, eaten)
-		caster.show_float_text("Consumed " + eaten.keepsake_name, MalletFx.LIGHT)
+	if dealt > 0.0 and held > 0 and _alive(caster):
+		_consume_keepsakes(caster)
+
+
+## B2: eats every Keepsake it holds for the rest of the battle, with Charge back for each.
+## The Charge lands as a burst, like a refund, even mid-Gambit.
+func _consume_keepsakes(caster: BattleUnit) -> void:
+	var eaten := caster.keepsakes.duplicate()
+	for keepsake in eaten:
+		caster.swap_keepsake_in_combat(null, keepsake)
+	caster.show_float_text("Consumed %d" % eaten.size() if eaten.size() > 1 else "Consumed " + eaten[0].keepsake_name, MalletFx.LIGHT)
+	if keepsake_charge > 0.0 and caster.gambit != null:
+		caster.charge = minf(caster.charge + keepsake_charge * eaten.size(), caster.max_charge)
+		caster._update_charge_bar()
 
 
 ## The enemy with the highest Insight (ties go to the nearest).

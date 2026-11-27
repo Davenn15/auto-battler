@@ -300,7 +300,7 @@ func _finish(index: int) -> void:
 	busy = false
 	var seconds := (Time.get_ticks_msec() - _started_ms) / 1000.0
 	var tested := _results.filter(func(result): return result != null).size()
-	var testing := "%d battles, halving %s" % [_battles_run, ",".join(PackedStringArray(_rungs.map(func(r): return str(r))))] if _rungs.size() > 1 			else "%d battles each" % _battles
+	var testing := "%d battles, halving %s" % [_battles_run, ",".join(PackedStringArray(_rungs.map(func(rung): return str(rung))))] if _rungs.size() > 1 			else "%d battles each" % _battles
 	var summary := "%s planned in %.1fs (%d plans tested, %s%s)" % [
 			label, seconds, tested, testing, ", against a stand-in army" if _used_stand_in else ""]
 	if _picking_ascension:

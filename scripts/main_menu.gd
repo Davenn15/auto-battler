@@ -101,6 +101,15 @@ func _build() -> void:
 	online.add_child(_launch_button("Host Online Match", _host))
 	online.add_child(_launch_button("Join Online Match", _join))
 
+	# Learn: reference pages (the glossary for now).
+	var learn := _section("Learn", SETUP_PANEL)
+	var glossary := Button.new()
+	glossary.text = "Glossary"
+	glossary.custom_minimum_size = Vector2(0, 40)
+	glossary.add_theme_font_size_override("font_size", 16)
+	glossary.pressed.connect(func(): add_child(Glossary.new()))   # a window over the menu, which shades behind it
+	learn.add_child(glossary)
+
 	_status = Label.new()
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.add_theme_color_override("font_color", Color(0.8, 0.8, 0.85))

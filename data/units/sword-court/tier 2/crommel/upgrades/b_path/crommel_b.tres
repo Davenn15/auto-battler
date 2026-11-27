@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("1_thexg")
 upgrade_name = "Precise"
-description = "New Gambit: Precise Shot. One powerful shot at the enemy with the most health: an attack with {damage} extra damage plus {max_health_percent%} of its max health."
+description = "New Gambit: Precise Shot. One powerful shot at its target: an attack with {damage} extra damage plus {max_health_percent%} of its max health."
 gambit = ExtResource("1_hy5wj")
 next_choices = Array[ExtResource("1_thexg")]([ExtResource("3_o56cf"), ExtResource("4_g5qev")])
 metadata/_custom_type_script = "uid://cf7ptbnm7a5s5"

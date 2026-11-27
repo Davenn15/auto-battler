@@ -3,6 +3,7 @@ extends Gambit
 ## Battery: for every Voltage Per Volt Voltage it has, it spends them and fires a Volt at a
 ## random enemy within Range Cells. Damage per Volt = Damage + Insight Scaling x Insight.
 ## Whatever Voltage is left over is cleared when the Gambit finishes, as for everyone.
+## It channels while the Volts launch: no moving, attacking or gaining Charge.
 ##   A1: Volts shred Insight Ward (stacking, each for its own Shred Duration).
 ##   A2: Volts Silence enemies hit.
 
@@ -38,6 +39,7 @@ func execute(caster: BattleUnit) -> void:
 		return
 	voltage.spend(volts * voltage_per_volt)
 	caster.show_float_text("Discharge x%d" % volts, VoltageStatus.LIGHT)
+	caster.lock_for(volts * interval)   # channelling until the last Volt leaves: no moving, attacking or Charge
 	var hit := Stats.scaled(damage, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
 	for i in volts:
 		var enemy := _random_enemy(caster)

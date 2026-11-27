@@ -632,8 +632,8 @@ func _heading_row(first: String, second: String) -> String:
 const ICON_SIZE := 14
 
 
-static func stat_icon(kind: Shard.Kind, stat_name: String, size: int = ICON_SIZE) -> String:
-	return "[hint=%s][img=%dx%d]%s[/img][/hint]" % [stat_name, size, size, Keyphrases.icon_path(kind)]
+static func stat_icon(kind: Shard.Kind, stat_name: String, p_size: int = ICON_SIZE) -> String:
+	return "[hint=%s][img=%dx%d]%s[/img][/hint]" % [stat_name, p_size, p_size, Keyphrases.icon_path(kind)]
 
 
 func _icon_cell(kind: Shard.Kind, stat_name: String) -> String:

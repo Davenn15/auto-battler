@@ -150,6 +150,7 @@ static func combat_income(round_number: int) -> int:
 static func aura_income(round_number: int) -> int:
 	if not Economy.tier_rework:
 		return paced_round(round_number)
+	@warning_ignore("integer_division")
 	var combat := round_number / 2 - 1   # 0 for the first combat (round 2)
 	return NEW_AURA_INCOME[combat] if combat >= 0 and combat < NEW_AURA_INCOME.size() else 0
 
@@ -231,8 +232,10 @@ static func buy_upgrade(player: PlayerState, unit: ArmyUnit, choice: int) -> boo
 		return false
 	if choice < 0 or choice >= upgrade_choices(unit).size():
 		return false
-	player.aura -= upgrade_cost(unit)
+	var cost := upgrade_cost(unit)
+	player.aura -= cost
 	unit.path.append(choice)
+	player.spent(cost, 0)
 	return true
 
 
@@ -263,7 +266,7 @@ static func upgrade_affordable(player: PlayerState, unit: ArmyUnit) -> bool:
 
 ## Buys shop slot `slot`: a new unit, or a Reserve stat buff for one you own. Returns
 ## false if it isn't allowed. (`choice` is unused, kept so older callers still work.)
-static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> bool:
+static func buy_unit_offer(player: PlayerState, slot: int, _choice: int = -1) -> bool:
 	if slot < 0 or slot >= player.unit_offers.size():
 		return false
 	var data := player.unit_offers[slot]
@@ -278,6 +281,7 @@ static func buy_unit_offer(player: PlayerState, slot: int, choice: int = -1) -> 
 	player.aura -= info["aura"]
 	player.reserve -= info["reserve"]
 	player.unit_offers.remove_at(slot)
+	player.spent(info["aura"], info["reserve"])
 	return true
 
 
@@ -301,6 +305,14 @@ const OWNED_UNIT_WEIGHT := 3.0
 const UNOWNED_UNIT_WEIGHT := 1.0 / 3.0
 
 
+## The round number players see, which counts combats: the Opening Shop and the first
+## combat are Round 1, the next Encounter and the second combat Round 2, and so on. Only
+## for showing; the rules all use the internal round_number.
+static func display_round(round_number: int) -> int:
+	@warning_ignore("integer_division")
+	return (round_number + 1) / 2
+
+
 static func is_combat_round(round_number: int) -> bool:
 	return round_number >= 2 and round_number % 2 == 0
 
@@ -311,6 +323,7 @@ static func is_encounter_round(round_number: int) -> bool:
 
 ## 1 for the first Encounter (round 3), 2 for the second (round 5), ...
 static func encounter_number(round_number: int) -> int:
+	@warning_ignore("integer_division")
 	return (round_number - 1) / 2
 
 
@@ -322,6 +335,7 @@ static func encounter_kind(number: int) -> EncounterKind:
 ## The tier an Encounter offers: Faction Encounters are the odd-numbered ones and Neutral
 ## the even, so each type's 1st is tier 1, its 2nd tier 2, and so on.
 static func encounter_tier(number: int) -> int:
+	@warning_ignore("integer_division")
 	return (number + 1) / 2
 
 
@@ -436,6 +450,7 @@ static func reroll_ascension(player: PlayerState, round_number: int, slot: int) 
 	var pool := _offerable(player, round_number).filter(func(a): return not player.ascension_offers.has(a))
 	var weights: Array = pool.map(func(a): return ascension_weight(player, a))
 	player.reserve -= player.ascension_reroll_cost
+	player.spent(0, player.ascension_reroll_cost)
 	player.ascension_reroll_cost += ASCENSION_REROLL_STEP
 	player.ascension_offers[slot] = pool[_weighted_pick(weights)]
 	return true
@@ -533,9 +548,9 @@ static func take_ascension(player: PlayerState, slot: int, unit_index: int = -1)
 			player.inventory.append(shard)
 	player.ascension_offers.clear()
 	# Buffs a unit they don't own yet: their next fresh shop is sure to offer it.
-	var roster := roster_for(player.faction)
+	var faction_units := roster_for(player.faction)
 	for data in ascension.affected_units:
-		if data != null and player.find_unit(data) == null and roster.has(data) and not player.promised_units.has(data):
+		if data != null and player.find_unit(data) == null and faction_units.has(data) and not player.promised_units.has(data):
 			player.promised_units.append(data)
 	return true
 
@@ -620,6 +635,7 @@ static func reroll(player: PlayerState, combat_number: int) -> bool:
 	if player.reserve < player.reroll_cost:
 		return false
 	player.reserve -= player.reroll_cost
+	player.spent(0, player.reroll_cost)
 	player.reroll_cost += REROLL_STEP
 	roll_unit_offers(player, combat_number)
 	roll_shard_offers(player)
@@ -631,6 +647,7 @@ static func buy_shard_offer(player: PlayerState, slot: int) -> bool:
 	if slot < 0 or slot >= player.shard_offers.size() or player.reserve < SHARD_COST:
 		return false
 	player.reserve -= SHARD_COST
+	player.spent(0, SHARD_COST)
 	player.inventory.append(player.shard_offers[slot])
 	player.shard_offers.remove_at(slot)
 	return true
@@ -640,6 +657,7 @@ static func buy_keepsake_offer(player: PlayerState) -> bool:
 	if player.keepsake_offer == null or player.reserve < KEEPSAKE_COST:
 		return false
 	player.reserve -= KEEPSAKE_COST
+	player.spent(0, KEEPSAKE_COST)
 	player.inventory.append(player.keepsake_offer)
 	player.keepsake_offer = null
 	player.keepsake_bought = true

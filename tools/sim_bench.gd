@@ -27,14 +27,14 @@ func _ready() -> void:
 		armies.append(army)
 	var started := Time.get_ticks_usec()
 	var simulated := 0.0
-	var prints := PackedStringArray()
+	var fingerprints := PackedStringArray()
 	for b in battles:
 		var r: Dictionary = await BattleArena.fight(self, armies[b * 2], armies[b * 2 + 1], float(_arg(args, "--limit", "90")), 1000 + b)
 		simulated += r["time"]
-		prints.append(r["fingerprint"])
+		fingerprints.append(r["fingerprint"])
 	var wall := (Time.get_ticks_usec() - started) / 1000000.0
 	print("BENCH lean=%s battles=%d simulated=%.1fs wall=%.2fs speed=%.1fx" % [SimMode.active, battles, simulated, wall, simulated / wall])
-	print("FINGERPRINTS " + ",".join(prints))
+	print("FINGERPRINTS " + ",".join(fingerprints))
 	get_tree().quit()
 
 

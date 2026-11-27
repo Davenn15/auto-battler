@@ -121,9 +121,3 @@ static func shockwave(unit: BattleUnit, radius_cells: int) -> void:
 	tween.tween_property(ring, "scale", Vector2.ONE, 0.25)
 	tween.tween_property(ring, "modulate:a", 0.0, 0.4)
 	tween.chain().tween_callback(ring.queue_free)
-
-
-## Phases `unit` for `time` seconds (see PhaseStatus). Its own Phase, so crowd control
-## resistance doesn't shorten it.
-static func self_phase(unit: BattleUnit, time: float) -> void:
-	PhaseStatus.phase(unit, time)

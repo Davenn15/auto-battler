@@ -10,6 +10,8 @@ var hp: int = MatchRules.START_HP
 var aura: int = MatchRules.start_aura()
 var aura_received: int = MatchRules.start_aura()   # counts toward MatchRules.max_aura_received()
 var reserve: int = MatchRules.START_RESERVE
+## True only for the person playing on this computer: spending makes a sound (see spent).
+var plays_sounds := false
 
 var units: Array[ArmyUnit] = []
 var inventory: Array[Keepsake] = []   # Shards and keepsakes not on a unit
@@ -115,3 +117,15 @@ func adopt(other: PlayerState) -> void:
 	ascension_offers = other.ascension_offers
 	reroll_cost = other.reroll_cost
 	promised_units = other.promised_units
+
+
+## Called after this player pays for something (MatchRules): the spend sounds, only for
+## the person playing here, never the computer or the other player online.
+func spent(aura_spent: int, reserve_spent: int) -> void:
+	if not plays_sounds:
+		return
+	var tree := Engine.get_main_loop() as SceneTree
+	if aura_spent > 0:
+		Sfx.play(tree, Sfx.SPEND_AURA)
+	if reserve_spent > 0:
+		Sfx.play(tree, Sfx.SPEND_RESERVE)

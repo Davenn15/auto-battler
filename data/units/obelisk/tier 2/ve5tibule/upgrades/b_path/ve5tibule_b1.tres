@@ -4,7 +4,10 @@
 
 [resource]
 script = ExtResource("1")
-description = "The Gambit gifts {targets} allies."
+description = "The Gambit gifts {targets} allies. Allies with no free Keepsake slot and no Shard to combine with can be gifted too (after the others): their Shard Empowers one of their Keepsakes until combat ends."
 gambit_bonuses = Dictionary[String, float]({
 "targets": 1.0
+})
+gambit_overrides = Dictionary[String, float]({
+"can_empower": 1.0
 })

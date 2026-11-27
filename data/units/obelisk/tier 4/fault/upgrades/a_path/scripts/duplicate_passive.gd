@@ -41,7 +41,7 @@ class DuplicateStatus extends Status:
 	func blocks_charge_gain(_unit: BattleUnit) -> bool:
 		return false
 
-	func on_gambit_played(unit: BattleUnit) -> void:
+	func on_gambit_played(_unit: BattleUnit) -> void:
 		if not done and waiting < 0.0:
 			waiting = 0.0
 

@@ -2,12 +2,18 @@ class_name CodeSpiralGambit
 extends Gambit
 ## Mother-Chip calls down a corrupted code spiral: a circle on the ground, centred on the
 ## cell within her attack range that covers the most enemies. For Duration seconds, every
-## enemy inside it gets Stacks Per Second Mono-Virus stacks each second. It stays where it
-## landed, and keeps going if she dies.
+## enemy inside it gets Stacks Per Second Mono-Virus stacks each second, and takes
+## Damage + Insight Scaling x her Insight as Insight damage every Damage Interval seconds
+## (Gambit damage, sized when she casts it). It stays where it landed, and keeps going if
+## she dies. She can't gain Charge while it lasts.
 
 @export var radius_cells: int = 1
 @export var duration: float = 5.0
 @export var stacks_per_second: int = 1
+@export var damage: float = 60.0
+@export var insight_scaling: float = 0.3
+## Seconds between damage ticks.
+@export var damage_interval: float = 0.5
 
 
 func can_use(caster: BattleUnit) -> bool:
@@ -30,10 +36,29 @@ func execute(caster: BattleUnit) -> void:
 	spiral.time_left = duration
 	spiral.duration = duration
 	spiral.stacks = stacks_per_second
+	spiral.hit = Stats.scaled(damage, insight_scaling, caster.get_stat(Stats.Stat.INSIGHT))
+	spiral.damage_interval = maxf(damage_interval, 0.05)
 	spiral.z_index = -1   # on the ground, under the units
 	caster.get_parent().add_child(spiral)
 	spiral.global_position = caster.grid.cell_to_world(center)
 	caster.show_float_text("Code Spiral", ChipPassive.LIGHT)
+	caster.add_status(SpiralChargeLock.new(duration))   # no Charge while it lasts
+
+
+## On Mother-Chip while her spiral lasts: she can't gain Charge.
+class SpiralChargeLock extends Status:
+	var time_left: float
+
+	func _init(p_duration: float) -> void:
+		time_left = p_duration
+
+	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+		return true
+
+	func tick(unit: BattleUnit, delta: float) -> void:
+		time_left -= delta
+		if time_left <= 0.0:
+			unit.remove_status(self)
 
 
 ## The cell within her range whose circle covers the most enemies (nearest to her on ties),
@@ -74,6 +99,9 @@ class CodeSpiral extends Node2D:
 	var time_left := 5.0
 	var duration := 5.0
 	var stacks := 1
+	var hit := 0.0                 # Insight damage per damage tick
+	var damage_interval := 0.5
+	var _damage_tick := 0.5
 	var _tick := 1.0
 	var _time := 0.0
 	var _fading := false
@@ -83,6 +111,10 @@ class CodeSpiral extends Node2D:
 		if _fading:
 			return
 		time_left -= delta
+		_damage_tick -= delta
+		if _damage_tick <= 0.0 and hit > 0.0:
+			_damage_tick += damage_interval
+			_deal_damage()
 		_tick -= delta
 		if _tick <= 0.0:
 			_tick += 1.0
@@ -97,6 +129,28 @@ class CodeSpiral extends Node2D:
 			var tween := create_tween()
 			tween.tween_property(self, "modulate:a", 0.0, 0.35)
 			tween.tween_callback(queue_free)
+
+	## One damage tick to every enemy inside: Gambit damage credited to Mother-Chip (it
+	## can Wrack if she's alive to roll it).
+	func _deal_damage() -> void:
+		var caster: BattleUnit = null   # null once she's gone: the damage keeps going without her
+		if caster_id != 0:
+			caster = instance_from_id(caster_id) as BattleUnit
+		for node in get_tree().get_nodes_in_group("units"):
+			var unit := node as BattleUnit
+			if unit == null or not unit.alive or not unit.active or unit.team == team \
+					or grid.get_distance(center, unit.cell) > radius_cells:
+				continue
+			var level := 0
+			var amount := hit
+			if caster != null and caster.alive:
+				level = caster.roll_effect_wrack(Stats.EffectKind.GAMBIT_DAMAGE)
+				amount *= caster.effect_wrack_multiplier(level, Stats.EffectKind.GAMBIT_DAMAGE)
+			var dealt := unit.take_damage(amount, level, Stats.DamageType.INSIGHT, false, caster, false)
+			unit.add_running_damage("code_spiral", dealt, Stats.damage_color(Stats.DamageType.INSIGHT, level), level)
+			if caster != null:
+				BattleUnit.gambit_damage_dealt(caster, unit, dealt)
+			get_tree().call_group("damage_tracker", "record_damage", credit_id, dealt)
 
 	func _process(delta: float) -> void:
 		_time += delta

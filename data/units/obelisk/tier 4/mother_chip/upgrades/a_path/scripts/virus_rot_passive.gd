@@ -86,7 +86,7 @@ class RotStatus extends Status:
 		rot.cap = p_cap
 		enemy.add_status(rot)
 
-	func blocks_charge_gain(_unit: BattleUnit) -> bool:
+	func blocks_charge_gain(_who: BattleUnit) -> bool:
 		return false
 
 	func on_applied(unit: BattleUnit) -> void:
